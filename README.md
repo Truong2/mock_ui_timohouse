@@ -31,19 +31,20 @@ Thứ tự lấy gói: `previewPackage` hợp lệ → lựa chọn đã lưu �
 index.html              trang giới thiệu + mount ứng dụng
 css/                    tokens · components · layouts (responsive, print)
 js/
-  data.js               dataset mẫu (3 tòa, 18 phòng, 15 HĐ đang thuê + 3 HĐ đã kết thúc, 6 kỳ, bảng giá theo HĐ, hồ sơ hoàn cọc, sổ cọc, chi phí chung, HĐ thuê tòa, lịch trả chủ nhà, tài sản) + TH.calc (gồm perfBuilding: hiệu suất A/B/C/D)
+  data.js               dataset mẫu (3 tòa, 18 phòng, 19 HĐ: 15 đang thuê + 4 đã kết thúc, 18 khách, 6 kỳ, dòng phí theo HĐ, hồ sơ cọc, sổ cọc, chi phí chung, HĐ thuê tòa, lịch trả chủ nhà, tài sản) + TH.calc (gồm perfBuilding: hiệu suất A/B/C/D)
   pnl.js                P&L tòa/kỳ theo mẫu báo cáo khách (TH.calc.pnl, chia cổ phần)
   reports-cr.js         CR-RPT-01: thêm RPT-04/05, cập nhật mô tả F045/F046, phần báo cáo của từng gói
   bld-cr.js             CR-BLD-01: cập nhật F001/F003/F004/F006/F013/F033/F036/F047 và ghi chú gói OWN/BLD theo note.md
   cus-cr.js             CR-CUS-01: cập nhật F010/F012/F015/F016/F031 và ghi chú gói CUS-01/02 theo note.md §8
   features.js           F001–F052 — SINH TỰ ĐỘNG từ SRS §5/§5A
   screens.js            39 Screen ID — SINH TỰ ĐỘNG từ SRS §4
-  store.js              gói, vai trò giả lập, scope, bộ lọc, nháp, lưu local (schema v8)
+  store.js              gói, vai trò giả lập, scope, bộ lọc, nháp, lưu local (schema v9; tự nạp lại seed khi schema cũ)
   router.js · app.js    hash router, app shell, event delegation, công cụ demo
   components.js         bảng, badge, gate gói, dialog/drawer, toast, tooltip, chart SVG
   xlsx.js               xuất .xlsx/.csv không phụ thuộc thư viện
   views/                15 phân hệ + landing + package drawer + import/OCR dùng chung (bizreports.js = RPT-04/05, perf.js = hiển thị hiệu suất)
 tools/extract-srs.js    node tools/extract-srs.js → sinh lại screens.js/features.js khi SRS đổi
+tools/qa-cus.playwright.js  kịch bản QA CR-CUS chạy bằng Playwright browser_run_code
 docs/                   plan · decision log · QA checklist
 ```
 
@@ -74,15 +75,17 @@ Kỳ 10/2026 đang mở (Thanh Xuân chưa lập hóa đơn, tiền thuê nhà c
 
 ## Khách thuê (CR-CUS-01, theo note.md §8)
 
-- `CUS-01` là danh sách tổng quan theo hồ sơ thuê.
-  - **Cột:** mã phòng/tòa, trưởng khu vực, NV vận hành, công nợ, Zalo, trạng thái.
-  - **Trạng thái:** gồm trạng thái chính và nhãn phụ (sắp hết HĐ 35 ngày, chờ bàn giao, hoàn cọc, mất cọc).
+- `CUS-01` hiển thị mỗi hợp đồng một dòng; KH-003 có hai hồ sơ thuê nối tiếp.
+  - **Cột:** mã phòng/tòa, Trưởng khu vực (TPVH), Trưởng nhóm riêng, NV vận hành, công nợ, Zalo, trạng thái. Thanh Xuân chưa có TPVH hiển thị *Chưa phân công*.
+  - **Trạng thái:** một trạng thái chính + nhãn theo trục thời hạn, bàn giao, cọc, công nợ. Phá HĐ và Mất cọc là hai nhãn riêng.
 - `CUS-02` có tiêu đề **Mã phòng — Mã tòa**.
-  - **Thông tin lưu trú:** nghề nghiệp, thời gian HĐ, lần gia hạn, phương tiện.
-  - **Hợp đồng:** file HĐ, đọc bảng giá theo gói, bảng giá 7 loại phí lưu theo từng HĐ, ghi chú.
-  - **Tài chính:** công nợ theo kỳ, tiền cọc và hoàn cọc.
+  - **Thông tin lưu trú:** nghề nghiệp, thời gian HĐ, chứng từ gia hạn, điều khoản áp dụng theo từng HĐ; xe chờ xác nhận / đang sử dụng / đã ngừng. Biển số lưu thật trong dữ liệu demo, che ở nơi tổng quan; xe chưa xác nhận chưa tính phí.
+  - **Hợp đồng:** file HĐ, OCR có review, danh mục 9 dòng phí lưu theo từng HĐ; xe máy 0đ, SM theo xe và sạc kWh tách riêng. Giá mới có hiệu lực từ kỳ sau; hóa đơn đã lập giữ nguyên.
+  - **Tài chính:** theo từng HĐ; mở hồ sơ cọc → bàn giao → đối chiếu/gửi duyệt → người khác duyệt hoặc trả lại → xác nhận thực chi có ngày/mã giao dịch. Chỉ bước cuối ghi sổ, xác nhận lại không ghi trùng. Không có điều khoản hạn hoàn thì không tự đặt 10 ngày.
 - Sửa từng nhóm thông tin có Lưu/Hủy và chặn rời trang như CR-BLD-01.
-- Các giả định K-01…K-09 đang chờ khách chốt. Xem Decision log §9.
+- Chỉ sửa SĐT/địa chỉ mới thêm lịch sử liên hệ; các thay đổi khác ghi audit chung.
+- `SYS-01 › Sao lưu & vận hành`: Admin đổi ngưỡng cảnh báo hết hạn (mặc định 35 ngày); tách khỏi nghĩa vụ báo trước 30 ngày của HĐ nếu có.
+- Đã áp bộ đề xuất K-01…K-09 theo CR_CUS_ANSWERS; trạng thái nguồn/phê duyệt và các phần còn thiếu ở Decision log §9.5. K-07 vẫn `BLOCKED_BY_REQUIREMENT`.
 
 ## Trạng thái nghiệm thu & công cụ QA
 
@@ -106,7 +109,7 @@ Kỳ 10/2026 đang mở (Thanh Xuân chưa lập hóa đơn, tiền thuê nhà c
 5. `METER-01` nhập chỉ số (TX-201 thiếu, TX-102 số lùi, DD-301 đột biến) → `INV-01` chọn Thanh Xuân → *Sinh nháp* → *Xem trước & xác nhận*.
 6. `PAY-01` báo thu → đổi vai trò *Quản lý tòa*: không tự duyệt → *Kế toán* xác nhận `PAY-APP` → `PAY-02` công nợ giảm, bảng *Hiệu suất theo tòa* (A/B/C/D, tạm tính & thực tế) cập nhật; chọn **C** xem chống trùng/backdate.
 6b. `BLD-02/TH-CG` kỳ 09: tab *Vận hành & kết quả* (các bước A→D, HS 72,3%) → tab *Chủ nhà & hợp đồng* bấm *Chỉnh sửa* giá thuê, đổi tab giữa chừng để thấy hộp thoại lưu/bỏ → tab *Lịch thanh toán* (Đống Đa, Thanh Xuân quá hạn); chuyển **A → B → C** để thấy vai trò nhân sự, sinh lịch từ HĐ, đã trả/còn lại mở dần.
-6c. `CUS-01` lọc *Hoàn cọc* → mở `DD-302 — TH-DD`, tab *Tài chính*: hoàn cọc quá hạn → *Đối chiếu & duyệt hoàn* → *Xác nhận đã hoàn*. Mở `DD-102`: 3 nhãn trạng thái cùng lúc. Tab *Hợp đồng*: sửa bảng giá thì thấy preview chênh lệch (C). Chuyển **A → B** để thấy nút *Tự đọc bảng giá* mở ra.
+6c. `CUS-01` lọc *Hồ sơ cọc* → mở `DD-302 — TH-DD`, tab *Tài chính*: Admin *Lập đối chiếu → gửi duyệt*, nhập khấu trừ thấm trần 500.000đ → số hoàn 3.990.000đ. Admin không tự duyệt; đổi *Kế toán* → *Duyệt hoàn* (chưa ghi sổ) → *Xác nhận đã chi / tất toán* với ngày và mã giao dịch. RPT-05 Tổng kỳ 10 giảm 3.990.000đ, Kinh doanh giữ 4.755.000đ. Mở `DD-102`: Đang thuê + Sắp hết HĐ + Chờ bàn giao. Tab *Hợp đồng*: **A → B** mở *Tự đọc bảng giá*, review 9 dòng; nước 2 × 120.000đ, hiệu lực kỳ 11. Mở KH-003 xem hai HĐ nối tiếp và phiếu chuyển cọc. `SYS-01 › Sao lưu & vận hành`: đổi cảnh báo 35 → 45 ngày (2 → 3 HĐ), rồi đặt lại 35.
 7. Chọn **D** → `SAL-01`, `SHARE-01` với nhãn DRAFT (D-06, D-07) và truy vết.
 8. Menu *Báo cáo* → `RPT-04` kỳ 09/2026: đối chiếu với file G1 của khách (cùng thứ tự dòng, tỷ lệ, bảng chia cổ phần); bấm một dòng để mở chứng từ (B+); *Xuất Excel theo mẫu*.
 9. `RPT-05`: đổi *Báo cáo kinh doanh* ↔ *Báo cáo tổng* (cọc mới, mua sắm); C gộp theo nhóm nhà; bấm tên tòa để về `RPT-04`. Đổi sang **A** để khách thấy cả hai báo cáo đã có trong gói thấp nhất.

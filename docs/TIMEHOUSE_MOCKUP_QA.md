@@ -181,3 +181,51 @@ Kèm sweep Playwright toàn ứng dụng (render qua router): **712 lượt** = 
 | 375px | ✅ | CUS-01, CUS-02 (3 tab × 2 hồ sơ) không tràn ngang |
 
 Giả định chờ khách chốt: K-01…K-09 (Decision log §9.3). Trên RTM, F010/F012/F015/F016/F031 ghi “DRAFT — chờ duyệt K-…”.
+
+### 8.3 Chạy lại CR_CUS_ANSWERS (schema 9 — 20/10/2026)
+
+Kết quả mới này thay thế mô tả schema 8 ở §8.2 về Trưởng khu vực, lịch sử liên hệ, 7 dòng phí và luồng cọc. Chạy trên Chromium qua Playwright, HTTP `127.0.0.1:8779`; không có lỗi console. **23 kiểm tra tự động đạt**, trong đó có kiểm tra nâng schema 8 → 9; QA-CUS-15 vẫn chờ xác nhận nguồn từ khách.
+
+Kịch bản tái lập: khởi động `python -m http.server 8779 --bind 127.0.0.1`, mở demo bằng Playwright rồi chạy hàm trong [tools/qa-cus.playwright.js](../tools/qa-cus.playwright.js) bằng `browser_run_code` (đọc nội dung file vào tham số `code`, bỏ dòng comment đầu nếu cần). Kịch bản dùng seed riêng trong trình duyệt, thao tác nút/form qua UI, kiểm tra dữ liệu và báo cáo; cuối lượt trả lại seed và flush storage. [Kết quả JSON](qa/schema9/results.json) lưu bằng chứng từng phép kiểm.
+
+| Phạm vi | Kết quả |
+| --- | --- |
+| Schema | v9; localStorage schema 8 có marker dữ liệu cũ → reload tự nạp 19 HĐ mới, marker mất |
+| Smoke render | **928 lượt · 0 lỗi** = (94 biến thể + 22 dialog) × 4 gói × 2 kỳ |
+| Đếm phạm vi | 44 route · 39 màn SRS + 2 CR · 11 Popup · 46 biến thể tab |
+| Mapping | 39/39 màn SRS · 52/52 nhóm · 156/156 increment (xem mapping) |
+| Hồi quy seed | LNR Kinh doanh 09 **16.937.599**; Tổng 09 **7.537.599**; Kinh doanh 10 **4.755.000**; HS CG 09 **72,3%**; INV-2610-CG202 **6.069.800** |
+
+| Mã | Kết quả | Bằng chứng / giới hạn |
+| --- | --- | --- |
+| QA-CUS-01 | PASS | CG: TPVH NV-013, Trưởng nhóm NV-003; TX: TPVH null, không thay bằng Trưởng nhóm |
+| QA-CUS-02 | PASS | DD-102: Đang thuê + Sắp hết HĐ + Chờ bàn giao |
+| QA-CUS-03 | PASS | DD-302: pending_approval và approved đều chưa có dòng sổ; Admin lập không có nút tự duyệt; Kế toán NV-002 duyệt |
+| QA-CUS-04 | PASS | Thực chi DD-302 3.990.000; mã mặc định CK-20261020-261001; gọi xác nhận lần hai vẫn một dòng refund |
+| QA-CUS-05 | PASS | TX-202 seed có hai nhãn Phá HĐ / Mất cọc, căn cứ và người duyệt; tình huống thử độc lập giữ 1.000.000, duyệt hoàn 3.000.000, không ép mất toàn bộ |
+| QA-CUS-06 | PASS | OCR DD-102, hóa đơn nháp kỳ 11: nước 2 người × 120.000 = 240.000, đơn vị người |
+| QA-CUS-07 | PASS | Dòng xe máy active giá 0; SM chờ xác nhận có số tính phí 0; sau xác nhận chuyển active |
+| QA-CUS-08 | PASS | OCR lưu SM 400.000/xe và EVCHG riêng; sạc kWh không có căn cứ thì method na, không suy ra giá từ SM |
+| QA-CUS-09 | PASS | 9 dòng OCR hiệu lực 2026-11; snapshot toàn bộ hóa đơn đã lập trước/sau giống nhau |
+| QA-CUS-10 | PASS trong phạm vi mockup | P302 autoRenew=false, refundDays=null, không có gia hạn mặc nhiên trong seed; chưa có engine vòng đời/gia hạn chạy nền |
+| QA-CUS-11 | PASS | CG-102 giữ mã HĐ, renewal mode amendment có ngày/bằng chứng/file phụ lục |
+| QA-CUS-12 | PASS | KH-003 có hai HĐ nối tiếp bằng previousContractId; cọc HĐ cũ transferred qua PCC-2507-01 |
+| QA-CUS-13 | PASS | HĐ mẫu đầy đủ có noticeDays=30; cấu hình expiryAlertDays=35, hiển thị tách riêng trong khối Điều khoản |
+| QA-CUS-14 | PASS trong phạm vi mockup | Tìm KH-003 ra đúng hai dòng; xe không biển được lưu; hàm mask che biển; lịch sử KH-018/KH-010 không báo trùng. Nhánh persona không có vehicle.view chưa được kiểm chứng |
+| QA-CUS-15 | CHỜ ĐẦU VÀO | Chưa có khách ký xác nhận nguồn; giữ SOURCE_REQUIRED / PENDING_APPROVAL, không tuyên bố APPROVED |
+| QA-CUS-16 | PASS | Sửa nghề không thêm customerHistory; sửa SĐT thêm đúng một dòng; thao tác lưu ghi audit chung |
+| QA-CUS-17 | PASS | Tổng kỳ 10 LNR 48.255.000 → 44.265.000 sau hoàn 3.990.000; Kinh doanh giữ 4.755.000 |
+
+Kiểm tra bổ sung: biển đang active ở hồ sơ khác → khai báo được nhưng **không xác nhận được**; hai khoảng đăng ký liên tiếp không bị chặn. SYS-01 đổi **35 → 45 ngày**, số HĐ sắp hết hạn **2 → 3** rồi đặt lại 35. Quản lý tòa mở hồ sơ cọc CG được, thấy bước bàn giao; không có nút duyệt/thực chi; DD-302 bị chặn ngoài phạm vi.
+
+**Bố cục và ảnh:** 5 màn/trạng thái × 2 độ rộng 1440px/375px, không tràn ngang trang; bảng và tab cuộn trong vùng riêng. Đã xem ảnh CUS-02 lưu trú/tài chính trên desktop và cấu hình SYS-01 trên mobile. Ảnh được chụp từ seed trước thao tác hoàn cọc:
+
+| Màn | Desktop 1440px | Mobile 375px |
+| --- | --- | --- |
+| CUS-01 | [Ảnh](qa/schema9/cus01-1440.png) | [Ảnh](qa/schema9/cus01-375.png) |
+| CUS-02 KH-003 — lưu trú, hai HĐ nối tiếp | [Ảnh](qa/schema9/cus02-stay-1440.png) | [Ảnh](qa/schema9/cus02-stay-375.png) |
+| CUS-02 — hợp đồng/dòng phí | [Ảnh](qa/schema9/cus02-contract-1440.png) | [Ảnh](qa/schema9/cus02-contract-375.png) |
+| CUS-02 DD-302 — tài chính/cọc | [Ảnh](qa/schema9/cus02-finance-1440.png) | [Ảnh](qa/schema9/cus02-finance-375.png) |
+| SYS-01 — cấu hình cảnh báo | [Ảnh](qa/schema9/sys01-expiry-1440.png) | [Ảnh](qa/schema9/sys01-expiry-375.png) |
+
+**Còn thiếu:** prorate theo ngày, override nhóm tòa, vòng đời HĐ đầy đủ, customerAuditLog riêng và persona mask chi tiết (Decision log §9.5). In/PDF, bàn phím/screen reader, Firefox/Safari, phân quyền backend, Excel giá gói, SRS v2.3 và 88 frame Figma chưa được nghiệm thu bởi lượt QA này.

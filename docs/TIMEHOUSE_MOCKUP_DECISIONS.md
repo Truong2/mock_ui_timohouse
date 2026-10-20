@@ -237,6 +237,8 @@ Nguyên tắc: áp vào mockup các mục mà file trả lời ghi **“có th�
 
 ## 9. CR-CUS-01 — Thông tin khách hàng (khách thuê) theo note.md §8 (20/10/2026)
 
+> §9.1–9.4 ghi nhận bản schema 8 trước khi áp bộ trả lời. **§9.5 bên dưới thay thế các giả định K-01…K-09 cũ** về TPVH, điều khoản, phí, cọc và lịch sử liên hệ; không áp các điều khoản của một mẫu cho mọi HĐ.
+
 Nguồn: `note.md` §8 và hai mẫu HĐ khách thuê `docs/tenplate/Hop_dong_thue_phong_demo_day_du.pdf`, `docs/tenplate/Hop_dong_khach_thue_P302_TH01_demo_dong_bo.pdf`. Các điểm lấy từ mẫu:
 - **Gia hạn:** tự gia hạn 12 tháng nếu không báo trước 30 ngày (Điều 3.4).
 - **Cọc:** hoàn trong 10 ngày sau bàn giao; mất cọc khi phá HĐ (Điều 4.3, 7.1).
@@ -303,3 +305,32 @@ Số màn và mapping không đổi: 39 SRS + 2 CR, 52/52 nhóm, 156/156 increme
 - **Đa trạng thái:** DD-102 (KH-008) vừa đang thuê, vừa sắp hết HĐ (26 ngày), vừa chờ bàn giao (đã báo chuyển đi 15/11).
 - **Hồ sơ hoàn cọc:** dữ liệu mới `db.depositCases`. Bước *Xác nhận đã hoàn* thêm dòng `db.deposits` loại refund vào kỳ hiện tại; RPT-05 chế độ Tổng phản ánh, chế độ Kinh doanh không đổi.
 - **Đối chiếu số liệu:** RPT-05 Kinh doanh kỳ 09 LNR 16.937.599; Tổng kỳ 09 7.537.599; Kinh doanh kỳ 10 4.755.000; HS CG kỳ 09 72,3%; INV-2610-CG202 6.069.800. Tất cả **không đổi**.
+
+### 9.5 Áp dụng CR_CUS_ANSWERS (20/10/2026, schema 9)
+
+Nguồn triển khai: [TIMEHOUSE_MOCKUP_CR_CUS_ANSWERS.md](TIMEHOUSE_MOCKUP_CR_CUS_ANSWERS.md). Đây là bộ đáp án **đề xuất cho mockup**, chưa phải xác nhận khách hàng. Các trạng thái dưới đây là trạng thái quyết định nghiệp vụ; kết quả QA kỹ thuật không đổi chúng thành APPROVED.
+
+| Mã | Đã áp trong mockup | Trạng thái quyết định |
+| --- | --- | --- |
+| K-01 | Trưởng khu vực lấy phân công TPVH; Trưởng nhóm là vai trò riêng; thiếu TPVH hiện Chưa phân công | `PROPOSED` — cần xác nhận tên gọi và phạm vi phụ trách |
+| K-02 | Một trạng thái vòng đời + nhãn kết thúc/thời hạn/bàn giao/cọc/nợ, tính theo từng HĐ | `PROPOSED` — bảng chuyển vòng đời đầy đủ chưa triển khai |
+| K-03 | Hồ sơ cọc: bàn giao → đối chiếu → chờ duyệt → đã duyệt/chờ chi → thực chi/tất toán; có trả lại, chặn tự duyệt, mã giao dịch và chống ghi trùng | `PROPOSED`; SLA 10 ngày `SOURCE_REQUIRED`, chỉ demo ở HĐ có `terms.refundDays` |
+| K-04 | Phá HĐ không tự ép mất cọc; mức giữ có số tiền/căn cứ/người duyệt; cho phép hoàn một phần | `PROPOSED`; chính sách mất cọc `SOURCE_REQUIRED / PENDING_APPROVAL` |
+| K-05 | Danh mục 9 dòng, từng HĐ chọn dòng áp dụng; xe máy 0đ riêng; thang máy diễn giải trong DV chung; SM theo xe và sạc kWh tách riêng; OCR áp từ kỳ 11 | 7 dòng P302 có căn cứ theo bộ trả lời; thang máy/sạc `PENDING_APPROVAL` |
+| K-06 | Cấu hình doanh nghiệp 35 ngày, Admin đổi tại SYS-01; CUS/CON/RPT/menu đọc cấu hình; không ghi đè mốc báo trước trong HĐ | `PROPOSED / PENDING_APPROVAL` — chưa có override nhóm tòa |
+| K-07 | Chỉ hiện ghi chú khi bật ghi chú demo, chưa dựng danh sách nghiệp vụ | `BLOCKED_BY_REQUIREMENT` — cần tên, tiêu chí, quyền, nguồn, trường và tác động tài chính |
+| K-08 | Xe có biển nullable, nhãn hiệu, khoảng đăng ký và trạng thái; kiểm trùng khoảng chồng lấn; xe đã xác nhận mới tính phí; mask khi tổng quan/xuất | `PROPOSED` — quyền backend và vai trò hạn chế xem chi tiết chưa có |
+| K-09 | Phụ lục giữ mã HĐ; HĐ mới liên kết HĐ cũ và phiếu chuyển cọc; P302 không mặc nhiên gia hạn; gia hạn theo điều khoản có bằng chứng kiểm tra | `PROPOSED`; tự gia hạn `SOURCE_REQUIRED / PENDING_APPROVAL` |
+
+**Dataset schema 9:** 18 khách, 19 HĐ (15 đang thuê + 4 đã kết thúc), 3 tòa, 18 phòng. TH.DATA_SCHEMA tăng 8 → 9; trình duyệt có schema cũ tự nạp seed mới. NV-013 TPVH phụ trách CG/DD; TX chưa phân công. KH-003 có HĐ-CG201/24 → HĐ-CG201/25 và phiếu PCC-2507-01, trạng thái cọc `transferred`. Không sinh thêm cọc mới cho hồ sơ cũ. KH-001 có xe SM chờ xác nhận; KH-018 → KH-010 cùng biển nhưng hai khoảng đăng ký liên tiếp không bị báo trùng.
+
+**Bằng chứng QA:** [QA §8.3](TIMEHOUSE_MOCKUP_QA.md#83-chạy-lại-cr_cus_answers-schema-9--20102026), [kết quả máy đọc được](qa/schema9/results.json), [ảnh desktop/mobile](qa/schema9/). Luồng DD-302: khấu trừ 310.000 + 500.000, hoàn 3.990.000; Tổng kỳ 10 LNR 48.255.000 → 44.265.000; Kinh doanh giữ 4.755.000. Xác nhận lần hai vẫn một dòng refund. Thử thỏa thuận TX-202 giữ 1.000.000/4.000.000, duyệt hoàn 3.000.000 được (dữ liệu kiểm thử độc lập, không thay seed).
+
+**Phần chưa triển khai / chưa nghiệm thu:**
+
+- Prorate theo ngày hiệu lực: mới có hiệu lực từ kỳ, chưa có thuật toán phân bổ ngày.
+- Override ngưỡng cảnh báo theo nhóm tòa: hiện chỉ cấu hình doanh nghiệp.
+- Vòng đời đầy đủ Nháp → Chờ hiệu lực → Đang hiệu lực → Đang kết thúc → Đã kết thúc / Đã hủy: hiện Nháp / Đang thuê / Đã kết thúc + nhãn.
+- `customerAuditLog` riêng: hiện dùng audit chung `TH.log`; `customerHistory` chỉ cho SĐT/địa chỉ.
+- Nhánh quyền chi tiết không có `vehicle.view`: code có mask, nhưng tất cả vai trò đang được mở CUS-02 đều có quyền này; chưa có persona kiểm thử riêng.
+- K-07 chưa đủ định nghĩa; ma trận quyền cọc thật, ký xác nhận nguồn QA-CUS-15, Excel giá gói, SRS v2.3 và Figma/QA ngoài HTML còn chờ đầu vào hoặc môi trường tương ứng.

@@ -9,7 +9,7 @@ var TH = window.TH = window.TH || {};
 TH.TODAY = '2026-10-20';
 TH.CURRENT_PERIOD = '2026-10';
 TH.PERIODS = ['2026-05', '2026-06', '2026-07', '2026-08', '2026-09', '2026-10'];
-TH.DATA_SCHEMA = 8;
+TH.DATA_SCHEMA = 9;
 
 /* Vai trò phụ trách tòa (CR-BLD-01, note.md §3.2 · cột NVVH/Lead/NVVS/NSKT trong docs/Thông tin nhà.xlsx).
    tier: gói bắt đầu được phân công vai trò này (A: một NV vận hành chính — F006.A; B: nhiều người theo vai trò — F006.B). */

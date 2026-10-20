@@ -1,0 +1,235 @@
+{
+  "passed": 23,
+  "results": [
+    {
+      "id": "SCHEMA-UPGRADE",
+      "pass": true,
+      "evidence": {
+        "schema": 9,
+        "name": "Phạm Quốc Bảo",
+        "contracts": 19
+      }
+    },
+    {
+      "id": "REGRESSION",
+      "pass": true,
+      "evidence": {
+        "schema": 9,
+        "kd09": 16937599,
+        "total09": 7537599,
+        "kd10": 4755000,
+        "total10": 48255000,
+        "invoice": 6069800,
+        "hs": 0.7226573305363141
+      }
+    },
+    {
+      "id": "QA-CUS-01",
+      "pass": true,
+      "evidence": {
+        "head": "NV-013",
+        "lead": "NV-003",
+        "tx": null
+      }
+    },
+    {
+      "id": "QA-CUS-02",
+      "pass": true,
+      "evidence": [
+        "Sắp hết HĐ",
+        "Chờ bàn giao"
+      ]
+    },
+    {
+      "id": "QA-CUS-03-pending",
+      "pass": true,
+      "evidence": {
+        "state": "pending_approval",
+        "ledger": 0
+      }
+    },
+    {
+      "id": "QA-CUS-03-approved",
+      "pass": true,
+      "evidence": {
+        "state": "approved",
+        "ledger": 0
+      }
+    },
+    {
+      "id": "DEFAULT-TXN",
+      "pass": true,
+      "evidence": "CK-20261020-261001"
+    },
+    {
+      "id": "QA-CUS-04/17",
+      "pass": true,
+      "evidence": {
+        "state": "refunded",
+        "refund": 3990000,
+        "paidBy": "NV-002",
+        "rows": 1,
+        "kd": 4755000,
+        "total": 44265000
+      }
+    },
+    {
+      "id": "QA-CUS-05-seed",
+      "pass": true,
+      "evidence": {
+        "labels": [
+          "Phá HĐ",
+          "Mất cọc"
+        ],
+        "basis": "Điều 4.3 & 7.1 HĐ ký 29/07/2025 (mẫu đầy đủ) — khách đơn phương chấm dứt",
+        "approver": "NV-001"
+      }
+    },
+    {
+      "id": "QA-CUS-05-partial",
+      "pass": true,
+      "evidence": "Giữ 1.000.000; duyệt hoàn 3.000.000 / cọc 4.000.000"
+    },
+    {
+      "id": "QA-CUS-06/08/09",
+      "pass": true,
+      "evidence": {
+        "water": {
+          "type": "water",
+          "name": "Nước (theo người)",
+          "qty": 2,
+          "unit": "người",
+          "price": 120000,
+          "amount": 240000
+        },
+        "sm": 400000,
+        "charging": "na",
+        "effective": "2026-11",
+        "oldInvoicesUnchanged": true
+      }
+    },
+    {
+      "id": "QA-CUS-07",
+      "pass": true,
+      "evidence": {
+        "moto": {
+          "code": "PARK_MOTO",
+          "price": 0,
+          "method": "per_vehicle",
+          "qtySource": "vehicles",
+          "active": true,
+          "from": "2025-05",
+          "basis": "HĐ ký 2025-04-28",
+          "note": "Miễn phí — giữ dòng để lưu quyền sử dụng và số xe đã đăng ký"
+        },
+        "pending": 1,
+        "smQty": 0
+      }
+    },
+    {
+      "id": "VEHICLE-CONFIRM",
+      "pass": true,
+      "evidence": "XE-001-9"
+    },
+    {
+      "id": "VEHICLE-DUPLICATE",
+      "pass": true,
+      "evidence": "Biển số đang hoạt động ở hồ sơ khác bị chặn xác nhận"
+    },
+    {
+      "id": "QA-CUS-10/11/12/13/14",
+      "pass": true,
+      "evidence": {
+        "p302": {
+          "template": "P302",
+          "templateName": "Mẫu HĐ P302 — bản đồng bộ",
+          "refundDays": null,
+          "autoRenew": false,
+          "autoRenewMonths": null,
+          "noticeDays": null,
+          "earlyTermination": null,
+          "source": "Hop_dong_khach_thue_P302_TH01_demo_dong_bo.pdf — Điều 2 (gia hạn phải xác nhận bằng văn bản), Điều 6 (hoàn cọc theo chứng từ, không ghi thời hạn)",
+          "signedAt": "2025-11-13"
+        },
+        "amendment": {
+          "n": 1,
+          "mode": "amendment",
+          "from": "2026-06-01",
+          "to": "2027-05-31",
+          "at": "2026-05-01",
+          "by": "NV-003",
+          "evidence": "Phụ lục gia hạn hai bên ký 2026-05-01",
+          "file": "phu_luc_gia_han_CG-102_2026.pdf"
+        },
+        "previous": "HĐ-CG201/24",
+        "transfer": "transferred",
+        "count": 2,
+        "notice": 30,
+        "alert": 35
+      }
+    },
+    {
+      "id": "VEHICLE-HISTORY/MASK",
+      "pass": true,
+      "evidence": {
+        "duplicate": false,
+        "nullable": true,
+        "masked": true
+      }
+    },
+    {
+      "id": "TENANCY-ROWS",
+      "pass": true,
+      "evidence": "KH-003 có hai dòng HĐ"
+    },
+    {
+      "id": "QA-CUS-16-occupation",
+      "pass": true,
+      "evidence": "Không ghi lịch sử liên hệ khi sửa nghề"
+    },
+    {
+      "id": "QA-CUS-16-contact",
+      "pass": true,
+      "evidence": "Sửa SĐT thêm đúng một lịch sử liên hệ; audit chung được ghi khi lưu"
+    },
+    {
+      "id": "K-06",
+      "pass": true,
+      "evidence": {
+        "count35": 2,
+        "count45": 3
+      }
+    },
+    {
+      "id": "MANAGER-PERMISSIONS",
+      "pass": true,
+      "evidence": "QL tòa mở hồ sơ được; không có thao tác duyệt/thực chi"
+    },
+    {
+      "id": "MANAGER-SCOPE",
+      "pass": true,
+      "evidence": "DD-302 nằm ngoài phạm vi Cầu Giấy"
+    },
+    {
+      "id": "SMOKE",
+      "pass": true,
+      "evidence": {
+        "total": 928,
+        "fails": [],
+        "counts": {
+          "route": 44,
+          "screenSrs": 39,
+          "screenCr": 2,
+          "popup": 11,
+          "dialog": 22,
+          "tab": 46,
+          "variant": 94,
+          "figma": null
+        }
+      }
+    }
+  ],
+  "date": "2026-10-20",
+  "browser": "Chromium (Playwright)",
+  "qaCus15": "SOURCE_REQUIRED / PENDING_APPROVAL — chưa có xác nhận nguồn từ khách hàng"
+}
