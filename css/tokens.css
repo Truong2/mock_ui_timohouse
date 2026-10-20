@@ -1,0 +1,153 @@
+/* TIMEHOUSE — design tokens. Nguồn: SRS §2, Plan §3. */
+
+/* @font-face Inter: xem css/fonts.css (data URI để chạy ở file://). */
+
+:root {
+  /* Brand */
+  --teal-25: #f5fdfb;
+  --teal-50: #f0fdfa;
+  --teal-100: #ccfbf1;
+  --teal-200: #99f6e4;
+  --teal-300: #5eead4;
+  --teal-500: #14b8a6;
+  --teal-600: #0d9488;
+  --teal-700: #0f766e;
+  --teal-800: #115e59;
+  --teal-900: #134e4a;
+  --teal-950: #042f2e;
+
+  /* Neutral (slate) */
+  --n-0: #ffffff;
+  --n-25: #fbfcfe;
+  --n-50: #f8fafc;
+  --n-100: #f1f5f9;
+  --n-200: #e2e8f0;
+  --n-300: #cbd5e1;
+  --n-400: #94a3b8;
+  --n-500: #64748b;
+  --n-600: #475569;
+  --n-700: #334155;
+  --n-800: #1e293b;
+  --n-900: #0f172a;
+
+  /* Semantic */
+  --primary: var(--teal-700);
+  --primary-hover: var(--teal-800);
+  --primary-soft: var(--teal-50);
+  --primary-ring: rgba(15, 118, 110, 0.28);
+
+  --bg: var(--n-50);
+  --surface: var(--n-0);
+  --surface-muted: var(--n-50);
+  --border: var(--n-200);
+  --border-strong: var(--n-300);
+
+  --text: var(--n-900);
+  --text-2: var(--n-600);
+  --text-3: var(--n-500);
+  --text-inverse: #ffffff;
+
+  --success: #15803d;
+  --success-soft: #f0fdf4;
+  --success-line: #bbf7d0;
+  --warning: #b45309;
+  --warning-soft: #fffbeb;
+  --warning-line: #fde68a;
+  --danger: #b91c1c;
+  --danger-soft: #fef2f2;
+  --danger-line: #fecaca;
+  --info: #1d4ed8;
+  --info-soft: #eff6ff;
+  --info-line: #bfdbfe;
+  --draft: #7c2d12;
+  --draft-soft: #fff7ed;
+  --draft-line: #fed7aa;
+
+  /* Package tiers */
+  --tier-a: #0f766e;
+  --tier-a-soft: #f0fdfa;
+  --tier-b: #0369a1;
+  --tier-b-soft: #f0f9ff;
+  --tier-c: #6d28d9;
+  --tier-c-soft: #f5f3ff;
+  --tier-d: #b45309;
+  --tier-d-soft: #fffbeb;
+
+  /* Chart */
+  /* Chart — thứ tự cố định, đã chạy validate_palette (light): PASS cả 5 kiểm tra */
+  --chart-1: #0d9488;
+  --chart-2: #d97706;
+  --chart-3: #6366f1;
+  --chart-4: #db2777;
+  /* Mốc 5/10/15 (thứ bậc, một hue): */
+  --seq-1: #115e59;
+  --seq-2: #0d9488;
+  --seq-3: #5eead4;
+  --seq-4: #cbd5e1;
+
+  /* Type */
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fs-11: 11px;
+  --fs-12: 12px;
+  --fs-13: 13px;
+  --fs-14: 14px;
+  --fs-15: 15px;
+  --fs-16: 16px;
+  --fs-18: 18px;
+  --fs-20: 20px;
+  --fs-24: 24px;
+  --fs-28: 28px;
+  --fs-32: 32px;
+
+  /* Spacing — grid 8px */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-10: 40px;
+  --s-12: 48px;
+  --s-16: 64px;
+
+  /* Radius & elevation */
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-xl: 16px;
+  --r-full: 999px;
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 16px 40px -12px rgba(15, 23, 42, 0.22), 0 4px 12px -4px rgba(15, 23, 42, 0.06);
+  --shadow-xl: 0 32px 64px -24px rgba(15, 23, 42, 0.3);
+
+  /* Layout */
+  --sidebar-w: 264px;
+  --topbar-h: 64px;
+  --content-max: 1400px;
+
+  /* Motion */
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --t-fast: 120ms;
+  --t-base: 160ms;
+  --t-slow: 220ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --t-fast: 0ms;
+    --t-base: 0ms;
+    --t-slow: 0ms;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
