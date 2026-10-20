@@ -208,12 +208,12 @@
     render: function () {
       var p = TH.store.state.period, scope = TH.scope(), bs = scopeBuildings();
       var sm = C.summary(p, scope), ms = C.milestones(p, scope);
-      var contracts = TH.db.contracts.filter(function (c) { return TH.inScope(c.buildingId) && (scope === 'ALL' || c.buildingId === scope); });
-      var expiring = C.expiring(45, scope).length;
+      var contracts = TH.db.contracts.filter(function (c) { return c.status === 'active' && TH.inScope(c.buildingId) && (scope === 'ALL' || c.buildingId === scope); });
+      var expiring = C.expiring(TH.expiryDays(), scope).length;
       var kpis = '<div class="grid-4" style="margin-bottom:16px">' +
         TH.kpi({ label: 'Tòa · phòng', icon: 'building', value: bs.length + '<small> tòa · ' + sm.rooms + ' phòng</small>', foot: sm.occupied + ' đang thuê' }) +
         TH.kpi({ label: 'Tỷ lệ lấp đầy', icon: 'door', value: F.pct(sm.occupancy, 0), href: TH.router.href('ROOM-01'), foot: (sm.rooms - sm.occupied) + ' phòng trống/đang sửa' }) +
-        TH.kpi({ label: 'Hợp đồng còn hiệu lực', icon: 'contract', value: String(contracts.length), href: TH.router.href('CON-03'), foot: expiring + ' HĐ hết hạn trong 45 ngày' }) +
+        TH.kpi({ label: 'Hợp đồng còn hiệu lực', icon: 'contract', value: String(contracts.length), href: TH.router.href('CON-03'), foot: expiring + ' HĐ hết hạn trong ' + TH.expiryDays() + ' ngày' }) +
         TH.kpi({ label: 'Doanh thu / Thu thực', icon: 'receipt', value: F.short(sm.billed) + '<small> / ' + F.short(sm.collected) + '</small>', href: TH.router.href('PAY-02'), foot: 'Tỷ lệ thu ' + F.pct(sm.billed ? sm.collectedForPeriod / sm.billed : 0, 0) }) + '</div>';
 
       var msTable = TH.perfTable(p, bs, { buckets: true });

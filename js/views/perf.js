@@ -12,9 +12,14 @@
   TH.hsCell = function (v, muted) {
     return '<b class="' + (muted ? 'muted' : v >= 0.9 ? 'pos' : v < 0.7 ? 'warn-text' : '') + '">' + F.pct(v, 1) + '</b>';
   };
+  /* G-02: thực tế = sau ngày 15 (ghi "chưa khóa kỳ" nếu kỳ còn mở); tạm tính = đến thời điểm xem, chưa áp trọng số */
   TH.perfState = function (r) {
-    return r.closed ? TH.badge('Thực tế · đã qua mốc 15', 'success', { dot: true }) : TH.badge('Tạm tính · chưa qua mốc 15', 'draft', { dot: true });
+    if (!r.closed) return TH.badge('Chưa qua mốc 15', 'draft', { dot: true });
+    return TH.periodLocked(r.period) ? TH.badge('Thực tế · đã khóa kỳ', 'success', { dot: true }) : TH.badge('Thực tế · chưa khóa kỳ', 'warning', { dot: true });
   };
+  TH.perfProvLabel = function () { return 'Tạm tính đến ' + F.date(TH.TODAY) + ' — chưa áp trọng số'; };
+  /* Gói A chưa tách dịch vụ → chỉ số sơ bộ, không đặt tên giống HS đầy đủ (QA-ANSWERS §6) */
+  TH.hsName = function () { return TH.has('F033.B') ? 'Hiệu suất' : 'Chỉ số sơ bộ'; };
 
   /* Bảng các bước A → D → HS cho một tòa/kỳ */
   TH.perfSteps = function (r) {
@@ -32,7 +37,8 @@
       TH.gate('F033.C', row('C', 'Doanh thu thu thêm ' + TH.up('F033.C'), cs.length ? cs.join(' + ') : 'Không có tiền phòng phát sinh đã thu đủ hoặc khoản khách bỏ cọc trong kỳ', F.money(r.C)), { label: 'Cộng tiền phòng phát sinh và khoản khách bỏ cọc', lines: 1 }) +
       row('D', 'Doanh thu tiền phòng quy đổi', (t.useB ? 'A − A × B' : 'A') + (t.useC ? ' + C' : ''), '<b>' + F.money(Math.round(t.D)) + '</b>', 'is-total') +
       row('N', 'Tổng giá niêm yết', r.rooms + ' phòng của tòa trong kỳ (mọi trạng thái)', F.money(r.listed)) +
-      row('HS', 'Hiệu suất' + (t.useB ? ' ' : ' (chưa tách dịch vụ) ') + TH.perfState(r), 'D ÷ tổng giá niêm yết · tạm tính (mọi khoản đã thu tới lúc xem, chưa áp trọng số) = ' + F.pct(t.hsProv, 1), r.closed ? TH.hsCell(t.hs) : '<span class="muted">chờ mốc 15</span>', 'is-total') +
+      row('HS', TH.hsName() + (t.useB ? ' ' : ' (chưa tách dịch vụ) ') + TH.perfState(r), 'D ÷ tổng giá niêm yết · ' + TH.perfProvLabel() + ': ' + F.pct(t.hsProv, 1), r.closed ? TH.hsCell(t.hs) : '<span class="muted">chờ mốc 15</span>', 'is-total') +
+      (r.th1.length ? '<div class="perf-row is-warn"><span class="perf-k">TH1</span><div class="perf-t"><b>Kỳ có cọc mới — cần chuẩn hóa ' + TH.openBadge('', 'chờ chốt G-03') + '</b><div class="small muted">' + r.th1.map(function (d) { return esc(d.roomId) + ' cọc ' + F.money(d.amount); }).join(', ') + '. Theo tài liệu lương: DT phải thu và DT M5 trừ cọc mới và tiền thuê tháng tương lai thu trước; phòng đóng 3 tháng trừ 2 tháng (cộng 1 tháng vào kỳ hưởng). Mockup chưa áp — cần ví dụ có số để chốt.</div></div><div class="perf-v tnum">' + F.money(C.sum(r.th1, function (d) { return d.amount; })) + '</div></div>' : '') +
       '</div>';
   };
 
@@ -54,9 +60,9 @@
       { key: 'C', label: 'C · thu thêm', num: true, gate: 'F033.C', render: function (r) { return r.C ? F.money(r.C) : '<span class="muted">0</span>'; } },
       { key: 'D', label: 'D · quy đổi', num: true, render: function (r) { return '<b class="pos">' + F.money(Math.round(r.t.D)) + '</b>'; } },
       { key: 'N', label: 'Giá niêm yết', num: true, render: function (r) { return F.money(r.listed); } },
-      { key: 'hs', label: 'HS thực tế' + (TH.has('F033.B') ? '' : ' (chưa tách DV)'), num: true, render: function (r) { return r.invoices ? (r.closed ? TH.hsCell(r.t.hs) : '<span class="muted small">chờ mốc 15</span>') : '<span class="muted small">chưa lập HĐơn</span>'; } },
-      { key: 'hp', label: 'HS tạm tính', num: true, render: function (r) { return r.invoices ? TH.hsCell(r.t.hsProv, true) : '<span class="muted">—</span>'; } },
-      { key: 'o', label: 'Lấp đầy (riêng)', num: true, render: function (r) { return F.pct(r.occ, 0) + '<div class="cell-sub">' + r.occupied + '/' + r.rooms + ' phòng</div>'; } },
+      { key: 'hs', label: TH.has('F033.B') ? 'HS thực tế' : 'Chỉ số sơ bộ (chưa tách DV)', num: true, render: function (r) { return r.invoices ? (r.closed ? TH.hsCell(r.t.hs) : '<span class="muted small">chờ mốc 15</span>') : '<span class="muted small">chưa lập HĐơn</span>'; } },
+      { key: 'hp', label: TH.has('F033.B') ? 'HS tạm tính' : 'Sơ bộ tạm tính', num: true, render: function (r) { return r.invoices ? TH.hsCell(r.t.hsProv, true) : '<span class="muted">—</span>'; } },
+      { key: 'o', label: 'Lấp đầy (riêng)', num: true, render: function (r) { return F.pct(r.occ, 0) + '<div class="cell-sub">' + r.occupied + '/' + r.rentable + ' phòng cho thuê được</div>'; } },
     ]);
     return TH.table({
       label: 'Hiệu suất theo tòa', cols: cols, rows: rows,
@@ -68,10 +74,10 @@
   TH.perfSheet = function (p, bs) {
     var rows = bs.map(function (b) { var r = C.perfBuilding(p, b.id), t = TH.perfTier(r); return [b.name, r.cum5, r.cum10, r.cum15, r.late, Math.round(r.A), t.useB ? r.B : null, t.useC ? r.C : null, Math.round(t.D), r.listed, r.invoices && r.closed ? t.hs : null, r.invoices ? t.hsProv : null, r.occ]; });
     return { name: 'Hieu suat', title: 'Hiệu suất tòa theo mốc 5/10/15 — kỳ ' + F.period(p), note: 'DRAFT · HS% = [A − A×B + C] ÷ tổng giá niêm yết (note khách 20/10/2026, D-04) · B/C theo gói đang xem',
-      columns: [{ label: 'Tòa', width: 26 }, { label: 'DT M5 (lũy kế)', type: 'money' }, { label: 'DT M10 (lũy kế)', type: 'money' }, { label: 'DT M15 (lũy kế)', type: 'money' }, { label: 'Thu sau 15', type: 'money' }, { label: 'A · sau 3 mốc', type: 'money' }, { label: 'B · tỷ lệ DV', type: 'pct' }, { label: 'C · thu thêm', type: 'money' }, { label: 'D · quy đổi', type: 'money' }, { label: 'Tổng giá niêm yết', type: 'money' }, { label: 'HS thực tế' + (TH.has('F033.B') ? '' : ' (chưa tách DV)'), type: 'pct' }, { label: 'HS tạm tính', type: 'pct' }, { label: 'Lấp đầy (riêng)', type: 'pct' }],
+      columns: [{ label: 'Tòa', width: 26 }, { label: 'DT M5 (lũy kế)', type: 'money' }, { label: 'DT M10 (lũy kế)', type: 'money' }, { label: 'DT M15 (lũy kế)', type: 'money' }, { label: 'Thu sau 15', type: 'money' }, { label: 'A · sau 3 mốc', type: 'money' }, { label: 'B · tỷ lệ DV', type: 'pct' }, { label: 'C · thu thêm', type: 'money' }, { label: 'D · quy đổi', type: 'money' }, { label: 'Tổng giá niêm yết', type: 'money' }, { label: TH.has('F033.B') ? 'HS thực tế' : 'Chỉ số sơ bộ (chưa tách DV)', type: 'pct' }, { label: 'Tạm tính đến ' + F.date(TH.TODAY) + ' (chưa áp trọng số)', type: 'pct' }, { label: 'Lấp đầy (riêng)', type: 'pct' }],
       rows: rows };
   };
   TH.perfFormulaNote = function () {
-    return '<span class="small muted">' + I('info', 'ic-sm') + ' HS% = [A − A × B + C] ÷ tổng giá niêm yết. A: trọng số 100/90/70/0 theo ngày thực nhận đã xác nhận; B, C bật theo gói (B+, C+). Lấp đầy tính riêng, không dùng trong HS. Nhánh cọc mới / đóng 3 tháng chờ chốt (D-04).</span>';
+    return '<span class="small muted">' + I('info', 'ic-sm') + ' HS% = [A − A × B + C] ÷ tổng giá niêm yết. A: M5/M10/M15 là thu lũy kế đã xác nhận theo ngày thực nhận, trọng số 100/90/70, thu sau 15 = 0 (vẫn giảm công nợ); B, C bật theo gói (B+, C+); làm tròn một lần ở bước cuối. Tạm tính = đến thời điểm xem, chưa áp trọng số. Lấp đầy = phòng đang thuê ÷ phòng cho thuê được, tính riêng. Nhánh TH1 (cọc mới / đóng 3 tháng) chờ chốt — PROPOSED (G-01…G-03).</span>';
   };
 })();

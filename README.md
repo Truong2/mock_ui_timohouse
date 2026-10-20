@@ -31,13 +31,14 @@ Thứ tự lấy gói: `previewPackage` hợp lệ → lựa chọn đã lưu �
 index.html              trang giới thiệu + mount ứng dụng
 css/                    tokens · components · layouts (responsive, print)
 js/
-  data.js               dataset mẫu (3 tòa, 18 phòng, 15 HĐ, 6 kỳ, sổ cọc, chi phí chung, HĐ thuê tòa, lịch trả chủ nhà, tài sản) + TH.calc (gồm perfBuilding: hiệu suất A/B/C/D)
+  data.js               dataset mẫu (3 tòa, 18 phòng, 15 HĐ đang thuê + 3 HĐ đã kết thúc, 6 kỳ, bảng giá theo HĐ, hồ sơ hoàn cọc, sổ cọc, chi phí chung, HĐ thuê tòa, lịch trả chủ nhà, tài sản) + TH.calc (gồm perfBuilding: hiệu suất A/B/C/D)
   pnl.js                P&L tòa/kỳ theo mẫu báo cáo khách (TH.calc.pnl, chia cổ phần)
   reports-cr.js         CR-RPT-01: thêm RPT-04/05, cập nhật mô tả F045/F046, phần báo cáo của từng gói
   bld-cr.js             CR-BLD-01: cập nhật F001/F003/F004/F006/F013/F033/F036/F047 và ghi chú gói OWN/BLD theo note.md
+  cus-cr.js             CR-CUS-01: cập nhật F010/F012/F015/F016/F031 và ghi chú gói CUS-01/02 theo note.md §8
   features.js           F001–F052 — SINH TỰ ĐỘNG từ SRS §5/§5A
   screens.js            39 Screen ID — SINH TỰ ĐỘNG từ SRS §4
-  store.js              gói, vai trò giả lập, scope, bộ lọc, nháp, lưu local (schema v6)
+  store.js              gói, vai trò giả lập, scope, bộ lọc, nháp, lưu local (schema v8)
   router.js · app.js    hash router, app shell, event delegation, công cụ demo
   components.js         bảng, badge, gate gói, dialog/drawer, toast, tooltip, chart SVG
   xlsx.js               xuất .xlsx/.csv không phụ thuộc thư viện
@@ -68,7 +69,26 @@ Kỳ 10/2026 đang mở (Thanh Xuân chưa lập hóa đơn, tiền thuê nhà c
 - `OWN-01`/`BLD-01` chỉ hiện thông tin tóm tắt; `OWN-02` 4 tab, `BLD-02` 8 tab theo note. Mỗi nhóm thông tin có **Chỉnh sửa / Lưu thay đổi / Hủy**; đổi tab hoặc rời trang khi chưa lưu sẽ hỏi *Lưu / Bỏ thay đổi / Tiếp tục chỉnh sửa*.
 - Hợp đồng thuê tòa (giá thuê, cọc, giữ giá, thời hạn, chu kỳ & hạn trả, người giới thiệu ≠ người nhập) dùng chung giữa hồ sơ chủ nhà và hồ sơ tòa.
 - Hiệu suất: HS% = [A − A × B + C] ÷ tổng giá niêm yết, xem tạm tính & thực tế ở `BLD-02 › Vận hành & kết quả`, `PAY-02`, `RPT-02` (Excel có sheet *Hieu suat*).
-- Xếp gói bám tầng SRS (vd: 3 vai trò phụ là B, sinh lịch trả từ HĐ là B, theo dõi đã trả/quá hạn là C). Chi tiết & giả định chờ chốt: Decision log §7.
+- Xếp gói bám tầng SRS (vd: 3 vai trò phụ là B, sinh lịch trả từ HĐ là B, theo dõi đã trả/quá hạn là C). Chi tiết: Decision log §7.
+- Đã áp các đề xuất G-01…G-10 (PROPOSED): 3 loại diện tích, 6 mức tình trạng, PCCC/ĐKKD đủ trường + 4 trạng thái, Chính/Phụ, tài sản có nhật ký, lịch trả có duyệt chi và nhắc lịch; báo cáo tách chế độ Kinh doanh (P&L) và Tổng (theo mẫu). Decision log §8.
+
+## Khách thuê (CR-CUS-01, theo note.md §8)
+
+- `CUS-01` là danh sách tổng quan theo hồ sơ thuê.
+  - **Cột:** mã phòng/tòa, trưởng khu vực, NV vận hành, công nợ, Zalo, trạng thái.
+  - **Trạng thái:** gồm trạng thái chính và nhãn phụ (sắp hết HĐ 35 ngày, chờ bàn giao, hoàn cọc, mất cọc).
+- `CUS-02` có tiêu đề **Mã phòng — Mã tòa**.
+  - **Thông tin lưu trú:** nghề nghiệp, thời gian HĐ, lần gia hạn, phương tiện.
+  - **Hợp đồng:** file HĐ, đọc bảng giá theo gói, bảng giá 7 loại phí lưu theo từng HĐ, ghi chú.
+  - **Tài chính:** công nợ theo kỳ, tiền cọc và hoàn cọc.
+- Sửa từng nhóm thông tin có Lưu/Hủy và chặn rời trang như CR-BLD-01.
+- Các giả định K-01…K-09 đang chờ khách chốt. Xem Decision log §9.
+
+## Trạng thái nghiệm thu & công cụ QA
+
+- Trạng thái: **`TECHNICAL_QA_REPORTED_PASS`** — chưa phải nghiệm thu nghiệp vụ. Giá 4 gói là cấu hình demo, **chưa đối chiếu Excel báo giá**. Công thức lương/hiệu suất/cổ phần còn `DRAFT` (xem `docs/TIMEHOUSE_MOCKUP_DECISIONS.md` §8 và `docs/TIMEHOUSE_MOCKUP_QA.md` §7).
+- `#/demo/mapping`: kiểm đếm 156 increment, **Chạy smoke test** (render mọi màn × tab × dialog × 4 gói × 2 kỳ, tải log CSV), **Xuất RTM (.xlsx)**, đếm riêng route/màn/dialog/tab.
+- Demo cho khách nên mở qua HTTP(S) (`python -m http.server`); mở `file://` có thể không giữ nháp sau F5 nếu trình duyệt chặn lưu trữ.
 
 ## Công cụ demo (nút trượt trên topbar)
 
@@ -86,6 +106,7 @@ Kỳ 10/2026 đang mở (Thanh Xuân chưa lập hóa đơn, tiền thuê nhà c
 5. `METER-01` nhập chỉ số (TX-201 thiếu, TX-102 số lùi, DD-301 đột biến) → `INV-01` chọn Thanh Xuân → *Sinh nháp* → *Xem trước & xác nhận*.
 6. `PAY-01` báo thu → đổi vai trò *Quản lý tòa*: không tự duyệt → *Kế toán* xác nhận `PAY-APP` → `PAY-02` công nợ giảm, bảng *Hiệu suất theo tòa* (A/B/C/D, tạm tính & thực tế) cập nhật; chọn **C** xem chống trùng/backdate.
 6b. `BLD-02/TH-CG` kỳ 09: tab *Vận hành & kết quả* (các bước A→D, HS 72,3%) → tab *Chủ nhà & hợp đồng* bấm *Chỉnh sửa* giá thuê, đổi tab giữa chừng để thấy hộp thoại lưu/bỏ → tab *Lịch thanh toán* (Đống Đa, Thanh Xuân quá hạn); chuyển **A → B → C** để thấy vai trò nhân sự, sinh lịch từ HĐ, đã trả/còn lại mở dần.
+6c. `CUS-01` lọc *Hoàn cọc* → mở `DD-302 — TH-DD`, tab *Tài chính*: hoàn cọc quá hạn → *Đối chiếu & duyệt hoàn* → *Xác nhận đã hoàn*. Mở `DD-102`: 3 nhãn trạng thái cùng lúc. Tab *Hợp đồng*: sửa bảng giá thì thấy preview chênh lệch (C). Chuyển **A → B** để thấy nút *Tự đọc bảng giá* mở ra.
 7. Chọn **D** → `SAL-01`, `SHARE-01` với nhãn DRAFT (D-06, D-07) và truy vết.
 8. Menu *Báo cáo* → `RPT-04` kỳ 09/2026: đối chiếu với file G1 của khách (cùng thứ tự dòng, tỷ lệ, bảng chia cổ phần); bấm một dòng để mở chứng từ (B+); *Xuất Excel theo mẫu*.
 9. `RPT-05`: đổi *Báo cáo kinh doanh* ↔ *Báo cáo tổng* (cọc mới, mua sắm); C gộp theo nhóm nhà; bấm tên tòa để về `RPT-04`. Đổi sang **A** để khách thấy cả hai báo cáo đã có trong gói thấp nhất.

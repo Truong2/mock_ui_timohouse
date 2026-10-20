@@ -22,8 +22,8 @@ TH.ROLES = {
 /* Quyền theo vai trò — độc lập với gói demo (SRS §2.1 mục 4, 7). */
 TH.PERMS = {
   admin: ['*'],
-  accountant: ['view.all', 'invoice.confirm', 'receipt.confirm', 'receipt.report', 'expense.create', 'expense.approve', 'salary.view', 'salary.edit', 'share.view', 'share.edit', 'report.all', 'meter.edit', 'meter.approve', 'master.edit', 'lease.edit', 'contract.edit', 'oa.send', 'hr.view'],
-  manager: ['view.ops', 'receipt.report', 'meter.edit', 'expense.create', 'master.edit', 'contract.edit', 'invoice.draft', 'oa.send', 'report.building'],
+  accountant: ['view.all', 'invoice.confirm', 'receipt.confirm', 'receipt.report', 'expense.create', 'expense.approve', 'salary.view', 'salary.edit', 'share.view', 'share.edit', 'report.all', 'meter.edit', 'meter.approve', 'master.edit', 'lease.edit', 'contract.edit', 'oa.send', 'hr.view', 'deposit.propose', 'deposit.approve', 'deposit.pay', 'vehicle.view'],
+  manager: ['view.ops', 'receipt.report', 'meter.edit', 'expense.create', 'master.edit', 'contract.edit', 'invoice.draft', 'oa.send', 'report.building', 'deposit.propose', 'vehicle.view'],
   hr: ['hr.view', 'hr.edit', 'salary.view'],
 };
 /* Màn nào vai trò nào được mở (ngoài danh sách → 403 Forbidden). */

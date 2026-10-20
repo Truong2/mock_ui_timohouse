@@ -2,13 +2,15 @@
 
 Ngày lập: 20/10/2026. Nguồn đối chiếu: `TIMEHOUSE_SRS_GOI_D_v1_1_CAU_HINH_XEM_GOI_A_B_C_D.md` (§4, §5A, §7) và handoff. **Excel báo giá, SRS v2.3, mẫu chứng từ chưa có trong workspace** — các mục đánh dấu ⚠ chưa thể xác minh với Excel.
 
+> **Cập nhật 20/10/2026:** câu trả lời cho mọi mã trong log nằm ở `TIMEHOUSE_MOCKUP_DECISIONS_ANSWERS.md` (đề xuất, **chưa phải phê duyệt của khách**) và phản hồi QA ở `TIMEHOUSE_MOCKUP_QA_ANSWERS.md`. Phần đã áp vào mockup và trạng thái từng mã: **§8**. Mọi mục chưa ký vẫn hiển thị `DRAFT / PROPOSED / SIMULATED`.
+
 ## 1. Các điểm OPEN của SRS và cách mockup thể hiện
 
 | Mã | Vấn đề | Giá trị tạm trong mockup | Nơi hiển thị nhãn |
 | --- | --- | --- | --- |
 | D-01 | Field bắt buộc, mask, validation | `Required?` để TBD; form chỉ chặn field tối thiểu để demo chạy; định danh mask `0010••••••218` | Form thêm/sửa, OCR |
 | D-02 | OCR số mẫu/định dạng | A: 1 mẫu; B: 2 mẫu + confidence 85%; C: đối chiếu; D: thư viện + log. Kết quả OCR cố định (mô phỏng) | `OCR-CON`, `OCR-CUS` |
-| D-03 | Giá điện nước, kỳ chốt, số lùi | Đơn giá cố định theo tòa (3.800–4.000 đ/kWh, 28–30k/m³); số mới < số cũ → chặn lưu, báo kiểm tra; thang giá (C) đánh dấu DRAFT | `METER-01` |
+| D-03 | Giá điện nước, kỳ chốt, số lùi | Đơn giá **theo từng tòa** (sửa được ở BLD-02), tách **giá bán / giá mua điện**, cách tính nước `meter_m3 / per_person / per_room` (hóa đơn demo vẫn tính theo m³); số mới < số cũ → chặn lưu, báo kiểm tra; thang giá (C) đánh dấu DRAFT | `METER-01`, `BLD-02` |
 | D-04 | Mốc 5/10/15 | Theo **ngày thực nhận đã xác nhận**; A = M5×100% + (M10−M5)×90% + (M15−M10)×70% (M = lũy kế), thu sau 15 / ngoài kỳ = 0; B = DV phải thu ÷ DT phải thu (theo tòa); C = tiền phòng phát sinh đã thu đủ + khách bỏ cọc; D = A − A×B + C; HS = D ÷ tổng giá niêm yết; 2 trạng thái tạm tính / thực tế (§7.3) | `BLD-02`, `PAY-02`, `RPT-02`, `SAL-01` |
 | D-05 | Zalo OA | Provider "chưa chốt", mọi gửi là mô phỏng; chỉ gửi khi đã liên kết OA + HĐ xác nhận | `OA-01`, `OA-02`, `INV-03` |
 | D-06 | Lương & hiệu suất | HS% = D ÷ DT niêm yết (D-04); mức lương/phòng = HS × đơn giá tham chiếu ÷ 90; lương HS = mức/phòng × số phòng; trưởng nhóm 10.000 đ/phòng; bảng tham chiếu đầy đủ chờ ký | `SAL-01`, `RPT-03`, `RPT-04` |
@@ -16,7 +18,7 @@ Ngày lập: 20/10/2026. Nguồn đối chiếu: `TIMEHOUSE_SRS_GOI_D_v1_1_CAU_H
 | D-08 | Ngoài gói, hạ tầng | Ghi chú ở landing (giá chưa gồm OCR/OA/VPS) | Landing |
 | D-09 | RTM FR ↔ UI | Chưa làm; registry chỉ truy vết tới §4 (số dòng SRS) và §5A | `screens.js.srcLine` |
 | PKG-01…05 | Package preview | Chỉ prototype; mặc định D; locked/ghost có toggle ẩn; giữ qua trang/tab/refresh; `?previewPackage=` | `DEMO-PKG-01` |
-| PKG-06 | Ảnh cũ sai giá | Không dùng ảnh cũ; giá A 50–60 / B 70–80 / C 80–90 / D 90–100 lấy từ một nguồn `TH.PACKAGES` | Toàn bộ |
+| PKG-06 | Ảnh cũ sai giá | Không dùng ảnh cũ; giá A 50–60 / B 70–80 / C 80–90 / D 90–100 lấy từ một nguồn `TH.PACKAGES` — **giá hiển thị thống nhất với cấu hình demo, chưa đối chiếu Excel báo giá, không phải giá chốt** (QA-B01) | Toàn bộ |
 
 ## 2. Khác biệt giữa note cấp màn (§4) và increment cấp chức năng (§5A)
 
@@ -61,7 +63,7 @@ Các file trong `docs/` (bảng lương T8, báo cáo kinh doanh T8, hóa đơn 
 | Nguồn | Nội dung thực tế | Mockup đã làm | Khác biệt / chờ chốt |
 | --- | --- | --- | --- |
 | `CÁCH TÍNH LƯƠNG PHÒNG VẬN HÀNH.docx` + `bảng lương tháng 8.xlsx` | DT sau 3 mốc = m5×100% + (m10−m5)×90% + (m15−m10)×70%; trừ tỷ lệ dịch vụ/DT phải thu; + DT thu thêm; **HS% = DT tiền phòng thu được ÷ DT niêm yết**; mức lương/phòng = HS × đơn giá tham chiếu (ví dụ 110.000 ở 90%, thâm niên > 1 năm) ÷ 90; lương HS = mức/phòng × số phòng; cột lương: cơ bản, ăn trưa, xăng xe, **lương trưởng nhóm (10.000 đ/phòng của đội)**, hỗ trợ | `TH.calc.perfPay/payroll` cài đúng công thức; SAL-01/RPT-03 hiện số phòng, DT niêm yết, HS%, mức lương/phòng, lương HS, lương trưởng nhóm; đơn giá tham chiếu 110.000/90.000 là **DRAFT** | Bảng tham chiếu đầy đủ theo bậc HS/thâm niên; “DT thu thêm” (C) đã mô hình hóa từ 20/10/2026 (§7.3); trường hợp cọc mới/kỳ 3 tháng (TH1) vẫn chờ chốt → F040.D |
-| `Hop_dong_*.pdf` (2 mẫu) | Mã `HĐKH-TH01-P302-2026-001`; số người/xe; ngày nhận phòng; cọc 1 tháng; **chỉ số bàn giao điện/nước**; biểu phí: điện 4.000 đ/kWh, nước & dịch vụ chung **120.000 đ/người**, internet 100.000/phòng, xe máy 0, xe đạp điện 150.000, xe điện 400.000; thông báo ngày 25, hạn 25–30 tháng trước kỳ; phạt 200.000 đ/ngày trễ | OCR-CON mô phỏng đúng cấu trúc mẫu đồng bộ (13 field, map biểu phí Điều 4); thư viện mẫu OCR đặt tên theo 2 PDF | Nước tính theo **người** (mẫu) vs theo **m³ công tơ** (SRS F020) → D-03; kỳ thông báo 25 / hạn 30 vs kỳ 01 / hạn 10 của dataset demo; phạt trễ hạn chưa có trong 52 nhóm |
+| `Hop_dong_*.pdf` (2 mẫu) | Mã `HĐKH-TH01-P302-2026-001`; số người/xe; ngày nhận phòng; cọc 1 tháng; **chỉ số bàn giao điện/nước**; biểu phí: điện 4.000 đ/kWh, nước & dịch vụ chung **120.000 đ/người**, internet 100.000/phòng, xe máy 0, xe đạp điện 150.000, xe điện 400.000; thông báo ngày 25, hạn 25–30 tháng trước kỳ. ~~Phạt 200.000 đ/ngày trễ~~ — **gỡ ngày 20/10/2026: không chứng minh được trong 2 PDF** (DECISIONS_ANSWERS §IV.2) | OCR-CON mô phỏng đúng cấu trúc mẫu đồng bộ (13 field, map biểu phí Điều 4); thư viện mẫu OCR đặt tên theo 2 PDF | Nước tính theo **người** (mẫu) vs theo **m³ công tơ** (SRS F020) → D-03; kỳ thông báo 25 / hạn 30 vs kỳ 01 / hạn 10 của dataset demo; không đưa mức phạt vào hệ thống khi chưa có điều khoản xác minh |
 | `Hoá đơn tiền nhà tháng 9…xlsx` | Mỗi phòng: giá niêm yết, giá QL, giá hiện tại, cọc, ngày ở/ngày DV (prorate theo ngày), nợ cũ, thu khác, số người, điện/nước/mạng (CS cũ–mới, SL, đơn giá); sheet *BÁO CÁO CHECK THU TIỀN* (cần đóng / đã đóng / công nợ / Đủ–Thừa–Chưa TT); *cập nhật thu tiền* theo quản lý (DT phải thu, thực thu, phá HĐ, tỷ lệ %) | INV-01/02/03, PAY-01/02 có cùng khái niệm (tổng, đã thu, còn nợ, trạng thái, theo QL) | “Nợ cũ” gộp vào hóa đơn kỳ sau (Excel) vs công nợ tách theo hóa đơn (SRS F031); “Thừa” (thu trước) và “phá HĐ” chưa có trong dataset → F031.D/F048.C |
 | `BÁO CÁO KINH DOANH THÁNG 8.xlsx` + `báo cáo.xlsx` | Báo cáo tổng theo nhóm nhà T/S/G: tổng DT, cọc phòng mới, cọc khách bỏ, hoàn cọc, phòng phá HĐ/mới/trống, DT tiền phòng, DT điện/nước…; danh mục báo cáo mong muốn: dòng tiền (gồm cọc) vs kinh doanh (không gồm cọc/hoàn cọc/mua sắm), dự kiến LN, LN/vốn, LN/tài sản, biên lợi nhuận tiền nhà, chi phí giá vốn/cố định, HS thực tế vs tạm tính; lọc theo thời gian/tòa/khu vực/NVVH/trưởng phòng | RPT-01 “Doanh thu thuộc kỳ vs dòng tiền” (F048.B) và “Điều chỉnh/loại trừ cọc” (F048.C) đúng hướng; RPT-02 so sánh tòa/nhóm/kỳ | **Đã làm ở §6 (CR-RPT-01):** sổ cọc, mua sắm, 2 chế độ Tổng/Kinh doanh, nhóm nhà. LN/vốn, LN/tài sản vẫn ngoài 52 nhóm (gần F044.D sổ vốn góp) → CR riêng nếu khách yêu cầu |
 | `Danh sách mã HĐ điện nước mạng.xlsx` | Mã HĐ EVN/nước/mạng theo tòa, tiền theo tháng, tên chủ HĐ | Thêm `evnCode/waterCode/netCode` (mask) vào tòa; hiển thị BLD-02 và METER-01 › Đối chiếu | Khớp F020.D; số liệu tháng chưa nhập |
@@ -177,3 +179,127 @@ Nguồn: `note.md` (đã cập nhật theo `ques.md` — trả lời 9 câu hỏ
 - `db.leases` (4 HĐ, 1 đã kết thúc khi đổi chủ Đống Đa), `db.landlordPays` (10 kỳ; kỳ 10: CG đã trả, DD còn 25 tr quá hạn, TX chưa trả), `db.assets` (16), `db.bldDocs` (12), `db.arisingRent` (2).
 - Nhân sự thêm 2 NV vệ sinh, 2 NV kỹ thuật; phân công theo 4 vai trò (một NV kỹ thuật phụ trách cả 3 tòa).
 - Ảnh hưởng số cũ: lương QL dùng D → LNR tổng kỳ 09 (chế độ Tổng) 7.579.599 → **7.537.599**; tiền phòng phát sinh cộng vào DT tiền phòng TX kỳ 08 và CG kỳ 10. Hóa đơn, phiếu thu, công nợ không đổi (INV-2610-CG202 = 6.069.800 ₫).
+
+## 8. Áp dụng câu trả lời 20/10/2026 (DECISIONS_ANSWERS + QA_ANSWERS)
+
+Nguyên tắc: áp vào mockup các mục mà file trả lời ghi **“có thể áp dụng ngay cho mockup (vẫn gắn PROPOSED)”** (mục V) và các lỗi QA chỉ ra; mục cần chữ ký vẫn để `DRAFT`, chỉ hiển thị cảnh báo/phát hiện, không biến thành quy tắc production. Dữ liệu mẫu nâng lên **schema 7**.
+
+### 8.1 Trạng thái từng mã
+
+| Mã | Trả lời (tóm tắt) | Đã làm trong mockup | Trạng thái |
+| --- | --- | --- | --- |
+| G-01 | M5/M10/M15 = thu lũy kế đã xác nhận theo ngày thực nhận; thu sau 15 không vào A nhưng vẫn giảm công nợ | Giữ công thức; ghi rõ ở chú thích HS, PAY-02, RPT-02 | PROPOSED |
+| G-02 | Tạm tính = [thu đến T × (1−B) + C] ÷ niêm yết, không trọng số; thực tế sau 15, ghi “chưa khóa kỳ”; lấp đầy = phòng đang thuê ÷ phòng cho thuê được | Nhãn “Tạm tính đến 20/10/2026 — chưa áp trọng số”; trạng thái *Thực tế · chưa khóa kỳ / đã khóa kỳ*; lấp đầy loại phòng đang sửa khỏi mẫu số; gói A đổi tên thành **“Chỉ số sơ bộ (chưa tách DV)”** | PROPOSED |
+| G-03 | TH1 (cọc mới, đóng 3 tháng) có căn cứ trong tài liệu lương; thuật toán chờ duyệt | **Phát hiện** kỳ có cọc mới và hiện dòng “TH1 — cần chuẩn hóa, chờ chốt” trong bảng tính A→D; **không áp** điều chỉnh | DRAFT |
+| G-04 | Tách P&L kinh doanh và dòng tiền; chi phí thuê chủ nhà theo tháng sử dụng | RPT-05 chế độ **Kinh doanh** = P&L đề xuất; chế độ **Tổng** = tái hiện mẫu; BLD-02 › Vận hành hiện song song 2 cột | PROPOSED |
+| G-05 | Ba ô diện tích đất / xây dựng / tổng sàn; thiếu chứng từ → “Chưa cập nhật” | Đã tách 3 trường, hiển thị “Chưa cập nhật” khi trống | PROPOSED |
+| G-06 | Danh mục Mới / Khá mới / Trung bình / Cũ / Rất cũ / Chưa đánh giá; nhập tay + ngày, người, ghi chú | Đã áp | PROPOSED |
+| G-07 | PCCC: loại, số, ngày cấp, cơ quan, hiệu lực, chủ thể, tệp; ĐKKD: chủ thể thực tế, MST, cơ quan, ngày; 4 trạng thái | Đã áp (`TH.DOC_STATES`); bắt buộc pháp lý theo loại tòa **chưa xác minh** | DRAFT |
+| G-08 | Nhiều người/vai trò, một người nhiều tòa; Chính/Phụ, từ–đến, trạng thái; một người chính mỗi vai trò | Badge Chính/Phụ + Đang hiệu lực cho mọi vai trò; gán “Chính” đóng người chính cũ của **cùng vai trò** | PROPOSED |
+| G-09 | Trường tài sản đầy đủ + nhật ký sửa/di chuyển/thanh lý | Thêm bên sở hữu/chịu chi, nguồn chứng từ, người cập nhật; đầu tư thêm có ngày mua, nguyên giá, thời hạn sử dụng; nhật ký trong popup “Sửa” (ghi cả di chuyển vị trí) | PROPOSED |
+| G-10 | Lịch từ HĐ + phụ lục; trạng thái duyệt, đã trả, còn lại, chứng từ; nhắc 7 ngày / 3 ngày / đến hạn / quá hạn, bật tắt được | Cột *Duyệt chi* (C); card **Nhắc lịch trả chủ nhà** (B, mô phỏng) với 4 công tắc; tiêu đề lịch ghi kỳ HĐ, bản HĐ, số phụ lục | PROPOSED |
+| R-01 | Tách DT kinh doanh và dòng tiền; cọc mới/hoàn cọc chỉ vào dòng tiền | Chế độ Kinh doanh loại cọc mới **và hoàn cọc**; dòng “Doanh thu kinh doanh tháng”; chế độ Tổng giữ nhãn mẫu + chú thích “gồm dòng tiền cọc” | PROPOSED |
+| R-02 | Chỉ chia đều 1/3 khi là gói phí chung có quy tắc | Giữ chia đều cho dataset demo (mẫu G1); chưa có `allocation_rule` theo hợp đồng | DRAFT |
+| R-03 | Mua sắm thiết bị ra khỏi P&L chuẩn (tài sản/dòng tiền) | Chế độ Kinh doanh loại mua sắm; khấu hao chưa có chính sách | PROPOSED |
+| R-04 | Giữ TCP = GV + CPBH, LNR = DT − TCP | Không đổi | Có căn cứ |
+| R-05 | Giai đoạn A nhập tay phân bổ; tự phân bổ theo phòng là đề xuất | Không đổi (A nhập tay, C rule PB-01 theo số phòng) | PROPOSED |
+| R-06 | Lương HS vào chi phí trực tiếp tòa; 10.000 đ/phòng chưa xác minh | Không đổi; vẫn DRAFT | CHƯA XÁC MINH |
+| R-07 | Chi phí thuê chủ nhà thuộc kỳ dù phiếu chi chưa duyệt (nhãn dự kiến) | Chế độ Kinh doanh cộng **tiền thuê dự kiến theo HĐ thuê tòa** khi tháng chưa có chi phí đã duyệt; cảnh báo đổi nội dung tương ứng | PROPOSED |
+| R-08 | Vốn/Tổng nhận trong G1 chỉ là công thức tái hiện mẫu | Ghi rõ “Công thức tái hiện mẫu G1 — không phải lệnh chi/hoàn vốn” ở RPT-04 và file Excel | CHƯA XÁC MINH |
+| R-09 | Phòng trống cuối kỳ không gồm phòng đang sửa; thêm số ngày trống | Phòng đang sửa không còn tính là phòng trống (ghi chú trên dòng); **số ngày trống chưa làm** | PROPOSED (một phần) |
+| D-01 | Ma trận field bắt buộc tối thiểu | Chưa đổi form — chờ duyệt ma trận | DRAFT |
+| D-02 | 85% chỉ là ngưỡng demo | Không đổi | Có căn cứ (mẫu) |
+| D-03 | Đơn giá theo tòa/biểu phí/ngày hiệu lực; giá mua ≠ giá bán; nước theo người hay m³ | Xem dòng D-03 §1; hóa đơn chưa tính theo người | PROPOSED (một phần) |
+| D-04 | Công thức A/B/C/D, giữ bước tính | Đã có; B lưu độ chính xác đầy đủ, làm tròn một lần khi hiển thị | Có căn cứ (trừ TH1) |
+| D-05 | Không gửi thật khi chưa có provider | Không đổi (SIMULATED) | PROPOSED |
+| D-06 | Mâu thuẫn ÷100 và ÷90 trong tài liệu lương | SAL-01 hiện cảnh báo mâu thuẫn; bản nháp vẫn dùng ÷90, **không dùng để trả lương** | **BLOCKER** (QA-B02) |
+| D-07 | Lợi nhuận phân phối cần phê duyệt; ≤0 không chi | Không đổi (DRAFT) | PROPOSED |
+| D-08 | Không có Excel báo giá → không xác nhận giá | Landing và drawer ghi “chưa đối chiếu Excel báo giá” | CHƯA XÁC MINH (QA-B01) |
+| D-09 | Bắt buộc RTM | `#/demo/mapping` › **Xuất RTM (.xlsx)**: 208 dòng (52 nhóm × 4 gói) gồm mô tả, SRS gốc nếu CR, màn, route, vai trò, test case, kết quả kỹ thuật, trạng thái nghiệp vụ | PROPOSED (định dạng) |
+| PKG / CR-RPT-01 / CR-BLD-01 | Thay đổi phạm vi so với §5A phải được PM duyệt và đánh giá ảnh hưởng giá | Giữ ghi chú CR; RTM ghi “PROPOSED — CR chờ PM duyệt” | Chờ PM |
+
+### 8.2 Số liệu thay đổi (schema 7)
+
+| Chỉ tiêu | Trước | Sau | Lý do |
+| --- | --- | --- | --- |
+| RPT-05 *Kinh doanh* kỳ 09 — doanh thu / LNR | 81.300.600 / 10.737.599 | **87.500.600 / 16.937.599** | Không trừ hoàn cọc 6.200.000 (R-01); vẫn loại mua sắm 3.200.000 |
+| RPT-05 *Kinh doanh* kỳ 10 — LNR | 44.255.000 | **4.755.000** | Cộng tiền thuê chủ nhà dự kiến theo HĐ 39.500.000 (R-07) |
+| RPT-05 / RPT-04 *Tổng (theo mẫu)* kỳ 09 — LNR | 7.537.599 | 7.537.599 | Không đổi |
+| Số phòng trống (Tổng) | gồm phòng đang sửa | kỳ 09 và 10: 2 phòng | R-09 |
+| Lấp đầy Đống Đa kỳ 10 | 5/6 = 83% | 5/5 = 100% | DD-302 đang sửa ra khỏi mẫu số (G-02) |
+| Hiệu suất CG kỳ 09 | 72,3% | 72,3% | Không đổi (A, B, C, D giữ nguyên) |
+
+### 8.3 Chưa làm / ngoài phạm vi bản HTML
+
+- G-03 thuật toán TH1, R-09 số ngày phòng trống, D-01 ma trận field, D-03 tính hóa đơn nước theo người, R-02 `allocation_rule` theo hợp đồng — chờ quyết định có ví dụ số.
+- Kiểm thử in/PDF thật, bàn phím/screen reader, Firefox/Safari, phân quyền ở backend (QA-P01…P03) — cần người kiểm và môi trường thật.
+- Checklist **88 frame Figma** (QA-B04) — không thuộc bản HTML này; phải lập riêng.
+
+## 9. CR-CUS-01 — Thông tin khách hàng (khách thuê) theo note.md §8 (20/10/2026)
+
+Nguồn: `note.md` §8 và hai mẫu HĐ khách thuê `docs/tenplate/Hop_dong_thue_phong_demo_day_du.pdf`, `docs/tenplate/Hop_dong_khach_thue_P302_TH01_demo_dong_bo.pdf`. Các điểm lấy từ mẫu:
+- **Gia hạn:** tự gia hạn 12 tháng nếu không báo trước 30 ngày (Điều 3.4).
+- **Cọc:** hoàn trong 10 ngày sau bàn giao; mất cọc khi phá HĐ (Điều 4.3, 7.1).
+- **Biểu phí theo người/phòng/xe:** điện 4.000/kWh, nước 120.000/người, internet 100.000/phòng, dịch vụ chung 120.000/người, xe máy 0, xe đạp điện 150.000/xe, xe điện SM 400.000/xe.
+
+### 9.1 Thay đổi giao diện
+
+| Màn | Nội dung |
+| --- | --- |
+| `CUS-01` | Danh sách tổng quan theo hồ sơ thuê. **Cột:** Mã phòng / Mã tòa (kèm tên khách), Trưởng khu vực, NV vận hành, Công nợ (đỏ khi quá hạn), Liên kết Zalo, Trạng thái nhiều tầng, *Xem chi tiết*. **Bộ lọc:** đang thuê / sắp hết HĐ (35 ngày) / phá HĐ / hoàn cọc / còn nợ / quá hạn / chưa liên kết Zalo. **Khác:** 4 KPI, xuất công nợ .xlsx |
+| `CUS-02` | **Tiêu đề và đầu trang:** tiêu đề **“Mã phòng — Mã tòa”**; phụ đề tên khách, NV vận hành, công nợ; trạng thái chính + nhãn phụ ở đầu trang. **Tab:** *Thông tin lưu trú · Hợp đồng · Tài chính*, giữ thêm 3 tab SRS *Tài liệu · Lịch sử liên hệ · Phiên bản định danh* |
+| Lưu trú | **Nhóm sửa được** *Thông tin khách hàng* (thêm **nghề nghiệp**, thường trú, ghi chú; giấy tờ mask chỉ đọc; lưu thì ghi lịch sử liên hệ). **Khối *Thời gian hợp đồng* (chỉ đọc):** bắt đầu, kết thúc, thời hạn, số người; badge **“Hợp đồng lần đầu / Gia hạn lần thứ N”** tách riêng khỏi trạng thái thuê; dòng thời gian ký → gia hạn → kết thúc. **Bảng *Phương tiện*:** thêm/sửa/xóa từng xe gồm loại, biển số mask, màu, ghi chú |
+| Hợp đồng | **Nhóm sửa được:** *Bảng giá dịch vụ theo hợp đồng* gồm 7 loại phí, mỗi dòng có cách tính, đơn giá, số lượng và ghi chú; *Ghi chú hợp đồng*. **Thẻ phụ:** File hợp đồng (tải lên mô phỏng); *Đọc bảng giá từ hợp đồng* (nhập tay / tự đọc); lịch sử bảng giá. Chọn được HĐ cũ khi khách có nhiều HĐ |
+| Tài chính | **KPI:** phải thu, đã thu (kế toán xác nhận), còn nợ, quá hạn. **Bảng hóa đơn theo kỳ:** đã thu, chờ xác nhận, còn nợ, quá hạn. **Thẻ *Tiền cọc & hoàn cọc*:** các bước *Chờ bàn giao → Đối chiếu → Duyệt hoàn → Đã hoàn* hoặc *Mất cọc*. **Hộp “Cần làm rõ”:** danh sách khách hoà |
+| `CON-01/02/03`, `RPT-02`, menu | Ngưỡng hết hạn **35 ngày**. CON-01 thêm bộ lọc *Đã kết thúc / Phá HĐ*. CON-03 chọn được 30/35/45/60/90 ngày (mặc định 35). RPT-02 chỉ đếm HĐ đang hiệu lực |
+
+Bảng giá lưu **theo từng HĐ**:
+- **Dòng phí cố định:** đồng bộ sang bộ phí lập hóa đơn (F015).
+- **Điện/nước:** `buildInvoice` lấy đơn giá trong bảng giá của HĐ. Nước theo người/phòng không cần chỉ số.
+- **Phạm vi áp dụng:** chỉ hóa đơn lập sau khi lưu; hóa đơn đã lập không đổi.
+- **OCR:** không tự lưu và không tự lập hóa đơn (UAT F011/F012).
+
+### 9.2 Xếp gói (bám tầng SRS như CR-BLD-01)
+
+| Hạng mục | A | B | C | D |
+| --- | --- | --- | --- | --- |
+| Danh sách tổng quan, trạng thái, công nợ | F010.A, F031.A (CR) | F031.B quá hạn + xuất | — | F010.D phiên bản |
+| Trưởng khu vực / NV vận hành | NV vận hành (F006.A) | Trưởng khu vực (F006.B) | — | — |
+| Lưu trú: nghề nghiệp, xe, lần gia hạn | F010.A (CR) | F010.B kiểm trùng giấy tờ/biển số | F010.C log liên hệ | F010.D |
+| File HĐ + đọc bảng giá | F013.A file; F012.A bảng giá nhập tay | F012.B tự đọc & map bảng giá | F012.C so khớp xe/người ↔ phí | F012.D log sửa tay |
+| Bảng giá 7 loại phí | F015.A một bộ phí hiện hành | F015.B hiệu lực từ kỳ | F015.C preview tác động | F015.D lịch sử giá |
+| Tài chính | F031.A | F031.B | F031.C phiếu điều chỉnh (hiển thị) | F031.D phân bổ phiếu thu (hiển thị) |
+| Hoàn cọc / phá HĐ | A (CR — SRS chưa có increment) | | | |
+| Nhắc hết hạn | F016.A 35 ngày | F016.B | F016.C | F016.D |
+
+Số màn và mapping không đổi: 39 SRS + 2 CR, 52/52 nhóm, 156/156 increment.
+
+### 9.3 Giả định cần khách chốt (K-01…K-09)
+
+| Mã | Giả định trong mockup | Câu hỏi cho khách |
+| --- | --- | --- |
+| K-01 | “Trưởng khu vực” = vai trò **Trưởng nhóm** phân công theo tòa (BLD-02 › Nhân sự) | Có phải cấp TPVH theo khu vực (sơ đồ tổ chức) không? |
+| K-02 | Mỗi hồ sơ có 1 trạng thái chính (Đang thuê / Phá HĐ / Đã kết thúc) + nhãn phụ (Sắp hết HĐ, Chờ bàn giao, Hoàn cọc đang xử lý/quá hạn, Đã hoàn, Mất cọc) | Hiển thị đa trạng thái như vậy có đúng không? |
+| K-03 | “Hoàn cọc” gồm 4 bước *Chờ bàn giao → Đối chiếu (khấu trừ) → Duyệt → Đã hoàn*; hạn 10 ngày sau bàn giao; chỉ bước *Đã hoàn* ghi dòng hoàn cọc vào sổ | Ai duyệt? Khấu trừ gồm những khoản nào? Hoàn cọc là trạng thái “đang xử lý” hay “đã xong”? |
+| K-04 | Phá HĐ = khách chấm dứt trước hạn → mất toàn bộ cọc (mẫu HĐ Điều 4.3/7.1) | Có trường hợp phá HĐ được hoàn một phần không? Điều kiện ghi nhận? |
+| K-05 | 7 loại phí với cách tính: theo chỉ số, theo người, theo phòng, theo xe, theo kWh sạc. Dữ liệu mẫu giữ giá cũ (DV chung 150.000/phòng, gửi xe 120.000/xe) để số báo cáo không đổi | Phí thang máy và sạc xe điện tính thế nào (mẫu HĐ chưa có)? Xe máy 0đ có cần dòng riêng? |
+| K-06 | Ngưỡng 35 ngày áp dụng toàn hệ thống (thay 45 ngày) | Đồng ý? |
+| K-07 | Chưa dựng “danh sách khách hoà” | Tên danh sách, mục đích, các trường cần hiển thị? |
+| K-08 | Biển số hiển thị dạng che một phần (29B1-•••.45); xe đạp điện không biển | Có cần mask biển số không? Cần thêm trường nào cho xe? |
+| K-09 | Lần gia hạn: “mặc nhiên” (không báo trước 30 ngày) hoặc “ký phụ lục”; đếm theo số lần gia hạn của cùng HĐ | Gia hạn có tạo HĐ mới (số HĐ mới) hay giữ số HĐ cũ? |
+
+### 9.4 Dữ liệu mẫu (schema 8 — trình duyệt tự nạp lại)
+
+- **Khách:** thêm nghề nghiệp, thường trú, phương tiện. KH-005 khai 2 xe nhưng HĐ tính 1 xe, để demo so khớp F012.C.
+- **HĐ:** thêm `renewals` (5 HĐ đã gia hạn 1 lần), `priceList` 7 dòng và `note`. CG-301 có dòng sạc xe điện theo kWh (chưa vào hóa đơn).
+- **HĐ đã kết thúc:** thêm 3 HĐ và khách KH-016…018. Phần này thêm **sau** bước sinh hóa đơn, nên doanh thu, hiệu suất và P&L không đổi.
+
+  | Khách | Phòng | Diễn biến | Trạng thái cọc |
+  | --- | --- | --- | --- |
+  | KH-016 | CG-401 | Kết thúc 31/08 | Đã hoàn 6.200.000 (COC-2609-01) |
+  | KH-017 | TX-202 | Phá HĐ 15/07 | Mất cọc 4.000.000 (COC-2607-01) |
+  | KH-018 | DD-302 | Bàn giao 28/09 | Đang đối chiếu, **quá hạn hoàn** từ 08/10 |
+
+- **Đa trạng thái:** DD-102 (KH-008) vừa đang thuê, vừa sắp hết HĐ (26 ngày), vừa chờ bàn giao (đã báo chuyển đi 15/11).
+- **Hồ sơ hoàn cọc:** dữ liệu mới `db.depositCases`. Bước *Xác nhận đã hoàn* thêm dòng `db.deposits` loại refund vào kỳ hiện tại; RPT-05 chế độ Tổng phản ánh, chế độ Kinh doanh không đổi.
+- **Đối chiếu số liệu:** RPT-05 Kinh doanh kỳ 09 LNR 16.937.599; Tổng kỳ 09 7.537.599; Kinh doanh kỳ 10 4.755.000; HS CG kỳ 09 72,3%; INV-2610-CG202 6.069.800. Tất cả **không đổi**.

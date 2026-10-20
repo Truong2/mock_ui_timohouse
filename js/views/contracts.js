@@ -4,7 +4,7 @@
 
   function cStatus(c) {
     if (c.status === 'draft') return 'draft';
-    if (c.status === 'active' && C.daysTo(c.end) <= 45) return 'expiring';
+    if (c.status === 'active' && C.daysTo(c.end) <= TH.expiryDays()) return 'expiring'; // 35 ngày — CR-CUS-01 (note.md §8.2)
     return c.status;
   }
   function custName(c) { var k = C.customer(c.customerId); return k ? k.name : (c.newCustomer || '—'); }
@@ -26,7 +26,7 @@
           { key: 'rent', label: 'Giá thuê', num: true, render: function (c) { return F.money(c.rent); } },
           { key: 'ky', label: 'Kỳ thu', render: function (c) { return 'Ngày ' + String(c.billingDay).padStart(2, '0') + ' hằng tháng'; } },
           { key: 'eff', label: 'Hiệu lực', render: function (c) { return F.date(c.start) + ' → ' + F.date(c.end); } },
-          { key: 'end', label: 'Hết hạn', render: function (c) { var d = C.daysTo(c.end); return c.status === 'draft' ? '—' : d <= 45 ? '<span class="warn-text strong">còn ' + d + ' ngày</span>' : '<span class="muted">còn ' + d + ' ngày</span>'; } },
+          { key: 'end', label: 'Hết hạn', render: function (c) { var d = C.daysTo(c.end); return c.status !== 'active' ? (c.endedAt ? '<span class="muted small">kết thúc ' + F.date(c.endedAt) + '</span>' : '—') : d <= TH.expiryDays() ? '<span class="warn-text strong">còn ' + d + ' ngày</span>' : '<span class="muted">còn ' + d + ' ngày</span>'; } },
           { key: 'st', label: 'Trạng thái', render: function (c) { return TH.status(cStatus(c)); } },
           { key: 'pl', label: 'Phụ lục', gate: 'F014.C', render: function (c) { return c.versions.length > 1 ? TH.badge((c.versions.length - 1) + ' phụ lục', 'info') : '<span class="muted">—</span>'; } },
           { key: 'v', label: 'Phiên bản', gate: 'F014.D', render: function (c) { return 'v' + c.versions.length; } },
@@ -38,13 +38,13 @@
       var actions = '<button type="button" class="btn" data-act="con.ocr">' + I('scan', 'ic-sm') + 'OCR hợp đồng</button>' + TH.exportBtn('con.expx', 'Xuất HĐ hết hạn (.xlsx)') +
         TH.permBtn('contract.edit', '<button type="button" class="btn btn-primary" data-act="go" data-href="' + TH.router.href('CON-02', 'new') + '">' + I('plus', 'ic-sm') + 'Tạo hợp đồng</button>', 'Tạo · 403');
       return TH.pageHeader({ screen: S, actions: actions }) +
-        '<div class="card card-flush"><div class="toolbar">' + TH.searchBox(S, 'Tìm số HĐ, khách, phòng…') + TH.chips(S, 'st', [{ id: 'all', label: 'Tất cả', count: all.length }, { id: 'active', label: 'Đang hiệu lực', count: cnt('active') }, { id: 'expiring', label: 'Sắp hết hạn', count: cnt('expiring') }, { id: 'draft', label: 'Nháp', count: cnt('draft') }], st) + '</div>' + table + TH.pager(S, pg) + '</div>';
+        '<div class="card card-flush"><div class="toolbar">' + TH.searchBox(S, 'Tìm số HĐ, khách, phòng…') + TH.chips(S, 'st', [{ id: 'all', label: 'Tất cả', count: all.length }, { id: 'active', label: 'Đang hiệu lực', count: cnt('active') }, { id: 'expiring', label: 'Sắp hết hạn', count: cnt('expiring') }, { id: 'draft', label: 'Nháp', count: cnt('draft') }, { id: 'ended', label: 'Đã kết thúc', count: cnt('ended') }, { id: 'terminated', label: 'Phá HĐ', count: cnt('terminated') }], st) + '</div>' + table + TH.pager(S, pg) + '</div>';
     },
   };
   TH.act['con.ocr'] = function () { TH.go('OCR-CON'); };
   TH.act['con.expx'] = function () {
-    var list = C.expiring(45, TH.scope());
-    TH.exportXlsx('HD_sap_het_han_' + TH.TODAY, [{ name: 'Sap het han', title: 'Hợp đồng hết hạn trong 45 ngày — ' + TH.scopeLabel(), note: 'Dữ liệu minh họa', columns: [{ label: 'Số HĐ', width: 18 }, { label: 'Khách', width: 24 }, { label: 'Liên hệ', width: 16 }, { label: 'Phòng' }, { label: 'Tòa', width: 20 }, { label: 'QL tòa', width: 20 }, { label: 'Ngày hết hạn' }, { label: 'Còn (ngày)', type: 'number' }],
+    var list = C.expiring(TH.expiryDays(), TH.scope());
+    TH.exportXlsx('HD_sap_het_han_' + TH.TODAY, [{ name: 'Sap het han', title: 'Hợp đồng hết hạn trong ' + TH.expiryDays() + ' ngày — ' + TH.scopeLabel(), note: 'Dữ liệu minh họa', columns: [{ label: 'Số HĐ', width: 18 }, { label: 'Khách', width: 24 }, { label: 'Liên hệ', width: 16 }, { label: 'Phòng' }, { label: 'Tòa', width: 20 }, { label: 'QL tòa', width: 20 }, { label: 'Ngày hết hạn' }, { label: 'Còn (ngày)', type: 'number' }],
       rows: list.map(function (c) { var k = C.customer(c.customerId); return [c.id, k.name, k.phone, c.roomId, C.building(c.buildingId).name, C.staffName(C.building(c.buildingId).managerId), F.date(c.end), C.daysTo(c.end)]; }) }]);
     TH.toast('Đã xuất danh sách', list.length + ' hợp đồng · .xlsx');
   };
@@ -63,7 +63,7 @@
       var tab = TH.resolveTab(S, tabs);
       var body;
       if (tab === 'info') {
-        body = '<div class="grid-main-side"><div class="card"><div class="card-hd"><div class="card-title">Điều khoản chính</div>' + (c.status === 'active' ? TH.badge('Bản đã xác nhận — không sửa trực tiếp', 'neutral', { icon: 'lock' }) : '') + '</div><div class="card-bd">' +
+        body = '<div class="grid-main-side"><div class="card"><div class="card-hd"><div class="card-title">Điều khoản chính</div>' + (c.status === 'active' ? TH.badge('Bản đã xác nhận — không sửa trực tiếp', 'neutral', { icon: 'lock' }) : c.status === 'ended' || c.status === 'terminated' ? TH.badge((c.status === 'terminated' ? 'Phá HĐ ' : 'Kết thúc ') + F.date(c.endedAt), c.status === 'terminated' ? 'danger' : 'neutral') : '') + '</div><div class="card-bd">' +
           TH.kv([['Số HĐ', '<span class="mono">' + esc(c.id) + '</span>'], ['Khách', k ? '<a href="' + TH.router.href('CUS-02', k.id) + '">' + esc(k.name) + '</a> · ' + esc(k.phone) : esc(custName(c))], ['Phòng', TH.roomLink(c.roomId) + ' · ' + esc(C.building(c.buildingId).name)], ['Giá thuê', '<b class="tnum">' + F.money(c.rent) + '</b>/tháng'], ['Tiền cọc', F.money(c.deposit) + ' <span class="small muted">(không tính doanh thu)</span>'], ['Kỳ', 'Ngày ' + String(c.billingDay).padStart(2, '0') + ' · tròn tháng'], ['Hiệu lực', F.date(c.start) + ' → ' + F.date(c.end)], ['Ngày ký', F.date(c.signedAt)], ['Số người ở', c.people]]) + '</div></div>' +
           '<div class="stack"><div class="card"><div class="card-hd"><div class="card-title">' + I('paperclip', 'ic-sm') + 'Bản scan</div></div><div class="card-bd">' + TH.fileOf(c.scanFile) + '</div></div>' +
           TH.gate('F014.C', '<div class="card"><div class="card-hd"><div class="card-title">Phụ lục thay đổi giá ' + TH.up('F014.C') + '</div></div><div class="card-bd stack-sm"><p class="small muted">Thay đổi giá có hiệu lực từ tháng; cần duyệt trước khi áp dụng vào hóa đơn.</p>' + TH.permBtn('contract.edit', '<button type="button" class="btn btn-sm" data-act="con.addendum" data-id="' + esc(c.id) + '">' + I('plus', 'ic-sm') + 'Tạo phụ lục</button>', 'Tạo phụ lục · 403') + '</div></div>', { label: 'Phụ lục thay đổi giá có hiệu lực từ tháng', lines: 2 }) +
@@ -90,7 +90,7 @@
           c.versions.slice(1).map(function (v) { return '<li>Phụ lục v' + v.v + ': ' + esc(v.note) + '<div class="when">' + F.date(v.at) + '</div></li>'; }).join('') + '</ul></div></div>';
       }
       return TH.pageHeader({ screen: S, title: 'Hợp đồng ' + c.id, crumbs: [['Hợp đồng', TH.router.href('CON-01')], [c.id]], status: TH.status(cStatus(c)),
-        actions: '<a class="btn" href="' + TH.router.href('CON-FOLLOW', c.id) + '">' + I('phone', 'ic-sm') + 'Ghi kết quả hỏi gia hạn</a>' }) +
+        actions: '<a class="btn" href="' + TH.router.href('CUS-02', c.customerId) + '">' + I('user', 'ic-sm') + 'Hồ sơ khách</a>' + (c.status === 'active' ? '<a class="btn" href="' + TH.router.href('CON-FOLLOW', c.id) + '">' + I('phone', 'ic-sm') + 'Ghi kết quả hỏi gia hạn</a>' : '') }) +
         '<div class="card" style="margin-bottom:16px">' + TH.tabs(S, tabs, tab) + '</div>' + body;
     },
     dialogs: [function () { addendumForm('HĐ-CG201/25'); }],
@@ -190,7 +190,7 @@
   function followOf(cid) { return TH.db.followUps.filter(function (f) { return f.contractId === cid; }).sort(function (a, b) { return a.at < b.at ? 1 : -1; })[0]; }
   TH.views['CON-03'] = {
     render: function () {
-      var S = 'CON-03', days = +TH.store.ui(S, 'days', '45'), grp = TH.has('F016.B') ? TH.store.ui(S, 'grp', 'none') : 'none';
+      var S = 'CON-03', days = +TH.store.ui(S, 'days', String(TH.expiryDays())), grp = TH.has('F016.B') ? TH.store.ui(S, 'grp', 'none') : 'none';
       var list = C.expiring(days, TH.scope());
       var cols = [
         { key: 'id', label: 'Hợp đồng', render: function (c) { return '<a class="mono" href="' + TH.router.href('CON-02', c.id) + '">' + esc(c.id) + '</a><div class="cell-sub">hết hạn ' + F.date(c.end) + '</div>'; } },
@@ -216,7 +216,7 @@
         TH.kpi({ label: 'Chuyển đi', value: String(all.filter(function (f) { return f.result === 'move_out'; }).length), foot: 'Cần lên kế hoạch cho thuê lại' }) +
         TH.kpi({ label: 'Chưa trả lời', value: String(all.filter(function (f) { return f.result === 'no_answer'; }).length), foot: 'Có lịch gọi lại' }) + '</div>', { label: 'Tổng hợp tỷ lệ gia hạn / chuyển đi', lines: 2 });
       return TH.pageHeader({ screen: S, actions: TH.exportBtn('con.expx', 'Xuất danh sách (.xlsx)') }) + rate +
-        '<div class="card card-flush"><div class="toolbar"><span class="small strong">Đến hạn trong</span>' + TH.chips(S, 'days', [30, 45, 60, 90].map(function (d) { return { id: String(d), label: d + ' ngày' }; }), String(days)) +
+        '<div class="card card-flush"><div class="toolbar"><span class="small strong">Đến hạn trong</span>' + TH.chips(S, 'days', [30, 35, 45, 60, 90].map(function (d) { return { id: String(d), label: d + ' ngày' + (d === TH.expiryDays() ? ' (cấu hình)' : '') }; }), String(days)) +
         '<span class="grow"></span>' + TH.gate('F016.B', TH.uiSelect(S, 'grp', [{ id: 'none', label: 'Không nhóm' }, { id: 'manager', label: 'Nhóm theo QL tòa' }], grp, 'Nhóm danh sách') + TH.up('F016.B'), { mode: 'btn', label: 'Danh sách theo QL tòa/nhóm', size: 'btn-sm' }) + '</div>' + tableHtml + '</div>';
     },
     scan: function () { return [{ ui: { grp: 'none' } }, { ui: { grp: 'manager' } }]; },
@@ -227,7 +227,7 @@
     modal: { size: 'md' },
     scanParam: 'HĐ-CG202/25',
     render: function (r) {
-      var c = C.contract(r.param) || C.expiring(45, 'ALL')[0];
+      var c = C.contract(r.param) || C.expiring(TH.expiryDays(), 'ALL')[0];
       var form = 'fu-' + c.id, res = TH.store.draft(form, 'result', 'no_answer');
       var hist = TH.db.followUps.filter(function (f) { return f.contractId === c.id; });
       var steps = ['Hỏi khách', 'Ghi kết quả', 'Duyệt gia hạn/đổi giá', 'Cập nhật HĐ / thu hồi phòng'];

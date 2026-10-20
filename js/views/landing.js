@@ -72,7 +72,7 @@
 
         '<section class="l-section alt" id="bang-gia"><div class="l-wrap"><div class="l-hd"><div class="l-kicker">Bốn gói</div><h2>Cùng 39 màn, khác chiều sâu xử lý</h2><p>Gói A đã có đủ mọi phân hệ ở mức cơ bản. B, C, D cộng dồn các nâng cấp theo từng dòng chức năng — không khóa cả phân hệ.</p></div>' +
         '<div class="plans">' + plans + '</div>' +
-        '<p class="plans-note">Giá trước thuế, theo báo giá 4 gói. Chi phí OCR, Zalo OA, máy chủ và các mục ngoài gói tính riêng (Decision Log D-08). Đang xem gần nhất: ' + TH.PACKAGES[pkg].name + '.</p></div></section>' +
+        '<p class="plans-note">Giá tham khảo theo cấu hình demo — <b>chưa đối chiếu Excel báo giá gốc</b>, không phải giá chốt. Chi phí OCR, Zalo OA, máy chủ và các mục ngoài gói tính riêng (Decision Log D-08). Đang xem gần nhất: ' + TH.PACKAGES[pkg].name + '.</p></div></section>' +
 
         '<section class="l-cta"><div class="l-wrap"><div class="l-cta-box"><div><h2>Xem trực tiếp trên dữ liệu mẫu</h2><p>Mở báo cáo tổng quan ở gói D, rồi đổi sang A/B/C ngay trên topbar để thấy phần lõi và phần nâng cấp của từng màn.</p></div>' +
         '<a class="btn btn-primary btn-lg" href="?previewPackage=D#/demo/rpt-01" data-act="landing.open" data-pkg="D">Khám phá bản demo' + I('arrowRight', 'ic-sm') + '</a></div></div></section>' +

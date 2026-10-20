@@ -49,7 +49,7 @@ var TH = window.TH = window.TH || {};
     no: '40b', id: 'RPT-05', title: 'Báo cáo kinh doanh tháng', module: 'Báo cáo', kind: 'Report / mẫu khách', excelType: 'Bổ sung CR-RPT-01', cr: TH.CR_RPT.id,
     template: 'docs/bao_cao/BÁO CÁO KINH DOANH THÁNG 8.xlsx · sheet BÁO CÁO TỔNG / KINH DOANH / BC DT NHÀ …',
     notes: {
-      A: 'Đúng mẫu Báo cáo tổng/kinh doanh: cột Tổng + từng tòa, 2 chế độ (gồm/loại cọc mới & mua sắm), 13 tỷ lệ; xuất Excel 3 sheet',
+      A: 'Cột Tổng + từng tòa, 2 chế độ: Kinh doanh (P&L đề xuất — loại cọc mới/hoàn cọc/mua sắm, tiền thuê nhà theo HĐ) và Tổng (tái hiện mẫu); 13 tỷ lệ; xuất Excel 3 sheet',
       B: 'Biểu đồ xu hướng 6 kỳ DT / LNG / LNR',
       C: 'Gộp theo nhóm nhà, so sánh kỳ trước, cảnh báo tòa biên lợi nhuận thấp',
       D: 'Mẫu báo cáo quản trị có version; khóa kỳ & chốt phiên bản',

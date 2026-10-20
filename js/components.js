@@ -41,7 +41,7 @@ var TH = window.TH = window.TH || {};
     draft: ['Nháp', 'draft'], pending: ['Chờ xác nhận', 'warning'], confirmed: ['Đã xác nhận', 'success'], approved: ['Đã duyệt', 'success'], rejected: ['Từ chối', 'danger'], cancelled: ['Đã hủy', 'neutral'],
     missing: ['Thiếu số', 'danger'], paid: ['Đã thu đủ', 'success'], unpaid: ['Chưa thu', 'neutral'], partial: ['Thu một phần', 'info'], overdue: ['Quá hạn', 'danger'], partial_overdue: ['Quá hạn · thu một phần', 'danger'], reported: ['Đã báo thu · chờ xác nhận', 'warning'],
     sent: ['Đã gửi', 'success'], failed: ['Lỗi gửi', 'danger'], queued: ['Trong hàng đợi', 'info'], skipped: ['Bỏ qua', 'neutral'],
-    expiring: ['Sắp hết hạn', 'warning'], ended: ['Đã kết thúc', 'neutral'],
+    expiring: ['Sắp hết hạn', 'warning'], ended: ['Đã kết thúc', 'neutral'], terminated: ['Phá hợp đồng', 'danger'],
     extend: ['Gia hạn', 'success'], move_out: ['Chuyển đi', 'danger'], no_answer: ['Chưa trả lời', 'neutral'],
     locked: ['Đã khóa kỳ', 'neutral'], done: ['Hoàn tất', 'success'],
   };

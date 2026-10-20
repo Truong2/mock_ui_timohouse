@@ -9,18 +9,94 @@ var TH = window.TH = window.TH || {};
 TH.TODAY = '2026-10-20';
 TH.CURRENT_PERIOD = '2026-10';
 TH.PERIODS = ['2026-05', '2026-06', '2026-07', '2026-08', '2026-09', '2026-10'];
-TH.DATA_SCHEMA = 6;
+TH.DATA_SCHEMA = 8;
 
 /* Vai trò phụ trách tòa (CR-BLD-01, note.md §3.2 · cột NVVH/Lead/NVVS/NSKT trong docs/Thông tin nhà.xlsx).
    tier: gói bắt đầu được phân công vai trò này (A: một NV vận hành chính — F006.A; B: nhiều người theo vai trò — F006.B). */
 TH.BLD_ROLES = [
   { id: 'Nhân viên vận hành', short: 'NVVH', tier: 'A', hint: 'Phụ trách chính — quản lý tòa, báo thu' },
   { id: 'Trưởng nhóm', short: 'Lead', tier: 'B', hint: 'Trưởng nhóm phụ trách' },
+  { id: 'Trưởng phòng vận hành', short: 'TPVH', tier: 'B', hint: 'Phụ trách khu vực / nhóm tòa — hiển thị là “Trưởng khu vực” ở danh sách khách (K-01, chờ PM xác nhận tên gọi)' },
   { id: 'Nhân viên vệ sinh', short: 'NVVS', tier: 'B', hint: 'Vệ sinh khu chung' },
   { id: 'Nhân viên kỹ thuật', short: 'NSKT', tier: 'B', hint: 'Sửa chữa, bảo trì' },
 ];
 TH.ROLE_MAIN = 'Nhân viên vận hành';
-TH.BLD_CONDITIONS = ['Mới', 'Trung bình', 'Cũ'];
+/* G-06 (đề xuất 20/10/2026): danh mục tình trạng theo file Thông tin nhà (Khá mới, Cũ, Rất cũ…); nhập tay, không tự tính theo tuổi nhà */
+TH.BLD_CONDITIONS = ['Mới', 'Khá mới', 'Trung bình', 'Cũ', 'Rất cũ', 'Chưa đánh giá'];
+/* G-07: trạng thái hồ sơ PCCC / ĐKKD */
+TH.DOC_STATES = { none: ['Chưa cập nhật', 'neutral'], has: ['Có hồ sơ — chưa kiểm tra', 'warning'], verified: ['Đã xác minh', 'success'], na: ['Không áp dụng / cần làm rõ', 'info'] };
+/* D-03: phương thức tính nước theo biểu phí (mặc định công tơ m³; HĐ mẫu P302 tính theo người) */
+TH.WATER_METHODS = { meter_m3: 'Theo công tơ (đ/m³)', per_person: 'Theo người (đ/người/tháng)', per_room: 'Theo phòng (đ/phòng/tháng)' };
+
+/* ---------- CR-CUS-01 (note.md §8) + trả lời CR_CUS_ANSWERS 20/10/2026 (K-01…K-09): khách thuê ---------- */
+TH.CUS_EXPIRY_DAYS = 35; // mặc định demo (K-06) — giá trị áp dụng đọc từ db.settings.expiryAlertDays (cấu hình doanh nghiệp, PENDING_APPROVAL); không hardcode cho production
+TH.expiryDays = function () { var st = TH.db && TH.db.settings; return st && +st.expiryAlertDays > 0 ? +st.expiryAlertDays : TH.CUS_EXPIRY_DAYS; };
+/* Điều khoản áp dụng THEO TỪNG HĐ/mẫu ký thực tế (K-03, K-04, K-09) — không mặc định theo mẫu khác */
+TH.CONTRACT_TERMS = {
+  DAYDU: { id: 'DAYDU', name: 'Mẫu HĐ cho thuê phòng — bản đầy đủ', refundDays: 10, autoRenew: true, autoRenewMonths: 12, noticeDays: 30, earlyTermination: 'forfeit_all', source: 'Hop_dong_thue_phong_demo_day_du.pdf — Điều 3.4 (gia hạn mặc nhiên), 4.3 (hoàn cọc 10 ngày; mất cọc khi đơn phương chấm dứt), 6.2.11 (báo trước 30 ngày)' },
+  P302: { id: 'P302', name: 'Mẫu HĐ P302 — bản đồng bộ', refundDays: null, autoRenew: false, autoRenewMonths: null, noticeDays: null, earlyTermination: null, source: 'Hop_dong_khach_thue_P302_TH01_demo_dong_bo.pdf — Điều 2 (gia hạn phải xác nhận bằng văn bản), Điều 6 (hoàn cọc theo chứng từ, không ghi thời hạn)' },
+};
+TH.END_KINDS = { expired: 'Hết hạn, không gia hạn', handover: 'Trả phòng — bàn giao', tenant_request: 'Khách chủ động chấm dứt trước hạn', breach: 'Vi phạm hợp đồng / nội quy', mutual: 'Hai bên thỏa thuận chấm dứt', lessor: 'Đơn vị cho thuê chấm dứt' };
+TH.EARLY_END = ['tenant_request', 'breach', 'mutual', 'lessor'];
+TH.RENEWAL_MODES = { amendment: 'Phụ lục gia hạn — giữ mã HĐ', new_contract: 'Ký HĐ mới — mã mới, liên kết HĐ cũ', auto_if_applicable: 'Mặc nhiên theo điều khoản HĐ' };
+/* Danh mục dòng phí theo HĐ (K-05): 1–N dòng/HĐ, mỗi dòng có cách tính, đơn giá, hiệu lực, căn cứ. Xe máy 0 đ vẫn là dòng riêng; sạc theo kWh tách khỏi phí xe điện/tháng */
+TH.FEE_TYPES = [
+  { code: 'ELEC', name: 'Điện sinh hoạt', methods: ['by_meter'], meterUnit: 'kWh' },
+  { code: 'WATER', name: 'Nước', methods: ['by_meter', 'per_person', 'per_room'], meterUnit: 'm³' },
+  { code: 'NET', name: 'Internet', methods: ['per_room', 'per_person', 'na'] },
+  { code: 'ELEV', name: 'Thang máy', methods: ['per_person', 'per_room', 'na'], hint: 'Chỉ tách dòng thu riêng khi HĐ/biểu phí quy định; mặc định chỉ diễn giải trong Dịch vụ chung' },
+  { code: 'SVC', name: 'Dịch vụ chung', methods: ['per_person', 'per_room', 'na'] },
+  { code: 'PARK_MOTO', name: 'Gửi xe máy', methods: ['per_vehicle', 'na'], vehicleType: 'Xe máy' },
+  { code: 'PARK_EBIKE', name: 'Gửi xe đạp điện', methods: ['per_vehicle', 'na'], vehicleType: 'Xe đạp điện' },
+  { code: 'PARK_EV', name: 'Xe điện dịch vụ SM (theo xe)', methods: ['per_vehicle', 'na'], vehicleType: 'Xe điện (dịch vụ SM)' },
+  { code: 'EVCHG', name: 'Sạc xe điện theo kWh', methods: ['per_kwh', 'na'], meterUnit: 'kWh', hint: 'Cần công tơ phụ hoặc chỉ số được xác nhận; không suy đơn giá kWh từ phí xe điện theo tháng' },
+];
+TH.FEE_METHODS = { by_meter: 'Theo chỉ số công tơ', per_person: 'Theo người / tháng', per_room: 'Theo phòng / tháng', per_vehicle: 'Theo xe / tháng', per_kwh: 'Theo kWh sạc (công tơ phụ)', na: 'Không áp dụng' };
+TH.FIXED_METHODS = ['per_person', 'per_room', 'per_vehicle'];
+TH.feeType = function (code) { return TH.FEE_TYPES.find(function (t) { return t.code === code; }); };
+TH.feeUnit = function (code, method) {
+  if (method === 'by_meter') return 'đ/' + ((TH.feeType(code) || {}).meterUnit || 'số');
+  return { per_person: 'đ/người/tháng', per_room: 'đ/phòng/tháng', per_vehicle: 'đ/xe/tháng', per_kwh: 'đ/kWh sạc', na: '—' }[method] || '—';
+};
+/* K-08: chỉ xe ĐÃ XÁC NHẬN đăng ký (status active) mới được đồng bộ sang tính phí */
+TH.vehiclesOf = function (ct, type, status) {
+  var k = (TH.db && TH.db.customers || []).find(function (c) { return c.id === ct.customerId; });
+  return (k && k.vehicles || []).filter(function (v) { return (status ? v.status === status : true) && (!type || v.type === type); });
+};
+/* Số lượng áp dụng của một dòng phí: theo người = số người ở; theo phòng = 1; theo xe = xe đã xác nhận (qtySource 'vehicles') hoặc số ghi trong HĐ (qtySource 'manual'); theo chỉ số = null */
+TH.priceQty = function (ct, l) {
+  if (l.method === 'per_person') return ct.people || 1;
+  if (l.method === 'per_room') return 1;
+  if (l.method === 'per_vehicle') {
+    if (l.qtySource === 'manual') return l.qty === undefined || l.qty === null || l.qty === '' ? 0 : +l.qty;
+    var t = TH.feeType(l.code);
+    return TH.vehiclesOf(ct, t && t.vehicleType, 'active').length;
+  }
+  return null;
+};
+/* Đồng bộ bộ phí cố định dùng khi lập hóa đơn (F015) từ bảng giá theo HĐ — chỉ các dòng tính cố định; điện/nước theo chỉ số do buildInvoice tính.
+   Dòng 0 đ (xe máy miễn phí) vẫn giữ trên bản kê với thành tiền 0; dòng theo xe chưa có xe xác nhận (SL 0) không vào hóa đơn. */
+TH.syncFees = function (ct) {
+  var old = ct.fees || [];
+  ct.fees = (ct.priceList || []).filter(function (l) { return l.active && l.code !== 'ELEC' && l.code !== 'WATER' && TH.FIXED_METHODS.indexOf(l.method) > -1; }).map(function (l) {
+    var prev = old.find(function (f) { return f.code === l.code; });
+    return { code: l.code, name: prev ? prev.name : TH.feeType(l.code).name, price: +l.price || 0, qty: TH.priceQty(ct, l), unit: { per_person: 'người', per_room: 'tháng', per_vehicle: 'xe' }[l.method] };
+  }).filter(function (f) { return f.qty > 0; });
+  return ct.fees;
+};
+TH.VEHICLE_TYPES = ['Xe máy', 'Xe đạp điện', 'Xe điện (dịch vụ SM)', 'Ô tô'];
+TH.VEHICLE_STATES = { pending: ['Chờ xác nhận đăng ký', 'warning'], active: ['Đang sử dụng', 'success'], ended: ['Đã ngừng', 'neutral'] };
+/* K-08: lưu biển số thật để so khớp/chống trùng; chỉ MASK khi hiển thị ở danh sách, tooltip, xuất file hoặc vai trò không có quyền */
+TH.maskPlate = function (p) {
+  if (!p) return '';
+  var m = String(p).toUpperCase().match(/^([0-9A-Z]{3,4})-?([0-9.]+)$/);
+  if (!m) return String(p).slice(0, 2) + '•••';
+  var d = m[2].replace(/\D/g, '');
+  return m[1] + '-•••.' + d.slice(-2);
+};
+/* Hồ sơ cọc (K-03/K-04): Chờ bàn giao → Chờ đối chiếu → Chờ duyệt → Đã duyệt/chờ chi → Đã hoàn | Đã tất toán (hoàn 0 đ) | Mất cọc (toàn bộ/một phần) | Chuyển sang HĐ mới. Luồng và vai trò là ĐỀ XUẤT. */
+TH.DEPOSIT_STATES = { holding: ['Đang giữ cọc', 'neutral'], awaiting_handover: ['Chờ bàn giao phòng', 'info'], reconciling: ['Chờ đối chiếu', 'warning'], pending_approval: ['Chờ duyệt hoàn', 'warning'], approved: ['Đã duyệt — chờ chi', 'info'], refunded: ['Đã hoàn cọc', 'success'], settled: ['Đã tất toán cọc', 'success'], forfeited: ['Mất cọc', 'danger'], transferred: ['Cọc chuyển sang HĐ mới', 'info'] };
+TH.DEPOSIT_OPEN = ['reconciling', 'pending_approval', 'approved'];
 
 TH.EXPENSE_CATS = {
   owner_rent: 'Tiền thuê trả chủ nhà',
@@ -49,9 +125,9 @@ TH.seed = function () {
 
   /* ---------- Tòa ---------- */
   db.buildings = [
-    { id: 'TH-CG', name: 'TimeHouse Cầu Giấy', short: 'Cầu Giấy', area: 'Cầu Giấy', address: 'Số 18, ngõ 75 đường Minh Họa, Cầu Giấy, Hà Nội', ownerId: 'CN-001', managerId: 'NV-003', floors: 4, elecPrice: 3800, waterPrice: 30000, ownerRent: 18000000, openedAt: '2024-04-01', status: 'active', evnCode: 'PD05•••2909', waterCode: 'NS•••0417', netCode: 'FPT•••88', areaM2: 120, areaType: null, condition: 'Mới', elevator: true, gcn: { no: 'CS 05•••18', issuer: 'UBND quận Cầu Giấy', date: '2015-06-12' }, fire: { status: 'yes', file: 'PCCC_nghiem_thu_CG_2024.pdf', note: 'Biên bản nghiệm thu PCCC 03/2024' }, bizReg: { status: 'yes', file: 'DKKD_ho_kinh_doanh_CG.pdf', holder: null }, opFrom: '2024-04-01', opTo: null },
-    { id: 'TH-DD', name: 'TimeHouse Đống Đa', short: 'Đống Đa', area: 'Đống Đa', address: 'Số 46 phố Mẫu Thử, Đống Đa, Hà Nội', ownerId: 'CN-002', managerId: 'NV-004', floors: 3, elecPrice: 3800, waterPrice: 28000, ownerRent: 12500000, openedAt: '2024-08-01', status: 'active', evnCode: 'PD05•••8589', waterCode: 'NS•••1122', netCode: 'VNPT•••31', areaM2: 85, areaType: null, condition: 'Trung bình', elevator: false, gcn: { no: 'BĐ 11•••46', issuer: 'UBND quận Đống Đa', date: '2011-09-30' }, fire: { status: 'yes', file: 'PCCC_tham_duyet_DD.pdf', note: 'Giấy chứng nhận thẩm duyệt PCCC' }, bizReg: { status: 'no', file: null, holder: null }, opFrom: '2024-08-01', opTo: null },
-    { id: 'TH-TX', name: 'TimeHouse Thanh Xuân', short: 'Thanh Xuân', area: 'Thanh Xuân', address: 'Số 9 ngách 4 đường Ví Dụ, Thanh Xuân, Hà Nội', ownerId: 'CN-003', managerId: 'NV-005', floors: 3, elecPrice: 4000, waterPrice: 30000, ownerRent: 9000000, openedAt: '2025-02-01', status: 'active', evnCode: 'PD05•••5868', waterCode: 'NS•••0930', netCode: 'FPT•••14', areaM2: 70, areaType: null, condition: 'Cũ', elevator: false, gcn: { no: 'CT 02•••09', issuer: 'UBND quận Thanh Xuân', date: '2009-03-18' }, fire: { status: 'no', file: null, note: 'Đang làm hồ sơ — hạn bổ sung 30/11/2026' }, bizReg: { status: 'yes', file: 'DKKD_TX.pdf', holder: null }, opFrom: '2025-02-01', opTo: null },
+    { id: 'TH-CG', name: 'TimeHouse Cầu Giấy', short: 'Cầu Giấy', area: 'Cầu Giấy', address: 'Số 18, ngõ 75 đường Minh Họa, Cầu Giấy, Hà Nội', ownerId: 'CN-001', managerId: 'NV-003', floors: 4, elecPrice: 3800, waterPrice: 30000, waterMethod: 'meter_m3', elecBuyPrice: 2500, ownerRent: 18000000, openedAt: '2024-04-01', status: 'active', evnCode: 'PD05•••2909', waterCode: 'NS•••0417', netCode: 'FPT•••88', landArea: 120, buildArea: 110, floorArea: 440, condition: 'Mới', conditionAt: '2026-06-15', conditionBy: 'NV-003', conditionNote: 'Sơn sửa 2024, kết cấu tốt', elevator: true, gcn: { no: 'CS 05•••18', issuer: 'UBND quận Cầu Giấy', date: '2015-06-12' }, fire: { status: 'verified', docType: 'Biên bản nghiệm thu PCCC', docNo: 'NT-PCCC 12/2024', issuedAt: '2024-03-18', issuer: 'Phòng CS PCCC & CNCH (minh họa)', validTo: null, holder: 'Nguyễn Văn An (chủ nhà)', file: 'PCCC_nghiem_thu_CG_2024.pdf', note: 'Đã đối chiếu bản gốc 03/2024' }, bizReg: { status: 'verified', holder: 'Hộ kinh doanh Vũ Quang Huy (minh họa)', regNo: '01A8•••512', issuer: 'UBND quận Cầu Giấy', issuedAt: '2024-04-08', file: 'DKKD_ho_kinh_doanh_CG.pdf', note: 'Chủ thể đứng tên khác chủ nhà' }, opFrom: '2024-04-01', opTo: null },
+    { id: 'TH-DD', name: 'TimeHouse Đống Đa', short: 'Đống Đa', area: 'Đống Đa', address: 'Số 46 phố Mẫu Thử, Đống Đa, Hà Nội', ownerId: 'CN-002', managerId: 'NV-004', floors: 3, elecPrice: 3800, waterPrice: 28000, waterMethod: 'meter_m3', elecBuyPrice: 2500, ownerRent: 12500000, openedAt: '2024-08-01', status: 'active', evnCode: 'PD05•••8589', waterCode: 'NS•••1122', netCode: 'VNPT•••31', landArea: 85, buildArea: null, floorArea: 255, condition: 'Trung bình', conditionAt: '2025-07-01', conditionBy: 'NV-004', conditionNote: 'Đánh giá khi tiếp nhận chủ mới; máy bơm cần thay', elevator: false, gcn: { no: 'BĐ 11•••46', issuer: 'UBND quận Đống Đa', date: '2011-09-30' }, fire: { status: 'has', docType: 'Giấy chứng nhận thẩm duyệt thiết kế PCCC', docNo: '', issuedAt: '', issuer: '', validTo: null, holder: '', file: 'PCCC_tham_duyet_DD.pdf', note: 'Đã có bản scan, chưa đối chiếu bản gốc' }, bizReg: { status: 'na', holder: '', regNo: '', issuer: '', issuedAt: '', file: null, note: 'Cần làm rõ chủ thể đứng tên sau khi đổi chủ nhà' }, opFrom: '2024-08-01', opTo: null },
+    { id: 'TH-TX', name: 'TimeHouse Thanh Xuân', short: 'Thanh Xuân', area: 'Thanh Xuân', address: 'Số 9 ngách 4 đường Ví Dụ, Thanh Xuân, Hà Nội', ownerId: 'CN-003', managerId: 'NV-005', floors: 3, elecPrice: 4000, waterPrice: 30000, waterMethod: 'meter_m3', elecBuyPrice: 2500, ownerRent: 9000000, openedAt: '2025-02-01', status: 'active', evnCode: 'PD05•••5868', waterCode: 'NS•••0930', netCode: 'FPT•••14', landArea: null, buildArea: null, floorArea: 210, condition: 'Cũ', conditionAt: '2025-02-01', conditionBy: 'NV-001', conditionNote: 'Nhà xây 2009, thấm tầng 3', elevator: false, gcn: { no: 'CT 02•••09', issuer: 'UBND quận Thanh Xuân', date: '2009-03-18' }, fire: { status: 'none', docType: '', docNo: '', issuedAt: '', issuer: '', validTo: null, holder: '', file: null, note: 'Đang làm hồ sơ — hạn bổ sung 30/11/2026' }, bizReg: { status: 'has', holder: 'Công ty TNHH Minh Phát (minh họa)', regNo: '0109•••037', issuer: 'Sở KH&ĐT Hà Nội', issuedAt: '2024-11-02', file: 'DKKD_TX.pdf', note: 'Chưa kiểm tra ngành nghề cho thuê lưu trú' }, opFrom: '2025-02-01', opTo: null },
   ];
   db.ownerLinks = [
     { buildingId: 'TH-CG', ownerId: 'CN-001', role: 'Chủ sở hữu', from: '2024-04-01', to: null },
@@ -160,10 +236,21 @@ TH.seed = function () {
   var ends = { 'CG-202': '2026-11-05', 'DD-102': '2026-11-15', 'TX-101': '2026-11-30', 'CG-301': '2026-12-20' };
   db.contracts = occupied.map(function (room, i) {
     var start = ['2025-05-01', '2025-06-01', '2025-07-01', '2025-11-06', '2025-12-21', '2026-01-01', '2025-09-01', '2025-11-16', '2026-02-01', '2026-03-01', '2025-10-01', '2025-12-01', '2026-04-01', '2026-05-01', '2026-06-01'][i];
-    var end = ends[room.id] || addMonths(start, 12, -1);
-    if (end < TH.TODAY) end = addMonths(start, 24, -1); // đã gia hạn thêm 12 tháng
+    var end = ends[room.id] || addMonths(start, 12, -1), renewed = false;
+    if (end < TH.TODAY) { end = addMonths(start, 24, -1); renewed = true; } // đã gia hạn thêm 12 tháng
     var people = 1 + (i % 2);
+    var bb = db.buildings.find(function (x) { return x.id === room.buildingId; });
+    var pl = seedPriceList(bb, start, people);
+    if (room.id === 'CG-301') Object.assign(pl.find(function (l) { return l.code === 'EVCHG'; }), { price: 3500, method: 'per_kwh', active: true, note: 'Công tơ phụ ổ sạc — chưa có chỉ số xác nhận nên chưa vào hóa đơn (K-05 PENDING_APPROVAL)' });
+    /* K-03/K-04/K-09: điều khoản theo mẫu đã ký của từng HĐ (chẵn: mẫu đầy đủ; lẻ: mẫu P302) — không áp mẫu khác */
+    var terms = termsOf(i % 2 ? 'P302' : 'DAYDU', start);
     return {
+      terms: terms,
+      renewals: renewed ? [terms.autoRenew
+        ? { n: 1, mode: 'auto_if_applicable', from: addMonths(start, 12), to: end, at: addMonths(start, 11), by: managerOf(db, room.buildingId), evidence: 'Đã kiểm tra: không có thông báo chấm dứt trước ' + terms.noticeDays + ' ngày (Điều 3.4 HĐ ký ' + start + ')', file: null }
+        : { n: 1, mode: 'amendment', from: addMonths(start, 12), to: end, at: addMonths(start, 11), by: managerOf(db, room.buildingId), evidence: 'Phụ lục gia hạn hai bên ký ' + addMonths(start, 11), file: 'phu_luc_gia_han_' + room.id + '_' + addMonths(start, 11).slice(0, 4) + '.pdf' }] : [],
+      previousContractId: room.id === 'CG-201' ? 'HĐ-CG201/24' : null, endKind: null,
+      priceList: pl, note: '',
       id: 'HĐ-' + room.id.replace('-', '') + '/' + start.slice(2, 4),
       roomId: room.id, buildingId: room.buildingId, customerId: db.customers[i].id,
       rent: room.rent, deposit: room.rent, start: start, end: end, signedAt: addDays(start, -3),
@@ -330,6 +417,17 @@ TH.seed = function () {
     { id: 'TS-TX-04', buildingId: 'TH-TX', group: 'invest', name: 'Kệ giày, tủ đồ chung', qty: 2, unit: 'cái', location: 'Sảnh tầng 1', condition: 'Tốt', note: '', since: '2025-02-03', value: 2400000 },
   ];
 
+  /* G-09 (đề xuất): trường tài sản đầy đủ — bên sở hữu/chịu chi, nguồn chứng từ, người cập nhật; tài sản đầu tư thêm có ngày mua, nguyên giá, thời hạn sử dụng */
+  db.assets.forEach(function (a) {
+    a.payer = a.group === 'owner' ? 'Chủ nhà' : 'Công ty vận hành';
+    a.source = a.expenseId ? 'Chi phí ' + a.expenseId : a.group === 'owner' ? 'Biên bản kiểm kê kèm HĐ thuê tòa' : 'Phiếu chi mua sắm (lưu ngoài hệ thống)';
+    a.updatedBy = a.group === 'owner' ? 'NV-001' : 'NV-002';
+    if (a.group === 'invest') { a.purchaseDate = a.since; a.lifeMonths = /Camera|Khóa|Wifi/.test(a.name) ? 36 : /Máy giặt|Điều hòa|Tủ lạnh/.test(a.name) ? 60 : null; }
+  });
+  /* G-10: trạng thái duyệt chi từng kỳ trả chủ nhà + cấu hình nhắc lịch nội bộ (đề xuất) */
+  db.landlordPays.forEach(function (x) { x.approval = x.paid > 0 ? 'approved' : x.dueAt <= TH.TODAY ? 'pending' : 'none'; });
+  db.landlordReminder = { before7: true, before3: true, due: true, overdue: true, channel: 'Thông báo nội bộ (chuông + email)', status: 'PROPOSED' };
+
   /* ---------- Chi phí chung toàn công ty (kế toán nhập theo kỳ), phân bổ về tòa theo số phòng ----------
      Dataset demo là 3 tòa đại diện trong danh mục ~360 phòng; cách chia giống sổ “BÁO CÁO KINH DOANH THÁNG 8” của khách. */
   db.costPools = {};
@@ -363,6 +461,7 @@ TH.seed = function () {
     { id: 'NV-010', name: 'Phan Thị Hương', title: 'Nhân viên vệ sinh', team: 'T2', role: 'staff', phone: '0912 ••• 913', status: 'active', joinedAt: '2025-02-01', base: 6000000, allowance: 500000 },
     { id: 'NV-011', name: 'Mạc Văn Tuấn', title: 'Nhân viên kỹ thuật', team: 'T1', role: 'staff', phone: '0913 ••• 924', status: 'active', joinedAt: '2024-05-15', base: 7500000, allowance: 800000 },
     { id: 'NV-012', name: 'Lương Đức Mạnh', title: 'Nhân viên kỹ thuật', team: 'T2', role: 'staff', phone: '0914 ••• 935', status: 'active', joinedAt: '2026-03-01', base: 7000000, allowance: 600000 },
+    { id: 'NV-013', name: 'Trần Quốc Thắng', title: 'Trưởng phòng vận hành', team: 'BO', role: 'staff', phone: '0915 ••• 946', status: 'active', joinedAt: '2024-03-01', base: 12000000, allowance: 2000000 },
   ];
   db.assignments = [
     { id: 'PC-01', staffId: 'NV-003', buildingId: 'TH-CG', role: 'Nhân viên vận hành', main: true, from: '2024-04-01', to: null },
@@ -380,7 +479,15 @@ TH.seed = function () {
     { id: 'PC-13', staffId: 'NV-011', buildingId: 'TH-DD', role: 'Nhân viên kỹ thuật', from: '2024-08-01', to: null },
     { id: 'PC-14', staffId: 'NV-011', buildingId: 'TH-TX', role: 'Nhân viên kỹ thuật', from: '2025-02-01', to: null },
     { id: 'PC-15', staffId: 'NV-012', buildingId: 'TH-TX', role: 'Nhân viên kỹ thuật', from: '2026-03-01', to: null },
+    /* K-01: TPVH phụ trách khu vực (Cầu Giấy + Đống Đa); Thanh Xuân chưa phân công TPVH → danh sách khách hiện “Chưa phân công”, không lấy Trưởng nhóm thay thế */
+    { id: 'PC-16', staffId: 'NV-013', buildingId: 'TH-CG', role: 'Trưởng phòng vận hành', from: '2024-04-01', to: null, area: 'Khu vực 1' },
+    { id: 'PC-17', staffId: 'NV-013', buildingId: 'TH-DD', role: 'Trưởng phòng vận hành', from: '2024-08-01', to: null, area: 'Khu vực 1' },
   ];
+  /* G-08 (đề xuất): mỗi phân công có Chính/Phụ + trạng thái; người đầu tiên của vai trò tại tòa là phụ trách chính */
+  db.assignments.forEach(function (a) {
+    if (a.main === undefined) a.main = !db.assignments.some(function (x) { return x !== a && x.buildingId === a.buildingId && x.role === a.role && !x.to && x.main && x.id < a.id; }) && !a.note && !a.to && a.role !== 'Nhân viên vận hành';
+  });
+
   db.titleHistory = [
     { staffId: 'NV-003', at: '2025-01-01', before: 'Quản lý tòa', after: 'Trưởng nhóm / QL tòa' },
     { staffId: 'NV-005', at: '2026-07-01', before: 'Quản lý tòa', after: 'Trưởng nhóm / QL tòa' },
@@ -464,6 +571,79 @@ TH.seed = function () {
     { id: 'IMP-0006', kind: 'building', file: 'toa_nha_2025.xlsx', at: '2025-01-28 16:40', by: 'NV-001', rows: 1, ok: 1, errors: 0, status: 'done' },
     { id: 'IMP-0005', kind: 'owner', file: 'chu_nha_dot2.xlsx', at: '2025-01-10 09:05', by: 'NV-001', rows: 3, ok: 2, errors: 1, status: 'done' },
   ];
+  /* ---------- CR-CUS-01 (note.md §8 + CR_CUS_ANSWERS): nghề nghiệp, phương tiện, HĐ đã kết thúc, hồ sơ cọc ----------
+     HĐ đã kết thúc được thêm SAU bước sinh hóa đơn/phiếu thu/tài liệu → không đổi doanh thu, hiệu suất, P&L đã kiểm. */
+  var JOBS = ['Nhân viên văn phòng', 'Sinh viên', 'Kỹ sư phần mềm', 'Giáo viên', 'Nhân viên kinh doanh', 'Điều dưỡng', 'Kế toán', 'Thiết kế đồ họa'];
+  var PLATES = ['29B1', '30F5', '29X3', '88H1', '29E2', '30K2', '29D1'];
+  var fullPlate = function (i, j) { return PLATES[(i + j) % PLATES.length] + '-' + String(100 + (i * 37 + j * 11) % 900) + '.' + String(10 + (i * 7 + j * 3) % 90); };
+  /* K-08: xe lưu biển số THẬT (giả lập), có trạng thái đăng ký, ngày hiệu lực; xe đạp điện không biển → plate null */
+  function seedCustomerExtra(k, i, people, ct) {
+    k.occupation = JOBS[i % JOBS.length];
+    k.permAddress = 'Phường/xã minh họa, ' + k.hometown;
+    k.note = k.note || '';
+    k.vehicles = [];
+    var from = ct ? ct.start : k.createdAt, to = ct && ct.status !== 'active' ? ct.endedAt : null, st = to ? 'ended' : 'active';
+    for (var j = 0; j < people; j++) k.vehicles.push({ id: 'XE-' + k.id.slice(3) + '-' + (j + 1), type: 'Xe đạp điện', plate: null, brand: ['VinFast Evo', 'Yadea', 'Pega', 'Dibao'][(i + j) % 4], color: ['Đen', 'Trắng', 'Xanh', 'Đỏ'][(i + j) % 4], status: st, from: from, to: to, feeCode: 'PARK_EBIKE', note: 'Không có biển số' });
+    if (i % 4 === 0) k.vehicles.push({ id: 'XE-' + k.id.slice(3) + '-' + (people + 1), type: 'Xe máy', plate: fullPlate(i, 0), brand: ['Honda Vision', 'Yamaha Janus', 'Honda Wave', 'SYM Attila'][i % 4], color: ['Đen', 'Xám', 'Đỏ', 'Trắng'][(i + 1) % 4], status: st, from: from, to: to, feeCode: 'PARK_MOTO', note: 'Gửi miễn phí theo HĐ' });
+  }
+  db.customers.forEach(function (k, i) {
+    var ct = db.contracts.find(function (c) { return c.customerId === k.id; });
+    seedCustomerExtra(k, i, ct ? ct.people : 1, ct);
+  });
+  /* KH-005: 2 xe đạp điện đã xác nhận nhưng HĐ ghi 1 xe → cảnh báo so khớp (F012.C). KH-001: xe điện SM mới khai, CHƯA xác nhận → chưa tính phí (K-08) */
+  db.customers[4].vehicles.push({ id: 'XE-005-9', type: 'Xe đạp điện', plate: null, brand: 'Yadea', color: 'Xanh', status: 'active', from: '2026-09-01', to: null, feeCode: 'PARK_EBIKE', note: 'Khách khai thêm 09/2026 — HĐ chưa cập nhật số xe' });
+  db.customers[0].vehicles.push({ id: 'XE-001-9', type: 'Xe điện (dịch vụ SM)', plate: '29E2-456.78', brand: 'VinFast Feliz S', color: 'Trắng', status: 'pending', from: '2026-10-18', to: null, feeCode: 'PARK_EV', note: 'Khai báo 18/10 — chờ xác nhận đăng ký, chưa tính phí' });
+
+  var ENDED = [
+    { k: ['KH-016', 'Trần Hải Đăng', '1994-03-08', true], room: 'CG-401', start: '2024-09-01', end: '2026-08-31', status: 'ended', endedAt: '2026-08-31', people: 2, renew: true, template: 'DAYDU', endKind: 'expired', reason: 'Hết hạn, khách trả phòng đúng hạn 31/08' },
+    { k: ['KH-017', 'Lương Thị Mỹ Duyên', '1999-11-11', false], room: 'TX-202', start: '2025-08-01', end: '2026-07-31', status: 'terminated', endedAt: '2026-07-15', people: 1, template: 'DAYDU', endKind: 'tenant_request', reason: 'Khách đơn phương chấm dứt trước hạn 15/07; mức giữ cọc theo Điều 4.3 HĐ ký 29/07/2025, Admin duyệt 16/07' },
+    { k: ['KH-018', 'Đinh Công Sơn', '1991-05-30', true], room: 'DD-302', start: '2025-09-28', end: '2026-09-27', status: 'ended', endedAt: '2026-09-27', people: 1, template: 'DAYDU', endKind: 'expired', reason: 'Hết hạn, không gia hạn; bàn giao 28/09' },
+    /* K-09 (ký HĐ mới nối tiếp): HĐ cũ của KH-003 tại CG-201, HĐ mới HĐ-CG201/25 có mã mới và liên kết previousContractId; cọc chuyển qua phiếu chuyển cọc được duyệt */
+    { k: null, customerId: 'KH-003', room: 'CG-201', start: '2024-07-01', end: '2025-06-30', status: 'ended', endedAt: '2025-06-30', people: 1, template: 'DAYDU', endKind: 'expired', reason: 'Hết hạn — hai bên ký HĐ mới HĐ-CG201/25 từ 01/07/2025 (giá thuê mới)', nextId: 'HĐ-CG201/25' },
+  ];
+  var endedIds = {};
+  ENDED.forEach(function (e, n) {
+    var room = db.rooms.find(function (r) { return r.id === e.room; }), b = db.buildings.find(function (x) { return x.id === room.buildingId; });
+    var i = db.customers.length, k;
+    if (e.k) {
+      k = { id: e.k[0], name: e.k[1], dob: e.k[2], phone: '09' + (10 + i) + ' ••• ' + (100 + i * 37) % 1000, idNo: '0010' + (93 + i) + '•••••' + (512 + i * 41) % 1000, idType: 'CCCD', hometown: ['Nam Định', 'Hưng Yên', 'Phú Thọ'][n], oaLinked: e.k[3], oaConsentAt: e.k[3] ? '2025-10-0' + (n + 1) : null, status: 'inactive', createdAt: addDays(e.start, -3) };
+      db.customers.push(k);
+    } else k = db.customers.find(function (x) { return x.id === e.customerId; });
+    var id = 'HĐ-' + room.id.replace('-', '') + '/' + e.start.slice(2, 4);
+    endedIds[e.room + (e.k ? '' : '#old')] = id;
+    var terms = termsOf(e.template, e.start);
+    var ct = { id: id, roomId: room.id, buildingId: room.buildingId, customerId: k.id, rent: e.k ? room.rent : room.rent - 400000, deposit: e.k ? room.rent : room.rent - 400000, start: e.start, end: e.end, signedAt: addDays(e.start, -3), people: e.people, billingDay: 1, status: e.status, endedAt: e.endedAt, endKind: e.endKind, endReason: e.reason, nextContractId: e.nextId || null, previousContractId: null, scanFile: 'scan_' + room.id + '_' + e.start.slice(0, 4) + '.pdf',
+      terms: terms,
+      renewals: e.renew ? [{ n: 1, mode: 'auto_if_applicable', from: addMonths(e.start, 12), to: e.end, at: addMonths(e.start, 11), by: managerOf(db, room.buildingId), evidence: 'Đã kiểm tra: không có thông báo chấm dứt trước 30 ngày (Điều 3.4)', file: null }] : [],
+      priceList: seedPriceList(b, e.start, e.people), note: '',
+      fees: [{ code: 'SVC', name: 'Phí dịch vụ', price: 150000, qty: 1, unit: 'tháng' }, { code: 'NET', name: 'Internet', price: 100000, qty: 1, unit: 'tháng' }, { code: 'PARK', name: 'Gửi xe điện', price: 120000, qty: e.people, unit: 'xe' }],
+      versions: [{ v: 1, at: e.start, note: 'Bản ký gốc' }] };
+    db.contracts.push(ct);
+    if (e.k) seedCustomerExtra(k, i, e.people, ct);
+    db.documents.push({ id: 'TL-' + String(200 + n * 3).padStart(3, '0'), customerId: k.id, contractId: id, roomId: room.id, kind: 'Hợp đồng scan', file: ct.scanFile, version: 1, uploadedAt: ct.signedAt, views: 3 });
+    if (e.k) db.documents.push({ id: 'TL-' + String(201 + n * 3).padStart(3, '0'), customerId: k.id, contractId: id, roomId: room.id, kind: 'CCCD (đã mask)', file: 'cccd_' + k.id + '_mask.jpg', version: 1, uploadedAt: ct.signedAt, views: 1 });
+    if (e.status === 'ended') db.documents.push({ id: 'TL-' + String(202 + n * 3).padStart(3, '0'), customerId: k.id, contractId: id, roomId: room.id, kind: 'Biên bản bàn giao', file: 'bien_ban_ban_giao_' + room.id + '_' + e.endedAt.slice(0, 4) + '.pdf', version: 1, uploadedAt: addDays(e.endedAt, 1), views: 2 });
+  });
+  /* K-08 (không báo trùng tuyệt đối theo lịch sử): xe máy của KH-018 (đã ngừng 27/09) được KH-010 đăng ký lại từ 01/10 — hai khoảng đăng ký không chồng lấn */
+  db.customers.find(function (x) { return x.id === 'KH-018'; }).vehicles.push({ id: 'XE-018-9', type: 'Xe máy', plate: '30K2-321.09', brand: 'Honda Wave', color: 'Đỏ', status: 'ended', from: '2025-09-28', to: '2026-09-27', feeCode: 'PARK_MOTO', note: 'Bán lại cho khách DD-202' });
+  db.customers.find(function (x) { return x.id === 'KH-010'; }).vehicles.push({ id: 'XE-010-9', type: 'Xe máy', plate: '30K2-321.09', brand: 'Honda Wave', color: 'Đỏ', status: 'active', from: '2026-10-01', to: null, feeCode: 'PARK_MOTO', note: 'Mua lại xe của khách DD-302 cũ' });
+  db.deposits.forEach(function (d) {
+    if (d.id === 'COC-2609-01') { d.contractId = endedIds['CG-401']; d.customerId = 'KH-016'; }
+    if (d.id === 'COC-2607-01') { d.contractId = endedIds['TX-202']; d.customerId = 'KH-017'; }
+  });
+  var dd102 = db.contracts.find(function (c) { return c.roomId === 'DD-102' && c.status === 'active'; });
+  /* Hồ sơ cọc (K-03): người lập ≠ người duyệt; chỉ bước xác nhận THỰC CHI (có ngày/mã giao dịch) mới sinh dòng refund/forfeit trong db.deposits (P&L và dòng tiền chỉ đọc db.deposits đã xác nhận).
+     Hạn hoàn chỉ tính khi HĐ có điều khoản (refundDays); HĐ mẫu P302 không ghi SLA → dueAt null, không tự báo quá hạn. */
+  db.depositCases = [
+    { id: 'HC-2609-01', contractId: endedIds['CG-401'], customerId: 'KH-016', amount: 6500000, state: 'refunded', handoverAt: '2026-08-31', dueAt: '2026-09-10', deductions: [{ name: 'Hư hỏng rèm, vệ sinh lại tường', amount: 300000, source: 'Biên bản bàn giao 31/08/2026 · Điều 6.2.5' }], forfeitAmount: 0, forfeitBasis: '', refundAmount: 6200000, proposedBy: 'NV-003', proposedAt: '2026-09-01', approvedBy: 'NV-001', approvedAt: '2026-09-02', paidBy: 'NV-002', paidAt: '2026-09-03', txnRef: 'CK-20260903-0417', depositId: 'COC-2609-01', note: 'Thanh lý đúng hạn, hoàn trong 3 ngày' },
+    { id: 'HC-2607-01', contractId: endedIds['TX-202'], customerId: 'KH-017', amount: 4000000, state: 'forfeited', handoverAt: '2026-07-15', dueAt: null, deductions: [], forfeitAmount: 4000000, forfeitBasis: 'Điều 4.3 & 7.1 HĐ ký 29/07/2025 (mẫu đầy đủ) — khách đơn phương chấm dứt', refundAmount: 0, proposedBy: 'NV-005', proposedAt: '2026-07-15', approvedBy: 'NV-001', approvedAt: '2026-07-16', paidBy: null, paidAt: null, txnRef: null, forfeitId: 'COC-2607-01', note: 'Giữ toàn bộ cọc theo quyết định đã duyệt; ghi nhận doanh thu bỏ cọc kỳ 07' },
+    { id: 'HC-2610-01', contractId: endedIds['DD-302'], customerId: 'KH-018', amount: 4800000, state: 'reconciling', handoverAt: '2026-09-28', dueAt: '2026-10-08', deductions: [{ name: 'Điện nước 01–27/09 (chưa lập hóa đơn)', amount: 310000, source: 'Chỉ số bàn giao 28/09' }, { name: 'Thấm trần — chờ xác định lỗi bên nào', amount: 0, source: 'Biên bản 28/09 · chưa chốt', pending: true }], forfeitAmount: 0, forfeitBasis: '', refundAmount: null, proposedBy: 'NV-004', proposedAt: null, approvedBy: null, approvedAt: null, paidBy: null, paidAt: null, txnRef: null, note: 'Phòng chuyển “Đang sửa” sau bàn giao; chưa chốt khấu trừ — hạn 10 ngày theo Điều 4.3 HĐ ký 25/09/2025' },
+    { id: 'HC-2611-01', contractId: dd102.id, customerId: dd102.customerId, amount: dd102.deposit, state: 'awaiting_handover', handoverAt: '2026-11-15', dueAt: null, deductions: [], forfeitAmount: 0, forfeitBasis: '', refundAmount: null, proposedBy: 'NV-004', proposedAt: '2026-10-12', approvedBy: null, approvedAt: null, paidBy: null, paidAt: null, txnRef: null, note: 'Khách báo chuyển đi 15/11 (khảo sát gia hạn 12/10). HĐ mẫu P302 không ghi thời hạn hoàn cọc → chưa xác định hạn', planned: true },
+    { id: 'HC-2507-01', contractId: endedIds['CG-201#old'], customerId: 'KH-003', amount: 4800000, state: 'transferred', handoverAt: null, dueAt: null, deductions: [], forfeitAmount: 0, forfeitBasis: '', refundAmount: 0, proposedBy: 'NV-003', proposedAt: '2025-06-28', approvedBy: 'NV-002', approvedAt: '2025-06-30', paidBy: null, paidAt: null, txnRef: 'PCC-2507-01', transferToContractId: 'HĐ-CG201/25', note: 'Chuyển cọc sang HĐ mới qua phiếu chuyển cọc PCC-2507-01 (bù thêm 400.000 theo giá mới) — không nhân đôi cọc' },
+  ];
+  /* K-06: ngưỡng cảnh báo hết hạn là cấu hình doanh nghiệp (mặc định 35), khác với mốc khách phải báo trước theo HĐ */
+  db.settings = { expiryAlertDays: 35, expiryAlertNote: 'Mặc định doanh nghiệp (đề xuất K-06) — override theo nhóm tòa cần phân quyền; chưa duyệt thành chính sách' };
+
   db.ocrJobs = [];
   db.ocrTemplates = [
     { id: 'OCR-HĐ-01', kind: 'contract', name: 'Hợp đồng cho thuê phòng — bản đồng bộ (HĐKH-…)', status: 'approved', fields: 13, accuracy: 0.94 },
@@ -538,10 +718,14 @@ function buildInvoice(db, ct, period, status) {
   var lines = [{ type: 'rent', name: 'Tiền phòng tháng ' + period.slice(5) + '/' + period.slice(0, 4), qty: 1, unit: 'tháng', price: ct.rent }];
   ct.fees.forEach(function (f) { lines.push({ type: 'fixed', code: f.code, name: f.name, qty: f.qty, unit: f.unit, price: f.price }); });
   var readingOk = rd && rd.elecCur !== null && rd.waterCur !== null && rd.waterCur >= rd.waterPrev && rd.elecCur >= rd.elecPrev;
+  /* CR-CUS-01: đơn giá điện/nước lấy theo bảng giá của HĐ nếu có (dữ liệu mẫu = giá tòa nên số cũ không đổi); nước theo người/phòng không cần chỉ số */
+  var pl = function (code) { return (ct.priceList || []).find(function (l) { return l.code === code && l.active; }); };
+  var pe = pl('ELEC'), pw = pl('WATER'), waterFixed = pw && pw.method !== 'by_meter';
   if (readingOk) {
-    lines.push({ type: 'elec', name: 'Điện (' + rd.elecPrev + ' → ' + rd.elecCur + ')', qty: rd.elecCur - rd.elecPrev, unit: 'kWh', price: b.elecPrice });
-    lines.push({ type: 'water', name: 'Nước (' + rd.waterPrev + ' → ' + rd.waterCur + ')', qty: rd.waterCur - rd.waterPrev, unit: 'm³', price: b.waterPrice });
+    lines.push({ type: 'elec', name: 'Điện (' + rd.elecPrev + ' → ' + rd.elecCur + ')', qty: rd.elecCur - rd.elecPrev, unit: 'kWh', price: pe ? pe.price : b.elecPrice });
+    if (!waterFixed) lines.push({ type: 'water', name: 'Nước (' + rd.waterPrev + ' → ' + rd.waterCur + ')', qty: rd.waterCur - rd.waterPrev, unit: 'm³', price: pw ? pw.price : b.waterPrice });
   }
+  if (waterFixed) lines.push({ type: 'water', name: pw.method === 'per_person' ? 'Nước (theo người)' : 'Nước (theo phòng)', qty: pw.method === 'per_person' ? ct.people || 1 : 1, unit: pw.method === 'per_person' ? 'người' : 'phòng', price: pw.price });
   (db.extraFees || []).filter(function (e) { return e.roomId === ct.roomId && e.period === period; }).forEach(function (e) {
     lines.push({ type: 'extra', name: e.name, qty: e.qty, unit: 'lần', price: e.price, refId: e.id, draft: e.status !== 'confirmed' });
   });
@@ -556,6 +740,25 @@ function buildInvoice(db, ct, period, status) {
   };
 }
 TH.buildInvoice = buildInvoice;
+/* Bảng giá dịch vụ theo HĐ (CR-CUS-01, K-05) — dữ liệu mẫu khớp bộ phí cũ (DV chung 150k/phòng, Internet 100k, gửi xe đạp điện 120k/xe) để hóa đơn/báo cáo đã kiểm không đổi */
+function seedPriceList(b, start, people) {
+  var from = start.slice(0, 7), basis = 'HĐ ký ' + addDays(start, -3);
+  return [
+    { code: 'ELEC', price: b.elecPrice, method: 'by_meter', active: true, from: from, basis: basis, note: '' },
+    { code: 'WATER', price: b.waterPrice, method: 'by_meter', active: true, from: from, basis: basis, note: '' },
+    { code: 'NET', price: 100000, method: 'per_room', active: true, from: from, basis: basis, note: '' },
+    { code: 'ELEV', price: 0, method: 'na', active: false, from: from, basis: basis, note: b.elevator ? 'Diễn giải trong Dịch vụ chung — không lập dòng thu riêng' : 'Tòa không có thang máy' },
+    { code: 'SVC', price: 150000, method: 'per_room', active: true, from: from, basis: basis, note: 'Máy giặt, điện chung, thu rác, vệ sinh chung' + (b.elevator ? ', thang máy' : '') },
+    { code: 'PARK_MOTO', price: 0, method: 'per_vehicle', qtySource: 'vehicles', active: true, from: from, basis: basis, note: 'Miễn phí — giữ dòng để lưu quyền sử dụng và số xe đã đăng ký' },
+    { code: 'PARK_EBIKE', price: 120000, method: 'per_vehicle', qtySource: 'manual', qty: people, active: true, from: from, basis: basis, note: 'Số xe ghi trong HĐ ký' },
+    { code: 'PARK_EV', price: 0, method: 'na', active: false, from: from, basis: basis, note: 'Chưa đăng ký' },
+    { code: 'EVCHG', price: 0, method: 'na', active: false, from: from, basis: basis, note: 'Chưa có công tơ phụ' },
+  ];
+}
+function termsOf(templateId, start) {
+  var t = TH.CONTRACT_TERMS[templateId];
+  return { template: t.id, templateName: t.name, refundDays: t.refundDays, autoRenew: t.autoRenew, autoRenewMonths: t.autoRenewMonths, noticeDays: t.noticeDays, earlyTermination: t.earlyTermination, source: t.source, signedAt: addDays(start, -3) };
+}
 
 /* =========================================================
    CALC — mọi tổng hợp đều từ bản ghi gốc
@@ -584,6 +787,77 @@ TH.calc = (function () {
     paid: function (invId) { return sum(api.receiptsOf(invId).filter(function (r) { return r.status === 'confirmed'; }), function (r) { return r.amount; }); },
     pending: function (invId) { return sum(api.receiptsOf(invId).filter(function (r) { return r.status === 'pending'; }), function (r) { return r.amount; }); },
     debt: function (inv) { return inv.status === 'confirmed' ? Math.max(0, inv.total - api.paid(inv.id)) : 0; },
+    /* ---- CR-CUS-01: khách thuê (theo CR_CUS_ANSWERS 20/10/2026) ---- */
+    customerContracts: function (cid) { return db().contracts.filter(function (c) { return c.customerId === cid; }).sort(function (a, b) { return a.start < b.start ? 1 : -1; }); },
+    contractOfCustomer: function (k) {
+      var all = api.customerContracts(typeof k === 'string' ? k : k.id);
+      return all.find(function (c) { return c.status === 'active'; }) || all.filter(function (c) { return c.status !== 'draft'; })[0] || null;
+    },
+    contractInvoices: function (ctId) { return db().invoices.filter(function (i) { return i.contractId === ctId; }).sort(function (a, b) { return a.period < b.period ? 1 : -1; }); },
+    customerInvoices: function (cid) { return db().invoices.filter(function (i) { return i.customerId === cid; }).sort(function (a, b) { return a.period < b.period ? 1 : -1; }); },
+    /* Công nợ chỉ từ hóa đơn + phiếu thu đã xác nhận (K-02) */
+    debtOf: function (invs) {
+      var r = { due: 0, paid: 0, debt: 0, overdue: 0, overdueCount: 0, pending: 0, count: invs.length };
+      invs.forEach(function (i) {
+        if (i.status !== 'confirmed') return;
+        var d = api.debt(i);
+        r.due += i.total; r.paid += api.paid(i.id); r.debt += d;
+        r.pending += sum(api.receiptsOf(i.id).filter(function (x) { return x.status === 'pending'; }), function (x) { return x.amount; });
+        if (d > 0 && i.dueAt < TH.TODAY) { r.overdue += d; r.overdueCount++; }
+      });
+      return r;
+    },
+    contractDebt: function (ctId) { return api.debtOf(api.contractInvoices(ctId)); },
+    customerDebt: function (cid) { return api.debtOf(api.customerInvoices(cid)); },
+    depositCase: function (contractId) { return (db().depositCases || []).find(function (x) { return x.contractId === contractId; }) || null; },
+    depositOverdue: function (hc) { return !!(hc && hc.dueAt && hc.dueAt < TH.TODAY && TH.DEPOSIT_OPEN.indexOf(hc.state) > -1); },
+    isEarlyEnd: function (c) { return c.status === 'terminated' || (c.status === 'ended' && TH.EARLY_END.indexOf(c.endKind) > -1); },
+    /* K-02: trạng thái theo TỪNG HỒ SƠ THUÊ (HĐ): 1 trạng thái vòng đời + nhãn theo trục (kết thúc, thời hạn, bàn giao, tiền cọc, công nợ).
+       Quy tắc QA: “Đã hoàn” chỉ khi có bút toán hoàn; “Sắp hết hạn” không áp cho HĐ đã kết thúc; “Phá HĐ” không tự đồng nghĩa “Mất cọc”. */
+    tenancyStates: function (c) {
+      if (!c) return { main: { id: 'nocontract', label: 'Chưa có HĐ', tone: 'neutral' }, tags: [], contract: null, depositCase: null, debt: { debt: 0, overdue: 0, overdueCount: 0 } };
+      var main = c.status === 'active' ? { id: 'renting', label: 'Đang thuê', tone: 'teal' } : c.status === 'draft' ? { id: 'draft', label: 'Nháp', tone: 'draft' } : { id: 'ended', label: 'Đã kết thúc HĐ', tone: 'neutral' };
+      var tags = [], d = api.daysTo(c.end), hc = api.depositCase(c.id), dt = TH.fmt.date;
+      var fu = db().followUps.filter(function (f) { return f.contractId === c.id && f.result === 'move_out'; })[0];
+      if (api.isEarlyEnd(c)) tags.push({ axis: 'end', id: 'broken', label: 'Phá HĐ', tone: 'danger', sub: TH.END_KINDS[c.endKind] || 'kết thúc trước hạn' });
+      if (c.status === 'active' && d >= 0 && d <= TH.expiryDays()) tags.push({ axis: 'term', id: 'expiring', label: 'Sắp hết HĐ', tone: 'warning', sub: 'còn ' + d + ' ngày' });
+      if (c.status === 'active' && fu && !(hc && hc.state === 'awaiting_handover')) tags.push({ axis: 'handover', id: 'notice', label: 'Đã báo chuyển đi', tone: 'info', sub: fu.moveOutAt ? 'dự kiến ' + dt(fu.moveOutAt) : '' });
+      if (hc) {
+        var S = TH.DEPOSIT_STATES[hc.state] || [hc.state, 'neutral'];
+        if (hc.state === 'awaiting_handover') tags.push({ axis: 'handover', id: 'refund', label: 'Chờ bàn giao', tone: 'info', sub: hc.handoverAt ? 'dự kiến ' + dt(hc.handoverAt) : '' });
+        else if (TH.DEPOSIT_OPEN.indexOf(hc.state) > -1) { var late = api.depositOverdue(hc); tags.push({ axis: 'deposit', id: 'refund', label: late ? 'Hoàn cọc quá hạn' : S[0], tone: late ? 'danger' : S[1], sub: hc.dueAt ? 'hạn ' + dt(hc.dueAt) : 'chưa xác định hạn' }); }
+        else if (hc.state === 'refunded') tags.push({ axis: 'deposit', id: 'refunded', label: 'Đã hoàn cọc', tone: 'success', sub: dt(hc.paidAt || hc.refundedAt) });
+        else if (hc.state === 'settled') tags.push({ axis: 'deposit', id: 'refunded', label: 'Đã tất toán cọc', tone: 'success', sub: 'không phát sinh hoàn' });
+        else if (hc.state === 'forfeited') tags.push({ axis: 'deposit', id: 'forfeit', label: hc.refundAmount > 0 ? 'Mất cọc một phần' : 'Mất cọc', tone: 'danger', sub: hc.approvedAt ? 'duyệt ' + dt(hc.approvedAt) : '' });
+        else if (hc.state === 'transferred') tags.push({ axis: 'deposit', id: 'transferred', label: 'Cọc chuyển sang HĐ mới', tone: 'info', sub: hc.txnRef || '' });
+      }
+      var debt = api.contractDebt(c.id);
+      if (debt.overdue > 0) tags.push({ axis: 'debt', id: 'overdue', label: 'Quá hạn', tone: 'danger', sub: debt.overdueCount + ' kỳ' });
+      else if (debt.debt > 0) tags.push({ axis: 'debt', id: 'debt', label: 'Còn nợ', tone: 'warning' });
+      return { main: main, tags: tags, contract: c, depositCase: hc, debt: debt };
+    },
+    customerStates: function (k) { return api.tenancyStates(api.contractOfCustomer(k)); },
+    roleStaff: function (bId, role) {
+      return db().assignments.filter(function (a) { return a.buildingId === bId && a.role === role && (!a.to || a.to >= TH.TODAY); }).sort(function (a, b) { return (b.main ? 1 : 0) - (a.main ? 1 : 0); });
+    },
+    /* K-01: “Trưởng khu vực” = TPVH phụ trách khu vực/nhóm tòa (vai trò riêng, có thể Chưa phân công); Trưởng nhóm là vai trò khác, không thay thế */
+    areaHead: function (bId) { var a = api.roleStaff(bId, 'Trưởng phòng vận hành')[0]; return a ? a.staffId : null; },
+    teamLead: function (bId) { var a = api.roleStaff(bId, 'Trưởng nhóm')[0]; return a ? a.staffId : null; },
+    opsStaff: function (bId) { var a = api.roleStaff(bId, TH.ROLE_MAIN)[0]; return a ? a.staffId : null; },
+    /* K-08: trùng biển số chỉ khi hai khoảng đăng ký chồng lấn (xe bán lại giữa hai hồ sơ liên tiếp không báo trùng) */
+    plateDup: function (k, v) {
+      if (!v || !v.plate) return null;
+      var out = null, p = String(v.plate).toUpperCase(), a1 = v.from || '0000-00-00', a2 = v.to || '9999-12-31';
+      db().customers.forEach(function (x) {
+        if (x.id === k.id || out) return;
+        (x.vehicles || []).forEach(function (o) {
+          if (out || !o.plate || String(o.plate).toUpperCase() !== p) return;
+          var b1 = o.from || '0000-00-00', b2 = o.to || '9999-12-31';
+          if (a1 <= b2 && b1 <= a2) out = { customer: x, vehicle: o };
+        });
+      });
+      return out;
+    },
     payState: function (inv) {
       if (inv.status === 'draft') return 'draft';
       if (inv.status === 'cancelled') return 'cancelled';
@@ -694,20 +968,24 @@ TH.calc = (function () {
       r.Dprov = r.Aprov - r.Aprov * r.B + r.C;
       r.hsProv = r.listed ? r.Dprov / r.listed : 0;
       r.closed = TH.TODAY > period + '-15';
+      /* G-02: lấp đầy = phòng đang thuê ÷ phòng cho thuê được (loại phòng đang sửa) tại cuối kỳ — KPI riêng, không vào HS */
       var stateAt = api.roomStateAt || function (x) { return x.status; };
       r.occupied = rooms.filter(function (x) { return stateAt(x, period) === 'occupied'; }).length;
-      r.occ = rooms.length ? r.occupied / rooms.length : 0;
+      r.rentable = rooms.filter(function (x) { return stateAt(x, period) !== 'maintenance'; }).length;
+      r.occ = r.rentable ? r.occupied / r.rentable : 0;
+      /* G-03 (TH1 trong "Cách tính lương phòng vận hành"): kỳ có cọc mới / thu trước nhiều tháng cần chuẩn hóa — mockup chỉ phát hiện, chưa áp */
+      r.th1 = (db().deposits || []).filter(function (d) { return d.buildingId === bId && d.period === period && d.type === 'in' && d.status === 'confirmed'; });
       return r;
     },
     /* Gộp nhiều tòa: cộng thành phần, B tính lại trên tổng; D/HS cộng từ từng tòa */
     perfAgg: function (period, ids) {
       var list = ids.map(function (id) { return api.perfBuilding(period, id); });
       var t = { list: list };
-      ['m5', 'm10', 'm15', 'late', 'rev', 'svc', 'invoices', 'cum5', 'cum10', 'cum15', 'A', 'arising', 'forfeit', 'C', 'D', 'rooms', 'listed', 'Aprov', 'Dprov', 'occupied'].forEach(function (k) { t[k] = sum(list, function (x) { return x[k]; }); });
+      ['m5', 'm10', 'm15', 'late', 'rev', 'svc', 'invoices', 'cum5', 'cum10', 'cum15', 'A', 'arising', 'forfeit', 'C', 'D', 'rooms', 'listed', 'Aprov', 'Dprov', 'occupied', 'rentable'].forEach(function (k) { t[k] = sum(list, function (x) { return x[k]; }); });
       t.B = t.rev ? t.svc / t.rev : 0;
       t.hs = t.listed ? t.D / t.listed : 0;
       t.hsProv = t.listed ? t.Dprov / t.listed : 0;
-      t.occ = t.rooms ? t.occupied / t.rooms : 0;
+      t.occ = t.rentable ? t.occupied / t.rentable : 0;
       t.closed = TH.TODAY > period + '-15';
       return t;
     },

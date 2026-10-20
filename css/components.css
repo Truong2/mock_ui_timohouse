@@ -511,3 +511,16 @@ img, svg { display: block; }
   .staff-meta { grid-column: 1 / -1; text-align: left; }
   .sec-ft .small { flex-basis: 100%; }
 }
+.perf-row.is-warn { background: var(--warning-soft); }
+
+/* ---------- CR-CUS-01: khách thuê ---------- */
+.st-cell { display: inline-flex; flex-wrap: wrap; gap: 4px; align-items: center; max-width: 300px; }
+.page-title .st-cell { max-width: none; margin-left: 4px; vertical-align: middle; }
+.price-edit td { vertical-align: top; }
+.price-edit .input-sm, .price-edit .select-sm { width: 100%; min-width: 96px; }
+.price-edit td:first-child { min-width: 120px; }
+.price-edit tr.is-warn td { background: var(--warning-soft); }
+@media (max-width: 760px) {
+  .st-cell { max-width: none; }
+  .price-edit .input-sm, .price-edit .select-sm { min-width: 84px; }
+}

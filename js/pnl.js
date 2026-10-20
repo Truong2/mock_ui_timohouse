@@ -13,7 +13,7 @@ var TH = window.TH = window.TH || {};
   /* Thứ tự dòng = thứ tự trong sheet mẫu. kind: sec (tiêu đề nhóm), grp (nhóm con), money, count, pct */
   TH.PNL_LINES = [
     { sec: 'Doanh thu' },
-    { k: 'total', label: 'Tổng doanh thu tháng', strong: true, hint: 'DT tiền phòng + DT dịch vụ + cọc phòng mới + cọc khách bỏ − hoàn cọc', hintKd: 'DT tiền phòng + DT dịch vụ + cọc khách bỏ − hoàn cọc (không gồm cọc phòng mới)' },
+    { k: 'total', label: 'Tổng doanh thu tháng', labelKd: 'Doanh thu kinh doanh tháng', strong: true, hint: 'Theo mẫu quản trị: DT tiền phòng + DT dịch vụ + cọc phòng mới + cọc khách bỏ − hoàn cọc (gồm dòng tiền cọc)', hintKd: 'DT tiền phòng + DT dịch vụ + cọc khách bỏ đủ điều kiện. Cọc mới, hoàn cọc chỉ vào dòng tiền (R-01, đề xuất)' },
     { k: 'depIn', label: 'Cọc phòng mới', indent: 1, notes: true },
     { k: 'depForfeit', label: 'Cọc khách bỏ không ở', indent: 1, notes: true },
     { k: 'depRefund', label: 'Hoàn cọc', indent: 1, notes: true, minus: true },
@@ -140,8 +140,10 @@ var TH = window.TH = window.TH || {};
     db().contracts.filter(function (c) { return c.buildingId === bId && c.start.slice(0, 7) === period; }).forEach(function (c) {
       add(v, 'cntNew', 1, { kind: 'contract', id: c.id, room: c.roomId, text: 'Bắt đầu ' + TH.fmt.date(c.start) }, c.roomId);
     });
+    /* R-09 (đề xuất 20/10/2026): phòng trống = phòng khai thác được nhưng không có người thuê cuối kỳ; phòng đang sửa loại khỏi phòng trống */
     rooms.forEach(function (r) {
       var st = C.roomStateAt(r, period);
+      if (st === 'maintenance') { v.notes.cntVacant.push(r.id + ' đang sửa — không tính'); return; }
       if (st !== 'occupied') add(v, 'cntVacant', 1, { kind: 'room', id: r.id, room: r.id, text: TH.statusLabel(st) }, r.id);
     });
 
@@ -158,6 +160,10 @@ var TH = window.TH = window.TH || {};
     });
     v.pendingExp = sum(db().expenses.filter(function (e) { return e.period === period && e.buildingId === bId && (e.status === 'pending' || e.status === 'draft'); }), function (e) { return e.amount; });
     v.pendingRent = sum(db().expenses.filter(function (e) { return e.period === period && e.buildingId === bId && e.category === 'owner_rent' && e.status !== 'approved'; }), function (e) { return e.amount; });
+    /* R-07 (đề xuất): chế độ kinh doanh ghi nhận tiền thuê chủ nhà theo tháng sử dụng (HĐ thuê tòa) dù phiếu chi chưa duyệt — nhãn "dự kiến" */
+    var lease = (db().leases || []).find(function (l) { return l.buildingId === bId && l.start.slice(0, 7) <= period && l.end.slice(0, 7) >= period; });
+    v.rentAccrual = v.cRent === 0 && lease ? lease.rent : 0;
+    v.accrualLease = v.rentAccrual ? lease.id : null;
 
     /* Chi phí chung phân bổ theo số phòng */
     var pool = db().costPools && db().costPools[period];
@@ -187,14 +193,14 @@ var TH = window.TH = window.TH || {};
 
   function merge(list) {
     var v = blank();
-    v.buildings = []; v.rooms = 0; v.invoices = 0; v.pendingExp = 0; v.pendingRent = 0; v.draftInvoices = 0; v.unbilledList = [];
+    v.buildings = []; v.rooms = 0; v.invoices = 0; v.pendingExp = 0; v.pendingRent = 0; v.rentAccrual = 0; v.draftInvoices = 0; v.unbilledList = [];
     list.forEach(function (x) {
       MONEY_KEYS.concat(COUNT_KEYS).forEach(function (k) {
         v[k] += x[k];
         v.src[k] = v.src[k].concat(x.src[k]);
         x.notes[k].forEach(function (n) { if (v.notes[k].indexOf(n) === -1) v.notes[k].push(n); });
       });
-      v.buildings = v.buildings.concat(x.buildings); v.rooms += x.rooms; v.invoices += x.invoices; v.pendingExp += x.pendingExp; v.pendingRent += x.pendingRent; v.draftInvoices += x.draftInvoices;
+      v.buildings = v.buildings.concat(x.buildings); v.rooms += x.rooms; v.invoices += x.invoices; v.pendingExp += x.pendingExp; v.pendingRent += x.pendingRent; v.rentAccrual += x.rentAccrual || 0; v.draftInvoices += x.draftInvoices;
       if (x.unbilled) v.unbilledList.push(x.b);
       v.pool = v.pool || x.pool;
       v.period = x.period;
@@ -204,7 +210,12 @@ var TH = window.TH = window.TH || {};
   function div(a, b) { return b ? a / b : NaN; }
   function finalize(v, mode) {
     v.mode = mode || 'tong';
-    if (v.mode === 'kd') { v.depInHidden = v.depIn; v.equipHidden = v.equip; v.depIn = 0; v.equip = 0; }
+    /* kd = Báo cáo kinh doanh (P&L đề xuất, R-01/R-03/R-07): loại cọc mới, hoàn cọc, mua sắm thiết bị; cộng tiền thuê chủ nhà dự kiến theo HĐ.
+       tong = Báo cáo tổng theo mẫu quản trị G1/BCKD (gồm cọc, hoàn cọc, mua sắm; chỉ chi phí đã duyệt). */
+    if (v.mode === 'kd') {
+      v.depInHidden = v.depIn; v.equipHidden = v.equip; v.depRefundHidden = v.depRefund; v.depIn = 0; v.equip = 0; v.depRefund = 0;
+      if (v.rentAccrual) { v.cRent += v.rentAccrual; v.accrued = v.rentAccrual; }
+    }
     v.svc = v.elec + v.water + v.clean + v.net + v.ev + v.lift + v.wash;
     v.total = v.rent + v.svc + v.depIn + v.depForfeit - v.depRefund;
     v.gdv = v.cElec + v.cWater + v.cNet + v.cWaste + v.cEnv + v.cLift;

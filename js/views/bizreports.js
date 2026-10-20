@@ -43,7 +43,7 @@
   function dataAlerts(v, p) {
     var items = [];
     if (v.unbilledList && v.unbilledList.length) items.push('<b>' + v.unbilledList.map(function (b) { return esc(b.short); }).join(', ') + '</b> chưa lập hóa đơn kỳ — doanh thu tiền phòng/dịch vụ đang là 0. <a href="' + TH.router.href('INV-01') + '">Lập hóa đơn (INV-01)</a>');
-    if (v.pendingExp) items.push(F.money(v.pendingExp) + ' chi phí chờ duyệt/nháp chưa tính' + (v.pendingRent ? ' (gồm tiền thuê nhà ' + F.money(v.pendingRent) + ')' : '') + '. <a href="' + TH.router.href('EXP-01') + '">Duyệt chi (EXP-01)</a>');
+    if (v.pendingExp) items.push(F.money(v.pendingExp) + ' chi phí chờ duyệt/nháp chưa tính' + (v.pendingRent ? (v.accrued ? ' (tiền thuê nhà đã tính DỰ KIẾN ' + F.money(v.accrued) + ' theo HĐ — R-07)' : ' (gồm tiền thuê nhà ' + F.money(v.pendingRent) + ')') : '') + '. <a href="' + TH.router.href('EXP-01') + '">Duyệt chi (EXP-01)</a>');
     if (v.pool && v.pool.status === 'draft') items.push('Bảng phân bổ chi phí chung kỳ ' + F.period(p) + ' đang <b>nháp</b>.');
     if (!items.length) return '';
     var pp = prevP(p);
@@ -88,7 +88,7 @@
       var attrs = o.rowAttrs ? o.rowAttrs(line) : '';
       var cls = (line.strong ? 'rpt-strong ' : '') + (line.result ? 'rpt-result ' : '') + (line.ratio ? 'rpt-ratio ' : '');
       var hint = o.hint ? o.hint(line) : line.hint;
-      body += '<tr class="' + cls + '" ' + attrs + '><th scope="row" class="rpt-label' + (line.indent ? ' rpt-ind' : '') + '">' + esc(line.label) + (hint ? ' <span class="rpt-hint" data-tip="' + esc(hint) + '" tabindex="0">' + I('info', 'ic-sm') + '</span>' : '') + lineTags(line) + '</th>' +
+      body += '<tr class="' + cls + '" ' + attrs + '><th scope="row" class="rpt-label' + (line.indent ? ' rpt-ind' : '') + '">' + esc(o.labelOf ? o.labelOf(line) : line.label) + (hint ? ' <span class="rpt-hint" data-tip="' + esc(hint) + '" tabindex="0">' + I('info', 'ic-sm') + '</span>' : '') + lineTags(line) + '</th>' +
         cols.map(function (c) {
           var locked = c.gate && !TH.has(c.gate);
           return '<td class="' + (c.num ? 'num ' : '') + (locked ? 'is-ghost ' : '') + (c.tdCls || '') + '">' + (locked ? '<span aria-hidden="true" style="display:inline-block;width:56px;height:8px;border-radius:4px;background:#e2e8f0"></span>' : c.cell(line)) + '</td>';
@@ -148,7 +148,7 @@
           { key: 't', label: 'Tổng nhận', num: true, render: function (r) { return '<b>' + num(r.total) + '</b>'; } },
         ], rows: share.rows, foot: { _label: '<b>Tổng ' + share.ratio + '%</b>', c: '<b>' + num(share.capital) + '</b>', g: '<b>' + num(share.lng) + '</b>', n: '<b>' + num(share.lnr) + '</b>', t: '<b>' + num(share.total) + '</b>' },
           empty: { title: 'Chưa có cổ đông hiệu lực', text: 'Khai báo tỷ lệ ở SHARE-01.' } }) +
-        '<div class="card-ft"><span class="small muted">LNR/GV ' + F.pct(share.lnr_gv, 1) + ' · CP/LNG ' + (isFinite(share.cp_lng) ? share.cp_lng.toLocaleString('vi-VN', { maximumFractionDigits: 2 }) : '—') + ' · Vốn = tỷ lệ × tiền thuê nhà kỳ; Tổng nhận = Vốn + LN ròng (theo mẫu, chờ chốt D-07)</span></div></div>';
+        '<div class="card-ft"><span class="small muted">LNR/GV ' + F.pct(share.lnr_gv, 1) + ' · CP/LNG ' + (isFinite(share.cp_lng) ? share.cp_lng.toLocaleString('vi-VN', { maximumFractionDigits: 2 }) : '—') + ' · <b>Công thức tái hiện mẫu G1</b>: Vốn = tỷ lệ × tiền thuê nhà kỳ; Tổng nhận = Vốn + LN ròng — không phải lệnh chi/hoàn vốn; chưa sinh thanh toán cho đến khi chốt ý nghĩa cột Vốn (R-08, D-07)</span></div></div>';
 
       var ratios = '<div class="card card-flush">' + TH.cardHd(I('activity', 'ic-sm') + 'Tỷ lệ theo mẫu', '13 chỉ số cuối sheet mẫu') +
         TH.table({ compact: true, label: 'Tỷ lệ', cols: [{ key: 'l', label: 'Chỉ số', render: function (r) { return esc(r.label); } }, { key: 'v', label: 'Tháng ' + mm(p), num: true, render: function (r) { return ratioVal(r, v.ratios[r.k]); } }, { key: 'pv', label: 'Kỳ trước', num: true, gate: 'F045.D', render: function (r) { return v1 ? ratioVal(r, v1.ratios[r.k]) : '—'; } }], rows: TH.PNL_RATIOS }) + '</div>';
@@ -177,7 +177,7 @@
       var actions = lockBtn + '<button type="button" class="btn" data-act="rpt4.print">' + I('printer', 'ic-sm') + 'In / PDF</button>' + TH.exportBtn('rpt4.xlsx', 'Xuất Excel theo mẫu');
 
       return TH.pageHeader({ screen: 'RPT-04', status: TH.periodBadge(p) + templateBadge('Mẫu G1 · T8/2026') + crBadge(),
-        desc: 'Bố cục theo sheet <b>“BÁO CÁO KINH DOANH G1 THÁNG 8/2026”</b> của khách. Số liệu tự tính: hóa đơn đã xác nhận, sổ cọc, chi phí đã duyệt, bảng phân bổ chi phí chung và lương HS.' + (drill ? ' Bấm vào dòng để mở chứng từ nguồn.' : ''), actions: actions }) +
+        desc: 'Bố cục theo sheet <b>“BÁO CÁO KINH DOANH G1 THÁNG 8/2026”</b> của khách. Số liệu tự tính: hóa đơn đã xác nhận, sổ cọc, chi phí đã duyệt, bảng phân bổ chi phí chung và lương HS. Đây là <b>chế độ quản trị tái hiện mẫu G1</b> (gồm dòng tiền cọc, mua sắm; chỉ chi đã duyệt) — báo cáo kinh doanh P&L theo kỳ xem ở RPT-05 chế độ Kinh doanh (R-01/R-07, đề xuất).' + (drill ? ' Bấm vào dòng để mở chứng từ nguồn.' : ''), actions: actions }) +
         toolbar + dataAlerts(v, p) + kpis +
         '<div class="card card-flush" style="margin-bottom:16px">' + TH.cardHd(I('sheet', 'ic-sm') + 'Báo cáo kinh doanh ' + esc(b.short) + ' tháng ' + mm(p), drill ? 'Bấm vào dòng để xem chứng từ nguồn' : 'Theo đúng thứ tự dòng của mẫu', TH.gate('F045.B', '', { mode: 'mini', label: 'Drill-down từ gói B' })) + table + '</div>' +
         '<div class="grid-2 rpt-grid" style="margin-bottom:16px">' + shareCard + ratios + '</div>' +
@@ -265,7 +265,7 @@
       { name: 'BAO CAO THANG ' + +p.slice(5), title: 'BÁO CÁO KINH DOANH ' + b.short.toUpperCase() + ' THÁNG ' + mm(p), note: 'DRAFT · dữ liệu minh họa · bố cục theo mẫu G1 (docs/G1.31.8.26.xlsx) · ' + TH.CR_RPT.id,
         columns: [{ label: 'Chỉ tiêu', width: 30 }, { label: '', width: 34 }, { label: 'Số tiền (đ)', type: 'money', width: 18 }, { label: 'Ghi chú', width: 30 }],
         rows: statementRows(v, function (l) { return [(v.notes[l.k] || []).join(', ')]; }) },
-      { name: 'CHIA CO PHAN', title: 'BẢNG CHIA CỔ PHẦN ' + b.short.toUpperCase() + ' · kỳ ' + F.period(p), note: 'Vốn = tỷ lệ × tiền thuê nhà kỳ; Tổng nhận = Vốn + LN ròng · chính sách D-07 chưa chốt',
+      { name: 'CHIA CO PHAN', title: 'BẢNG CHIA CỔ PHẦN ' + b.short.toUpperCase() + ' · kỳ ' + F.period(p), note: 'Công thức tái hiện mẫu G1 (R-08): Vốn = tỷ lệ × tiền thuê nhà kỳ; Tổng nhận = Vốn + LN ròng — không phải lệnh chi/hoàn vốn · D-07 chưa chốt',
         columns: [{ label: 'Cổ đông', width: 30 }, { label: 'Tỷ lệ %', type: 'number', width: 10 }, { label: 'Vốn', type: 'money' }, { label: 'LN gộp', type: 'money' }, { label: 'LN ròng', type: 'money' }, { label: 'Tổng nhận', type: 'money' }],
         rows: share.rows.map(function (r) { return [r.holder.name, r.ratio, r.capital, r.lng, r.lnr, r.total]; }), totals: ['Tổng', share.ratio, share.capital, share.lng, share.lnr, share.total] },
       { name: 'NGUON SO LIEU', title: 'Nguồn từng dòng · ' + b.name + ' · kỳ ' + F.period(p), columns: [{ label: 'Dòng báo cáo', width: 30 }, { label: 'Loại', width: 12 }, { label: 'Chứng từ', width: 20 }, { label: 'Phòng', width: 10 }, { label: 'Diễn giải', width: 40 }, { label: 'Số tiền', type: 'money' }], rows: srcRows },
@@ -312,10 +312,10 @@
       ents.forEach(function (x) {
         cols.push({ label: x.e.label, labelHtml: x.e.building ? '<a href="' + TH.router.href('RPT-04') + '" data-act="rpt5.open" data-b="' + x.e.id + '" data-tip="Mở báo cáo doanh thu ' + esc(x.e.sub) + ' (RPT-04)">' + esc(x.e.label) + '</a>' : '<span data-tip="' + esc(x.e.sub) + ' · ' + x.e.ids.length + ' tòa">' + esc(x.e.label) + '</span>', num: true, cell: function (l) { return cell(x.v, l); } });
       });
-      var matrix = stmt({ label: 'Báo cáo ' + (mode === 'kd' ? 'kinh doanh' : 'tổng') + ' tháng ' + mm(p), lines: lines, cols: cols, matrix: true, hint: function (l) { return l.k === 'total' ? (mode === 'kd' ? l.hintKd : l.hint) : l.hint; } });
+      var matrix = stmt({ label: 'Báo cáo ' + (mode === 'kd' ? 'kinh doanh' : 'tổng') + ' tháng ' + mm(p), lines: lines, cols: cols, matrix: true, labelOf: function (l) { return mode === 'kd' && l.labelKd ? l.labelKd : l.label; }, hint: function (l) { if (mode === 'kd' && l.k === 'cRent' && tot.accrued) return 'Gồm ' + F.money(tot.accrued) + ' tiền thuê nhà DỰ KIẾN theo HĐ thuê tòa (phiếu chi chưa duyệt) — R-07, đề xuất'; if (mode === 'kd' && (l.k === 'depIn' || l.k === 'depRefund' || l.k === 'equip')) return 'Chế độ kinh doanh: khoản này chỉ vào dòng tiền / tài sản, không vào P&L (R-01, R-03 · đề xuất)'; return l.k === 'total' ? (mode === 'kd' ? l.hintKd : l.hint) : l.hint; } });
 
       var kpis = '<div class="grid-5" style="margin-bottom:16px">' +
-        TH.kpi({ label: 'Tổng doanh thu tháng', icon: 'receipt', value: F.short(tot.total), foot: mode === 'kd' ? 'Không gồm cọc phòng mới ' + F.short(tot.depInHidden || 0) : 'Gồm cọc phòng mới ' + F.short(tot.depIn) }) +
+        TH.kpi({ label: mode === 'kd' ? 'Doanh thu kinh doanh' : 'Tổng doanh thu (theo mẫu)', icon: 'receipt', value: F.short(tot.total), foot: mode === 'kd' ? 'Loại cọc mới ' + F.short(tot.depInHidden || 0) + ' · hoàn cọc ' + F.short(tot.depRefundHidden || 0) : 'Gồm cọc phòng mới ' + F.short(tot.depIn) + ', trừ hoàn cọc' }) +
         TH.kpi({ label: 'Giá vốn (GV)', icon: 'building', value: F.short(tot.gv), foot: 'GV/DT ' + F.pct(tot.ratios.gv_dt, 1) }) +
         TH.kpi({ label: 'Chi phí bán hàng (CPBH)', icon: 'expense', value: F.short(tot.cpbh), foot: 'CPBH/DT ' + F.pct(tot.ratios.cpbh_dt, 1) }) +
         TH.kpi({ label: 'Lợi nhuận gộp (LNG)', icon: 'trend', value: F.short(tot.lng), neg: tot.lng < 0, foot: 'LNG/DT ' + F.pct(tot.ratios.lng_dt, 1) }) +
@@ -323,7 +323,7 @@
 
       var seg = function (key, opts, cur) { return '<div class="seg">' + opts.map(function (o) { return '<button type="button" aria-pressed="' + (cur === o[0]) + '" data-act="ui.set" data-screen="RPT-05" data-key="' + key + '" data-val="' + o[0] + '"' + (o[2] ? ' data-tip="' + esc(o[2]) + '"' : '') + '>' + o[1] + '</button>'; }).join('') + '</div>'; };
       var toolbar = '<div class="card" style="margin-bottom:16px"><div class="toolbar" style="border:0;flex-wrap:wrap">' +
-        seg('mode', [['kd', 'Báo cáo kinh doanh', 'Không gồm cọc phòng mới và mua sắm thiết bị — sheet “BÁO CÁO KINH DOANH THÁNG”'], ['tong', 'Báo cáo tổng', 'Gồm cọc phòng mới và mua sắm thiết bị — sheet “BÁO CÁO TỔNG THÁNG”']], mode) +
+        seg('mode', [['kd', 'Báo cáo kinh doanh', 'P&L theo kỳ (đề xuất R-01/R-07): loại cọc mới, hoàn cọc, mua sắm thiết bị; tiền thuê chủ nhà tính theo HĐ kể cả khi phiếu chi chưa duyệt'], ['tong', 'Báo cáo tổng (theo mẫu)', 'Chế độ quản trị tái hiện sheet “BÁO CÁO TỔNG THÁNG”: gồm cọc mới, hoàn cọc, mua sắm; chỉ chi phí đã duyệt — không đồng nghĩa P&L chuẩn']], mode) +
         TH.gate('F046.C', seg('cols', [['b', 'Theo tòa'], ['g', 'Theo nhóm nhà']], byGroup ? 'g' : 'b'), { mode: 'btn', label: 'Gộp theo nhóm nhà', size: 'btn-sm' }) +
         TH.gate('F046.C', '<button type="button" class="btn btn-sm" aria-pressed="' + cmp + '" data-act="ui.set" data-screen="RPT-05" data-key="cmp" data-val="' + (cmp ? '0' : '1') + '">' + I('compare', 'ic-sm') + (cmp ? 'Đang so với kỳ trước' : 'So với kỳ trước') + '</button>', { mode: 'btn', label: 'So với kỳ trước', size: 'btn-sm' }) +
         periodSelect('rpt5-p') + '<span class="grow"></span><span class="small muted">Đơn vị: đồng · ' + esc(TH.scopeLabel()) + '</span></div></div>';
@@ -350,7 +350,7 @@
       var lockBtn = TH.gate('F048.D', TH.periodLocked(p) ? TH.badge('Đã chốt kỳ ' + F.period(p), 'neutral', { icon: 'lock' }) : TH.permBtn('report.all', '<button type="button" class="btn" data-act="rpt.lock">' + I('lock', 'ic-sm') + 'Khóa kỳ & chốt' + TH.up('F048.D') + '</button>', 'Khóa kỳ · 403'), { mode: 'btn', label: 'Khóa kỳ & chốt phiên bản' });
 
       return TH.pageHeader({ screen: 'RPT-05', status: TH.periodBadge(p) + templateBadge('Mẫu BCKD · T8/2026') + crBadge(),
-        desc: 'Bố cục theo file <b>“BÁO CÁO KINH DOANH THÁNG 8”</b> của khách: cột TỔNG và từng tòa (hoặc nhóm nhà như sheet “BC DT … NHÀ G”). Hai chế độ khớp hai sheet: <b>Báo cáo kinh doanh</b> loại cọc phòng mới và mua sắm; <b>Báo cáo tổng</b> gồm cả hai.', actions: tplSel + lockBtn + '<button type="button" class="btn" data-act="rpt5.print">' + I('printer', 'ic-sm') + 'In / PDF</button>' + TH.exportBtn('rpt5.xlsx', 'Xuất Excel theo mẫu') }) +
+        desc: 'Bố cục theo file <b>“BÁO CÁO KINH DOANH THÁNG 8”</b> của khách: cột TỔNG và từng tòa (hoặc nhóm nhà như sheet “BC DT … NHÀ G”). <b>Báo cáo kinh doanh</b> = P&L theo kỳ (loại cọc mới, hoàn cọc, mua sắm; tiền thuê chủ nhà dự kiến theo HĐ — đề xuất R-01/R-07, chờ duyệt). <b>Báo cáo tổng</b> = chế độ quản trị tái hiện sheet mẫu (gồm dòng tiền cọc, mua sắm).', actions: tplSel + lockBtn + '<button type="button" class="btn" data-act="rpt5.print">' + I('printer', 'ic-sm') + 'In / PDF</button>' + TH.exportBtn('rpt5.xlsx', 'Xuất Excel theo mẫu') }) +
         toolbar + dataAlerts(tot, p) + kpis +
         '<div class="card card-flush" style="margin-bottom:16px">' + TH.cardHd(I('sheet', 'ic-sm') + (mode === 'kd' ? 'Báo cáo kinh doanh' : 'Báo cáo tổng') + ' tháng ' + mm(p), (tpl.compact ? 'Mẫu rút gọn HĐQT · ' : '') + 'Bấm tên tòa để mở báo cáo doanh thu chi tiết (RPT-04)') + matrix + '</div>' +
         '<div class="grid-2">' + trend + warn + '</div>';
@@ -364,14 +364,15 @@
     TH.PNL_LINES.forEach(function (l) {
       if (l.sec) { rows.push({ c: [l.sec.toUpperCase()], bold: true }); return; }
       if (l.grp) { rows.push({ c: ['', l.grp], bold: true }); return; }
-      rows.push({ c: (l.indent ? ['', l.label] : [l.label, '']).concat([tot[l.k]]).concat(vs.map(function (v) { return v[l.k]; })), bold: l.strong });
+      var lb = mode === 'kd' && l.labelKd ? l.labelKd : l.label;
+      rows.push({ c: (l.indent ? ['', lb] : [lb, '']).concat([tot[l.k]]).concat(vs.map(function (v) { return v[l.k]; })), bold: l.strong });
     });
     rows.push({ c: [] });
     TH.PNL_RATIOS.forEach(function (r) {
       var f = function (v) { var x = v.ratios[r.k]; return isFinite(x) ? Math.round(x * 10000) / 10000 : null; };
       rows.push({ c: [r.label, '', f(tot)].concat(vs.map(f)), pct: !r.times });
     });
-    return { name: name, title: title, note: 'DRAFT · dữ liệu minh họa · bố cục theo “BÁO CÁO KINH DOANH THÁNG 8” · ' + TH.CR_RPT.id,
+    return { name: name, title: title, note: 'DRAFT · dữ liệu minh họa · bố cục theo “BÁO CÁO KINH DOANH THÁNG 8” · ' + (mode === 'kd' ? 'P&L đề xuất: loại cọc mới/hoàn cọc/mua sắm, tiền thuê chủ nhà theo HĐ (R-01/R-07)' : 'chế độ quản trị theo mẫu (gồm dòng tiền cọc, mua sắm)') + ' · ' + TH.CR_RPT.id,
       columns: [{ label: 'Chỉ tiêu', width: 28 }, { label: '', width: 34 }, { label: 'TỔNG', type: 'money', width: 18 }].concat(ents.map(function (e) { return { label: e.label, type: 'money', width: 16 }; })), rows: rows };
   }
   TH.act['rpt5.xlsx'] = function () {

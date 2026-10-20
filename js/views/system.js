@@ -38,6 +38,13 @@
   };
 
   /* ---------------- SYS-01 ---------------- */
+  TH.act['settings.expiry'] = function () {
+    var el = document.getElementById('sys-expiry'), v = el ? +String(el.value).replace(/\D/g, '') : 0;
+    if (!(v > 0 && v <= 365)) { TH.toast('Giá trị không hợp lệ', 'Nhập số ngày từ 1 đến 365.', 'danger'); return; }
+    var old = TH.expiryDays(); TH.db.settings.expiryAlertDays = v;
+    TH.log('Đổi cấu hình cảnh báo hết hạn', 'settings.expiryAlertDays', old + ' → ' + v + ' ngày', 'system');
+    TH.app.refresh(); TH.toast('Đã áp dụng ' + v + ' ngày', 'Cấu hình demo — chưa phải chính sách đã duyệt (K-06).');
+  };
   TH.views['SYS-01'] = {
     scan: function () { return [{ ui: { tab: 'users' } }, { ui: { tab: 'audit' } }, { ui: { tab: 'ops' } }]; },
     render: function () {
@@ -76,6 +83,9 @@
           ], rows: rows }) + (TH.has('F051.D') ? '<div class="card-ft"><span class="small">' + TH.tierPill('D') + ' Báo cáo snapshot có revision truy vết: ' + Object.keys(TH.db.snapshots).length + ' snapshot kỳ.</span></div>' : '');
       } else {
         body = '<div class="card-bd grid-2">' +
+          '<div class="card"><div class="card-hd"><div class="card-title">' + I('clock', 'ic-sm') + 'Cảnh báo hợp đồng sắp hết hạn</div>' + TH.badge('ĐỀ XUẤT K-06', 'draft') + '</div><div class="card-bd stack-sm">' +
+            '<div class="row" style="gap:10px;align-items:flex-end">' + TH.field({ name: 'expiryDays', label: 'Nhắc trước (ngày) — mặc định doanh nghiệp', value: TH.expiryDays(), num: true, inputmode: 'numeric', readonly: !TH.can('settings.edit'), id: 'sys-expiry' }) + TH.permBtn('settings.edit', '<button type="button" class="btn btn-sm" data-act="settings.expiry">' + I('check', 'ic-sm') + 'Áp dụng</button>', 'Chỉ Admin · 403') + '</div>' +
+            '<div class="small muted">Áp dụng cho CUS-01, CON-01/03, RPT-02 và menu. Khác với mốc <b>khách phải báo trước</b> ghi trong từng HĐ (vd 30 ngày) — hai mốc không ghi đè nhau. Override theo nhóm tòa cần phân quyền; chưa duyệt thành chính sách toàn hệ thống.</div></div></div>' +
           '<div class="card"><div class="card-hd"><div class="card-title">' + I('database', 'ic-sm') + 'Sao lưu & staging</div>' + TH.tierPill('A') + '</div><div class="card-bd">' + TH.kv([['Môi trường', 'Staging + Production'], ['Backup gần nhất', '20/10/2026 02:00 (hằng ngày)'], ['Hướng dẫn người dùng', TH.fileOf('huong_dan_su_dung_v1.pdf')]]) + '</div></div>' +
           '<div class="stack">' + TH.gate('F052.B', '<div class="card"><div class="card-bd small"><b>' + TH.tierPill('B') + ' Kiểm thử phục hồi & dữ liệu đầu kỳ</b><br>Restore test gần nhất: 19/10/2026 · đạt · 4 phút. Dữ liệu đầu kỳ nhập theo mẫu: chủ nhà 4, tòa 3, phòng 18.</div></div>', { label: 'Kiểm thử phục hồi và dữ liệu đầu kỳ theo mẫu', lines: 2 }) +
           TH.gate('F052.C', '<div class="card"><div class="card-bd small"><b>' + TH.tierPill('C') + ' Bộ test hồi quy dòng tiền</b><br>Chạy đêm 19/10: 48/48 ca đạt (hóa đơn → thu → công nợ → báo cáo).</div></div>', { label: 'Bộ test hồi quy tự động các dòng tiền', lines: 2 }) +

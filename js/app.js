@@ -6,7 +6,7 @@ var TH = window.TH = window.TH || {};
 
   var NAV = [
     { label: 'Tổng quan', items: [['RPT-01', 'dashboard', 'Tổng quan · Báo cáo tòa']] },
-    { label: 'Dữ liệu gốc', items: [['OWN-01', 'owner', 'Chủ nhà'], ['BLD-01', 'building', 'Tòa nhà'], ['ROOM-01', 'door', 'Phòng'], ['CUS-01', 'user', 'Khách thuê'], ['CON-01', 'contract', 'Hợp đồng'], ['CON-03', 'fileClock', 'HĐ sắp hết hạn', function () { return TH.calc.expiring(45, TH.scope()).length; }]] },
+    { label: 'Dữ liệu gốc', items: [['OWN-01', 'owner', 'Chủ nhà'], ['BLD-01', 'building', 'Tòa nhà'], ['ROOM-01', 'door', 'Phòng'], ['CUS-01', 'user', 'Khách thuê'], ['CON-01', 'contract', 'Hợp đồng'], ['CON-03', 'fileClock', 'HĐ sắp hết hạn', function () { return TH.calc.expiring(TH.expiryDays(), TH.scope()).length; }]] },
     { label: 'Vận hành kỳ', items: [['METER-01', 'zap', 'Điện nước', function () { return TH.db.readings.filter(function (r) { return r.period === TH.store.state.period && r.status !== 'confirmed' && TH.inScope(TH.calc.room(r.roomId).buildingId); }).length; }], ['INV-01', 'receipt', 'Lập hóa đơn'], ['INV-02', 'invoiceList', 'Hóa đơn & công nợ'], ['OA-01', 'send', 'Zalo OA'], ['OA-02', 'message', 'Lịch sử Zalo']] },
     { label: 'Thu chi', items: [['PAY-01', 'handCoins', 'Báo đã thu', function () { return TH.db.receipts.filter(function (r) { return r.status === 'pending' && TH.inScope(TH.calc.invoice(r.invoiceId).buildingId); }).length; }], ['PAY-02', 'wallet', 'Công nợ & mốc 5/10/15'], ['EXP-01', 'expense', 'Chi phí']] },
     { label: 'Nhân sự & lợi nhuận', items: [['HR-01', 'briefcase', 'Nhân sự & đội nhóm'], ['SAL-01', 'calculator', 'Lương nháp'], ['SHARE-01', 'pie', 'Cổ phần theo tòa']] },

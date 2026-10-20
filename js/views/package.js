@@ -22,11 +22,12 @@
           title: 'Cấu hình hiển thị gói',
           sub: '<span class="screen-id">DEMO-PKG-01</span> · UX PROPOSED — chỉ dùng cho prototype',
           body: '<div class="stack">' +
-            '<div class="alert alert-warning">' + I('info', 'ic-sm') + '<div class="alert-body">Đây là chế độ xem phạm vi báo giá, không thay đổi quyền, dữ liệu hoặc gói thanh toán.</div></div>' +
+            '<div class="alert alert-warning">' + I('info', 'ic-sm') + '<div class="alert-body">Đây là chế độ xem phạm vi báo giá, không thay đổi quyền, dữ liệu hoặc gói thanh toán. Giá hiển thị thống nhất với cấu hình demo, <b>chưa đối chiếu Excel báo giá gốc</b> (QA-B01).</div></div>' +
             '<fieldset style="border:0;margin:0;padding:0"><legend class="section-title">Chọn gói A / B / C / D</legend><div class="pkg-options">' + opts + '</div></fieldset>' +
             '<label class="switch"><input type="checkbox" data-act-change="pkg.locked"' + (s.showLocked ? ' checked' : '') + '><span class="switch-track"></span><span><b>Hiện tính năng gói cao hơn dưới dạng khóa</b><br><span class="small muted">Tắt để ẩn toàn bộ phần nâng cấp vượt gói. Phần lõi A luôn hiển thị.</span></span></label>' +
             '<button type="button" class="btn" data-act="pkg.compare" style="justify-content:flex-start">' + I('compare') + 'So sánh 52 chức năng<span style="margin-left:auto" class="muted small">bảng rộng</span></button>' +
             bldPack(lvl) +
+            cusPack(lvl) +
             reportPack(lvl) +
             here +
             '<div><div class="section-title">Liên kết gửi khách</div><div class="copy-field"><label class="sr-only" for="pkg-link">Deep link</label><input id="pkg-link" class="input input-sm" readonly value="' + esc(TH.store.deepLink()) + '"><button type="button" class="btn btn-sm" data-act="pkg.copy">' + I('copy', 'ic-sm') + 'Chép</button></div><div class="field-hint" style="margin-top:6px"><code>?previewPackage=' + s.pkg + '</code> là [UX PROPOSED], không phải route/API production.</div></div>' +
@@ -42,6 +43,13 @@
       var on = lvl >= TH.PACKAGES[k].level, rp = TH.BLD_PACK[k];
       return '<div class="rpt-pack-row' + (on ? '' : ' is-off') + '">' + TH.tierPill(k, { plus: k !== 'A' }) + '<div><b class="small rpt-pack-hd">' + (on ? '' : I('lock', 'ic-sm')) + esc(rp.head) + '</b><ul>' + rp.items.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></div></div>';
     }).join('') + '</div><div class="row" style="margin-top:8px;gap:8px"><a class="btn btn-sm" href="' + TH.router.href('OWN-02', 'CN-001') + '" data-close>' + I('owner', 'ic-sm') + 'Hồ sơ chủ nhà</a><a class="btn btn-sm" href="' + TH.router.href('BLD-02', 'TH-CG') + '" data-close>' + I('building', 'ic-sm') + 'Hồ sơ tòa</a></div></div>';
+  }
+  /* Hồ sơ khách thuê trong từng gói (CR-CUS-01) */
+  function cusPack(lvl) {
+    return '<div><div class="section-title">Hồ sơ khách thuê trong gói <span class="badge badge-info" data-tip="' + esc(TH.CR_CUS.title + ' · ' + TH.CR_CUS.id) + '">CR</span></div><div class="rpt-pack">' + TH.PKG_KEYS.map(function (k) {
+      var on = lvl >= TH.PACKAGES[k].level, rp = TH.CUS_PACK[k];
+      return '<div class="rpt-pack-row' + (on ? '' : ' is-off') + '">' + TH.tierPill(k, { plus: k !== 'A' }) + '<div><b class="small rpt-pack-hd">' + (on ? '' : I('lock', 'ic-sm')) + esc(rp.head) + '</b><ul>' + rp.items.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></div></div>';
+    }).join('') + '</div><div class="row" style="margin-top:8px;gap:8px"><a class="btn btn-sm" href="' + TH.router.href('CUS-01') + '" data-close>' + I('users', 'ic-sm') + 'Danh sách khách</a><a class="btn btn-sm" href="' + TH.router.href('CUS-02', 'KH-008') + '" data-close>' + I('user', 'ic-sm') + 'Hồ sơ DD-102</a></div></div>';
   }
   /* Báo cáo theo mẫu khách có trong từng gói (CR-RPT-01) */
   function reportPack(lvl) {
@@ -170,12 +178,13 @@
       }).join('');
       var screensDone = TH.SRS_SCREENS().filter(function (s) { return TH.views[s.id]; }).length;
       var crDone = TH.SCREENS.filter(function (s) { return s.cr && TH.views[s.id]; }).map(function (s) { return s.id; });
-      return '<div class="page-hd"><div><nav class="crumbs"><span>Công cụ demo</span></nav><h1 class="page-title">Kiểm đếm mapping gói</h1><p class="page-desc">Quét render toàn bộ màn (kể cả tab/dialog khai báo) và ghi lại nơi mỗi increment B/C/D được gắn gate. Nguồn: SRS §5A' + (crDone.length ? ' + ' + esc(TH.CR_RPT.id) + ' (' + crDone.join(', ') + ' cũng được quét)' : '') + ' · ' + esc(TH.CR_BLD.id) + ' cập nhật nội dung OWN/BLD, F033, F036 (cùng 39 màn).</p></div></div>' +
+      return '<div class="page-hd"><div><nav class="crumbs"><span>Công cụ demo</span></nav><h1 class="page-title">Kiểm đếm mapping gói</h1><p class="page-desc">Quét render toàn bộ màn (kể cả tab/dialog khai báo) và ghi lại nơi mỗi increment B/C/D được gắn gate. Nguồn: SRS §5A' + (crDone.length ? ' + ' + esc(TH.CR_RPT.id) + ' (' + crDone.join(', ') + ' cũng được quét)' : '') + ' · ' + esc(TH.CR_BLD.id) + ' cập nhật nội dung OWN/BLD, F033, F036; ' + esc(TH.CR_CUS.id) + ' cập nhật CUS-01/02, F010, F012, F015, F016, F031 (cùng 39 màn).</p></div><div class="page-actions">' + TH.exportBtn('qa.rtm', 'Xuất RTM (.xlsx)') + '</div></div>' +
         '<div class="grid-4" style="margin-bottom:16px">' +
         TH.kpi({ label: 'Màn đã dựng', value: screensDone + '<small>/ 39</small>', icon: 'grid' }) +
         TH.kpi({ label: 'Nhóm chức năng', value: TH.FEATURES.length + '<small>/ 52</small>', icon: 'layers' }) +
         TH.kpi({ label: 'Increment B/C/D đã gắn', value: covered + '<small>/ ' + total + '</small>', icon: 'checkCircle' }) +
         TH.kpi({ label: 'Chưa gắn', value: String(missing.length), icon: 'alert', foot: missing.length ? esc(missing.slice(0, 8).join(', ')) + (missing.length > 8 ? '…' : '') : 'Đủ 100%' }) + '</div>' +
+        (TH.qaPanel ? TH.qaPanel() : '') +
         '<div class="card card-flush"><div class="table-wrap"><table class="table"><thead><tr><th>Mã</th><th>Chức năng</th><th>A</th><th>B</th><th>C</th><th>D</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
     },
   };

@@ -1,44 +1,111 @@
-/* Khách thuê: CUS-01 (danh sách), CUS-02 (hồ sơ & OCR), OCR-CUS (OCR giấy tờ). F010, F011, F013. */
+/* Khách thuê: CUS-01 (danh sách theo hồ sơ thuê), CUS-02 (hồ sơ thuê: lưu trú / hợp đồng / tài chính), OCR-CUS (OCR giấy tờ).
+   F010, F011, F012, F013, F015, F031 — CR-CUS-01 (note.md §8) + áp dụng bộ trả lời CR_CUS_ANSWERS 20/10/2026 (K-01…K-09, PROPOSED). */
 (function () {
   var I = TH.icon, esc = TH.esc, F = TH.fmt, C = TH.calc;
+  function digits(v) { return +String(v === null || v === undefined ? '' : v).replace(/\D/g, '') || 0; }
 
-  function contractOf(k) { return TH.db.contracts.find(function (c) { return c.customerId === k.id && c.status === 'active'; }); }
+  function contractOf(k) { return C.contractOfCustomer(k); }
   function visible(k) { var c = contractOf(k); return !c || TH.inScope(c.buildingId); }
+  function roomCode(c) { return c ? c.roomId + ' — ' + c.buildingId : ''; }
+  function plateHtml(v, full) { return v.plate ? '<span class="mono"' + (full ? '' : ' data-tip="Biển số che một phần — xem đầy đủ ở chi tiết khi có quyền"') + '>' + esc(full ? v.plate : TH.maskPlate(v.plate)) + '</span>' : '<span class="muted small">Không biển số</span>'; }
+  function stateHtml(s, o) {
+    o = o || {};
+    var tags = s.tags.filter(function (t) { return !(o.skipDebt && t.axis === 'debt'); });
+    return '<span class="st-cell">' + TH.badge(s.main.label, s.main.tone, { dot: true }) + tags.map(function (t) {
+      return TH.badge(t.label + (t.sub && !o.compact ? ' · ' + t.sub : ''), t.tone, t.sub && o.compact ? { tip: t.sub } : {});
+    }).join('') + '</span>';
+  }
+  function hasTag(s, id) { return s.tags.some(function (t) { return t.id === id; }); }
+  var FILTERS = {
+    renting: function (x) { return x.s.main.id === 'renting'; },
+    ended: function (x) { return x.s.main.id === 'ended'; },
+    expiring: function (x) { return hasTag(x.s, 'expiring'); },
+    broken: function (x) { return hasTag(x.s, 'broken'); },
+    refund: function (x) { return x.s.tags.some(function (t) { return t.axis === 'deposit' || t.id === 'refund'; }); },
+    debt: function (x) { return x.d.debt > 0; },
+    overdue: function (x) { return x.d.overdue > 0; },
+    oa: function (x) { return !x.k.oaLinked; },
+  };
+  /* K-02: một dòng = một hồ sơ thuê (HĐ); khách chưa có HĐ là một dòng riêng */
+  function tenancyRows() {
+    var rows = [];
+    TH.db.contracts.filter(function (c) { return c.status !== 'draft' && TH.inScope(c.buildingId); }).forEach(function (c) {
+      var k = C.customer(c.customerId); if (!k) return;
+      rows.push({ k: k, ct: c, s: C.tenancyStates(c), d: C.contractDebt(c.id) });
+    });
+    TH.db.customers.forEach(function (k) { if (!TH.db.contracts.some(function (c) { return c.customerId === k.id && c.status !== 'draft'; })) rows.push({ k: k, ct: null, s: C.tenancyStates(null), d: C.customerDebt(k.id) }); });
+    return rows.sort(function (a, b) { var oa = a.ct ? (a.ct.status === 'active' ? 0 : 1) : 2, ob = b.ct ? (b.ct.status === 'active' ? 0 : 1) : 2; return oa - ob || (a.ct && b.ct ? (a.ct.roomId < b.ct.roomId ? -1 : 1) : 0); });
+  }
+  function rowParam(x) { return x.ct ? x.ct.id : x.k.id; }
+  TH.act['cus.open'] = function (el) { if (el.dataset.tab) TH.store.setUi('CUS-02', 'tab', el.dataset.tab); TH.go('CUS-02', el.dataset.id); };
 
   /* ---------------- CUS-01 ---------------- */
   TH.views['CUS-01'] = {
+    scan: function () { return ['all', 'renting', 'ended', 'expiring', 'broken', 'refund', 'debt'].map(function (st) { return { ui: { st: st } }; }); },
     render: function () {
       var S = 'CUS-01', q = TH.store.ui(S, 'q', ''), st = TH.store.ui(S, 'st', 'all');
-      var all = TH.db.customers.filter(visible);
-      var rows = all.filter(function (k) { var c = contractOf(k); return (st === 'all' || (st === 'renting' ? !!c : st === 'nocontract' ? !c : st === 'oa' ? !k.oaLinked : true)) && TH.match(q, [k.id, k.name, k.phone, c ? c.roomId : '']); });
+      if (st === 'overdue' && !TH.has('F031.B')) st = 'all';
+      var all = tenancyRows();
+      var cnt = function (f) { return all.filter(FILTERS[f]).length; };
+      var rows = all.filter(function (x) {
+        var c = x.ct, b = c ? C.building(c.buildingId) : null;
+        return (st === 'all' || FILTERS[st](x)) && TH.match(q, [x.k.id, x.k.name, x.k.phone, c ? c.id : '', c ? c.roomId : '', c ? c.buildingId : '', b ? b.short : '']);
+      });
       var pg = TH.paginate(S, rows, 12);
       var table = TH.table({
-        label: 'Danh sách khách',
+        label: 'Danh sách hồ sơ thuê',
         cols: [
-          { key: 'id', label: 'Mã khách', render: function (k) { return '<span class="mono">' + k.id + '</span>'; } },
-          { key: 'n', label: 'Tên', render: function (k) { return '<a class="cell-main" href="' + TH.router.href('CUS-02', k.id) + '">' + esc(k.name) + '</a><div class="cell-sub">' + esc(k.idType) + ' ' + esc(k.idNo) + '</div>'; } },
-          { key: 'p', label: 'Số liên hệ', render: function (k) { return esc(k.phone); } },
-          { key: 'r', label: 'Phòng', render: function (k) { var c = contractOf(k); return c ? TH.roomLink(c.roomId) : '<span class="muted">—</span>'; } },
-          { key: 'c', label: 'Hợp đồng', render: function (k) { var c = contractOf(k); return c ? '<a class="mono small" href="' + TH.router.href('CON-02', c.id) + '">' + esc(c.id) + '</a>' : '<span class="muted">Chưa gán</span>'; } },
-          { key: 'oa', label: 'Zalo OA', render: function (k) { return k.oaLinked ? TH.badge('Đã liên kết', 'success') : TH.badge('Chưa liên kết', 'neutral'); } },
-          { key: 's', label: 'Trạng thái', render: function (k) { return TH.status(contractOf(k) ? 'occupied' : 'active', contractOf(k) ? 'Đang thuê' : 'Chưa có HĐ'); } },
-          { key: 'v', label: 'Phiên bản định danh', gate: 'F010.D', render: function (k) { return 'v' + (1 + TH.db.customerHistory.filter(function (h) { return h.customerId === k.id; }).length); } },
+          { key: 'room', label: 'Mã phòng / Mã tòa', render: function (x) { var c = x.ct; return '<a class="cell-main' + (c ? ' mono' : '') + '" style="white-space:nowrap" href="' + TH.router.href('CUS-02', rowParam(x)) + '">' + esc(c ? roomCode(c) : x.k.name) + '</a><div class="cell-sub">' + (c ? esc(x.k.name) + ' · <span class="mono">' + esc(c.id) + '</span>' : 'Chưa gán phòng · <span class="mono">' + x.k.id + '</span>'); } },
+          { key: 'lead', label: 'Trưởng khu vực (TPVH)', gate: 'F006.B', render: function (x) {
+            var c = x.ct; if (!c) return '<span class="muted">—</span>';
+            var h = C.areaHead(c.buildingId), l = C.teamLead(c.buildingId);
+            return (h ? esc(C.staffName(h)) : '<span class="muted" data-tip="Chưa khai báo Trưởng phòng vận hành phụ trách khu vực của tòa — không lấy Trưởng nhóm thay thế (K-01)">Chưa phân công</span>') + '<div class="cell-sub">Trưởng nhóm: ' + (l ? esc(C.staffName(l)) : '—') + '</div>';
+          } },
+          { key: 'ops', label: 'NV vận hành', render: function (x) { var c = x.ct; return c ? esc(C.staffName(C.opsStaff(c.buildingId))) : '<span class="muted">—</span>'; } },
+          { key: 'debt', label: 'Công nợ', num: true, render: function (x) {
+            if (!x.d.debt) return '<span class="muted tnum">0 ₫</span>';
+            return '<a class="tnum strong' + (x.d.overdue ? ' neg' : '') + '" href="#" data-act="cus.open" data-id="' + esc(rowParam(x)) + '" data-tab="fin">' + F.money(x.d.debt) + '</a>' + (x.d.overdue ? '<div class="cell-sub neg">quá hạn ' + x.d.overdueCount + ' kỳ</div>' : '');
+          } },
+          { key: 'oa', label: 'Liên kết Zalo', render: function (x) { return x.k.oaLinked ? TH.badge('Đã liên kết', 'success') : TH.badge('Chưa liên kết', 'neutral'); } },
+          { key: 's', label: 'Trạng thái', render: function (x) { return stateHtml(x.s, { compact: true, skipDebt: true }); } },
+          { key: 'v', label: 'Phiên bản định danh', gate: 'F010.D', render: function (x) { return 'v' + (1 + TH.db.customerHistory.filter(function (h) { return h.customerId === x.k.id; }).length); } },
+          { key: 'a', label: '', render: function (x) { return '<button type="button" class="btn btn-xs" data-act="cus.open" data-id="' + esc(rowParam(x)) + '">Xem chi tiết</button>'; } },
         ],
         rows: pg.rows,
-        rowAttrs: function (k) { return 'class="is-clickable" tabindex="0" data-href="' + TH.router.href('CUS-02', k.id) + '"'; },
+        rowAttrs: function (x) { return 'class="is-clickable" tabindex="0" data-href="' + TH.router.href('CUS-02', rowParam(x)) + '"'; },
+        empty: { title: 'Không có hồ sơ phù hợp', text: 'Đổi bộ lọc hoặc từ khóa tìm kiếm.' },
       });
-      return TH.pageHeader({ screen: S, actions: '<button type="button" class="btn" data-act="go" data-href="' + TH.router.href('OCR-CUS') + '">' + I('scan', 'ic-sm') + 'OCR giấy tờ</button>' + TH.permBtn('contract.edit', '<button type="button" class="btn btn-primary" data-act="cus.add">' + I('userPlus', 'ic-sm') + 'Thêm khách</button>', 'Thêm · 403') }) +
-        '<div class="card card-flush"><div class="toolbar">' + TH.searchBox(S, 'Tìm mã, tên, số liên hệ, phòng…') + TH.chips(S, 'st', [{ id: 'all', label: 'Tất cả', count: all.length }, { id: 'renting', label: 'Đang thuê' }, { id: 'nocontract', label: 'Chưa có HĐ' }, { id: 'oa', label: 'Chưa liên kết OA' }], st) + '</div>' + table + TH.pager(S, pg) + '</div>' +
-        '<p class="small muted" style="margin-top:10px">' + I('shield', 'ic-sm') + ' Thông tin định danh được che (mask) trong toàn bộ bản demo.</p>';
+      var debtAll = C.sum(all, function (x) { return x.d.debt; }), overAll = C.sum(all, function (x) { return x.d.overdue; });
+      var kpis = '<div class="grid-4" style="margin-bottom:16px">' +
+        TH.kpi({ label: 'Đang thuê', icon: 'users', value: String(cnt('renting')), foot: all.length + ' hồ sơ thuê trong phạm vi (' + cnt('ended') + ' đã kết thúc)' }) +
+        TH.kpi({ label: 'Chuẩn bị hết HĐ', icon: 'calendar', value: String(cnt('expiring')), foot: 'Nhắc trước ' + TH.expiryDays() + ' ngày (cấu hình)', href: TH.router.href('CON-03') }) +
+        TH.kpi({ label: 'Hồ sơ cọc / phá HĐ', icon: 'wallet', value: String(cnt('refund')), foot: cnt('broken') + ' phá HĐ · ' + all.filter(function (x) { return x.s.depositCase && TH.DEPOSIT_OPEN.indexOf(x.s.depositCase.state) > -1; }).length + ' đang xử lý cọc' }) +
+        TH.kpi({ label: 'Công nợ khách', icon: 'receipt', value: F.short(debtAll), neg: overAll > 0, foot: overAll ? 'Quá hạn ' + F.money(overAll) : 'Không có khoản quá hạn' }) + '</div>';
+      var chips = [{ id: 'all', label: 'Tất cả', count: all.length }, { id: 'renting', label: 'Đang thuê', count: cnt('renting') }, { id: 'expiring', label: 'Sắp hết HĐ (' + TH.expiryDays() + ' ngày)', count: cnt('expiring') }, { id: 'broken', label: 'Phá HĐ', count: cnt('broken') }, { id: 'refund', label: 'Hồ sơ cọc', count: cnt('refund') }, { id: 'ended', label: 'Đã kết thúc', count: cnt('ended') }, { id: 'debt', label: 'Còn nợ', count: cnt('debt') }]
+        .concat(TH.has('F031.B') ? [{ id: 'overdue', label: 'Quá hạn', count: cnt('overdue') }] : []).concat([{ id: 'oa', label: 'Chưa liên kết Zalo', count: cnt('oa') }]);
+      var actions = '<button type="button" class="btn" data-act="go" data-href="' + TH.router.href('OCR-CUS') + '">' + I('scan', 'ic-sm') + 'OCR giấy tờ</button>' +
+        TH.gate('F031.B', TH.exportBtn('cus.debtx', 'Xuất công nợ (.xlsx)'), { mode: 'btn', label: 'Danh sách quá hạn / xuất file' }) +
+        TH.permBtn('contract.edit', '<button type="button" class="btn btn-primary" data-act="cus.add">' + I('userPlus', 'ic-sm') + 'Thêm khách</button>', 'Thêm · 403');
+      return TH.pageHeader({ screen: S, actions: actions, desc: 'Danh sách theo <b>hồ sơ thuê</b> (mỗi hợp đồng một dòng) — nhấn mã phòng hoặc <b>Xem chi tiết</b> để mở thông tin lưu trú, hợp đồng và tài chính.' }) + kpis +
+        '<div class="card card-flush"><div class="toolbar">' + TH.searchBox(S, 'Tìm mã phòng, mã tòa, số HĐ, tên, số liên hệ…') + TH.chips(S, 'st', chips, st) + '</div>' + table + TH.pager(S, pg) + '</div>' +
+        '<p class="small muted" style="margin-top:10px">' + I('shield', 'ic-sm') + ' Thông tin định danh và biển số được che (mask) trong danh sách, tooltip và file xuất. Trạng thái = 1 trạng thái vòng đời + nhãn theo trục (kết thúc, thời hạn, bàn giao, cọc); công nợ tính từ hóa đơn/phiếu thu đã xác nhận. Mô hình là <b>PROPOSED</b> theo bộ trả lời K-01…K-09 (CR-CUS-01), chưa phải khách phê duyệt.</p>';
     },
     dialogs: [function () { cusForm(); }],
+  };
+  TH.act['cus.debtx'] = function () {
+    var list = tenancyRows().filter(function (x) { return x.d.debt > 0; });
+    TH.exportXlsx('Cong_no_khach_' + TH.TODAY, [{ name: 'Cong no', title: 'Công nợ theo hồ sơ thuê — ' + TH.scopeLabel(), note: 'Dữ liệu minh họa · chỉ tính hóa đơn đã xác nhận và phiếu thu đã xác nhận · không xuất biển số/giấy tờ',
+      columns: [{ label: 'Mã phòng — tòa', width: 18 }, { label: 'Số HĐ', width: 16 }, { label: 'Khách', width: 24 }, { label: 'Liên hệ', width: 16 }, { label: 'NV vận hành', width: 20 }, { label: 'Còn nợ', type: 'money' }, { label: 'Quá hạn', type: 'money' }, { label: 'Số kỳ quá hạn', type: 'number' }],
+      rows: list.map(function (x) { var c = x.ct; return [roomCode(c), c ? c.id : '', x.k.name, x.k.phone, c ? C.staffName(C.opsStaff(c.buildingId)) : '', x.d.debt, x.d.overdue, x.d.overdueCount]; }) }]);
+    TH.toast('Đã xuất công nợ', list.length + ' hồ sơ còn nợ · .xlsx');
   };
   function cusForm() {
     var form = 'cus-new', name = (TH.store.draft(form, 'name', '') || '').trim(), idNo = (TH.store.draft(form, 'idNo', '') || '').replace(/\D/g, '');
     var dup = idNo.length >= 3 ? TH.db.customers.filter(function (k) { return k.idNo.replace(/\D/g, '').slice(-3) === idNo.slice(-3); }) : [];
     return { title: 'Thêm khách (nhập tay)', sub: 'CUS-01 · có thể dùng OCR giấy tờ để điền nhanh',
       body: '<div class="stack"><div class="form-grid">' + TH.field({ form: form, name: 'name', label: 'Họ tên', def: '', required: true }) + TH.field({ form: form, name: 'dob', label: 'Ngày sinh', type: 'date', def: '' }) +
-        TH.field({ form: form, name: 'phone', label: 'Số liên hệ', def: '' }) + TH.field({ form: form, name: 'idNo', label: 'Số giấy tờ', def: '', live: true, hint: 'Lưu dạng mask' }) + '</div>' +
+        TH.field({ form: form, name: 'phone', label: 'Số liên hệ', def: '' }) + TH.field({ form: form, name: 'idNo', label: 'Số giấy tờ', def: '', live: true, hint: 'Lưu dạng mask' }) +
+        TH.field({ form: form, name: 'occupation', label: 'Nghề nghiệp', def: '' }) + TH.field({ form: form, name: 'hometown', label: 'Quê quán', def: '' }) + '</div>' +
         TH.gate('F010.B', dup.length ? '<div class="alert alert-warning">' + I('alert', 'ic-sm') + '<div class="alert-body"><b>Nghi trùng theo số giấy tờ ' + TH.up('F010.B') + '</b><span>' + dup.map(function (k) { return esc(k.id + ' · ' + k.name); }).join(', ') + '</span></div></div>' : '<div class="alert alert-success">' + I('checkCircle', 'ic-sm') + '<div class="alert-body">Kiểm trùng theo trường nhận dạng đã duyệt ' + TH.up('F010.B') + ': chưa phát hiện.</div></div>', { label: 'Kiểm trùng theo trường nhận dạng', ghost: 'self' }) + '</div>',
       foot: '<button type="button" class="btn" data-close>Hủy</button><button type="button" class="btn btn-primary" data-act="cus.save"' + (name ? '' : ' disabled') + '>Lưu khách</button>' };
   }
@@ -46,52 +113,521 @@
   TH.act['cus.save'] = function () {
     var g = function (k, d) { return TH.store.draft('cus-new', k, d); };
     var id = 'KH-' + String(TH.db.customers.length + 1).padStart(3, '0'), idNo = String(g('idNo', '')).replace(/\D/g, '');
-    TH.db.customers.push({ id: id, name: g('name', ''), dob: g('dob', ''), phone: g('phone', '') || '—', idNo: idNo ? idNo.slice(0, 4) + '•••••' + idNo.slice(-3) : '—', idType: 'CCCD', hometown: '—', oaLinked: false, oaConsentAt: null, status: 'active', createdAt: TH.TODAY });
+    TH.db.customers.push({ id: id, name: g('name', ''), dob: g('dob', ''), phone: g('phone', '') || '—', idNo: idNo ? idNo.slice(0, 4) + '•••••' + idNo.slice(-3) : '—', idType: 'CCCD', hometown: g('hometown', '') || '—', occupation: g('occupation', ''), permAddress: '', note: '', vehicles: [], oaLinked: false, oaConsentAt: null, status: 'active', createdAt: TH.TODAY });
     TH.log('Thêm khách', id, g('name', ''), 'customer'); TH.store.clearDraft('cus-new'); TH.modal.close('cus-form', { silent: true }); TH.app.refresh(); TH.toast('Đã thêm khách', esc(id));
   };
 
+  /* ---------------- CUS-02: các nhóm sửa inline (note.md §8.7 → §7.1) ---------------- */
+  var INFO_LABELS = { name: 'Họ tên', dob: 'Ngày sinh', phone: 'Số điện thoại', occupation: 'Nghề nghiệp', hometown: 'Quê quán', permAddress: 'Địa chỉ thường trú', note: 'Ghi chú' };
+  var CONTACT_FIELDS = ['phone', 'permAddress']; // chỉ thay đổi thông tin LIÊN HỆ mới ghi “Lịch sử thông tin liên hệ” (F010.C); mọi thay đổi khác chỉ vào audit log
+  TH.SECTIONS.cusInfo = {
+    title: 'Thông tin khách hàng',
+    sub: 'Giữ thông tin hồ sơ hiện có + nghề nghiệp',
+    perm: 'contract.edit',
+    values: function (id) { var k = C.customer(id); return { name: k.name, dob: k.dob || '', phone: k.phone, occupation: k.occupation || '', hometown: k.hometown || '', permAddress: k.permAddress || '', note: k.note || '' }; },
+    fields: function (id) {
+      var k = C.customer(id);
+      return [{ name: 'name', label: 'Họ tên', required: true }, { name: 'dob', label: 'Ngày sinh', type: 'date' },
+        { html: TH.field({ name: 'idv', label: 'Giấy tờ (mask — không sửa trực tiếp)', value: k.idType + ' · ' + k.idNo, readonly: true, hint: 'Cập nhật giấy tờ qua OCR & review' }) },
+        { name: 'phone', label: 'Số điện thoại', hint: 'Thay đổi được ghi vào lịch sử thông tin liên hệ' }, { name: 'occupation', label: 'Nghề nghiệp', placeholder: 'VD: Nhân viên văn phòng' }, { name: 'hometown', label: 'Quê quán' },
+        { name: 'permAddress', label: 'Địa chỉ thường trú', span: true }, { name: 'note', label: 'Ghi chú', type: 'textarea', span: true, rows: 2 }];
+    },
+    validate: function (v) { return !v.name ? 'Nhập họ tên khách.' : null; },
+    save: function (id, v, changed) {
+      var k = C.customer(id);
+      changed.forEach(function (f) { if (CONTACT_FIELDS.indexOf(f) > -1) TH.db.customerHistory.unshift({ customerId: id, at: TH.TODAY, field: INFO_LABELS[f] || f, before: k[f] || '—', after: v[f] || '—', by: TH.me().id }); });
+      Object.keys(INFO_LABELS).forEach(function (f) { k[f] = v[f]; });
+    },
+    log: function (id, v, changed) { var c = contractOf(C.customer(id)); return ['Sửa thông tin khách', id, (c ? roomCode(c) + ' · ' : '') + changed.map(function (f) { return INFO_LABELS[f] || f; }).join(', '), 'customer', c ? c.buildingId : null]; },
+    view: function (id, v) {
+      var k = C.customer(id);
+      return TH.kv([['Mã khách', '<span class="mono">' + k.id + '</span>'], ['Họ tên', esc(v.name)], ['Ngày sinh', v.dob ? F.date(v.dob) : '—'], ['Giấy tờ', esc(k.idType + ' · ' + k.idNo) + ' ' + TH.badge('Đã mask', 'neutral', { icon: 'shield' })], ['Số điện thoại', esc(v.phone)],
+        ['Nghề nghiệp', v.occupation ? esc(v.occupation) : '<span class="muted">Chưa cập nhật</span>'], ['Quê quán', esc(v.hometown || '—')], ['Thường trú', v.permAddress ? esc(v.permAddress) : '<span class="muted">Chưa cập nhật</span>'],
+        ['Zalo OA', k.oaLinked ? TH.badge('Đã liên kết', 'success') + ' <span class="small muted">đồng ý ' + F.date(k.oaConsentAt) + '</span>' : TH.badge('Chưa liên kết — không gửi tin', 'neutral')], ['Ghi chú', v.note ? esc(v.note) : '<span class="muted">—</span>']]);
+    },
+  };
+
+  /* Dòng phí theo từng HĐ (K-05): danh mục 9 dòng, mỗi HĐ chọn dòng áp dụng + cách tính + hiệu lực + căn cứ; dòng cố định đồng bộ sang bộ phí lập hóa đơn (F015) */
+  function priceRows(ct) { return TH.FEE_TYPES.map(function (t) { return Object.assign({ t: t }, ct.priceList.find(function (l) { return l.code === t.code; }) || { code: t.code, price: 0, method: 'na', active: false, note: '' }); }); }
+  function estOf(ct, l) { var q = TH.priceQty(ct, l); return l.active && q !== null ? (+l.price || 0) * q : null; }
+  function qtyLabel(ct, l) {
+    var q = TH.priceQty(ct, l);
+    if (!l.active) return '—';
+    if (q === null) return '<span class="small muted">theo chỉ số</span>';
+    if (l.method === 'per_vehicle') { var t = TH.feeType(l.code), pend = TH.vehiclesOf(ct, t.vehicleType, 'pending').length; return q + ' xe <span class="small muted">' + (l.qtySource === 'manual' ? '(ghi trong HĐ)' : '(đã xác nhận)') + '</span>' + (pend ? '<div class="cell-sub warn-text">' + pend + ' xe chờ xác nhận — chưa tính</div>' : ''); }
+    return q + ' ' + (l.method === 'per_person' ? 'người' : 'phòng');
+  }
+  /* F012.C: so khớp xe đã xác nhận ↔ số xe ghi trong HĐ (chỉ với dòng nhập tay) */
+  function parkMismatch(ct) {
+    var out = [];
+    ct.priceList.forEach(function (l) {
+      if (!l.active || l.method !== 'per_vehicle' || l.qtySource !== 'manual') return;
+      var t = TH.feeType(l.code), n = TH.vehiclesOf(ct, t.vehicleType, 'active').length, q = +l.qty || 0;
+      if (n !== q) out.push(t.name + ': hồ sơ có ' + n + ' ' + t.vehicleType.toLowerCase() + ' đã xác nhận nhưng HĐ ghi ' + q + ' xe');
+    });
+    return out.length ? out.join('; ') : null;
+  }
+  TH.SECTIONS.cusPrice = {
+    title: 'Dòng phí dịch vụ theo hợp đồng',
+    sub: function (id) { return esc(id) + ' · lưu riêng từng HĐ — các HĐ có thể áp dụng mức giá/cách tính khác nhau'; },
+    perm: 'contract.edit',
+    readonly: function (id) { return C.contract(id).status !== 'active'; },
+    values: function (id) {
+      var v = {};
+      priceRows(C.contract(id)).forEach(function (l) { v['p_' + l.code] = l.method === 'na' ? '' : l.price; v['m_' + l.code] = l.method; v['s_' + l.code] = l.method === 'per_vehicle' ? (l.qtySource || 'vehicles') : ''; v['q_' + l.code] = l.method === 'per_vehicle' && l.qtySource === 'manual' ? (l.qty === undefined ? '' : l.qty) : ''; v['n_' + l.code] = l.note || ''; });
+      return v;
+    },
+    fields: function (id) {
+      var ct = C.contract(id), form = TH.secForm('cusPrice', id), vals = TH.SECTIONS.cusPrice.values(id);
+      var g = function (k) { var d = TH.store.draft(form, k); return d === undefined ? vals[k] : d; };
+      var oldFixed = 0, newFixed = 0;
+      var rows = TH.FEE_TYPES.map(function (t) {
+        var m = g('m_' + t.code), p = g('p_' + t.code), src = g('s_' + t.code) || 'vehicles', qv = g('q_' + t.code);
+        var l = { code: t.code, method: m, price: digits(p), qtySource: src, qty: digits(qv), active: m !== 'na' };
+        var old = ct.priceList.find(function (x) { return x.code === t.code; }) || {};
+        if (old.active && TH.FIXED_METHODS.indexOf(old.method) > -1) oldFixed += (+old.price || 0) * (TH.priceQty(ct, old) || 0);
+        if (l.active && TH.FIXED_METHODS.indexOf(m) > -1) newFixed += l.price * (TH.priceQty(ct, l) || 0);
+        var qtyCell = m === 'per_vehicle'
+          ? '<select class="select select-sm" aria-label="Nguồn số xe ' + esc(t.name) + '" data-draft="' + form + '.s_' + t.code + '"><option value="vehicles"' + (src === 'vehicles' ? ' selected' : '') + '>Xe đã xác nhận (' + TH.vehiclesOf(ct, t.vehicleType, 'active').length + ')</option><option value="manual"' + (src === 'manual' ? ' selected' : '') + '>Nhập tay theo HĐ</option></select>' + (src === 'manual' ? '<input class="input input-sm num" inputmode="numeric" style="max-width:64px;margin-top:4px" aria-label="Số xe ' + esc(t.name) + '" data-draft="' + form + '.q_' + t.code + '" data-live value="' + esc(qv) + '">' : '')
+          : '<span class="small muted">' + (m === 'per_person' ? ct.people + ' người' : m === 'per_room' ? '1 phòng' : m === 'na' ? '—' : 'theo chỉ số') + '</span>';
+        return '<tr><td><b>' + esc(t.name) + '</b>' + (t.hint ? '<div class="cell-sub">' + esc(t.hint) + '</div>' : '') + '</td>' +
+          '<td><select class="select select-sm" aria-label="Cách tính ' + esc(t.name) + '" data-draft="' + form + '.m_' + t.code + '">' + t.methods.map(function (x) { return '<option value="' + x + '"' + (x === m ? ' selected' : '') + '>' + esc(TH.FEE_METHODS[x]) + '</option>'; }).join('') + '</select></td>' +
+          '<td>' + (m === 'na' ? '<span class="muted small">—</span>' : '<input class="input input-sm num" inputmode="numeric" aria-label="Đơn giá ' + esc(t.name) + '" data-draft="' + form + '.p_' + t.code + '" data-live value="' + esc(p) + '"><div class="cell-sub">' + esc(TH.feeUnit(t.code, m)) + '</div>') + '</td>' +
+          '<td>' + qtyCell + '</td>' +
+          '<td><input class="input input-sm" aria-label="Ghi chú ' + esc(t.name) + '" data-draft="' + form + '.n_' + t.code + '" value="' + esc(g('n_' + t.code)) + '"></td></tr>';
+      }).join('');
+      var preview = TH.gate('F015.C', '<div class="alert alert-neutral" style="margin-top:12px">' + I('chart', 'ic-sm') + '<div class="alert-body"><b>Preview tác động ' + TH.up('F015.C') + '</b><span>Phí cố định/tháng ' + F.money(oldFixed) + ' → <b>' + F.money(newFixed) + '</b> (' + (newFixed - oldFixed >= 0 ? '+' : '') + F.money(newFixed - oldFixed) + '/tháng). Áp dụng từ kỳ sau khi lưu; hóa đơn đã lập không tính lại.</span></div></div>', { mode: 'mini', label: 'Preview tác động khi đổi biểu phí' });
+      return [{ html: '<div class="field span-2"><div class="table-wrap"><table class="table table-compact price-edit"><thead><tr><th>Dòng phí</th><th>Cách tính</th><th>Đơn giá</th><th>SL áp dụng</th><th>Ghi chú</th></tr></thead><tbody>' + rows + '</tbody></table></div>' + preview +
+        '<div class="field-hint" style="margin-top:8px">Cách tính theo mẫu HĐ đã ký của hồ sơ này (' + esc((ct.terms || {}).templateName || '') + '). Thang máy mặc định diễn giải trong Dịch vụ chung; sạc theo kWh cần công tơ phụ — hai mục này <b>PENDING_APPROVAL</b> (K-05). Căn cứ dòng phí: ' + esc((ct.priceList[0] || {}).basis || '') + '.</div></div>' }];
+    },
+    validate: function (v) {
+      var bad = TH.FEE_TYPES.filter(function (t) { return v['m_' + t.code] !== 'na' && String(v['p_' + t.code]).replace(/[\s.,]/g, '') !== '' && !/^\d+$/.test(String(v['p_' + t.code]).replace(/[\s.,]/g, '')); });
+      return bad.length ? 'Đơn giá phải là số: ' + bad.map(function (t) { return t.name; }).join(', ') + '.' : null;
+    },
+    save: function (id, v, changed) {
+      var ct = C.contract(id), from = TH.addMonthsYm(TH.TODAY.slice(0, 7), 1), codes = {};
+      changed.forEach(function (k) { codes[k.slice(2)] = true; });
+      ct.priceList = TH.FEE_TYPES.map(function (t) {
+        var l = ct.priceList.find(function (x) { return x.code === t.code; }) || { code: t.code, from: from, basis: '' };
+        var m = v['m_' + t.code];
+        l.method = m; l.active = m !== 'na'; l.price = m === 'na' ? 0 : digits(v['p_' + t.code]); l.note = v['n_' + t.code] || '';
+        if (m === 'per_vehicle') { l.qtySource = v['s_' + t.code] || 'vehicles'; if (l.qtySource === 'manual') l.qty = digits(v['q_' + t.code]); else delete l.qty; } else { delete l.qty; delete l.qtySource; }
+        if (codes[t.code]) { l.from = from; l.basis = 'Nhập tay ' + TH.TODAY + ' · ' + C.staffName(TH.me().id); }
+        return l;
+      });
+      if (Object.keys(codes).length) {
+        TH.syncFees(ct);
+        ct.versions.push({ v: ct.versions.length + 1, at: TH.TODAY, by: TH.me().id, note: 'Cập nhật dòng phí (' + Object.keys(codes).map(function (c) { return (TH.feeType(c) || { name: c }).name; }).join(', ') + ') hiệu lực từ kỳ ' + F.period(from) });
+      }
+    },
+    log: function (id) { var ct = C.contract(id); return ['Sửa dòng phí HĐ', id, ct.roomId, 'contract', ct.buildingId]; },
+    view: function (id) {
+      var ct = C.contract(id), mm = parkMismatch(ct);
+      var rows = priceRows(ct), on = rows.filter(function (l) { return l.active; }), off = rows.filter(function (l) { return !l.active; });
+      var total = C.sum(on, function (l) { return TH.FIXED_METHODS.indexOf(l.method) > -1 ? estOf(ct, l) || 0 : 0; });
+      return TH.table({ compact: true, cols: [
+        { key: 'n', label: 'Dòng phí', render: function (l) { return '<b>' + esc(l.t.name) + '</b>' + (l.note ? '<div class="cell-sub" style="max-width:260px;white-space:normal">' + esc(l.note) + '</div>' : ''); } },
+        { key: 'p', label: 'Đơn giá', num: true, render: function (l) { return F.money(l.price) + '<div class="cell-sub">' + esc(TH.feeUnit(l.code, l.method)) + '</div>'; } },
+        { key: 'm', label: 'Cách tính', render: function (l) { return esc(TH.FEE_METHODS[l.method]); } },
+        { key: 'q', label: 'SL áp dụng', render: function (l) { return qtyLabel(ct, l); } },
+        { key: 'a', label: 'Dự kiến/tháng', num: true, render: function (l) { var e = estOf(ct, l); return e === null ? '<span class="muted small">theo sử dụng</span>' : '<b>' + F.money(e) + '</b>'; } },
+        { key: 'from', label: 'Hiệu lực từ kỳ', gate: 'F015.B', render: function (l) { return F.period(l.from || ct.start.slice(0, 7)) + '<div class="cell-sub">' + esc(l.basis || '') + '</div>'; } },
+      ], rows: on, foot: { _label: 'Phí cố định/tháng', a: '<b>' + F.money(total) + '</b>' } }) +
+        '<p class="small muted" style="margin:8px 0 0">Dự kiến theo dòng phí — chưa gồm tiền phòng và điện/nước theo chỉ số công tơ. Dòng 0 đ (xe máy) vẫn lưu để đối chiếu số xe đăng ký.' + (off.length ? ' <b>Không áp dụng:</b> ' + off.map(function (l) { return esc(l.t.name) + (l.note ? ' (' + esc(l.note) + ')' : ''); }).join('; ') + '.' : '') + '</p>' +
+        (mm ? TH.gate('F012.C', '<div class="alert alert-warning" style="margin-top:12px">' + I('alert', 'ic-sm') + '<div class="alert-body"><b>So khớp xe – dòng phí ' + TH.up('F012.C') + '</b><span>' + esc(mm) + ' — kiểm tra trước khi lập hóa đơn; số xe tính phí lấy theo xe đã xác nhận đăng ký.</span></div></div>', { mode: 'mini', label: 'So khớp số xe ↔ dòng phí' }) : '');
+    },
+  };
+  TH.SECTIONS.cusNote = {
+    title: 'Ghi chú hợp đồng',
+    sub: 'Nhập tay, chỉnh sửa theo quyền',
+    perm: 'contract.edit',
+    values: function (id) { return { note: C.contract(id).note || '' }; },
+    fields: function () { return [{ name: 'note', label: 'Ghi chú', type: 'textarea', span: true, rows: 4, placeholder: 'VD: khách xin đóng tiền ngày 28; đã thống nhất thêm 1 xe đạp điện từ 11/2026…' }]; },
+    save: function (id, v) { C.contract(id).note = v.note; },
+    log: function (id) { var ct = C.contract(id); return ['Sửa ghi chú HĐ', id, ct.roomId, 'contract', ct.buildingId]; },
+    view: function (id, v) { return v.note ? '<p style="white-space:pre-line;margin:0">' + esc(v.note) + '</p>' : '<span class="muted">Chưa có ghi chú.</span>'; },
+  };
+
   /* ---------------- CUS-02 ---------------- */
+  function monthsOf(a, b) { return Math.max(1, Math.round((new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / 86400000 / 30.44)); }
+  function signLabel(ct) { var n = (ct.renewals || []).length; return n ? TH.badge('Gia hạn lần thứ ' + n, 'info', { icon: 'refresh' }) : ct.previousContractId ? TH.badge('HĐ mới nối tiếp ' + ct.previousContractId, 'info') : TH.badge('Hợp đồng lần đầu', 'neutral'); }
+  function ctLink(id, tab) { return '<a class="mono" href="#" data-act="cus.open" data-id="' + esc(id) + '"' + (tab ? ' data-tab="' + tab + '"' : '') + '>' + esc(id) + '</a>'; }
+  function termsBlock(c) {
+    var T = c.terms || {};
+    return '<div class="section-title" style="margin-top:14px">Điều khoản áp dụng (theo HĐ đã ký)</div>' + TH.kv([
+      ['Mẫu HĐ', esc(T.templateName || 'Chưa xác định') + (T.source ? ' <span class="small muted" data-tip="' + esc(T.source) + '">' + I('info', 'ic-sm') + '</span>' : '')],
+      ['Gia hạn', T.autoRenew ? 'Mặc nhiên ' + T.autoRenewMonths + ' tháng nếu không báo trước ' + T.noticeDays + ' ngày (Điều 3.4) — chỉ áp dụng khi đã kiểm tra thông báo chấm dứt' : '<b>Phải xác nhận bằng văn bản</b> trước khi hết hạn — không tự gia hạn'],
+      ['Khách báo trước', T.noticeDays ? T.noticeDays + ' ngày <span class="small muted">(nghĩa vụ theo HĐ)</span>' : '<span class="muted">HĐ không ghi</span>'],
+      ['Cảnh báo vận hành', TH.expiryDays() + ' ngày trước hết hạn <span class="small muted">(cấu hình doanh nghiệp K-06 — khác mốc báo trước của HĐ)</span>'],
+      ['Hoàn cọc', T.refundDays ? 'Trong ' + T.refundDays + ' ngày sau bàn giao (Điều 4.3)' : '<span class="muted">HĐ không ghi thời hạn — chưa xác định hạn, không tự báo quá hạn</span>'],
+      ['Chấm dứt trước hạn', T.earlyTermination === 'forfeit_all' ? 'HĐ ghi mất toàn bộ cọc (Điều 4.3/7.1) — mức giữ cọc vẫn phải được duyệt theo hồ sơ' : '<span class="muted">HĐ không ghi — xử lý theo quyết định đã duyệt</span>'],
+    ]);
+  }
+  function stayTab(k, c) {
+    var left = TH.section('cusInfo', k.id);
+    var term = c ? '<div class="card"><div class="card-hd"><div class="card-title">' + I('calendar', 'ic-sm') + 'Thời gian hợp đồng</div>' + signLabel(c) + '</div><div class="card-bd">' +
+      TH.kv([['Phòng / tòa', TH.roomLink(c.roomId) + ' · ' + esc(C.building(c.buildingId).name)], ['Số HĐ', '<a class="mono" href="' + TH.router.href('CON-02', c.id) + '">' + esc(c.id) + '</a>' + (c.previousContractId ? ' <span class="small muted">nối tiếp ' + ctLink(c.previousContractId) + '</span>' : '') + (c.nextContractId ? ' <span class="small muted">→ HĐ mới ' + ctLink(c.nextContractId) + '</span>' : '')],
+        ['Ngày bắt đầu', F.date(c.start)], ['Ngày kết thúc', F.date(c.end) + (c.status === 'active' ? ' <span class="small ' + (C.daysTo(c.end) <= TH.expiryDays() ? 'warn-text strong' : 'muted') + '">còn ' + C.daysTo(c.end) + ' ngày</span>' : '')],
+        ['Thời hạn', monthsOf(c.start, TH.addDays(c.end, 1)) + ' tháng' + ((c.renewals || []).length ? ' <span class="small muted">(kỳ hiện hành ' + F.date(c.renewals[c.renewals.length - 1].from) + ' → ' + F.date(c.end) + ')</span>' : '')],
+        ['Số người ở', c.people + ' người']].concat(c.status !== 'active' ? [['Kết thúc', F.date(c.endedAt) + ' · ' + esc(TH.END_KINDS[c.endKind] || '') + (c.endReason ? '<div class="small muted">' + esc(c.endReason) + '</div>' : '')]] : [])) +
+      '<div class="section-title" style="margin-top:14px">Lần ký / gia hạn</div><ul class="timeline"><li>' + (c.previousContractId ? 'Ký HĐ mới (mã mới) nối tiếp ' + esc(c.previousContractId) : 'Ký hợp đồng lần đầu') + '<div class="when">' + F.date(c.signedAt) + ' · hiệu lực từ ' + F.date(c.start) + '</div></li>' +
+      (c.renewals || []).map(function (r) { return '<li><b>Gia hạn lần ' + r.n + '</b>: ' + F.date(r.from) + ' → ' + F.date(r.to) + ' · ' + esc(TH.RENEWAL_MODES[r.mode] || r.mode) + (r.evidence ? '<div class="small muted">' + esc(r.evidence) + '</div>' : '') + (r.file ? '<div>' + TH.fileOf(r.file) + '</div>' : '') + '<div class="when">' + esc(C.staffName(r.by)) + ' · ' + F.date(r.at) + '</div></li>'; }).join('') +
+      (c.status !== 'active' ? '<li><b>' + (C.isEarlyEnd(c) ? 'Kết thúc trước hạn' : 'Kết thúc hợp đồng') + '</b> · ' + esc(TH.END_KINDS[c.endKind] || '') + '<div class="when">' + F.date(c.endedAt) + '</div></li>' : '') + '</ul>' +
+      termsBlock(c) +
+      '<p class="small muted" style="margin:8px 0 0">Ngày/thời hạn của bản đã xác nhận chỉ đổi qua phụ lục, gia hạn có chứng từ hoặc HĐ mới (F014, K-09).</p>' +
+      (c.status === 'active' ? '<div class="row" style="margin-top:12px"><a class="btn btn-sm" href="' + TH.router.href('CON-FOLLOW', c.id) + '">' + I('phone', 'ic-sm') + 'Ghi kết quả hỏi gia hạn</a><a class="btn btn-sm" href="' + TH.router.href('CON-02', c.id) + '">Mở hợp đồng</a></div>' : '') +
+      '</div></div>' : '<div class="card"><div class="card-bd">' + TH.state('empty', { title: 'Chưa gán hợp đồng', action: '<a class="btn btn-sm" href="' + TH.router.href('CON-02', 'new') + '">Tạo hợp đồng</a>' }) + '</div></div>';
+    var full = TH.can('vehicle.view');
+    var dups = (k.vehicles || []).map(function (v) { return { v: v, d: C.plateDup(k, v) }; }).filter(function (x) { return x.d; });
+    var mm = c ? parkMismatch(c) : null;
+    var veh = '<div class="card card-flush">' + TH.cardHd(I('key', 'ic-sm') + 'Phương tiện', (k.vehicles || []).filter(function (v) { return v.status === 'active'; }).length + ' xe đã xác nhận · ' + (k.vehicles || []).filter(function (v) { return v.status === 'pending'; }).length + ' chờ xác nhận', TH.permBtn('contract.edit', '<button type="button" class="btn btn-sm" data-act="veh.add" data-k="' + k.id + '">' + I('plus', 'ic-sm') + 'Thêm xe</button>', 'Thêm · 403')) +
+      TH.table({ compact: true, cols: [
+        { key: 't', label: 'Loại xe', render: function (v) { return esc(v.type) + (v.brand ? '<div class="cell-sub">' + esc(v.brand) + '</div>' : ''); } },
+        { key: 'p', label: 'Biển số', render: function (v) { return plateHtml(v, full); } },
+        { key: 'c', label: 'Màu', render: function (v) { return esc(v.color || '—'); } },
+        { key: 'eff', label: 'Đăng ký', render: function (v) { return F.date(v.from) + (v.to ? ' → ' + F.date(v.to) : ''); } },
+        { key: 's', label: 'Trạng thái', render: function (v) { var S = TH.VEHICLE_STATES[v.status] || [v.status, 'neutral']; return TH.badge(S[0], S[1], { dot: true }); } },
+        { key: 'f', label: 'Dòng phí', render: function (v) { var t = TH.feeType(v.feeCode); return t ? '<span class="small">' + esc(t.name) + '</span>' : '<span class="muted small">—</span>'; } },
+        { key: 'a', label: '', render: function (v) { return TH.permBtn('contract.edit', '<div class="row" style="gap:4px;flex-wrap:nowrap">' + (v.status === 'pending' ? '<button type="button" class="btn btn-xs btn-primary" data-act="veh.confirm" data-k="' + k.id + '" data-id="' + v.id + '">' + I('check', 'ic-sm') + 'Xác nhận</button>' : '') + '<button type="button" class="btn btn-xs" data-act="veh.edit" data-k="' + k.id + '" data-id="' + v.id + '">' + I('edit', 'ic-sm') + 'Sửa</button></div>', ''); } },
+      ], rows: k.vehicles || [], empty: { title: 'Chưa khai báo xe', text: 'Thêm xe để đối chiếu dòng phí gửi xe / sạc xe điện.' } }) +
+      '<div class="card-bd stack-sm">' +
+      (full ? '' : '<div class="small muted">' + I('shield', 'ic-sm') + ' Biển số che một phần — vai trò hiện tại không có quyền xem đầy đủ.</div>') +
+      TH.gate('F010.B', dups.length ? '<div class="alert alert-warning">' + I('alert', 'ic-sm') + '<div class="alert-body"><b>Trùng biển số trong khoảng đăng ký ' + TH.up('F010.B') + '</b><span>' + dups.map(function (x) { return esc(TH.maskPlate(x.v.plate) + ' — đang đăng ký ở ' + x.d.customer.id + ' (' + F.date(x.d.vehicle.from) + (x.d.vehicle.to ? ' → ' + F.date(x.d.vehicle.to) : ' → nay') + ')'); }).join('; ') + '</span></div></div>' : '<div class="small muted row" style="gap:6px">' + I('checkCircle', 'ic-sm') + ' Kiểm trùng biển số ' + TH.up('F010.B') + ': không có khoảng đăng ký chồng lấn (xe bán lại giữa hai hồ sơ liên tiếp không báo trùng).</div>', { mode: 'mini', label: 'Kiểm trùng biển số theo khoảng đăng ký' }) +
+      (mm ? TH.gate('F012.C', '<div class="alert alert-warning">' + I('alert', 'ic-sm') + '<div class="alert-body"><b>Lệch với dòng phí HĐ ' + TH.up('F012.C') + '</b><span>' + esc(mm) + '.</span></div></div>', { mode: 'mini', label: 'So khớp số xe ↔ dòng phí' }) : '') + '</div></div>';
+    return '<div class="grid-2">' + left + '<div class="stack">' + term + veh + '</div></div>';
+  }
+  function contractTab(k, all, ct) {
+    if (!ct) return '<div class="card"><div class="card-bd">' + TH.state('empty', { title: 'Chưa có hợp đồng', action: '<a class="btn btn-sm" href="' + TH.router.href('CON-02', 'new') + '">Tạo hợp đồng</a>' }) + '</div></div>';
+    var S = 'CUS-02';
+    var picker = all.length > 1 ? '<div class="toolbar" style="margin-bottom:12px;padding:0">' + TH.uiSelect(S, 'ct', all.map(function (c) { return { id: c.id, label: c.id + ' · ' + c.roomId + ' · ' + TH.statusLabel(c.status === 'active' ? 'occupied' : c.status) + ' · ' + F.date(c.start) + ' → ' + F.date(c.end) }; }), ct.id, 'Chọn hợp đồng') + '<span class="small muted">Trạng thái, dòng phí và tài chính thể hiện theo từng hợp đồng</span></div>' : '';
+    var files = TH.db.documents.filter(function (d) { return d.contractId === ct.id && d.kind !== 'CCCD (đã mask)'; });
+    var job = TH.db.ocrJobs.find(function (j) { return j.kind === 'pricelist' && j.contractId === ct.id; });
+    var summary = '<div class="card"><div class="card-hd"><div class="card-title">Hợp đồng ' + esc(ct.id) + '</div>' + TH.status(ct.status === 'active' && C.daysTo(ct.end) <= TH.expiryDays() ? 'expiring' : ct.status) + '</div><div class="card-bd">' +
+      TH.kv([['Phòng — tòa', '<b class="mono">' + esc(roomCode(ct)) + '</b>'], ['Giá thuê', '<b class="tnum">' + F.money(ct.rent) + '</b>/tháng'], ['Tiền cọc', F.money(ct.deposit)], ['Hiệu lực', F.date(ct.start) + ' → ' + F.date(ct.end)], ['Lần ký', signLabel(ct)], ['Mẫu HĐ', esc((ct.terms || {}).templateName || '—')]]) +
+      '<a class="btn btn-sm" style="margin-top:12px" href="' + TH.router.href('CON-02', ct.id) + '">Mở CON-02</a></div></div>';
+    var fileCard = '<div class="card card-flush">' + TH.cardHd(I('paperclip', 'ic-sm') + 'File hợp đồng', 'Gắn với khách, phòng và tòa tương ứng', ct.status === 'active' ? TH.permBtn('contract.edit', '<button type="button" class="btn btn-sm" data-act="cus.ctUpload" data-ct="' + esc(ct.id) + '">' + I('upload', 'ic-sm') + 'Tải lên</button>', 'Tải lên · 403') : '') +
+      '<div class="card-bd stack-sm">' + (files.map(function (d) { return '<div class="row" style="justify-content:space-between;flex-wrap:nowrap">' + TH.fileOf(d.file) + '<span class="small muted" style="text-align:right">' + esc(d.kind) + '<br>' + F.date(d.uploadedAt) + ' · v' + d.version + '</span></div>'; }).join('') || '<span class="muted small">Chưa có file hợp đồng.</span>') + '</div></div>';
+    var ocrCard = ct.status === 'active' ? '<div class="card"><div class="card-hd"><div class="card-title">' + I('scan', 'ic-sm') + 'Đọc dòng phí từ hợp đồng</div></div><div class="card-bd stack-sm">' +
+      '<p class="small muted" style="margin:0">OCR chỉ điền <b>nháp để xác nhận</b> theo khả năng nhận dạng của gói; không tự ghi dữ liệu, không tự lập hóa đơn. Chưa nhận dạng được thì nhập tay.</p>' +
+      '<div class="row">' + TH.permBtn('contract.edit', '<button type="button" class="btn btn-sm" data-act="sec.edit" data-key="cusPrice" data-id="' + esc(ct.id) + '">' + I('edit', 'ic-sm') + 'Nhập tay</button>', '') +
+      TH.gate('F012.B', TH.permBtn('contract.edit', '<button type="button" class="btn btn-sm btn-primary" data-act="cus.priceOcr" data-ct="' + esc(ct.id) + '"' + (files.length ? '' : ' disabled') + '>' + I('wand', 'ic-sm') + 'Tự đọc dòng phí' + TH.up('F012.B') + '</button>', ''), { mode: 'btn', label: 'Tự đọc & map bảng giá từ file', size: 'btn-sm' }) + '</div>' +
+      (TH.has('F012.B') ? '' : '<div class="small muted">Gói hiện tại: OCR 1 mẫu HĐ chuẩn (F012.A) — các trường chính phải xác nhận; dòng phí nhập tay.</div>') +
+      (job ? TH.gate('F012.D', '<div class="small">' + I('history', 'ic-sm') + ' Lần đọc gần nhất ' + F.date(job.at) + ' · ' + esc(C.staffName(job.by)) + ' · <b>' + job.corrections + '</b> dòng đã sửa tay ' + TH.up('F012.D') + '</div>', { fallback: '' }) : '') +
+      '</div></div>' : '';
+    var hist = TH.gate('F015.D', '<div class="card"><div class="card-hd"><div class="card-title">Lịch sử dòng phí / phiên bản ' + TH.up('F015.D') + '</div></div><div class="card-bd"><ul class="timeline">' + ct.versions.slice().reverse().map(function (v) { return '<li><b>v' + v.v + '</b> · ' + esc(v.note) + '<div class="when">' + F.date(v.at) + (v.by ? ' · ' + esc(C.staffName(v.by)) : '') + '</div></li>'; }).join('') + '</ul></div></div>', { label: 'Nhiều giai đoạn giá và lịch sử thay đổi', lines: 3 });
+    return picker + '<div class="grid-main-side"><div class="stack">' + TH.section('cusPrice', ct.id) + TH.section('cusNote', ct.id) + '</div><div class="stack">' + summary + fileCard + ocrCard + hist + '</div></div>';
+  }
+  TH.act['cus.ctUpload'] = function (el) {
+    var ct = C.contract(el.dataset.ct), n = TH.db.documents.filter(function (d) { return d.contractId === ct.id && d.kind === 'Hợp đồng thuê phòng'; }).length;
+    TH.db.documents.push({ id: 'TL-' + Date.now().toString().slice(-5), customerId: ct.customerId, contractId: ct.id, roomId: ct.roomId, kind: 'Hợp đồng thuê phòng', file: 'hop_dong_' + ct.roomId + '_' + TH.TODAY.replace(/-/g, '') + (n ? '_v' + (n + 1) : '') + '.pdf', version: n + 1, uploadedAt: TH.TODAY, views: 0 });
+    TH.log('Tải file hợp đồng', ct.id, ct.roomId + ' · ' + ct.buildingId, 'contract', ct.buildingId);
+    TH.app.refresh(); TH.toast('Đã lưu file hợp đồng (mô phỏng)', 'Gắn với ' + esc(ct.customerId) + ' · ' + esc(roomCode(ct)) + (TH.has('F012.B') ? '. Chọn “Tự đọc dòng phí” để nhận dạng.' : '. Dòng phí nhập tay ở gói hiện tại.'));
+  };
+
+  /* Đọc dòng phí từ file (F012.B) — giá trị mô phỏng theo biểu phí Điều 4 mẫu P302; không lưu khi chưa xác nhận.
+     Xe máy 0 đ vẫn là dòng riêng; phí xe điện SM theo xe KHÔNG suy ra đơn giá kWh sạc (K-05). */
+  var PRICE_OCR = {
+    ELEC: { text: 'Điện: 4.000đ /số', price: 4000, method: 'by_meter', conf: 0.95 },
+    WATER: { text: 'Nước: 120.000đ /người', price: 120000, method: 'per_person', conf: 0.88 },
+    NET: { text: 'Internet 100.000đ /tháng', price: 100000, method: 'per_room', conf: 0.93 },
+    ELEV: { text: 'Không có dòng riêng trong HĐ', price: 0, method: 'na', conf: 0 },
+    SVC: { text: 'Dịch vụ chung 120.000đ /người', price: 120000, method: 'per_person', conf: 0.86 },
+    PARK_MOTO: { text: 'Xe máy 0đ /xe', price: 0, method: 'per_vehicle', conf: 0.9 },
+    PARK_EBIKE: { text: 'Xe đạp điện: 150.000đ /xe', price: 150000, method: 'per_vehicle', conf: 0.78 },
+    PARK_EV: { text: 'Xe điện dịch vụ xanh SM: 400.000/xe', price: 400000, method: 'per_vehicle', conf: 0.71 },
+    EVCHG: { text: 'Không có trong HĐ — không suy từ 400.000/xe', price: 0, method: 'na', conf: 0 },
+  };
+  function priceOcrForm(ctId) {
+    var ct = C.contract(ctId), form = 'pocr-' + ctId;
+    var file = (TH.db.documents.filter(function (d) { return d.contractId === ct.id && /Hợp đồng/.test(d.kind); }).slice(-1)[0] || { file: ct.scanFile }).file;
+    var g = function (code, f, d) { return TH.store.draft(form, f + '_' + code, d); };
+    var diffs = 0;
+    var rows = TH.FEE_TYPES.map(function (t) {
+      var o = PRICE_OCR[t.code];
+      var m = g(t.code, 'm', o.method), p = g(t.code, 'p', String(o.price));
+      var cur = ct.priceList.find(function (l) { return l.code === t.code; }) || {};
+      var differs = m !== cur.method || (m !== 'na' && digits(p) !== +cur.price);
+      if (differs) diffs++;
+      var low = o.conf < 0.8;
+      return '<tr' + (low && TH.has('F011.B') ? ' class="is-warn"' : '') + '><td><b>' + esc(t.name) + '</b><div class="cell-sub">' + esc(o.text) + '</div></td>' +
+        '<td><select class="select select-sm" aria-label="Cách tính ' + esc(t.name) + '" data-draft="' + form + '.m_' + t.code + '">' + t.methods.map(function (x) { return '<option value="' + x + '"' + (x === m ? ' selected' : '') + '>' + esc(TH.FEE_METHODS[x]) + '</option>'; }).join('') + '</select></td>' +
+        '<td>' + (m === 'na' ? '—' : '<input class="input input-sm num" inputmode="numeric" aria-label="Đơn giá ' + esc(t.name) + '" data-draft="' + form + '.p_' + t.code + '" data-live value="' + esc(p) + '">') + '</td>' +
+        '<td><span class="small muted">' + (m === 'per_vehicle' ? TH.vehiclesOf(ct, t.vehicleType, 'active').length + ' xe đã xác nhận' : m === 'per_person' ? ct.people + ' người' : m === 'per_room' ? '1 phòng' : '—') + '</span></td>' +
+        '<td>' + (o.conf ? TH.badge(Math.round(o.conf * 100) + '%', low ? 'warning' : 'success') : TH.badge('Không đọc được', 'neutral')) + '</td>' +
+        '<td class="small">' + (cur.method ? (cur.active ? F.money(cur.price) + ' · ' + esc(TH.FEE_METHODS[cur.method]) : 'Không áp dụng') : '—') + (differs ? ' ' + TH.badge('Khác', 'info') : '') + '</td></tr>';
+    }).join('');
+    return { title: 'Đọc dòng phí dịch vụ từ hợp đồng ' + TH.up('F012.B'), sub: esc(ct.id) + ' · ' + esc(roomCode(ct)) + ' · file ' + esc(file),
+      body: '<div class="stack"><div class="row">' + TH.simBadge('Kết quả nhận dạng mô phỏng') + '<span class="small muted">Đối chiếu biểu phí Điều 4 của mẫu HĐ. Không lưu khi chưa xác nhận; OCR không tự lập hóa đơn. Số xe tính phí lấy theo xe đã xác nhận đăng ký.</span></div>' +
+        '<div class="table-wrap"><table class="table table-compact price-edit"><thead><tr><th>Dòng phí · dòng đọc được</th><th>Cách tính</th><th>Đơn giá</th><th>SL</th><th>Độ tin cậy</th><th>Đang áp dụng</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+        TH.gate('F012.C', '<div class="alert ' + (diffs ? 'alert-warning' : 'alert-success') + '">' + I(diffs ? 'alert' : 'checkCircle', 'ic-sm') + '<div class="alert-body"><b>So khớp với dòng phí hiện hành ' + TH.up('F012.C') + '</b><span>' + (diffs ? diffs + ' dòng khác bảng giá đang áp dụng — kiểm tra trước khi xác nhận.' : 'Khớp bảng giá đang áp dụng.') + '</span></div></div>', { mode: 'mini', label: 'So khớp phòng–khách–HĐ và cảnh báo lệch' }) + '</div>',
+      foot: '<button type="button" class="btn" data-close>Hủy</button><button type="button" class="btn" data-act="pocr.manual" data-ct="' + esc(ct.id) + '">Nhập tay</button><span class="spacer"></span><button type="button" class="btn btn-primary" data-act="pocr.confirm" data-ct="' + esc(ct.id) + '">' + I('check', 'ic-sm') + 'Xác nhận áp dụng</button>' };
+  }
+  TH.act['cus.priceOcr'] = function (el) { var id = el.dataset.ct; TH.store.clearDraft('pocr-' + id); TH.modal.open({ key: 'pocr', size: 'xl', render: function () { return priceOcrForm(id); } }); };
+  TH.act['pocr.manual'] = function (el) { var id = el.dataset.ct; TH.store.clearDraft('pocr-' + id); TH.modal.close('pocr', { silent: true }); TH.act['sec.edit']({ dataset: { key: 'cusPrice', id: id } }); };
+  TH.act['pocr.confirm'] = function (el) {
+    var ct = C.contract(el.dataset.ct), form = 'pocr-' + ct.id, from = TH.addMonthsYm(TH.TODAY.slice(0, 7), 1), corrections = 0, vals = {};
+    ct.priceList = TH.FEE_TYPES.map(function (t) {
+      var o = PRICE_OCR[t.code], d = function (f, def) { return TH.store.draft(form, f + '_' + t.code, def); };
+      var m = d('m', o.method), p = digits(d('p', String(o.price)));
+      if (m !== o.method || (m !== 'na' && p !== o.price)) corrections++;
+      var old = ct.priceList.find(function (l) { return l.code === t.code; }) || {};
+      var l = { code: t.code, method: m, active: m !== 'na', price: m === 'na' ? 0 : p, from: from, basis: 'OCR xác nhận ' + TH.TODAY + ' · ' + C.staffName(TH.me().id), note: m === 'na' ? (old.note || '') : 'Đọc từ file HĐ ' + F.date(TH.TODAY) };
+      if (m === 'per_vehicle') l.qtySource = 'vehicles';
+      vals[t.code] = l.price + ' ' + m;
+      return l;
+    });
+    TH.syncFees(ct);
+    ct.versions.push({ v: ct.versions.length + 1, at: TH.TODAY, by: TH.me().id, note: 'Dòng phí đọc từ file HĐ — đã xác nhận (' + corrections + ' dòng sửa tay), áp dụng từ kỳ ' + F.period(from) });
+    TH.db.ocrJobs.unshift({ id: 'OCR-' + String(TH.db.ocrJobs.length + 1).padStart(4, '0'), kind: 'pricelist', contractId: ct.id, file: ct.scanFile, status: 'confirmed', fields: vals, by: TH.me().id, at: TH.TODAY, corrections: corrections, used: true });
+    TH.log('Xác nhận dòng phí từ OCR HĐ', ct.id, corrections + ' dòng sửa tay', 'contract', ct.buildingId);
+    TH.store.clearDraft(form); TH.modal.close('pocr', { silent: true }); TH.app.refresh();
+    TH.toast('Đã áp dụng dòng phí cho ' + esc(ct.id), 'Hiệu lực từ kỳ ' + F.period(from) + '; hóa đơn đã lập không tính lại.');
+  };
+
+  /* Phương tiện (K-08): biển số lưu thật (nullable), có khoảng đăng ký + trạng thái; xe mới khai → chờ xác nhận, chưa tính phí */
+  var VEH_FEE = { 'Xe máy': 'PARK_MOTO', 'Xe đạp điện': 'PARK_EBIKE', 'Xe điện (dịch vụ SM)': 'PARK_EV', 'Ô tô': null };
+  function vehForm(kid, vid) {
+    var k = C.customer(kid), v = vid ? (k.vehicles || []).find(function (x) { return x.id === vid; }) : null, form = 'veh-' + kid + '-' + (vid || 'new');
+    var full = TH.can('vehicle.view');
+    return { title: (v ? 'Sửa xe' : 'Thêm xe') + ' · ' + esc(k.name), sub: 'CUS-02 › Thông tin lưu trú › Phương tiện' + (v ? ' · ' + esc((TH.VEHICLE_STATES[v.status] || [v.status])[0]) : ' · xe mới ở trạng thái chờ xác nhận đăng ký'),
+      body: '<div class="form-grid">' + TH.field({ form: form, name: 'type', label: 'Loại xe', type: 'select', def: v ? v.type : 'Xe máy', options: TH.VEHICLE_TYPES }) +
+        TH.field({ form: form, name: 'plate', label: 'Biển số (để trống nếu không có)', def: v ? (full ? v.plate || '' : TH.maskPlate(v.plate)) : '', placeholder: 'VD: 29B1-123.45', readonly: !!(v && !full), hint: full ? 'Lưu giá trị thật để so khớp/chống trùng; danh sách hiển thị dạng che' : 'Không có quyền xem/sửa biển số đầy đủ' }) +
+        TH.field({ form: form, name: 'brand', label: 'Nhãn hiệu / kiểu xe', def: v ? v.brand || '' : '' }) + TH.field({ form: form, name: 'color', label: 'Màu', def: v ? v.color : '' }) +
+        TH.field({ form: form, name: 'from', label: 'Ngày đăng ký', type: 'date', def: v ? v.from : TH.TODAY }) + TH.field({ form: form, name: 'note', label: 'Ghi chú', def: v ? v.note : '' }) + '</div>',
+      foot: (v ? (v.status === 'pending' ? '<button type="button" class="btn btn-danger" data-act="veh.remove" data-k="' + kid + '" data-id="' + vid + '">' + I('trash', 'ic-sm') + 'Xóa khai báo</button>' : v.status === 'active' ? '<button type="button" class="btn" data-act="veh.end" data-k="' + kid + '" data-id="' + vid + '">' + I('xCircle', 'ic-sm') + 'Ngừng sử dụng</button>' : '') : '') + '<span class="spacer"></span><button type="button" class="btn" data-close>Hủy</button><button type="button" class="btn btn-primary" data-act="veh.save" data-k="' + kid + '" data-id="' + (vid || '') + '">' + I('check', 'ic-sm') + 'Lưu xe</button>' };
+  }
+  TH.act['veh.add'] = function (el) { var kid = el.dataset.k; TH.store.clearDraft('veh-' + kid + '-new'); TH.modal.open({ key: 'veh', size: 'sm', render: function () { return vehForm(kid); } }); };
+  TH.act['veh.edit'] = function (el) { var kid = el.dataset.k, id = el.dataset.id; TH.store.clearDraft('veh-' + kid + '-' + id); TH.modal.open({ key: 'veh', size: 'sm', render: function () { return vehForm(kid, id); } }); };
+  TH.act['veh.save'] = function (el) {
+    var k = C.customer(el.dataset.k), id = el.dataset.id, v = id ? k.vehicles.find(function (x) { return x.id === id; }) : null, form = 'veh-' + k.id + '-' + (id || 'new');
+    var g = function (f, d) { return TH.store.draft(form, f, d); };
+    var plateIn = String(g('plate', v ? v.plate || '' : '')).trim().toUpperCase();
+    var plate = v && !TH.can('vehicle.view') ? v.plate : (plateIn || null);
+    var type = g('type', v ? v.type : 'Xe máy');
+    var rec = { type: type, plate: plate, brand: g('brand', v ? v.brand : ''), color: g('color', v ? v.color : ''), from: g('from', v ? v.from : TH.TODAY), note: g('note', v ? v.note : ''), feeCode: VEH_FEE[type] || null };
+    k.vehicles = k.vehicles || [];
+    if (v) Object.assign(v, rec); else { v = Object.assign({ id: 'XE-' + k.id.slice(3) + '-' + (k.vehicles.length + 1) + '-' + Date.now().toString().slice(-3), status: 'pending', to: null }, rec); k.vehicles.push(v); }
+    var dup = C.plateDup(k, v), c = contractOf(k);
+    TH.log(id ? 'Sửa phương tiện' : 'Khai báo phương tiện', k.id, rec.type + (rec.plate ? ' · ' + TH.maskPlate(rec.plate) : ''), 'customer', c ? c.buildingId : null);
+    TH.store.clearDraft(form); TH.modal.close('veh', { silent: true }); TH.app.refresh();
+    TH.toast(id ? 'Đã lưu phương tiện' : 'Đã khai báo xe — chờ xác nhận đăng ký', esc(rec.type) + (dup ? ' · trùng biển số với ' + esc(dup.customer.id) + ' trong khoảng đăng ký' : ''), dup ? 'warning' : 'success');
+  };
+  TH.act['veh.confirm'] = function (el) {
+    var k = C.customer(el.dataset.k), v = k.vehicles.find(function (x) { return x.id === el.dataset.id; }), dup = C.plateDup(k, v);
+    if (dup) { TH.toast('Chưa thể xác nhận', 'Biển số trùng với ' + esc(dup.customer.id) + ' trong khoảng đăng ký — xử lý trùng trước.', 'danger'); return; }
+    v.status = 'active'; v.confirmedBy = TH.me().id; v.confirmedAt = TH.TODAY;
+    var c = contractOf(k);
+    TH.log('Xác nhận đăng ký xe', k.id, v.type + (v.plate ? ' · ' + TH.maskPlate(v.plate) : ''), 'customer', c ? c.buildingId : null);
+    TH.app.refresh(); TH.toast('Đã xác nhận đăng ký xe', 'Dòng phí theo xe đã xác nhận sẽ tính xe này từ kỳ lập hóa đơn tiếp theo.');
+  };
+  TH.act['veh.end'] = function (el) {
+    var k = C.customer(el.dataset.k), v = k.vehicles.find(function (x) { return x.id === el.dataset.id; });
+    v.status = 'ended'; v.to = TH.TODAY;
+    var c = contractOf(k);
+    TH.log('Ngừng sử dụng xe', k.id, v.type + (v.plate ? ' · ' + TH.maskPlate(v.plate) : ''), 'customer', c ? c.buildingId : null);
+    TH.modal.close('veh', { silent: true }); TH.app.refresh(); TH.toast('Đã ngừng sử dụng', 'Xe không còn tính phí từ kỳ tiếp theo; lịch sử đăng ký được giữ.');
+  };
+  TH.act['veh.remove'] = function (el) {
+    var k = C.customer(el.dataset.k), v = k.vehicles.find(function (x) { return x.id === el.dataset.id; });
+    TH.confirm({ title: 'Xóa khai báo xe ' + esc(v.plate ? TH.maskPlate(v.plate) : v.type) + '?', body: '<p>Chỉ xóa được xe chưa xác nhận đăng ký; thao tác được ghi audit.</p>', ok: 'Xóa', danger: true }).then(function (ok) {
+      if (!ok) return;
+      k.vehicles = k.vehicles.filter(function (x) { return x !== v; });
+      var c = contractOf(k);
+      TH.log('Xóa khai báo xe', k.id, v.type, 'customer', c ? c.buildingId : null);
+      TH.modal.close('veh', { silent: true }); TH.app.refresh(); TH.toast('Đã xóa khai báo xe', esc(v.type));
+    });
+  };
+
+  /* ---- Hồ sơ cọc (K-03/K-04): lập ≠ duyệt; chỉ xác nhận thực chi mới ghi sổ; hạn hoàn theo điều khoản HĐ ---- */
+  function caseOf(id) { return TH.db.depositCases.find(function (x) { return x.id === id; }); }
+  function depDed(hc) { return C.sum(hc.deductions, function (d) { return d.amount || 0; }); }
+  function depositCard(ct) {
+    var hc = C.depositCase(ct.id), st = hc ? hc.state : 'holding', S = TH.DEPOSIT_STATES[st], T = ct.terms || {};
+    var steps = ['Chờ bàn giao', 'Đối chiếu', 'Chờ duyệt', 'Đã duyệt · chờ chi', 'Đã hoàn / tất toán'], idx = { holding: -1, awaiting_handover: 0, reconciling: 1, pending_approval: 2, approved: 3, refunded: 5, settled: 5, forfeited: 5, transferred: 5 }[st];
+    var late = C.depositOverdue(hc), me = TH.me().id;
+    var who = function (id, at) { return id ? esc(C.staffName(id)) + (at ? ' · ' + F.date(at) : '') : '<span class="muted">—</span>'; };
+    var body = TH.kv([['Tiền cọc theo HĐ', '<b class="tnum">' + F.money(hc ? hc.amount : ct.deposit) + '</b>'], ['Trạng thái', TH.badge(S[0], S[1], { dot: true })]].concat(hc ? [
+      ['Bàn giao phòng', hc.handoverAt ? F.date(hc.handoverAt) + (hc.planned ? ' <span class="small muted">(dự kiến)</span>' : '') : '<span class="muted">—</span>'],
+      ['Hạn hoàn cọc', hc.dueAt ? F.date(hc.dueAt) + ' <span class="small muted">(' + T.refundDays + ' ngày sau bàn giao, theo HĐ)</span>' + (late ? ' ' + TH.badge('Quá hạn ' + (-C.daysTo(hc.dueAt)) + ' ngày', 'danger') : '') : '<span class="muted">Chưa xác định hạn — HĐ không ghi thời hạn hoàn cọc</span>'],
+      ['Người lập / đề xuất', who(hc.proposedBy, hc.proposedAt)], ['Người duyệt', who(hc.approvedBy, hc.approvedAt)], ['Xác nhận thực chi', hc.paidBy ? who(hc.paidBy, hc.paidAt) + (hc.txnRef ? ' · <span class="mono small">' + esc(hc.txnRef) + '</span>' : '') : (hc.txnRef ? '<span class="mono small">' + esc(hc.txnRef) + '</span>' : '<span class="muted">—</span>')],
+    ] : []).concat(hc && st === 'transferred' ? [['Chuyển sang HĐ', ctLink(hc.transferToContractId, 'fin')]] : []));
+    var calc = hc && (hc.refundAmount !== null && hc.refundAmount !== undefined || hc.forfeitAmount) ? '<div class="section-title" style="margin-top:12px">Đối chiếu</div>' + TH.kv([['Cọc đã giữ', F.money(hc.amount)], ['− Khấu trừ hợp lệ', F.money(depDed(hc))], ['− Cọc bị giữ (mất cọc)', (hc.forfeitAmount ? '<span class="neg">' + F.money(hc.forfeitAmount) + '</span>' : F.money(0)) + (hc.forfeitBasis ? '<div class="small muted">' + esc(hc.forfeitBasis) + '</div>' : '')], ['= Số hoàn cho khách', '<b class="tnum">' + F.money(hc.refundAmount || 0) + '</b>']]) : '';
+    var dedHtml = hc && hc.deductions.length ? '<div class="section-title" style="margin-top:12px">Khoản khấu trừ (mỗi khoản có nguồn)</div>' + TH.table({ compact: true, cols: [{ key: 'n', label: 'Khoản', render: function (d) { return esc(d.name) + '<div class="cell-sub">' + esc(d.source || '') + '</div>'; } }, { key: 'a', label: 'Số tiền', num: true, render: function (d) { return d.pending ? TH.badge('Chưa chốt', 'warning') : F.money(d.amount); } }], rows: hc.deductions }) : '';
+    var stepper = st === 'forfeited' ? '<div class="alert alert-danger" style="margin-top:12px">' + I('xCircle', 'ic-sm') + '<div class="alert-body"><b>Mất cọc' + (hc.refundAmount > 0 ? ' một phần' : '') + ' — theo quyết định đã duyệt, không tự suy từ lý do chấm dứt</b><span>' + esc(hc.forfeitBasis || hc.note || '') + (hc.forfeitId ? ' · ghi nhận ' + esc(hc.forfeitId) + ' (doanh thu bỏ cọc)' : '') + '</span></div></div>'
+      : st === 'transferred' ? '<div class="alert alert-neutral" style="margin-top:12px">' + I('info', 'ic-sm') + '<div class="alert-body">' + esc(hc.note || '') + '</div></div>'
+      : '<div class="stepper" style="margin-top:14px">' + steps.map(function (s, i) { return '<div class="step ' + (i < idx || idx === 5 ? 'is-done' : i === idx ? 'is-current' : '') + '"><span class="n">' + (i < idx || idx === 5 ? '✓' : i + 1) + '</span>' + s + '</div>' + (i < 4 ? '<span class="step-line"></span>' : ''); }).join('') + '</div>';
+    var act = '', hint = '';
+    if (st === 'holding' && ct.status === 'active') act = TH.permBtn('deposit.propose', '<button type="button" class="btn btn-sm" data-act="dep.open" data-ct="' + esc(ct.id) + '">' + I('plus', 'ic-sm') + 'Mở hồ sơ bàn giao / cọc</button>', 'NV vận hành / Kế toán lập · 403');
+    if (st === 'awaiting_handover') act = TH.permBtn('deposit.propose', '<button type="button" class="btn btn-sm btn-primary" data-act="dep.handover" data-id="' + hc.id + '">' + I('door', 'ic-sm') + 'Ghi nhận bàn giao phòng</button>', 'NV vận hành / Kế toán · 403');
+    if (st === 'reconciling') act = TH.permBtn('deposit.propose', '<button type="button" class="btn btn-sm btn-primary" data-act="dep.review" data-id="' + hc.id + '">' + I('fileCheck', 'ic-sm') + 'Lập đối chiếu → gửi duyệt</button>', 'NV vận hành / Kế toán · 403');
+    if (st === 'pending_approval') {
+      var self = hc.proposedBy === me;
+      act = self ? '<span class="forbidden-chip" data-tip="Người lập hồ sơ không tự duyệt hồ sơ do mình lập (K-03) — chuyển vai trò Kế toán/Admin khác để duyệt">' + I('ban', 'ic-sm') + 'Không tự duyệt hồ sơ do mình lập</span>'
+        : TH.permBtn('deposit.approve', '<button type="button" class="btn btn-sm btn-primary" data-act="dep.approve" data-id="' + hc.id + '">' + I('shieldCheck', 'ic-sm') + 'Duyệt hoàn ' + F.money(hc.refundAmount || 0) + '</button><button type="button" class="btn btn-sm" data-act="dep.reject" data-id="' + hc.id + '">' + I('rotateCcw', 'ic-sm') + 'Từ chối / yêu cầu bổ sung</button>', 'Admin / Kế toán duyệt · 403');
+      hint = 'Hồ sơ do ' + esc(C.staffName(hc.proposedBy)) + ' lập ' + F.date(hc.proposedAt) + '.';
+    }
+    if (st === 'approved') act = TH.permBtn('deposit.pay', '<button type="button" class="btn btn-sm btn-primary" data-act="dep.pay" data-id="' + hc.id + '">' + I('checkCircle', 'ic-sm') + 'Xác nhận đã chi / tất toán</button>', 'Kế toán/thủ quỹ xác nhận · 403');
+    if (hc && hc.rejectNote && st === 'reconciling') hint = '<span class="warn-text">Bị trả lại: ' + esc(hc.rejectNote) + '</span>';
+    return '<div class="card"><div class="card-hd"><div class="card-title">' + I('wallet', 'ic-sm') + 'Tiền cọc & hoàn cọc</div>' + TH.badge('ĐỀ XUẤT K-03/K-04', 'draft') + '</div><div class="card-bd">' + body + calc + dedHtml + stepper +
+      (late ? '<div class="alert alert-danger" style="margin-top:12px">' + I('alert', 'ic-sm') + '<div class="alert-body">Quá hạn hoàn cọc theo điều khoản HĐ (' + T.refundDays + ' ngày kể từ bàn giao).</div></div>' : '') +
+      (act ? '<div class="row" style="margin-top:12px;gap:8px">' + act + '</div>' : '') + (hint ? '<div class="small muted" style="margin-top:6px">' + hint + '</div>' : '') +
+      '<p class="small muted" style="margin:10px 0 0">Luồng: lập/đề xuất khấu trừ (vận hành) → đối chiếu & duyệt (kế toán/Admin, không tự duyệt hồ sơ mình lập) → xác nhận thực chi có ngày/mã giao dịch. Chỉ bước cuối ghi dòng hoàn cọc / mất cọc vào sổ (RPT-05 chế độ Tổng, dòng tiền); P&L kinh doanh không đổi. Số hoàn = max(0, cọc − khấu trừ hợp lệ − cọc bị giữ).</p></div></div>';
+  }
+  function finTab(k, ct) {
+    var d = ct ? C.contractDebt(ct.id) : C.customerDebt(k.id), inv = ct ? C.contractInvoices(ct.id) : C.customerInvoices(k.id);
+    var others = ct ? C.customerContracts(k.id).filter(function (c) { return c.id !== ct.id && C.contractDebt(c.id).debt > 0; }) : [];
+    var kpis = '<div class="grid-4" style="margin-bottom:16px">' +
+      TH.kpi({ label: 'Phải thu (đã xác nhận)', icon: 'receipt', value: F.short(d.due), foot: inv.length + ' hóa đơn' + (ct ? ' · ' + esc(ct.id) : '') }) +
+      TH.kpi({ label: 'Đã thu (kế toán xác nhận)', icon: 'checkCircle', value: F.short(d.paid), foot: d.pending ? 'Báo thu chờ xác nhận ' + F.money(d.pending) + ' — chưa tính' : 'Không có báo thu chờ' }) +
+      TH.kpi({ label: 'Còn nợ', icon: 'wallet', value: F.short(d.debt), neg: d.debt > 0, foot: d.debt ? 'Từ hóa đơn & phiếu thu đã xác nhận' : 'Đã thu đủ' }) +
+      TH.kpi({ label: 'Quá hạn', icon: 'alert', value: d.overdueCount + '<small> kỳ</small>', neg: d.overdueCount > 0, foot: d.overdue ? F.money(d.overdue) : 'Không quá hạn' }) + '</div>';
+    var table = '<div class="card card-flush">' + TH.cardHd('Hóa đơn theo kỳ', 'Số tổng hợp lấy từ hóa đơn/phiếu thu nguồn — sửa tại INV/PAY') +
+      TH.table({ compact: true, cols: [
+        { key: 'p', label: 'Kỳ', render: function (i) { return '<b data-tip="' + esc(i.id) + '" style="white-space:nowrap">' + F.period(i.period) + '</b>'; } },
+        { key: 't', label: 'Phải thu', num: true, render: function (i) { return F.money(i.total); } },
+        { key: 'pd', label: 'Đã thu', num: true, render: function (i) { return F.money(C.paid(i.id)); } },
+        { key: 'pe', label: 'Chờ XN', num: true, render: function (i) { var p = C.pending(i.id); return p ? '<span class="warn-text">' + F.money(p) + '</span>' : '<span class="muted">—</span>'; } },
+        { key: 'd', label: 'Còn nợ', num: true, render: function (i) { var x = C.debt(i); return x ? '<b class="neg">' + F.money(x) + '</b>' : '<span class="muted">0 ₫</span>'; } },
+        { key: 'due', label: 'Hạn', render: function (i) { return F.date(i.dueAt); } },
+        { key: 'od', label: 'Quá hạn', gate: 'F031.B', render: function (i) { var x = C.debt(i); return x && i.dueAt < TH.TODAY ? '<span class="neg strong">' + (-C.daysTo(i.dueAt)) + ' ngày</span>' : '<span class="muted">—</span>'; } },
+        { key: 's', label: 'Trạng thái', render: function (i) { return TH.status(C.payState(i)); } },
+      ], rows: inv, empty: { title: 'Không có hóa đơn trong dữ liệu demo', text: ct && ct.status !== 'active' ? 'Dữ liệu demo chỉ sinh hóa đơn cho HĐ đang thuê từ kỳ 05/2026.' : 'Chưa lập hóa đơn cho hồ sơ này.' } }) +
+      '<div class="card-ft"><a class="btn btn-sm" href="' + TH.router.href('INV-02') + '">Danh sách hóa đơn</a><a class="btn btn-sm" href="' + TH.router.href('PAY-01') + '">Báo thu / xác nhận</a>' + (others.length ? '<span class="small muted">HĐ khác của khách còn nợ: ' + others.map(function (c) { return ctLink(c.id, 'fin'); }).join(', ') + '</span>' : '') + '</div></div>';
+    var extra = TH.gate('F031.C', '<div class="card"><div class="card-hd"><div class="card-title">Phiếu điều chỉnh công nợ ' + TH.up('F031.C') + '</div></div><div class="card-bd small muted">Điều chỉnh có lý do và cần duyệt — hồ sơ này chưa có phiếu điều chỉnh.</div></div>', { label: 'Phiếu điều chỉnh có lý do/duyệt', lines: 1 }) +
+      TH.gate('F031.D', '<div class="card"><div class="card-hd"><div class="card-title">Phân bổ phiếu thu ' + TH.up('F031.D') + '</div></div><div class="card-bd small muted">Một phiếu thu được phân bổ cho nhiều hóa đơn cùng khách theo thứ tự kỳ cũ trước.</div></div>', { label: 'Phân bổ 1 phiếu thu cho nhiều HĐơn cùng khách', lines: 1 });
+    /* K-07: BLOCKED_BY_REQUIREMENT — chỉ hiện trong chế độ ghi chú demo, không đưa vào màn nghiệp vụ của khách */
+    var ask = TH.store.state.tierNotes ? '<div class="alert alert-draft">' + I('info', 'ic-sm') + '<div class="alert-body"><b>DRAFT · BLOCKED_BY_REQUIREMENT — “danh sách khách hoà” (K-07)</b><span>Ghi chú gốc “thêm danh sách khách hoà gồm: mã phòng mã tòa” chưa đủ định nghĩa; không suy đoán, không dựng báo cáo. Cần: tên chính xác, mục đích, tiêu chí vào/ra, các trường, người xem/sửa, nguồn dữ liệu, cách lọc/xuất, tác động tới cọc/công nợ.</span></div></div>' : '';
+    return kpis + '<div class="grid-main-side"><div class="stack">' + table + extra + '</div><div class="stack">' + (ct ? depositCard(ct) : '') + ask + '</div></div>';
+  }
+  TH.act['dep.open'] = function (el) {
+    var ct = C.contract(el.dataset.ct), fu = TH.db.followUps.filter(function (f) { return f.contractId === ct.id && f.result === 'move_out'; })[0];
+    var at = fu && fu.moveOutAt ? fu.moveOutAt : ct.end;
+    TH.db.depositCases.push({ id: 'HC-' + at.slice(2, 4) + at.slice(5, 7) + '-' + String(TH.db.depositCases.length + 1).padStart(2, '0'), contractId: ct.id, customerId: ct.customerId, amount: ct.deposit, state: 'awaiting_handover', handoverAt: at, dueAt: null, deductions: [], forfeitAmount: 0, forfeitBasis: '', refundAmount: null, proposedBy: TH.me().id, proposedAt: TH.TODAY, approvedBy: null, approvedAt: null, paidBy: null, paidAt: null, txnRef: null, note: 'Mở hồ sơ bàn giao / cọc', planned: true });
+    TH.log('Mở hồ sơ cọc', ct.id, roomCode(ct), 'contract', ct.buildingId); TH.app.refresh(); TH.toast('Đã mở hồ sơ cọc', 'Bàn giao dự kiến ' + F.date(at) + '. Hạn hoàn tính khi bàn giao, theo điều khoản HĐ.');
+  };
+  TH.act['dep.handover'] = function (el) {
+    var hc = caseOf(el.dataset.id), ct = C.contract(hc.contractId), T = ct.terms || {};
+    TH.confirm({ title: 'Ghi nhận bàn giao phòng ' + esc(ct.roomId) + '?', body: '<p>Hợp đồng ' + esc(ct.id) + ' chuyển <b>Đã kết thúc</b> (lý do: trả phòng — bàn giao), phòng chuyển <b>Trống</b>. ' + (T.refundDays ? 'Hạn hoàn cọc = hôm nay + ' + T.refundDays + ' ngày (Điều 4.3 HĐ).' : 'HĐ không ghi thời hạn hoàn cọc → không đặt hạn, không tự báo quá hạn.') + '</p>', ok: 'Ghi nhận bàn giao' }).then(function (ok) {
+      if (!ok) return;
+      Object.assign(hc, { state: 'reconciling', handoverAt: TH.TODAY, dueAt: T.refundDays ? TH.addDays(TH.TODAY, T.refundDays) : null, planned: false });
+      if (ct.status === 'active') { ct.status = 'ended'; ct.endedAt = TH.TODAY; ct.endKind = 'handover'; ct.endReason = 'Trả phòng — bàn giao ' + F.date(TH.TODAY); }
+      var room = C.room(ct.roomId);
+      TH.db.roomEvents.unshift({ roomId: room.id, at: TH.TODAY, from: room.status, to: 'vacant', by: TH.me().id, note: 'Bàn giao trả phòng HĐ ' + ct.id });
+      room.status = 'vacant';
+      TH.log('Ghi nhận bàn giao phòng', ct.id, roomCode(ct), 'contract', ct.buildingId); TH.app.refresh(); TH.toast('Đã ghi nhận bàn giao', 'Chuyển sang bước đối chiếu cọc.');
+    });
+  };
+  function depReviewForm(id) {
+    var hc = caseOf(id), ct = C.contract(hc.contractId), form = 'dep-' + id, early = C.isEarlyEnd(ct), T = ct.terms || {};
+    var amt = hc.deductions.map(function (d, i) { return digits(TH.store.draft(form, 'a' + i, String(d.amount))); });
+    var extra = digits(TH.store.draft(form, 'extra', '0')), forfeit = digits(TH.store.draft(form, 'forfeit', String(hc.forfeitAmount || 0)));
+    var ded = C.sum(amt) + extra, refund = hc.amount - ded - forfeit;
+    return { title: 'Lập đối chiếu cọc → gửi duyệt', sub: esc(hc.contractId) + ' · cọc ' + F.money(hc.amount) + ' · bàn giao ' + F.date(hc.handoverAt) + (early ? ' · kết thúc trước hạn (' + esc(TH.END_KINDS[ct.endKind] || '') + ')' : ''),
+      body: '<div class="stack">' + (hc.deductions.length ? '<div class="form-grid">' + hc.deductions.map(function (d, i) { return TH.field({ form: form, name: 'a' + i, label: d.name, def: String(d.amount), num: true, inputmode: 'numeric', live: true, hint: esc(d.source || '') + (d.pending ? ' · chưa chốt — nhập số đã thống nhất' : '') }); }).join('') + '</div>' : '') +
+        '<div class="form-grid">' + TH.field({ form: form, name: 'extra', label: 'Khấu trừ thêm (đ)', def: '0', num: true, inputmode: 'numeric', live: true }) + TH.field({ form: form, name: 'reason', label: 'Khoản / nguồn chứng từ', def: '', placeholder: 'VD: tiền điện kỳ 10 chưa lập hóa đơn — chỉ số bàn giao' }) + '</div>' +
+        '<div class="form-grid">' + TH.field({ form: form, name: 'forfeit', label: 'Cọc bị giữ — mất cọc (đ)', def: String(hc.forfeitAmount || 0), num: true, inputmode: 'numeric', live: true, hint: early ? (T.earlyTermination === 'forfeit_all' ? 'HĐ ghi mất toàn bộ cọc khi đơn phương chấm dứt (Điều 4.3/7.1) — vẫn nhập mức giữ và cần duyệt; được hoàn một phần nếu có thỏa thuận' : 'HĐ không ghi điều khoản mất cọc — chỉ giữ cọc khi có quyết định đã duyệt') : 'Kết thúc đúng hạn — thường bằng 0' }) + TH.field({ form: form, name: 'basis', label: 'Căn cứ giữ cọc (điều khoản / quyết định)', def: hc.forfeitBasis || '', placeholder: 'VD: Điều 4.3 HĐ ký …; biên bản thỏa thuận …' }) + '</div>' +
+        TH.kv([['Tổng khấu trừ', F.money(ded)], ['Cọc bị giữ', F.money(forfeit)], ['Số hoàn cho khách', '<b class="tnum ' + (refund < 0 ? 'neg' : '') + '">' + F.money(Math.max(0, refund)) + '</b>']]) +
+        (refund < 0 ? '<div class="alert alert-danger">' + I('xCircle', 'ic-sm') + '<div class="alert-body">Khấu trừ + giữ cọc vượt tiền cọc — phần chênh ' + F.money(-refund) + ' lập công nợ riêng, không ghi âm.</div></div>' : '') +
+        '<div class="small muted">' + I('info', 'ic-sm') + ' Gửi duyệt chuyển hồ sơ sang <b>Chờ duyệt</b>; người lập không tự duyệt. Chưa ghi sổ ở bước này.</div></div>',
+      foot: '<button type="button" class="btn" data-close>Hủy</button><button type="button" class="btn btn-primary" data-act="dep.submit" data-id="' + id + '"' + (refund < 0 || (forfeit > 0 && !(TH.store.draft(form, 'basis', hc.forfeitBasis || '') || '').trim()) ? ' disabled' : '') + '>' + I('send', 'ic-sm') + 'Gửi duyệt hoàn ' + F.money(Math.max(0, refund)) + '</button>' };
+  }
+  TH.act['dep.review'] = function (el) { var id = el.dataset.id; TH.modal.open({ key: 'dep', size: 'md', render: function () { return depReviewForm(id); } }); };
+  TH.act['dep.submit'] = function (el) {
+    var hc = caseOf(el.dataset.id), form = 'dep-' + hc.id, ct = C.contract(hc.contractId);
+    hc.deductions.forEach(function (d, i) { d.amount = digits(TH.store.draft(form, 'a' + i, String(d.amount))); d.pending = false; });
+    var extra = digits(TH.store.draft(form, 'extra', '0'));
+    if (extra) hc.deductions.push({ name: TH.store.draft(form, 'reason', '') || 'Khấu trừ thêm', amount: extra, source: 'Đối chiếu ' + F.date(TH.TODAY) + ' · ' + C.staffName(TH.me().id) });
+    hc.forfeitAmount = digits(TH.store.draft(form, 'forfeit', String(hc.forfeitAmount || 0)));
+    hc.forfeitBasis = (TH.store.draft(form, 'basis', hc.forfeitBasis || '') || '').trim();
+    hc.refundAmount = Math.max(0, hc.amount - depDed(hc) - hc.forfeitAmount);
+    Object.assign(hc, { state: 'pending_approval', proposedBy: TH.me().id, proposedAt: TH.TODAY, rejectNote: null });
+    TH.log('Gửi duyệt hoàn cọc', ct.id, 'hoàn ' + F.money(hc.refundAmount) + (hc.forfeitAmount ? ' · giữ ' + F.money(hc.forfeitAmount) : ''), 'contract', ct.buildingId);
+    TH.store.clearDraft(form); TH.modal.close('dep', { silent: true }); TH.app.refresh(); TH.toast('Đã gửi duyệt', 'Chờ Kế toán/Admin khác duyệt — chưa ghi sổ.');
+  };
+  TH.act['dep.approve'] = function (el) {
+    var hc = caseOf(el.dataset.id), ct = C.contract(hc.contractId);
+    if (hc.proposedBy === TH.me().id) { TH.toast('Không tự duyệt', 'Người lập hồ sơ không duyệt hồ sơ do mình lập (K-03).', 'danger'); return; }
+    Object.assign(hc, { state: 'approved', approvedBy: TH.me().id, approvedAt: TH.TODAY });
+    TH.log('Duyệt hoàn cọc', ct.id, 'hoàn ' + F.money(hc.refundAmount) + (hc.forfeitAmount ? ' · giữ ' + F.money(hc.forfeitAmount) : ''), 'contract', ct.buildingId);
+    TH.app.refresh(); TH.toast('Đã duyệt', 'Chờ kế toán/thủ quỹ xác nhận thực chi — chưa ghi sổ, chưa “Đã hoàn”.');
+  };
+  TH.act['dep.reject'] = function (el) {
+    var hc = caseOf(el.dataset.id), ct = C.contract(hc.contractId);
+    TH.confirm({ title: 'Trả lại hồ sơ để bổ sung?', body: '<p>Hồ sơ quay về bước <b>Đối chiếu</b>; người lập cần bổ sung chứng từ/khấu trừ rồi gửi duyệt lại.</p>', ok: 'Trả lại', danger: true }).then(function (ok) {
+      if (!ok) return;
+      Object.assign(hc, { state: 'reconciling', rejectNote: 'Yêu cầu bổ sung chứng từ — ' + C.staffName(TH.me().id) + ' ' + F.date(TH.TODAY) });
+      TH.log('Trả lại hồ sơ hoàn cọc', ct.id, 'yêu cầu bổ sung', 'contract', ct.buildingId); TH.app.refresh(); TH.toast('Đã trả lại hồ sơ', 'Về bước đối chiếu.');
+    });
+  };
+  function defaultTxn(hc) { return 'CK-' + TH.TODAY.replace(/-/g, '') + '-' + hc.id.slice(-7).replace(/\D/g, '').padStart(4, '0'); }
+  function depPayForm(id) {
+    var hc = caseOf(id), form = 'pay-' + id;
+    return { title: 'Xác nhận đã chi / tất toán cọc', sub: esc(hc.contractId) + ' · hoàn ' + F.money(hc.refundAmount || 0) + (hc.forfeitAmount ? ' · giữ ' + F.money(hc.forfeitAmount) : ''),
+      body: '<div class="stack"><div class="form-grid">' + TH.field({ form: form, name: 'paidAt', label: 'Ngày thực chi', type: 'date', def: TH.TODAY }) + TH.field({ form: form, name: 'txn', label: 'Mã giao dịch / chứng từ chi', def: defaultTxn(hc), required: true }) + TH.field({ form: form, name: 'method', label: 'Hình thức', type: 'select', def: 'Chuyển khoản', options: ['Chuyển khoản', 'Tiền mặt'] }) + '</div>' +
+        '<div class="small muted">' + I('info', 'ic-sm') + ' ' + (hc.refundAmount > 0 ? 'Ghi dòng <b>hoàn cọc</b> ' + F.money(hc.refundAmount) : 'Không phát sinh dòng hoàn → <b>Đã tất toán cọc</b>') + (hc.forfeitAmount ? '; ghi dòng <b>mất cọc</b> ' + F.money(hc.forfeitAmount) + ' (doanh thu bỏ cọc)' : '') + ' vào kỳ của ngày thực chi. Chỉ một bút toán cho mỗi hồ sơ (idempotent).</div></div>',
+      foot: '<button type="button" class="btn" data-close>Hủy</button><button type="button" class="btn btn-primary" data-act="dep.paid" data-id="' + id + '">' + I('checkCircle', 'ic-sm') + 'Xác nhận</button>' };
+  }
+  TH.act['dep.pay'] = function (el) { var id = el.dataset.id; TH.modal.open({ key: 'deppay', size: 'sm', render: function () { return depPayForm(id); } }); };
+  TH.act['dep.paid'] = function (el) {
+    var hc = caseOf(el.dataset.id), ct = C.contract(hc.contractId), form = 'pay-' + hc.id;
+    if (hc.state !== 'approved' || hc.depositId || hc.forfeitId) { TH.modal.close('deppay', { silent: true }); TH.toast('Đã ghi nhận trước đó', 'Hồ sơ này đã có bút toán — không ghi lần hai.', 'info'); return; }
+    var paidAt = TH.store.draft(form, 'paidAt', TH.TODAY), txn = (TH.store.draft(form, 'txn', defaultTxn(hc)) || '').trim(), p = paidAt.slice(0, 7);
+    if (!txn) { TH.toast('Thiếu mã giao dịch', 'Nhập mã giao dịch/chứng từ chi.', 'danger'); return; }
+    var seq = function () { return 'COC-' + p.slice(2, 4) + p.slice(5) + '-' + String(TH.db.deposits.filter(function (d) { return d.period === p; }).length + 1).padStart(2, '0'); };
+    if (hc.refundAmount > 0) { hc.depositId = seq(); TH.db.deposits.push({ id: hc.depositId, buildingId: ct.buildingId, roomId: ct.roomId, period: p, date: paidAt, type: 'refund', amount: hc.refundAmount, note: 'Hoàn cọc ' + ct.id + ' · ' + txn, status: 'confirmed', contractId: ct.id, customerId: ct.customerId, caseId: hc.id }); }
+    if (hc.forfeitAmount > 0) { hc.forfeitId = seq(); TH.db.deposits.push({ id: hc.forfeitId, buildingId: ct.buildingId, roomId: ct.roomId, period: p, date: paidAt, type: 'forfeit', amount: hc.forfeitAmount, breach: C.isEarlyEnd(ct), note: 'Giữ cọc ' + ct.id + ' — ' + hc.forfeitBasis, status: 'confirmed', contractId: ct.id, customerId: ct.customerId, caseId: hc.id }); }
+    Object.assign(hc, { state: hc.refundAmount > 0 ? 'refunded' : hc.forfeitAmount > 0 ? 'forfeited' : 'settled', paidBy: TH.me().id, paidAt: paidAt, txnRef: txn, method: TH.store.draft(form, 'method', 'Chuyển khoản') });
+    TH.log('Xác nhận thực chi hoàn cọc', ct.id, F.money(hc.refundAmount || 0) + ' · ' + txn, 'contract', ct.buildingId);
+    TH.store.clearDraft(form); TH.modal.close('deppay', { silent: true }); TH.app.refresh(); TH.toast('Đã ghi sổ', (hc.depositId ? hc.depositId + ' hoàn ' + F.money(hc.refundAmount) : 'Tất toán cọc') + (hc.forfeitId ? ' · ' + hc.forfeitId + ' giữ ' + F.money(hc.forfeitAmount) : ''));
+  };
+
   TH.views['CUS-02'] = {
     scanParam: 'KH-003',
-    scan: function () { return ['profile', 'docs', 'history', 'versions'].map(function (t) { return { ui: { tab: t }, param: 'KH-003' }; }); },
+    scan: function () { return ['stay', 'contract', 'fin', 'docs', 'history', 'versions'].map(function (t) { return { ui: { tab: t }, param: 'KH-003' }; }).concat([{ ui: { tab: 'fin' }, param: 'HĐ-DD302/25' }, { ui: { tab: 'contract' }, param: 'HĐ-CG401/24' }, { ui: { tab: 'stay' }, param: 'HĐ-TX202/25' }, { ui: { tab: 'fin' }, param: 'HĐ-CG201/24' }]); },
     render: function (r) {
-      var k = C.customer(r.param || 'KH-003');
-      if (!k) return TH.pageHeader({ screen: 'CUS-02' }) + '<div class="card">' + TH.state('empty', { title: 'Không tìm thấy khách' }) + '</div>';
-      if (!visible(k)) return TH.pageHeader({ screen: 'CUS-02', title: k.name }) + '<div class="card">' + TH.state('forbidden', { text: 'Khách thuộc tòa ngoài phạm vi vai trò hiện tại.' }) + '</div>';
-      var S = 'CUS-02', c = contractOf(k);
-      var tabs = [{ id: 'profile', label: 'Hồ sơ' }, { id: 'docs', label: 'Tài liệu', count: TH.db.documents.filter(function (d) { return d.customerId === k.id; }).length }, { id: 'history', label: 'Lịch sử liên hệ', gate: 'F010.C' }, { id: 'versions', label: 'Phiên bản định danh', gate: 'F010.D' }];
+      var param = r.param || 'KH-003', k, ctParam = null;
+      if (/^HĐ/.test(param)) { ctParam = C.contract(param); k = ctParam && C.customer(ctParam.customerId); } else k = C.customer(param);
+      if (!k) return TH.pageHeader({ screen: 'CUS-02' }) + '<div class="card">' + TH.state('empty', { title: 'Không tìm thấy hồ sơ' }) + '</div>';
+      if (!visible(k) || (ctParam && !TH.inScope(ctParam.buildingId))) return TH.pageHeader({ screen: 'CUS-02', title: k.name }) + '<div class="card">' + TH.state('forbidden', { text: 'Hồ sơ thuộc tòa ngoài phạm vi vai trò hiện tại.' }) + '</div>';
+      var S = 'CUS-02', all = C.customerContracts(k.id).filter(function (c) { return c.status !== 'draft'; }), ctSel = TH.store.ui(S, 'ct', '');
+      var ct = ctParam || all.find(function (x) { return x.id === ctSel; }) || contractOf(k);
+      var s = C.tenancyStates(ct), d = ct ? C.contractDebt(ct.id) : C.customerDebt(k.id);
+      var tabs = [{ id: 'stay', label: 'Thông tin lưu trú' }, { id: 'contract', label: 'Hợp đồng', count: all.length > 1 ? all.length : undefined }, { id: 'fin', label: 'Tài chính', count: d.overdueCount || undefined },
+        { id: 'docs', label: 'Tài liệu', count: TH.db.documents.filter(function (x) { return x.customerId === k.id; }).length }, { id: 'history', label: 'Lịch sử liên hệ', gate: 'F010.C' }, { id: 'versions', label: 'Phiên bản định danh', gate: 'F010.D' }];
       var tab = TH.resolveTab(S, tabs);
       var body;
-      if (tab === 'profile') {
-        body = '<div class="grid-2"><div class="card"><div class="card-hd"><div class="card-title">Thông tin khách</div>' + TH.badge('Đã mask định danh', 'neutral', { icon: 'shield' }) + '</div><div class="card-bd">' +
-          TH.kv([['Mã khách', '<span class="mono">' + k.id + '</span>'], ['Họ tên', esc(k.name)], ['Ngày sinh', F.date(k.dob)], ['Giấy tờ', esc(k.idType + ' · ' + k.idNo)], ['Quê quán', esc(k.hometown)], ['Số liên hệ', esc(k.phone)], ['Zalo OA', k.oaLinked ? TH.badge('Đã liên kết', 'success') + ' <span class="small muted">đồng ý ' + F.date(k.oaConsentAt) + '</span>' : TH.badge('Chưa liên kết — không gửi tin', 'neutral')]]) + '</div></div>' +
-          '<div class="card"><div class="card-hd"><div class="card-title">Hợp đồng</div></div><div class="card-bd">' + (c ? TH.kv([['Số HĐ', '<a href="' + TH.router.href('CON-02', c.id) + '">' + esc(c.id) + '</a>'], ['Phòng', TH.roomLink(c.roomId)], ['Hiệu lực', F.date(c.start) + ' → ' + F.date(c.end)], ['Giá thuê', F.money(c.rent)]]) : TH.state('empty', { title: 'Chưa gán hợp đồng', action: '<a class="btn btn-sm" href="' + TH.router.href('CON-02', 'new') + '">Tạo hợp đồng</a>' })) + '</div></div></div>';
-      } else if (tab === 'docs') {
+      if (tab === 'stay') body = stayTab(k, ct);
+      else if (tab === 'contract') body = contractTab(k, all, ct);
+      else if (tab === 'fin') body = finTab(k, ct);
+      else if (tab === 'docs') {
         var dq = TH.has('F013.B') ? TH.store.ui(S, 'dq', '') : '';
-        var docs = TH.db.documents.filter(function (d) { return d.customerId === k.id && TH.match(dq, [d.kind, d.file, d.contractId, d.roomId]); });
+        var docs = TH.db.documents.filter(function (x) { return x.customerId === k.id && TH.match(dq, [x.kind, x.file, x.contractId, x.roomId]); });
         body = '<div class="card card-flush"><div class="toolbar">' + (TH.has('F013.B') ? '<div class="input-wrap">' + I('search') + '<label class="sr-only" for="dq">Tìm tài liệu</label><input id="dq" class="input input-sm" data-ui="CUS-02.dq" value="' + esc(dq) + '" placeholder="Tìm theo HĐ/khách/phòng…"></div>' + TH.up('F013.B') : TH.gate('F013.B', '', { mode: 'btn', label: 'Tìm theo HĐ/khách/phòng', size: 'btn-sm' })) + '<span class="grow"></span><button type="button" class="btn btn-sm" data-act="cus.upload" data-id="' + k.id + '">' + I('upload', 'ic-sm') + 'Tải lên</button></div>' +
           TH.table({ cols: [
-            { key: 'f', label: 'Tài liệu', render: function (d) { return TH.fileOf(d.file); } },
-            { key: 'k', label: 'Loại', render: function (d) { return esc(d.kind); } },
-            { key: 'c', label: 'Hợp đồng · phòng', render: function (d) { return esc(d.contractId) + '<div class="cell-sub">' + esc(d.roomId) + '</div>'; } },
-            { key: 'u', label: 'Ngày tải', render: function (d) { return F.date(d.uploadedAt); } },
+            { key: 'f', label: 'Tài liệu', render: function (x) { return TH.fileOf(x.file); } },
+            { key: 'k', label: 'Loại', render: function (x) { return esc(x.kind); } },
+            { key: 'c', label: 'Hợp đồng · phòng', render: function (x) { return esc(x.contractId) + '<div class="cell-sub">' + esc(x.roomId) + '</div>'; } },
+            { key: 'u', label: 'Ngày tải', render: function (x) { return F.date(x.uploadedAt); } },
             { key: 'perm', label: 'Quyền xem', gate: 'F013.C', render: function () { return '<span class="small">QL tòa + Kế toán</span>'; } },
-            { key: 'v', label: 'Phiên bản · lượt xem', gate: 'F013.D', render: function (d) { return 'v' + d.version + ' · ' + d.views + ' lượt'; } },
-            { key: 'a', label: '', render: function (d) { return '<button type="button" class="btn btn-xs" data-act="cus.dl" data-f="' + esc(d.file) + '">' + I('download', 'ic-sm') + 'Tải xuống</button>'; } },
+            { key: 'v', label: 'Phiên bản · lượt xem', gate: 'F013.D', render: function (x) { return 'v' + x.version + ' · ' + x.views + ' lượt'; } },
+            { key: 'a', label: '', render: function (x) { return '<button type="button" class="btn btn-xs" data-act="cus.dl" data-f="' + esc(x.file) + '">' + I('download', 'ic-sm') + 'Tải xuống</button>'; } },
           ], rows: docs, empty: { title: 'Không có tài liệu', text: 'Tải lên giấy tờ hoặc bản scan hợp đồng.' } }) + '</div>';
       } else if (tab === 'history') {
-        body = '<div class="card"><div class="card-hd"><div class="card-title">Log lịch sử thông tin liên hệ ' + TH.up('F010.C') + '</div></div><div class="card-bd"><ul class="timeline">' + (TH.db.customerHistory.filter(function (h) { return h.customerId === k.id; }).map(function (h) { return '<li><b>' + esc(h.field) + '</b>: <s class="muted">' + esc(h.before) + '</s> → ' + esc(h.after) + '<div class="when">' + esc(C.staffName(h.by)) + ' · ' + F.date(h.at) + '</div></li>'; }).join('') || '<li class="muted">Chưa có thay đổi.</li>') + '</ul></div></div>';
+        body = '<div class="card"><div class="card-hd"><div class="card-title">Log lịch sử thông tin liên hệ ' + TH.up('F010.C') + '</div><span class="small muted">Chỉ thay đổi số điện thoại / địa chỉ liên hệ; thay đổi khác xem audit</span></div><div class="card-bd"><ul class="timeline">' + (TH.db.customerHistory.filter(function (h) { return h.customerId === k.id; }).map(function (h) { return '<li><b>' + esc(h.field) + '</b>: <s class="muted">' + esc(h.before) + '</s> → ' + esc(h.after) + '<div class="when">' + esc(C.staffName(h.by)) + ' · ' + F.date(h.at) + '</div></li>'; }).join('') || '<li class="muted">Chưa có thay đổi.</li>') + '</ul></div></div>';
       } else {
-        body = '<div class="card card-flush">' + TH.cardHd('Phiên bản thông tin định danh/hợp đồng' + TH.up('F010.D')) + TH.table({ cols: [{ key: 'v', label: 'Phiên bản', render: function (x) { return '<b>v' + x.v + '</b>'; } }, { key: 'a', label: 'Từ ngày', render: function (x) { return F.date(x.at); } }, { key: 'n', label: 'Nội dung', render: function (x) { return esc(x.n); } }], rows: [{ v: 1, at: k.createdAt, n: 'Tạo từ ' + (k.id === 'KH-003' ? 'OCR CCCD (đã xác nhận)' : 'nhập tay') }].concat(TH.db.customerHistory.filter(function (h) { return h.customerId === k.id; }).map(function (h, i) { return { v: i + 2, at: h.at, n: 'Cập nhật ' + h.field }; })) }) + '</div>';
+        body = '<div class="card card-flush">' + TH.cardHd('Phiên bản thông tin định danh/hợp đồng' + TH.up('F010.D')) + TH.table({ cols: [{ key: 'v', label: 'Phiên bản', render: function (x) { return '<b>v' + x.v + '</b>'; } }, { key: 'a', label: 'Từ ngày', render: function (x) { return F.date(x.at); } }, { key: 'n', label: 'Nội dung', render: function (x) { return esc(x.n); } }], rows: [{ v: 1, at: k.createdAt, n: 'Tạo từ ' + (k.id === 'KH-003' ? 'OCR CCCD (đã xác nhận)' : 'nhập tay') }].concat(TH.db.customerHistory.filter(function (h) { return h.customerId === k.id; }).slice().reverse().map(function (h, i) { return { v: i + 2, at: h.at, n: 'Cập nhật ' + h.field }; })) }) + '</div>';
       }
-      return TH.pageHeader({ screen: 'CUS-02', title: k.name, crumbs: [['Khách hàng', TH.router.href('CUS-01')], [k.id]], status: TH.status(c ? 'occupied' : 'active', c ? 'Đang thuê' : 'Chưa có HĐ'),
+      var b = ct ? C.building(ct.buildingId) : null;
+      return TH.pageHeader({ screen: 'CUS-02', title: ct ? roomCode(ct) : k.name, crumbs: [['Khách hàng', TH.router.href('CUS-01')], [ct ? roomCode(ct) : k.id]], status: stateHtml(s),
+          desc: '<b>' + esc(k.name) + '</b> · <span class="mono">' + k.id + '</span>' + (ct ? ' · HĐ <span class="mono">' + esc(ct.id) + '</span>' : '') + (b ? ' · ' + esc(b.name) + ' · NV vận hành ' + esc(C.staffName(C.opsStaff(b.id))) + ' · Trưởng khu vực ' + (C.areaHead(b.id) ? esc(C.staffName(C.areaHead(b.id))) : '<span class="muted">chưa phân công</span>') : '') + (d.debt ? ' · <span class="neg strong">còn nợ ' + F.money(d.debt) + '</span>' : ''),
           actions: '<button type="button" class="btn" data-act="cus.upload" data-id="' + k.id + '">' + I('upload', 'ic-sm') + 'Upload</button><a class="btn btn-primary" href="' + TH.router.href('OCR-CUS', k.id) + '">' + I('scan', 'ic-sm') + 'OCR & review</a>' }) +
         '<div class="card" style="margin-bottom:16px">' + TH.tabs(S, tabs, tab) + '</div>' + body;
     },
+    dialogs: [function () { vehForm('KH-003'); }, function () { vehForm('KH-003', 'XE-003-1'); }, function () { priceOcrForm('HĐ-CG201/25'); }, function () { depReviewForm('HC-2610-01'); }, function () { depPayForm('HC-2609-01'); }],
   };
   TH.act['cus.upload'] = function (el) {
-    var k = C.customer(el.dataset.id);
-    TH.db.documents.push({ id: 'TL-' + Date.now().toString().slice(-4), customerId: k.id, contractId: (contractOf(k) || {}).id || '—', roomId: (contractOf(k) || {}).roomId || '—', kind: 'Giấy tờ bổ sung', file: 'giay_to_bo_sung_' + k.id + '.pdf', version: 1, uploadedAt: TH.TODAY, views: 0 });
+    var k = C.customer(el.dataset.id), c = contractOf(k);
+    TH.db.documents.push({ id: 'TL-' + Date.now().toString().slice(-4), customerId: k.id, contractId: (c || {}).id || '—', roomId: (c || {}).roomId || '—', kind: 'Giấy tờ bổ sung', file: 'giay_to_bo_sung_' + k.id + '.pdf', version: 1, uploadedAt: TH.TODAY, views: 0 });
     TH.log('Tải tài liệu', k.id, 'Giấy tờ bổ sung', 'customer'); TH.store.setUi('CUS-02', 'tab', 'docs'); TH.app.refresh(); TH.toast('Đã lưu tài liệu (mô phỏng)', 'Gắn với hồ sơ ' + esc(k.id));
   };
   TH.act['cus.dl'] = function (el) { TH.toast('Tệp minh họa', esc(el.dataset.f) + ' — bản demo không lưu tệp thật.', 'info'); };

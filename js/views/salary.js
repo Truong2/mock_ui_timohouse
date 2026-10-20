@@ -79,6 +79,7 @@
         TH.gate('F040.B', '', { mode: 'mini', label: 'Tự đưa mốc 5/10/15 vào bản nháp' }) +
         TH.gate('F040.C', '<div class="small">' + TH.tierPill('C') + ' Bậc hiệu suất / thâm niên: Bậc 1 ≤ 15 tr; Bậc 2 > 15 tr (bảng nguồn chờ duyệt).</div>', { mode: 'mini', label: 'Bậc hiệu suất/thâm niên' }) +
         TH.gate('F040.D', '<div class="small">' + TH.tierPill('D') + ' Nhánh công thức: phòng mới, khách trả trước, cọc — ngoại lệ lương đã ký, có truy vết.</div>', { mode: 'mini', label: 'Công thức nhiều nhánh' }) +
+        '<div class="alert alert-draft">' + I('alert', 'ic-sm') + '<div class="alert-body"><b>Mâu thuẫn trong tài liệu lương (D-06)</b><span>Trang 1 ghi mức lương/phòng = HS × đơn giá ÷ 100, ví dụ lại tính 91 × 110.000 ÷ 90 = 111.222. Bản nháp đang dùng ÷ 90 cho mọi bậc — <b>chưa được chọn chính thức</b>; không dùng số này để trả lương.</span></div></div>' +
         '<div class="small muted">Chưa chốt bảng bậc/đặc lệ thì kế toán review bằng tay.</div></div></div>';
       var actions = TH.gate('F039.B', TH.permBtn('salary.edit', '<button type="button" class="btn" data-act="sal.import">' + I('upload', 'ic-sm') + 'Import bảng lương nguồn' + TH.up('F039.B') + '</button>', '403'), { mode: 'btn', label: 'Import bảng lương nguồn' }) +
         '<a class="btn" href="' + TH.router.href('SAL-ADJ') + '">' + I('edit', 'ic-sm') + 'Điều chỉnh</a>' + TH.exportBtn('sal.xlsx', 'Xuất Excel (.xlsx)');
