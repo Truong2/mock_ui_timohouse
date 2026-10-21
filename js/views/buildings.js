@@ -470,13 +470,13 @@
       var payAlert = TH.has('F036.C') && TH.db.landlordPays.some(function (x) { return x.buildingId === b.id && x.amount > x.paid && x.dueAt < TH.TODAY; });
       var tabs = [
         { id: 'info', label: 'Thông tin chung', icon: 'building' },
-        { id: 'owner', label: 'Chủ nhà & hợp đồng', icon: 'contract' },
+        { id: 'owner', label: 'Chủ nhà & hợp đồng thuê tòa', icon: 'contract' },
         { id: 'staff', label: 'Nhân sự', icon: 'users', count: TH.db.assignments.filter(function (a) { return a.buildingId === b.id && !a.to; }).length },
         { id: 'rooms', label: 'Phòng', icon: 'door', count: rooms.length },
         { id: 'assets', label: 'Tài sản', icon: 'layers', count: TH.db.assets.filter(function (a) { return a.buildingId === b.id; }).length },
         { id: 'docs', label: 'Hồ sơ & minh chứng', icon: 'shieldCheck' },
         { id: 'ops', label: 'Vận hành & kết quả', icon: 'activity' },
-        { id: 'pay', label: 'Lịch thanh toán', icon: 'calendar' },
+        { id: 'pay', label: 'Thanh toán chủ nhà', icon: 'calendar' },
       ];
       var tab = TH.resolveTab(S, tabs);
       var body;

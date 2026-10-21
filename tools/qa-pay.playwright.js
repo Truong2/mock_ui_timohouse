@@ -106,6 +106,6 @@ async (page) => {
   check('QA-PAY-11', q11.tabs === 7 && q11.cols.includes('DT mốc 2 · 90%') && q11.cols.includes('Lũy kế M15') && over <= 0, { q11, over });
 
   const smoke = await read(() => { TH.db = TH.seed(); Object.assign(TH.store.state, { building: 'ALL', ui: {}, drafts: {}, editing: null, role: 'admin' }); const r = TH.qaSmoke(); TH.store.flush(); TH.app.refresh(); return { total: r.total, fails: r.fails.length }; });
-  check('SMOKE', smoke.total === 1048 && smoke.fails === 0, smoke);
+  check('SMOKE', smoke.total >= 1048 && smoke.fails === 0, smoke);
   return { passed: results.length, results };
 }

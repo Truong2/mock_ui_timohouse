@@ -1,0 +1,276 @@
+{
+  "testedAtUtc": "2026-10-21 10:53:51 UTC",
+  "baseCommit": "02ec339",
+  "change": "CR-NAV-01",
+  "oldPrimaryMenuItems": 24,
+  "newPrimaryMenuItems": 9,
+  "widths": {
+    "expandedDesktop": 232,
+    "collapsedDesktop": 72,
+    "mobileDrawer": 264
+  },
+  "passed": 22,
+  "results": [
+    {
+      "id": "NAV-01",
+      "pass": true,
+      "evidence": {
+        "modules": [
+          "overview",
+          "properties",
+          "tenancies",
+          "utilities",
+          "billing",
+          "expenses",
+          "people",
+          "equity",
+          "reports"
+        ],
+        "names": [
+          "Tổng quan",
+          "Tòa nhà & phòng",
+          "Khách thuê & hợp đồng",
+          "Điện nước & dịch vụ",
+          "Hóa đơn & thu tiền",
+          "Chi phí vận hành",
+          "Nhân sự & tiền lương",
+          "Cổ đông & lợi nhuận",
+          "Báo cáo"
+        ],
+        "tabs": [
+          "Tòa nhà",
+          "Phòng",
+          "Chủ nhà"
+        ],
+        "noTruncatedNames": true,
+        "noScreenCode": true,
+        "title": "Tòa nhà"
+      }
+    },
+    {
+      "id": "NAV-02",
+      "pass": true,
+      "evidence": {
+        "width": 72,
+        "accessible": true,
+        "count": 9,
+        "persistedAfterReload": true
+      }
+    },
+    {
+      "id": "NAV-03-ROOM-02",
+      "pass": true,
+      "evidence": {
+        "group": "properties",
+        "section": "Phòng",
+        "activeCount": 1
+      }
+    },
+    {
+      "id": "NAV-03-OWN-02",
+      "pass": true,
+      "evidence": {
+        "group": "properties",
+        "section": "Chủ nhà",
+        "activeCount": 1
+      }
+    },
+    {
+      "id": "NAV-03-CON-03",
+      "pass": true,
+      "evidence": {
+        "group": "tenancies",
+        "section": "Hợp đồng thuê phòng",
+        "activeCount": 1
+      }
+    },
+    {
+      "id": "NAV-03-INV-01",
+      "pass": true,
+      "evidence": {
+        "group": "billing",
+        "section": "Hóa đơn",
+        "activeCount": 1
+      }
+    },
+    {
+      "id": "NAV-03-INV-03",
+      "pass": true,
+      "evidence": {
+        "group": "billing",
+        "section": "Hóa đơn",
+        "activeCount": 1
+      }
+    },
+    {
+      "id": "NAV-03-PAY-01",
+      "pass": true,
+      "evidence": {
+        "group": "billing",
+        "section": "Thu tiền & công nợ",
+        "activeCount": 1
+      }
+    },
+    {
+      "id": "NAV-03-OA-02",
+      "pass": true,
+      "evidence": {
+        "group": "billing",
+        "section": "Nhắc thanh toán",
+        "activeCount": 1
+      }
+    },
+    {
+      "id": "NAV-03-SAL-01",
+      "pass": true,
+      "evidence": {
+        "group": "people",
+        "section": "Bảng lương",
+        "activeCount": 1
+      }
+    },
+    {
+      "id": "NAV-04-HR",
+      "pass": true,
+      "evidence": [
+        {
+          "id": "people",
+          "allowed": true
+        },
+        {
+          "id": "reports",
+          "allowed": true
+        }
+      ]
+    },
+    {
+      "id": "NAV-04-SEARCH-PERM",
+      "pass": true,
+      "evidence": "Không có kết quả cho “chi phí”."
+    },
+    {
+      "id": "NAV-04-MANAGER",
+      "pass": true,
+      "evidence": {
+        "ids": [
+          "overview",
+          "properties",
+          "tenancies",
+          "utilities",
+          "billing",
+          "expenses",
+          "reports"
+        ],
+        "forbidden": false
+      }
+    },
+    {
+      "id": "NAV-05-STAY",
+      "pass": true,
+      "evidence": {
+        "screen": "OWN-02",
+        "dirty": true
+      }
+    },
+    {
+      "id": "NAV-05-DISCARD",
+      "pass": true,
+      "evidence": "Dữ liệu chủ nhà giữ nguyên sau khi bỏ nháp"
+    },
+    {
+      "id": "NAV-06-ALIAS",
+      "pass": true,
+      "evidence": "Phiếu thu & đối soát\nDanh sách & tác vụ"
+    },
+    {
+      "id": "NAV-07-REPORT-HUB",
+      "pass": true,
+      "evidence": "Mục Báo cáo mở luồng REPORTS hiện có"
+    },
+    {
+      "id": "NAV-07-RETURN",
+      "pass": true,
+      "evidence": {
+        "exists": true,
+        "first": true
+      }
+    },
+    {
+      "id": "NAV-08-DRAWER",
+      "pass": true,
+      "evidence": {
+        "closed": {
+          "inert": true,
+          "overflow": -15
+        },
+        "opened": {
+          "inert": false,
+          "expanded": "true",
+          "focusInNav": true,
+          "scrollLocked": true
+        },
+        "focusTrapped": true,
+        "escClosed": true
+      }
+    },
+    {
+      "id": "NAV-08-NAVIGATE",
+      "pass": true,
+      "evidence": {
+        "overflow": 0,
+        "active": "properties"
+      }
+    },
+    {
+      "id": "NAV-08-LANDING",
+      "pass": true,
+      "evidence": "Về trang giới thiệu không giữ khóa cuộn của drawer"
+    },
+    {
+      "id": "NAV-09-SMOKE",
+      "pass": true,
+      "evidence": {
+        "total": 1088,
+        "fails": []
+      }
+    }
+  ],
+  "sourceHashes": [
+    {
+      "Path": "C:\\Users\\truon\\Downloads\\mockup\\js\\navigation.js",
+      "Hash": "B03DCE64DE2D850421A3CC77DAAD25EA1820574676C0F60EC18AB6DAD7313F03"
+    },
+    {
+      "Path": "C:\\Users\\truon\\Downloads\\mockup\\css\\navigation.css",
+      "Hash": "BE6BAFC20B40252E67474B8FD22C548CD67E60CDA4FC2D8446E4B7D50937F767"
+    },
+    {
+      "Path": "C:\\Users\\truon\\Downloads\\mockup\\index.html",
+      "Hash": "4F7B08CE3E73BE3C401D36E9B5E5AAE3A8C5D558A8FB302426942CC05E8ACE67"
+    },
+    {
+      "Path": "C:\\Users\\truon\\Downloads\\mockup\\js\\views\\owners.js",
+      "Hash": "839B0D30B5D65C251BF76D9601E10C0E808F43321158BC285AB56FE68FFC0BEA"
+    },
+    {
+      "Path": "C:\\Users\\truon\\Downloads\\mockup\\js\\views\\buildings.js",
+      "Hash": "4A5D768EE3D49E160C90ED35120B450262350531A31A145289DF886FE74677E4"
+    },
+    {
+      "Path": "C:\\Users\\truon\\Downloads\\mockup\\js\\views\\customers.js",
+      "Hash": "85FE338DC55264B2C7479623677E599AAF36FD1F1CEB76223BBFC5E43C81BC78"
+    },
+    {
+      "Path": "C:\\Users\\truon\\Downloads\\mockup\\js\\views\\payments.js",
+      "Hash": "96CC7CD7FB6D29E4C215BD31D3BBA32F9810E94F32AD33115EC7A04E6CD21C7E"
+    },
+    {
+      "Path": "C:\\Users\\truon\\Downloads\\mockup\\js\\views\\rooms.js",
+      "Hash": "A83FEF2E9F0669FF9F1022FE52D2111C131793272C359C945074CD765E616DEA"
+    },
+    {
+      "Path": "C:\\Users\\truon\\Downloads\\mockup\\js\\views\\zalo.js",
+      "Hash": "9A4565829046D94A8B213C93694C796954E2D5B50D492F495BFCA61E93D27D18"
+    }
+  ]
+}

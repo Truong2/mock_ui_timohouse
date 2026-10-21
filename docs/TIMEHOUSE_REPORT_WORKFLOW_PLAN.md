@@ -1,6 +1,6 @@
 # Plan báo cáo theo mẫu Excel — cập nhật sau Claude CR-BILL
 
-Ngày: 21/10/2026. Trạng thái: **plan đã cập nhật, chưa triển khai luồng báo cáo mới**.
+Ngày: 21/10/2026. Trạng thái: **đã triển khai (CR-RPT-02)** — kết quả ở [Decision log §9.10](TIMEHOUSE_MOCKUP_DECISIONS.md) và [QA §8.9](TIMEHOUSE_MOCKUP_QA.md); kiểm thử `tools/qa-report.playwright.js` 11/11.
 
 Bản này thay thế plan báo cáo trong hội thoại, giữ đầy đủ các lựa chọn người dùng đã chốt và bổ sung căn cứ từ working tree **schema 12** sau CR-PAY/CR-BILL. Base commit là `70763e3`; các thay đổi Claude chưa commit nên không coi commit này là toàn bộ baseline.
 

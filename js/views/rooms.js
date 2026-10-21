@@ -75,7 +75,7 @@
       if (!r) return TH.pageHeader({ screen: 'ROOM-02' }) + '<div class="card">' + TH.state('empty', { title: 'Không tìm thấy phòng' }) + '</div>';
       if (!TH.inScope(r.buildingId)) return TH.pageHeader({ screen: 'ROOM-02', title: 'Phòng ' + r.id }) + '<div class="card">' + TH.state('forbidden', { text: 'Phòng thuộc tòa ngoài phạm vi vai trò hiện tại.' }) + '</div>';
       var S = 'ROOM-02', c = C.contractOfRoom(r.id), k = c && C.customer(c.customerId), b = C.building(r.buildingId);
-      var tabs = [{ id: 'overview', label: 'Tổng quan' }, { id: 'tenant', label: 'Khách' }, { id: 'contract', label: 'Hợp đồng' }, { id: 'meter', label: 'Chỉ số & phí', gate: 'F009.B' }, { id: 'timeline', label: 'Timeline thu/khai thác', gate: 'F009.C' }, { id: 'periods', label: 'Lịch sử theo kỳ', gate: 'F009.D' }];
+      var tabs = [{ id: 'overview', label: 'Thông tin phòng' }, { id: 'tenant', label: 'Khách thuê' }, { id: 'contract', label: 'Hợp đồng thuê' }, { id: 'meter', label: 'Chỉ số & phí', gate: 'F009.B' }, { id: 'timeline', label: 'Nhật ký hoạt động', gate: 'F009.C' }, { id: 'periods', label: 'Lịch sử theo kỳ', gate: 'F009.D' }];
       var tab = TH.resolveTab(S, tabs);
       var invs = TH.db.invoices.filter(function (i) { return i.roomId === r.id; }).sort(function (a, z) { return a.period < z.period ? 1 : -1; });
       var body;

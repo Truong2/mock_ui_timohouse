@@ -211,11 +211,11 @@
   var P2_TABS = [
     { id: 'mgr', label: 'Theo quản lý', icon: 'users' },
     { id: 'bld', label: 'Theo tòa', icon: 'building' },
-    { id: 'room', label: 'Check theo phòng', icon: 'door' },
-    { id: 'new', label: 'Phòng mới', icon: 'sparkles' },
-    { id: 'break', label: 'Phòng phá HĐ', icon: 'alertCircle' },
+    { id: 'room', label: 'Theo phòng', icon: 'door' },
+    { id: 'new', label: 'Vào ở & giữ chỗ', icon: 'sparkles' },
+    { id: 'break', label: 'Chấm dứt trước hạn', icon: 'alertCircle' },
     { id: 'loss', label: 'Điện nước không thu được', icon: 'zap' },
-    { id: 'inv', label: 'Chi tiết hóa đơn & hiệu suất', icon: 'receipt' },
+    { id: 'inv', label: 'Hiệu suất thu tiền', icon: 'receipt' },
   ];
   var pctOf = function (x) { return x === null || x === undefined ? '<span class="muted">—</span>' : F.pct(x, 1); };
   var moneyOr = function (n, cls) { return n ? '<span class="' + (cls || '') + '">' + F.money(n) + '</span>' : '<span class="muted">0</span>'; };

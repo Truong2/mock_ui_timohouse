@@ -29,7 +29,7 @@ TH.PERMS = {
 };
 /* Màn nào vai trò nào được mở (ngoài danh sách → 403 Forbidden). */
 TH.SCREEN_ACCESS = {
-  manager: ['AUTH-01', 'OWN-01', 'OWN-02', 'OWN-IMP', 'BLD-01', 'BLD-02', 'BLD-IMP', 'ROOM-01', 'ROOM-02', 'ROOM-IMP', 'CUS-01', 'CUS-02', 'OCR-CUS', 'CON-01', 'CON-02', 'CON-03', 'OCR-CON', 'CON-FOLLOW', 'METER-01', 'INV-01', 'INV-02', 'INV-03', 'INV-PREV', 'OA-01', 'OA-02', 'PAY-01', 'PAY-02', 'PAY-APP', 'EXP-01', 'RPT-01', 'RPT-02', 'RPT-04'],
+  manager: ['AUTH-01', 'OWN-01', 'OWN-02', 'OWN-IMP', 'BLD-01', 'BLD-02', 'BLD-IMP', 'ROOM-01', 'ROOM-02', 'ROOM-IMP', 'CUS-01', 'CUS-02', 'OCR-CUS', 'CON-01', 'CON-02', 'CON-03', 'OCR-CON', 'CON-FOLLOW', 'METER-01', 'INV-01', 'INV-02', 'INV-03', 'INV-PREV', 'OA-01', 'OA-02', 'PAY-01', 'PAY-02', 'PAY-APP', 'EXP-01', 'RPT-01', 'RPT-02', 'RPT-04', 'REPORTS'],
   hr: ['AUTH-01', 'HR-01', 'HR-ASSIGN', 'SAL-01', 'SAL-ADJ', 'RPT-03'],
   accountant: null, // tất cả trừ SYS-01
   admin: null,
@@ -46,10 +46,11 @@ TH.store = (function () {
     if (!storageOk) return mem;
     try { var raw = localStorage.getItem(KEY); return raw ? JSON.parse(raw) : null; } catch (e) { return mem; }
   }
+  /* Trả true khi đã ghi bền vững vào localStorage; false = chỉ giữ trong bộ nhớ phiên (bị chặn / đầy quota) */
   function write(obj) {
     mem = obj;
-    if (!storageOk) return;
-    try { localStorage.setItem(KEY, JSON.stringify(obj)); } catch (e) { /* quota/blocked → giữ trong bộ nhớ */ }
+    if (!storageOk) return false;
+    try { localStorage.setItem(KEY, JSON.stringify(obj)); return true; } catch (e) { /* quota/blocked → giữ trong bộ nhớ */ return false; }
   }
 
   var state = {
@@ -60,7 +61,7 @@ TH.store = (function () {
   var saveTimer = null;
   function flush() {
     clearTimeout(saveTimer); saveTimer = null;
-    write({ schema: TH.DATA_SCHEMA, pkg: state.pkg, showLocked: state.showLocked, role: state.role, building: state.building, period: state.period, tierNotes: state.tierNotes, ui: state.ui, drafts: state.drafts, db: TH.db });
+    return write({ schema: TH.DATA_SCHEMA, pkg: state.pkg, showLocked: state.showLocked, role: state.role, building: state.building, period: state.period, tierNotes: state.tierNotes, ui: state.ui, drafts: state.drafts, db: TH.db });
   }
   function persist() {
     clearTimeout(saveTimer);
@@ -84,6 +85,9 @@ TH.store = (function () {
       } else {
         TH.db = TH.seed();
       }
+      /* CR-RPT-02: bổ sung mảng báo cáo đã tạo / bản nháp preview khi nạp DB schema 12 — không reset dữ liệu */
+      TH.db.reportRuns = TH.db.reportRuns || [];
+      TH.db.reportDrafts = TH.db.reportDrafts || [];
       // Thứ tự lấy gói: query hợp lệ → lựa chọn đã lưu → D
       var q = queryPkg();
       state.pkgFromQuery = !!validPkg(q);
@@ -95,6 +99,8 @@ TH.store = (function () {
     },
     persist: persist,
     flush: flush,
+    /* Ghi ngay và báo đã lưu bền vững hay chỉ trong phiên */
+    flushChecked: function () { var ok = flush(); return { durable: !!ok, storageOk: storageOk }; },
     level: function (p) { return TH.PACKAGES[p || state.pkg].level; },
     setPkg: function (p) {
       p = validPkg(p);

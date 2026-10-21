@@ -460,3 +460,69 @@ Làm tiếp 4 mục §9.8 để ngoài phạm vi và các điều chỉnh gõ ta
 - Nhiều đoạn giá trong một kỳ (F023.D vẫn là thẻ mô tả).
 - Chuẩn hóa G-03 vào HS/lương.
 - Import sheet PHÒNG MỚI từ Excel.
+
+### 9.10 CR-RPT-02 — Luồng báo cáo theo mẫu Excel: xem trước, bản lưu, phiên bản, truy nguồn (21/10/2026, schema 12)
+
+Triển khai [plan báo cáo](TIMEHOUSE_REPORT_WORKFLOW_PLAN.md). Không nâng schema: DB schema 12 đang lưu chỉ được bổ sung `reportRuns` và `reportDrafts` khi nạp.
+
+**Luồng (mọi gói A–D):**
+1. Menu **Báo cáo theo mẫu Excel** (`#/demo/reports`) mở danh sách bản đã tạo. Có tìm kiếm, lọc loại / tòa / kỳ / người tạo, mới nhất trước, hiện mọi phiên bản.
+2. **Tạo báo cáo** (`/new`): chọn loại → tháng → tòa trong quyền. "Chọn tất cả" chỉ chọn các tòa được phép.
+3. **Xem trước** (`/preview/<draftId>`):
+   - RPT-04: mỗi tòa một item.
+   - RPT-05: một bản tổng hợp, có sheet Kinh doanh, Tổng và sheet từng nhóm nhà. Mỗi nhóm chỉ gộp các tòa đã chọn.
+   - Có đủ tab sheet sẽ xuất: mẫu, chia cổ phần, nguồn số liệu, công thức.
+4. **Xác nhận tạo N báo cáo**: chỉ bước này sinh bản lưu. Hủy hoặc quay lại không tạo; bấm lần hai không tạo bản trùng.
+5. Bản lưu (`/view/<runId>`) chỉ đọc. Tải Excel dựng từ snapshot. **Tạo phiên bản mới** tính lại từ nguồn hiện tại, tạo v2/v3 và không ghi đè bản cũ.
+
+Route cũ `RPT-04`/`RPT-05` mở form tạo đã điền sẵn loại, kỳ và tòa; mở link không tạo báo cáo.
+
+**Số liệu và truy nguồn:**
+- Preview và Excel cùng dựng từ một snapshot, tính bằng `C.pnl` và `C.shareSplit`.
+- Mỗi ô số là nút "Nguồn và cách tính", hiển thị theo loại chỉ tiêu:
+  - Chỉ tiêu dẫn xuất: công thức → thành phần.
+  - Tỷ lệ: tử số và mẫu số. Mẫu số bằng 0 thì hiện "Không áp dụng".
+  - Cột nhiều tòa: đóng góp từng tòa.
+  - Chỉ tiêu lá: danh sách chứng từ kèm căn cứ tại lúc tạo, tổng đối chiếu và chênh lệch làm tròn.
+- **Trả trước:** nguồn `prepaid` ghi hóa đơn gốc, kỳ xuất, các kỳ phủ, tổng dòng, phần kỳ đầu và phần mỗi kỳ sau. Nút mở hóa đơn gốc (INV-03).
+- **Căn cứ trên dòng hóa đơn:** `buildInvoice` từ nay lưu căn cứ tính cùng dòng.
+  - Tiền phòng: `raw`, `roundTo`, `rule`.
+  - Điện chung: `basis` gồm công tơ, chỉ số, đơn giá, cách chia, số người/phòng, phần phòng trống, các dòng phân bổ.
+  - Giảm trừ/phụ thu: `basis` gồm mã, loại, lý do, trạng thái, người duyệt, kỳ.
+  - Hóa đơn cũ không có căn cứ hiện cảnh báo "Thiếu căn cứ lịch sử", không dựng căn cứ giả.
+- **Phân loại giữ như schema 12:** điện chung vào doanh thu điện; giảm trừ trừ vào tiền phòng; phụ thu vào DV khác. "Tổng số phòng mới" vẫn đếm theo ngày bắt đầu HĐ; phần truy nguồn nêu khác biệt với tab Phòng mới ở PAY-02.
+- **Lỗi chặn tạo báo cáo:**
+  - Số không hữu hạn.
+  - Chỉ tiêu dẫn xuất không bằng tổng thành phần.
+  - Cột nhiều tòa khác tổng các tòa.
+  - Chỉ tiêu lá khác tổng nguồn quá 1đ.
+  - Dòng hóa đơn không khớp nguồn.
+  - Tham số sai hoặc vượt quyền.
+- **Cảnh báo phải tích đã đọc:** hóa đơn nháp bị loại; tòa chưa lập hóa đơn; chi phí chờ duyệt; giảm trừ chờ duyệt; phân bổ chung nháp; lương chưa duyệt; quy tắc đề xuất (BILL-Q1…Q8); thu trước chưa chuẩn hóa HS (BILL-Q7); thiếu căn cứ lịch sử.
+- **Dấu vân tay nguồn:** gồm kết quả tính, nguồn đóng góp, hóa đơn kỳ/nháp/trả trước, quy tắc, điều chỉnh, điện chung/số người, phân bổ, lương, chi phí và lịch sử phòng. Nếu nguồn đổi trước khi xác nhận thì bị chặn tạo, phải bấm "Tính lại preview"; màn hình hiện danh sách chỉ tiêu thay đổi.
+- **Mở dữ liệu nguồn:** giữ kỳ và có thanh "Quay về báo cáo".
+  - Kiểm tra quyền màn hình và phạm vi tòa hiện tại; không tự cấp quyền sửa hay vượt khóa kỳ.
+  - Chi tiết lương bị che với vai trò không có `salary.view`.
+  - Nguồn không có trang riêng (chi phí, cọc không gắn HĐ, tiền phòng phát sinh) mở modal đúng bản ghi.
+- **Các thẻ phân tích theo gói** của RPT-04/05 cũ được giữ, đặt trong preview dưới nhãn "số liệu hiện tại, không thuộc bản lưu": phân bổ chung, đối chiếu dòng tiền, snapshot duyệt kỳ, 3 kỳ lịch sử, xu hướng, biên lợi nhuận, khóa kỳ.
+
+**Bản lưu (`ReportRun`):**
+- Gồm mã, loại, kỳ, danh sách tòa đã sắp xếp, phiên bản, bản trước, bản tạo từ, người và thời điểm tạo, mẫu, bộ tính, schema, dấu vân tay, cảnh báo đã đọc, trạng thái lưu (`local`/`session`).
+- Snapshot lưu nhãn tòa/nhóm, giá trị, nguồn đã sao chép, ghi chú, quy tắc tính tiền và cổ phần. Không giữ tham chiếu tới `TH.db`, không chụp toàn bộ DB.
+- Nhóm phiên bản theo loại + tháng + tập tòa; luôn lấy số tiếp theo của nhóm.
+- **Lưu trữ:** ghi localStorage thất bại (bị chặn hoặc đầy quota) thì báo "chỉ lưu trong phiên", không báo đã lưu bền vững.
+- **Quyền:**
+  - Admin/Kế toán: dùng cả hai loại.
+  - Quản lý tòa: chỉ RPT-04 trong tòa được giao; không thấy bản RPT-05.
+  - Nhân sự: 403.
+
+**Căn cứ số liệu:** `roomStateAt` nay cắt ở **ngày đầu tháng kế tiếp (không bao gồm)**, thay mốc ngày 28. Sự kiện ngày 28–31 và 29/02 thuộc kỳ đó. Các số đếm cuối kỳ có đổi:
+- CG-401 trống cuối kỳ 08.
+- DD-302 đang sửa cuối kỳ 09.
+- Số tiền P&L không đổi: kỳ 09 kinh doanh 16.682.599, tổng 7.282.599; kỳ 10 kinh doanh 9.655.000.
+
+**Chưa làm:**
+- Áp chuẩn hóa G-03 vào HS/lương (giữ cảnh báo BILL-Q7).
+- Bản in PDF từ bản lưu.
+- Backend lưu trữ (demo vẫn dùng localStorage).
+- Dọn bớt bản lưu khi gần đầy quota.

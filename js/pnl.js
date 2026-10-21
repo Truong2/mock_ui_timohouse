@@ -74,9 +74,10 @@ var TH = window.TH = window.TH || {};
   var POOL_MAP = { gm: 'gm', opsHead: 'opsHead', source: 'source', sales: 'sales', acct: 'acct', repairStaff: 'repairStaff', security: 'security', office: 'office', marketing: 'mkt' };
   var EXP_MAP = { owner_rent: 'cRent', equipment: 'equip', internet: 'cNet', waste: 'cWaste', elevator: 'cLift', cleaning: 'cleanStaff', commission: 'mkt', repair: 'repair', supplies: 'other', other: 'other' };
 
-  /* Trạng thái phòng tại cuối kỳ theo lịch sử roomEvents */
+  /* Trạng thái phòng tại cuối kỳ theo lịch sử roomEvents.
+     CR-RPT-02: cận = ngày đầu tháng kế tiếp, KHÔNG bao gồm (sự kiện ngày 28/29/30/31 thuộc kỳ) — trước đây cắt ở ngày 28. */
   C.roomStateAt = function (room, period) {
-    var cut = period + '-28';
+    var cut = TH.addMonthsYm(period, 1) + '-01';
     var ev = db().roomEvents.filter(function (e) { return e.roomId === room.id; }).sort(function (a, b) { return a.at < b.at ? -1 : 1; });
     var before = ev.filter(function (e) { return e.at < cut; });
     if (before.length) return before[before.length - 1].to;
@@ -105,6 +106,7 @@ var TH = window.TH = window.TH || {};
     if (l.code === 'PARK') return 'ev';
     return 'svcSplit';
   }
+  C.pnlLineKey = lineKey;
 
   /* P&L cơ sở của 1 tòa (chưa áp chế độ báo cáo) */
   function base(period, bId) {
@@ -129,7 +131,9 @@ var TH = window.TH = window.TH || {};
     });
     v.invoices = invs.length;
     C.rentCovering(period, bId).forEach(function (x) {
-      add(v, 'rent', x.amount, { kind: 'prepaid', id: x.invoice.id, room: x.invoice.roomId, amount: x.amount, text: 'Phân bổ tiền phòng trả trước ' + x.line.months + ' tháng (' + TH.fmt.period(x.invoice.period) + ')' }, x.invoice.roomId + ' trả trước');
+      var sh = C.rentShare(x.line);
+      add(v, 'rent', x.amount, { kind: 'prepaid', id: x.invoice.id, room: x.invoice.roomId, amount: x.amount, text: 'Phân bổ tiền phòng trả trước ' + x.line.months + ' tháng (' + TH.fmt.period(x.invoice.period) + ')',
+        invoicePeriod: x.invoice.period, cover: (x.line.cover || []).slice(), lineTotal: x.line.amount, first: sh.first, later: sh.later, months: sh.months }, x.invoice.roomId + ' trả trước');
     });
     v.unbilled = !db().invoices.some(function (i) { return i.buildingId === bId && i.period === period; });
     v.draftInvoices = C.invoicesIn(period, bId).filter(function (i) { return i.status === 'draft'; }).length;

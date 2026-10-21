@@ -869,7 +869,9 @@ function buildInvoice(db, ct, period, status) {
     var firstAmt = occ.full ? ct.rent : Math.round(ct.rent * occ.k / (R.roundTo || 1)) * (R.roundTo || 1);
     var rentName = cyc.months > 1 ? 'Tiền phòng ' + cyc.from.slice(5) + '–' + cyc.to.slice(5) + '/' + cyc.to.slice(0, 4) + ' (' + cyc.months + ' tháng)' + (occ.full ? '' : ' · tháng đầu ' + occ.days + '/' + occ.base + ' ngày')
       : occ.full ? 'Tiền phòng tháng ' + mm : 'Tiền phòng ' + occ.from.slice(8) + '–' + occ.to.slice(8) + '/' + period.slice(5) + ' (' + occ.days + '/' + occ.base + ' ngày)';
-    lines.push({ type: 'rent', name: rentName, qty: cyc.months, unit: 'tháng', price: ct.rent, k: occ.full ? 1 : Math.round(occ.k * 10000) / 10000, days: occ.days, base: occ.base, from: occ.from, to: occ.to, months: cyc.months, cover: cyc.cover, amount: firstAmt + ct.rent * (cyc.months - 1) });
+    /* CR-RPT-02: lưu căn cứ tính cùng dòng (số chưa làm tròn, mức làm tròn, quy tắc) — báo cáo không suy ngược từ hệ số đã rút gọn */
+    lines.push({ type: 'rent', name: rentName, qty: cyc.months, unit: 'tháng', price: ct.rent, k: occ.full ? 1 : Math.round(occ.k * 10000) / 10000, days: occ.days, base: occ.base, from: occ.from, to: occ.to, months: cyc.months, cover: cyc.cover, amount: firstAmt + ct.rent * (cyc.months - 1),
+      raw: occ.full ? ct.rent : ct.rent * occ.days / occ.base, roundTo: occ.full ? 0 : (R.roundTo || 1), rule: R.prorateBase, cycleScope: cyc.months > 1 ? (ct.cycleScope || 'rent') : null });
   }
   var fixedMul = cyc.months > 1 && ct.cycleScope === 'rent_svc' ? (cyc.start ? cyc.months : 0) : 1;
   var fixedK = R.prorateFixed === 'yes' && !occ.full ? Math.round(occ.k * 10000) / 10000 : 1;
@@ -891,7 +893,9 @@ function buildInvoice(db, ct, period, status) {
   (db.commonMeters || []).filter(function (m) { return m.buildingId === ct.buildingId && m.from <= period && m.rooms.indexOf(ct.roomId) > -1; }).forEach(function (m) {
     var sh = commonShare(db, m, period), row = sh.rows.find(function (x) { return x.roomId === ct.roomId; });
     if (!sh.ok || !row || !row.amount) return;
-    lines.push({ type: 'common', code: 'ECOM', name: 'Điện chung ' + m.name + ' (' + sh.kwh + ' kWh ÷ ' + sh.base + ' ' + (m.method === 'per_person' ? 'người' : 'phòng') + ')', qty: row.units, unit: m.method === 'per_person' ? 'người' : 'phòng', price: Math.round(sh.perUnit), amount: row.amount, refId: m.id });
+    lines.push({ type: 'common', code: 'ECOM', name: 'Điện chung ' + m.name + ' (' + sh.kwh + ' kWh ÷ ' + sh.base + ' ' + (m.method === 'per_person' ? 'người' : 'phòng') + ')', qty: row.units, unit: m.method === 'per_person' ? 'người' : 'phòng', price: Math.round(sh.perUnit), amount: row.amount, refId: m.id,
+      basis: { meterId: m.id, meterName: m.name, code: m.code, prev: sh.reading.prev, cur: sh.reading.cur, kwh: sh.kwh, price: m.price, meterAmount: sh.amount, method: m.method, base: sh.base, units: row.units, perUnit: sh.perUnit, vacant: sh.vacant, loss: sh.loss, rule: R.commonVacant,
+        rows: sh.rows.map(function (x) { return { roomId: x.roomId, units: x.units, amount: x.amount }; }) } });
   });
   (db.extraFees || []).filter(function (e) { return e.roomId === ct.roomId && e.period === period; }).forEach(function (e) {
     lines.push({ type: 'extra', name: e.name, qty: e.qty, unit: 'lần', price: e.price, refId: e.id, draft: e.status !== 'confirmed' });
@@ -899,7 +903,8 @@ function buildInvoice(db, ct, period, status) {
   /* Giảm trừ / phụ thu ("Thu khác"): khoản chờ duyệt giữ hóa đơn ở nháp */
   (db.billAdjusts || []).filter(function (a) { return a.roomId === ct.roomId && a.period === period && a.status !== 'rejected'; }).forEach(function (a) {
     var sg = a.kind === 'discount' ? -1 : 1;
-    lines.push({ type: 'adjust', code: a.kind === 'discount' ? 'DISC' : 'SURC', name: (sg < 0 ? 'Giảm trừ' : 'Phụ thu') + ' · ' + a.category + (a.reason ? ' — ' + a.reason : ''), qty: 1, unit: 'lần', price: sg * a.amount, amount: sg * a.amount, refId: a.id, draft: a.status !== 'approved' });
+    lines.push({ type: 'adjust', code: a.kind === 'discount' ? 'DISC' : 'SURC', name: (sg < 0 ? 'Giảm trừ' : 'Phụ thu') + ' · ' + a.category + (a.reason ? ' — ' + a.reason : ''), qty: 1, unit: 'lần', price: sg * a.amount, amount: sg * a.amount, refId: a.id, draft: a.status !== 'approved',
+      basis: { id: a.id, kind: a.kind, category: a.category, reason: a.reason, amount: a.amount, sign: sg, period: a.period, status: a.status, createdBy: a.createdBy, createdAt: a.createdAt, approvedBy: a.approvedBy, approvedAt: a.approvedAt } });
   });
   lines.forEach(function (l) { if (l.amount === undefined) l.amount = l.qty * l.price; });
   var total = lines.reduce(function (s, l) { return s + l.amount; }, 0);

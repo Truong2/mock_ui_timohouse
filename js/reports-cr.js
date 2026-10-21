@@ -56,5 +56,16 @@ var TH = window.TH = window.TH || {};
     },
     fields: [], actions: [], rules: ['Báo cáo kinh doanh toàn công ty', 'Báo cáo chi phí và lãi'], srcActions: ['Lọc kỳ', 'Đổi chế độ', 'Xuất Excel', 'In'], srcFields: 'Kỳ, tòa/nhóm nhà, các chỉ tiêu mẫu, tỷ lệ',
   });
+  /* CR-RPT-02 (21/10/2026, docs/TIMEHOUSE_REPORT_WORKFLOW_PLAN.md): luồng Báo cáo theo mẫu Excel — tạo → xem trước → xác nhận → bản lưu bất biến có phiên bản.
+     Áp dụng cho RPT-04/RPT-05; route cũ mở form tạo đã điền sẵn ngữ cảnh. Có ở mọi gói A–D. */
+  TH.CR_RPT2 = { id: 'CR-RPT-02', date: '2026-10-21', title: 'Luồng tạo / lưu phiên bản báo cáo theo mẫu Excel' };
+  var after5 = TH.SCREENS.findIndex(function (s) { return s.id === 'RPT-05'; });
+  var flowNote = 'Danh sách bản đã tạo (lọc loại/tòa/kỳ/người tạo) → chọn loại, tháng, tòa → xem trước đủ sheet, truy nguồn từng ô → xác nhận tạo bản lưu bất biến; tải Excel từ bản lưu; tạo phiên bản mới';
+  TH.SCREENS.splice(after5 + 1, 0, {
+    no: '40c', id: 'REPORTS', title: 'Báo cáo theo mẫu Excel', module: 'Báo cáo', kind: 'Workflow / bản lưu', excelType: 'Bổ sung CR-RPT-02', cr: TH.CR_RPT2.id,
+    template: 'docs/G1.31.8.26.xlsx · docs/bao_cao/BÁO CÁO KINH DOANH THÁNG 8.xlsx',
+    notes: { A: flowNote, B: flowNote, C: flowNote, D: flowNote },
+    fields: [], actions: [], rules: ['Chỉ bấm Xác nhận mới sinh bản lưu', 'Bản lưu chỉ đọc, Excel dựng từ bản lưu', 'Phiên bản mới không ghi đè bản cũ'], srcActions: ['Lọc', 'Xem trước', 'Xác nhận', 'Tải Excel', 'Tạo phiên bản mới'], srcFields: 'Loại, kỳ, tòa, phiên bản, người tạo, cảnh báo',
+  });
   TH.SRS_SCREENS = function () { return TH.SCREENS.filter(function (s) { return !s.cr; }); };
 })();

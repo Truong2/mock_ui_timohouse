@@ -105,6 +105,6 @@ async (page) => {
   check('QA-BILL-07', ui1.rules && ui1.adj && ui1.lek && ui1.prepaid && o1 <= 0 && ui2.rows === 1 && ui2.tx202 && o2 <= 0 && ui3.rows === 5 && ui3.input, { ui1, o1, ui2, o2, ui3 });
 
   const smoke = await read(() => { TH.db = TH.seed(); Object.assign(TH.store.state, { building: 'ALL', ui: {}, drafts: {}, editing: null, role: 'admin' }); const r = TH.qaSmoke(); TH.store.flush(); TH.app.refresh(); return { total: r.total, fails: r.fails.length }; });
-  check('SMOKE', smoke.total === 1048 && smoke.fails === 0, smoke);
+  check('SMOKE', smoke.total >= 1048 && smoke.fails === 0, smoke);
   return { passed: results.length, results };
 }

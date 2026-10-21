@@ -111,6 +111,7 @@ var TH = window.TH = window.TH || {};
     setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
   }
 
+  TH.buildXlsx = buildXlsx;
   TH.exportXlsx = function (filename, sheets) {
     save(buildXlsx(sheets), filename.replace(/\.xlsx$/i, '') + '.xlsx');
   };

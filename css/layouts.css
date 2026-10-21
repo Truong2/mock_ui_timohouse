@@ -381,3 +381,12 @@
 @media (max-width: 760px) { .doc-page.doc-bill { padding: 16px 12px; } }
 /* CR-PAY: select lọc gọn trong vùng thao tác đầu trang */
 .select.sel-inline { width: auto; max-width: 260px; }
+
+/* CR-RPT-02 — Báo cáo theo mẫu Excel: ô số mở "Nguồn và cách tính", thanh xác nhận, quay về báo cáo */
+.rptf-cell { background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; text-decoration: underline dotted var(--text-3); text-underline-offset: 3px; }
+.rptf-cell:hover { color: var(--primary); text-decoration-color: var(--primary); }
+.rptf-cell:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 2px; }
+.rptf-confirm { position: sticky; bottom: 8px; z-index: 5; box-shadow: 0 6px 20px rgba(15, 23, 42, .12); }
+.rptf-lines { margin: 0; padding-left: 16px; font-size: var(--fs-12); }
+.rptf-lines li { margin: 2px 0; }
+.rptf-return { align-items: center; }

@@ -43,13 +43,14 @@ js/
   router.js · app.js    hash router, app shell, event delegation, công cụ demo
   components.js         bảng, badge, gate gói, dialog/drawer, toast, tooltip, chart SVG
   xlsx.js               xuất .xlsx/.csv không phụ thuộc thư viện
-  views/                15 phân hệ + landing + package drawer + import/OCR dùng chung (bizreports.js = RPT-04/05, perf.js = hiển thị hiệu suất)
+  views/                15 phân hệ + landing + package drawer + import/OCR dùng chung (bizreports.js = RPT-04/05 + thẻ phân tích, reportflow.js = luồng Báo cáo theo mẫu Excel / TH.reports, perf.js = hiển thị hiệu suất)
 tools/extract-srs.js    node tools/extract-srs.js → sinh lại screens.js/features.js khi SRS đổi
 tools/qa-cus.playwright.js  kịch bản QA CR-CUS chạy bằng Playwright browser_run_code
 tools/qa-ocr.playwright.js  kịch bản QA OCR hợp đồng mẫu đầy đủ (CR-CUS-02)
 tools/qa-table-wrap.playwright.js  quét mọi màn/tab/dialog tìm ô bảng bị gãy dòng + bảng cuộn ngang
 tools/qa-pay.playwright.js  kịch bản QA CR-PAY: tiến độ thu theo QL/tòa/phòng, phá HĐ, điện nước không thu được, QL xác nhận thu, mẫu hóa đơn
 tools/qa-bill.playwright.js kịch bản QA CR-BILL: tính lẻ ngày, phòng mới, kỳ TT nhiều tháng, điện chung, giảm trừ/phụ thu
+tools/qa-report.playwright.js kịch bản QA CR-RPT-02: báo cáo theo mẫu Excel — xem trước, bản lưu, phiên bản, truy nguồn, Excel từ bản lưu
 docs/                   plan · decision log · QA checklist
 ```
 
@@ -124,8 +125,8 @@ Kỳ 10/2026 đang mở (Thanh Xuân chưa lập hóa đơn, tiền thuê nhà c
 6c. `CUS-01` lọc *Hồ sơ cọc* → mở `DD-302 — TH-DD`, tab *Tài chính*: Admin *Lập đối chiếu → gửi duyệt*, nhập khấu trừ thấm trần 500.000đ → số hoàn 3.990.000đ. Admin không tự duyệt; đổi *Kế toán* → *Duyệt hoàn* (chưa ghi sổ) → *Xác nhận đã chi / tất toán* với ngày và mã giao dịch. RPT-05 Tổng kỳ 10 giảm 3.990.000đ, Kinh doanh giữ 4.755.000đ. Mở `DD-102`: Đang thuê + Sắp hết HĐ + Chờ bàn giao. Tab *Hợp đồng*: *Đọc hợp đồng* (OCR mẫu đầy đủ) → *Đánh dấu tất cả* → *Xác nhận & áp vào hồ sơ thuê*; nước 2 × 120.000đ, hiệu lực kỳ 11. Mở KH-003 xem hai HĐ nối tiếp và phiếu chuyển cọc. `SYS-01 › Sao lưu & vận hành`: đổi cảnh báo 35 → 45 ngày (2 → 3 HĐ), rồi đặt lại 35.
 6d. `INV-01` Thanh Xuân → *Sinh nháp*: TX-202 khách mới tiền phòng 12/30 ngày, TX-301 *Đã trả trước đến 11/2026* (đóng 3 tháng), dòng điện chung, TX-301 bị giữ nháp vì phạt 600.000 chờ duyệt (đổi *Kế toán* → *Duyệt*). Thẻ *Quy tắc tính tiền* đổi ÷30 ↔ ngày thực để khách so. `PAY-02` tab *Phòng mới* (giá chốt / niêm yết, cọc, cần đóng).
 7. Chọn **D** → `SAL-01`, `SHARE-01` với nhãn DRAFT (D-06, D-07) và truy vết.
-8. Menu *Báo cáo* → `RPT-04` kỳ 09/2026: đối chiếu với file G1 của khách (cùng thứ tự dòng, tỷ lệ, bảng chia cổ phần); bấm một dòng để mở chứng từ (B+); *Xuất Excel theo mẫu*.
-9. `RPT-05`: đổi *Báo cáo kinh doanh* ↔ *Báo cáo tổng* (cọc mới, mua sắm); C gộp theo nhóm nhà; bấm tên tòa để về `RPT-04`. Đổi sang **A** để khách thấy cả hai báo cáo đã có trong gói thấp nhất.
+8. Menu *Báo cáo theo mẫu Excel* → **Tạo báo cáo** → RPT-04, kỳ 09/2026, chọn Cầu Giấy + Thanh Xuân → **Xem trước** (mỗi tòa một bản, tab sheet mẫu / chia cổ phần / nguồn / công thức). Bấm một con số để mở *Nguồn và cách tính*: công thức → thành phần → chứng từ (TX-301 kỳ 10: nguồn *Trả trước* mở hóa đơn kỳ 09). Tích đã đọc cảnh báo → **Xác nhận tạo 2 báo cáo** → bản lưu chỉ đọc, **Tải Excel**.
+9. Tạo RPT-05 các tòa → sheet Kinh doanh / Tổng / từng nhóm nhà. Sửa một chi phí rồi quay về: preview báo *nguồn đã thay đổi* → **Tính lại preview** (liệt kê chỉ tiêu đổi) → xác nhận ra **v2**, v1 giữ nguyên. Đổi vai trò *Quản lý tòa*: chỉ RPT-04 tòa mình.
 10. Về `RPT-01`, F5 — gói được giữ; mở *So sánh 52 chức năng* (ô có nhãn **CR** là phần cập nhật theo mẫu báo cáo).
 
 ## Xuất file

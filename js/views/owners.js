@@ -313,7 +313,7 @@
       var docs = TH.db.bldDocs.filter(function (d) { return d.ownerId === o.id; });
       var tabs = [
         { id: 'info', label: 'Thông tin chung', icon: 'user' },
-        { id: 'lease', label: 'Hợp đồng thuê', icon: 'contract', count: leases.length },
+        { id: 'lease', label: 'Hợp đồng thuê tòa', icon: 'contract', count: leases.length },
         { id: 'bld', label: 'Tòa nhà liên quan', icon: 'building', count: bs.length },
         { id: 'docs', label: 'Tài liệu', icon: 'folder', count: docs.length },
         { id: 'linkHist', label: 'Lịch sử chủ nhà của tòa', gate: 'F003.B' },

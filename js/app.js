@@ -10,10 +10,10 @@ var TH = window.TH = window.TH || {};
     { label: 'Vận hành kỳ', items: [['METER-01', 'zap', 'Điện nước', function () { return TH.db.readings.filter(function (r) { return r.period === TH.store.state.period && r.status !== 'confirmed' && TH.inScope(TH.calc.room(r.roomId).buildingId); }).length; }], ['INV-01', 'receipt', 'Lập hóa đơn'], ['INV-02', 'invoiceList', 'Hóa đơn & công nợ'], ['OA-01', 'send', 'Zalo OA'], ['OA-02', 'message', 'Lịch sử Zalo']] },
     { label: 'Thu chi', items: [['PAY-01', 'handCoins', 'Báo đã thu', function () { return TH.db.receipts.filter(function (r) { return r.status === 'pending' && TH.inScope(TH.calc.invoice(r.invoiceId).buildingId); }).length; }], ['PAY-02', 'wallet', 'Công nợ & mốc 5/10/15'], ['EXP-01', 'expense', 'Chi phí']] },
     { label: 'Nhân sự & lợi nhuận', items: [['HR-01', 'briefcase', 'Nhân sự & đội nhóm'], ['SAL-01', 'calculator', 'Lương nháp'], ['SHARE-01', 'pie', 'Cổ phần theo tòa']] },
-    { label: 'Báo cáo', items: [['RPT-04', 'building', 'Doanh thu theo tòa'], ['RPT-05', 'chart', 'Báo cáo kinh doanh tháng'], ['RPT-02', 'trend', 'Kinh doanh & hiệu suất'], ['RPT-03', 'sheet', 'Lương & chia lợi nhuận']] },
+    { label: 'Báo cáo', items: [['REPORTS', 'sheet', 'Báo cáo theo mẫu Excel'], ['RPT-02', 'trend', 'Kinh doanh & hiệu suất'], ['RPT-03', 'sheet', 'Lương & chia lợi nhuận']] },
     { label: 'Hệ thống', items: [['SYS-01', 'shield', 'Phân quyền & phạm vi'], ['AUTH-01', 'login', 'Đăng nhập / đổi đơn vị']] },
   ];
-  var NAV_PARENT = { 'OWN-02': 'OWN-01', 'BLD-02': 'BLD-01', 'ROOM-02': 'ROOM-01', 'CUS-02': 'CUS-01', 'CON-02': 'CON-01', 'INV-03': 'INV-02' };
+  var NAV_PARENT = { 'RPT-04': 'REPORTS', 'RPT-05': 'REPORTS', 'OWN-02': 'OWN-01', 'BLD-02': 'BLD-01', 'ROOM-02': 'ROOM-01', 'CUS-02': 'CUS-01', 'CON-02': 'CON-01', 'INV-03': 'INV-02' };
 
   var app = TH.app = { route: null, prevHash: null, shellReady: false };
 
@@ -128,6 +128,8 @@ var TH = window.TH = window.TH || {};
         html = TH.pageHeader({ screen: id }) + '<div class="card">' + TH.state('empty', { title: 'Màn đang hoàn thiện' }) + '</div>';
       }
     }
+    /* CR-RPT-02: đang mở dữ liệu nguồn từ báo cáo → thanh quay về preview / bản lưu */
+    if (!r.notFound && !r.extra && r.page !== 'REPORTS' && TH.reportReturnBanner) html = TH.reportReturnBanner(r) + html;
     view.innerHTML = html;
     if (navigated) {
       view.classList.remove('is-entering'); void view.offsetWidth; view.classList.add('is-entering');

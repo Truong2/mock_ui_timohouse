@@ -343,3 +343,22 @@ Các bảng QA cũ còn ghi số trước schema 12; số đúng như sau:
 - METER-01 Thanh Xuân: **5** phòng đang ở, không còn phòng trống (§8.6 ghi 4 + TX-202 trống).
 - QA-PAY-03 vẫn *TX-202 Đóng cọc*: cọc đã nhận, hóa đơn chưa lập.
 - QA-PAY-05: TX-202 PT không còn.
+
+### 8.9 CR-RPT-02 — Báo cáo theo mẫu Excel: xem trước → bản lưu → Excel (21/10/2026, schema 12)
+
+`tools/qa-report.playwright.js` **11/11**:
+
+| Mã | Kiểm tra | KQ | Bằng chứng |
+| --- | --- | --- | --- |
+| QA-RPT-01 | Hai mẫu, nhiều tòa, hủy, chống trùng | ✅ | Qua giao diện: RPT-04 Cầu Giấy + Thanh Xuân → nút "Xác nhận tạo 2 báo cáo", hủy → 0 bản; chưa tích cảnh báo thì nút bị khóa; bấm xác nhận 2 lần → đúng 2 bản `BC04-202610-CG-v1`, `BC04-202610-TX-v1`. RPT-05 (CG + TX) → 1 bản, 6 sheet; sheet NHÓM NHÀ 1 chỉ có Cầu Giấy |
+| QA-RPT-02 | Preview = bản lưu = Excel | ✅ | RPT-05 kỳ 09, 3 tòa: snapshot preview trùng bản lưu; 728 ô số trên các sheet mẫu đều khớp file Excel (số và tỷ lệ) và truy được nguồn, tổng nguồn/thành phần khớp giá trị; file `TIMEHOUSE_RPT-05_ALL_ky_2026-09_v1.xlsx`; giao diện có đủ nút ô số (224 ở sheet đầu), mỗi nút có tên truy cập |
+| QA-RPT-03 | Trả trước TX-301 | ✅ | Hóa đơn kỳ 09 có dòng 14.700.000 phủ 09–11, kỳ 09 nhận 4.900.000; nguồn kỳ 10 `prepaid INV-2609-TX301` 4.900.000 (tổng dòng 14.700.000, kỳ đầu 4.900.000, mỗi kỳ sau 4.900.000). "Mở dữ liệu hiện tại" → `#/demo/inv-03/INV-2609-TX301`, có thanh quay về, quay về đúng preview |
+| QA-RPT-04 | Lẻ ngày TX-202 | ✅ | Preview loại hóa đơn nháp kèm cảnh báo (tiền phòng TX chỉ có 4.900.000 trả trước). Xác nhận hóa đơn → preview cũ bị phát hiện, xác nhận bị chặn (`stale`) → tính lại có 12 chỉ tiêu thay đổi. Căn cứ: 20/10–31/10, 12/30 ngày, 1.520.000 trước làm tròn, làm tròn 1.000. Đổi quy tắc ÷31 → hóa đơn nháp mới 1.471.000, hóa đơn đã xác nhận giữ 1.520.000 |
+| QA-RPT-05 | Điện chung | ✅ | Seed: TX chưa có hóa đơn xác nhận → doanh thu điện 0, không tự cộng 504.000. Sau xác nhận TX-101, TX-202: 2 dòng điện chung, căn cứ 126 kWh × 4.000 = 504.000 ÷ 9 người; tổng phân bổ + thất thoát = 504.000 |
+| QA-RPT-06 | Điều chỉnh | ✅ | TX-101 −120.000 vào tiền phòng đúng 1 lần (lý do, đã duyệt bởi NV-005, kỳ 10/2026); tiền phòng 8.280.000 = trả trước + 3.500.000 − 120.000; phạt chờ duyệt TX-301 không lọt vào số, có cảnh báo |
+| QA-RPT-07 | Lịch sử phòng | ✅ | Sự kiện 31/10 → đang thuê cuối kỳ 10; ngày 28, 30/9, 29/02/2028, 28/02/2027 → thuộc kỳ; 01/11 và 01/03 → không; DD-302 cuối kỳ 09 = đang sửa; CG-401 cuối kỳ 08 = trống, kỳ 07 = đang thuê |
+| QA-RPT-08 | Phiên bản | ✅ | Sửa chi phí CG kỳ 09 (+1.000.000) → preview v2 bị phát hiện cũ → tính lại → v2 = v1 + 1.000.000, có bản trước và bản tạo từ v1. Xóa chi phí và đổi quy tắc → v1 vẫn đọc nguồn đã lưu; Excel v1 xuất lại giống hệt |
+| QA-RPT-09 | Quyền và lưu trữ | ✅ | Gói A tạo được RPT-05. Quản lý: không có RPT-05, không thấy bản RPT-05, chọn Đống Đa → 403, nguồn lương bị che. Nhân sự → 403. Tải lại trang giữ bản lưu (`local`). Giả lập lỗi quota → vẫn tạo bản nhưng báo `durable:false`, `storage:'session'` |
+| QA-RPT-10 | Route cũ và 375px | ✅ | `#/demo/rpt-04` mở form điền sẵn RPT-04 + Đống Đa, không tạo bản lưu; preview, bản lưu, danh sách không tràn ngang ở 375px; không có lỗi JS |
+
+Smoke: **1088 lượt / 0 lỗi** (thêm màn REPORTS: 3 biến thể, 2 dialog truy nguồn; RPT-04/05 nay mở form tạo). Hồi quy: `qa-bill` 8/8, `qa-pay` 12/12, `qa-cus` 23/23 (REGRESSION giữ baseline schema 12: 16.682.599 / 7.282.599 / 9.655.000), `qa-ocr` 9/9. Bốn bộ cũ đổi điều kiện smoke thành ≥ 1048 lượt và 0 lỗi, không khóa cứng tổng (theo plan). `qa-table-wrap`: không có ô gãy mới (vẫn 1 ô ghi chú khấu trừ đã biết).

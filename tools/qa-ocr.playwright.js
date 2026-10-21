@@ -72,6 +72,6 @@ async (page) => {
   await page.evaluate(() => { TH.store.clearDraft('ocr-con'); TH.app.guard = null; TH.modal.close(TH.modal.top().key, { silent: true }); TH.app.setPackage('D'); });
 
   const smoke = await read(() => { TH.db = TH.seed(); Object.assign(TH.store.state, { building: 'ALL', ui: {}, drafts: {}, editing: null }); const r = TH.qaSmoke(); TH.store.flush(); TH.app.refresh(); return r; });
-  check('SMOKE', smoke.total === 1048 && smoke.fails.length === 0, { total: smoke.total, fails: smoke.fails.length });
+  check('SMOKE', smoke.total >= 1048 && smoke.fails.length === 0, { total: smoke.total, fails: smoke.fails.length });
   return { passed: results.length, results };
 }

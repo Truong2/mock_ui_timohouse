@@ -606,7 +606,7 @@
       var S = 'CUS-02', all = C.customerContracts(k.id).filter(function (c) { return c.status !== 'draft'; }), ctSel = TH.store.ui(S, 'ct', '');
       var ct = ctParam || all.find(function (x) { return x.id === ctSel; }) || contractOf(k);
       var s = C.tenancyStates(ct), d = ct ? C.contractDebt(ct.id) : C.customerDebt(k.id);
-      var tabs = [{ id: 'stay', label: 'Thông tin lưu trú' }, { id: 'contract', label: 'Hợp đồng', count: all.length > 1 ? all.length : undefined }, { id: 'fin', label: 'Tài chính', count: d.overdueCount || undefined },
+      var tabs = [{ id: 'stay', label: 'Thông tin lưu trú' }, { id: 'contract', label: 'Hợp đồng & biểu phí', count: all.length > 1 ? all.length : undefined }, { id: 'fin', label: 'Công nợ & tiền cọc', count: d.overdueCount || undefined },
         { id: 'docs', label: 'Tài liệu', count: TH.db.documents.filter(function (x) { return x.customerId === k.id; }).length }, { id: 'history', label: 'Lịch sử liên hệ', gate: 'F010.C' }, { id: 'versions', label: 'Phiên bản định danh', gate: 'F010.D' }];
       var tab = TH.resolveTab(S, tabs);
       var body;

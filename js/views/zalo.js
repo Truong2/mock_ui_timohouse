@@ -83,7 +83,7 @@
     scan: function () { return [{ ui: { tab: 'log' } }, { ui: { tab: 'dead' } }]; },
     render: function () {
       var S = 'OA-02', q = TH.has('F028.B') ? TH.store.ui(S, 'q', '') : '', st = TH.store.ui(S, 'st', 'all');
-      var tabs = [{ id: 'log', label: 'Nhật ký gửi' }, { id: 'dead', label: 'Dead-letter', gate: 'F028.C', count: TH.db.messages.filter(function (m) { return m.status === 'failed' && m.retries >= 1; }).length }];
+      var tabs = [{ id: 'log', label: 'Nhật ký gửi' }, { id: 'dead', label: 'Tin lỗi cần xử lý', gate: 'F028.C', count: TH.db.messages.filter(function (m) { return m.status === 'failed' && m.retries >= 1; }).length }];
       var tab = TH.resolveTab(S, tabs);
       var all = TH.db.messages.filter(function (m) { var i = C.invoice(m.invoiceId); return i && TH.inScope(i.buildingId); }).slice().reverse();
       var rows = all.filter(function (m) { var i = C.invoice(m.invoiceId); return (st === 'all' || m.status === st) && TH.match(q, [m.invoiceId, i.roomId, C.customer(m.customerId).name]) && (tab === 'log' || (m.status === 'failed' && m.retries >= 1)); });
@@ -94,7 +94,7 @@
         { key: 't', label: 'Thời gian', render: function (m) { return F.date(m.at); } },
         { key: 's', label: 'Kết quả gửi', render: function (m) { return TH.status(m.status); } },
         { key: 'e', label: 'Lỗi / lý do', render: function (m) { return m.reason ? '<span class="small ' + (m.status === 'failed' ? 'neg' : 'muted') + '">' + esc(m.reason) + '</span>' : '<span class="muted">—</span>'; } },
-        { key: 'r', label: 'Retry', gate: 'F028.C', render: function (m) { return m.status === 'failed' ? (m.retries >= 2 ? TH.badge('Dead-letter', 'danger') : TH.permBtn('oa.send', '<button type="button" class="btn btn-xs" data-act="oa.retry" data-id="' + m.id + '">' + I('refresh', 'ic-sm') + 'Retry (' + m.retries + '/2)</button>', '403')) : '<span class="muted small">—</span>'; } },
+        { key: 'r', label: 'Gửi lại', gate: 'F028.C', render: function (m) { return m.status === 'failed' ? (m.retries >= 2 ? TH.badge('Cần xử lý', 'danger') : TH.permBtn('oa.send', '<button type="button" class="btn btn-xs" data-act="oa.retry" data-id="' + m.id + '">' + I('refresh', 'ic-sm') + 'Thử gửi lại (' + m.retries + '/2)</button>', '403')) : '<span class="muted small">—</span>'; } },
       ], rows: pg.rows, empty: { title: 'Không có tin', text: 'Không có tin nhắn khớp bộ lọc.' } });
       var dash = TH.gate('F028.D', '<div class="grid-4" style="margin-bottom:16px">' + ['sent', 'failed', 'skipped'].map(function (k) { return TH.kpi({ label: TH.statusLabel(k), value: String(all.filter(function (m) { return m.status === k; }).length) }); }).join('') + TH.kpi({ label: 'Tỷ lệ gửi thành công', value: F.pct(all.length ? all.filter(function (m) { return m.status === 'sent'; }).length / all.length : 0, 0), accent: true, foot: 'Dashboard hiệu quả theo kỳ ' + TH.up('F028.D') }) + '</div>', { label: 'Dashboard hiệu quả gửi theo kỳ', lines: 2 });
       return TH.pageHeader({ screen: S, status: TH.simBadge('Dữ liệu gửi mô phỏng'), actions: TH.exportBtn('oa2.csv', 'Tải nhật ký (.csv)') }) + dash +

@@ -1,0 +1,46 @@
+/* Điều hướng theo nghiệp vụ; nạp sau layouts.css. */
+:root { --sidebar-w: 232px; }
+.workspace-item { height: 43px; margin-bottom: 4px; font-size: 13px; }
+.workspace-item .ic { flex: none; }
+.workspace-item .nav-text { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.35; }
+.crumbs:empty { display: none; }
+.sidebar .nav { padding-top: 16px; }
+.sidebar .brand { padding-left: 18px; gap: 9px; }
+.sidebar .brand-sub { font-size: 10px; }
+.sidebar-foot { gap: 4px; padding: 10px 12px; }
+.nav-compact-toggle { width: 100%; border: 0; background: transparent; cursor: pointer; font-family: inherit; text-align: left; }
+.nav-item:focus-visible, .workspace-tabs a:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+body.nav-drawer-open { overflow: hidden; }
+.workspace-navigation { margin-bottom: 20px; min-width: 0; }
+.workspace-caption { display: flex; align-items: center; gap: 7px; color: var(--text-3); font-size: 12px; font-weight: 600; margin-bottom: 8px; }
+.workspace-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--border); }
+.workspace-tabs { display: flex; gap: 20px; overflow-x: auto; min-width: 0; scrollbar-width: thin; }
+.workspace-tabs a { display: inline-flex; align-items: center; min-height: 40px; color: var(--text-2); font-size: 13px; font-weight: 550; white-space: nowrap; text-decoration: none; border-bottom: 2px solid transparent; }
+.workspace-tabs a:hover { color: var(--primary); }
+.workspace-tabs a[aria-current="page"] { color: var(--teal-800); border-bottom-color: var(--primary); font-weight: 650; }
+.workspace-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; padding-bottom: 7px; }
+/* Mã màn là thông tin đối chiếu SRS; giữ ở mục lục/RTM thay vì tiêu đề nghiệp vụ. */
+.content .page-hd > div > .page-title > .screen-id { display: none; }
+@media (min-width: 1081px) {
+  .shell { transition: grid-template-columns 160ms ease; }
+  .shell.nav-compact { grid-template-columns: 72px minmax(0, 1fr); }
+  .nav-compact .sidebar .brand { padding: 0; justify-content: center; }
+  .nav-compact .brand > span:not(.brand-mark) { display: none; }
+  .nav-compact .nav { padding-left: 12px; padding-right: 12px; overflow-y: auto; overflow-x: hidden; }
+  .nav-compact .nav-item { justify-content: center; padding: 0; }
+  .nav-compact .nav-item .nav-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .nav-compact .nav-count { position: absolute; top: -3px; right: -4px; font-size: 9px; padding: 0 4px; min-width: 15px; text-align: center; }
+  .nav-compact .sidebar-foot { padding-left: 12px; padding-right: 12px; }
+}
+@media (max-width: 1080px) {
+  :root { --sidebar-w: 264px; }
+  .nav-compact-toggle { display: none; }
+}
+@media (max-width: 760px) {
+  .workspace-navigation { margin-bottom: 15px; }
+  .workspace-row { flex-wrap: wrap; gap: 6px; }
+  .workspace-tabs { width: 100%; gap: 18px; }
+  .workspace-actions { padding-bottom: 9px; flex-wrap: wrap; max-width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) { .shell { transition: none; } }
+@media print { .workspace-navigation { display: none !important; } }

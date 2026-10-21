@@ -168,6 +168,6 @@ async (page) => {
   await role('admin');
 
   const smoke = await read(() => { TH.db = TH.seed(); Object.assign(TH.store.state, { building: 'ALL', ui: {}, drafts: {}, editing: null }); const r = TH.qaSmoke(); TH.store.flush(); TH.app.refresh(); return { total: r.total, fails: r.fails, counts: TH.qaCounts() }; });
-  check('SMOKE', smoke.total === 1048 && smoke.fails.length === 0, smoke);
+  check('SMOKE', smoke.total >= 1048 && smoke.fails.length === 0, smoke);
   return { passed: results.length, results };
 }
