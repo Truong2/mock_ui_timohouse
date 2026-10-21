@@ -9,7 +9,7 @@
   function prevP(p, n) { var i = TH.PERIODS.indexOf(p) - (n || 1); return i >= 0 ? TH.PERIODS[i] : null; }
   function periods6(p) { var i = TH.PERIODS.indexOf(p); return TH.PERIODS.slice(Math.max(0, i - 5), i + 1); }
   function mm(p) { return String(+p.slice(5)) + '/' + p.slice(0, 4); }
-  function num(x) { return F.money(x).replace(' ₫', ''); }
+  function num(x) { return F.money(x).replace(/\s₫$/, ''); }
   function cellVal(line, x) {
     if (line.count) return x ? '<span class="tnum">' + x + '</span>' : '<span class="muted">0</span>';
     if (!x) return '<span class="muted">0</span>';

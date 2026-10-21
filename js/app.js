@@ -309,7 +309,6 @@ var TH = window.TH = window.TH || {};
             (screen ? '<div><div class="section-title">Trạng thái dữ liệu · ' + esc(screen) + '</div><div class="seg" role="group">' + [['normal', 'Dữ liệu mẫu'], ['loading', 'Đang tải'], ['empty', 'Không có dữ liệu'], ['error', 'Lỗi API']].map(function (o) {
               return '<button type="button" aria-pressed="' + (ds === o[0]) + '" data-act="state.set" data-screen="' + screen + '" data-val="' + o[0] + '">' + o[1] + '</button>';
             }).join('') + '</div><div class="field-hint" style="margin-top:6px">Forbidden (403) xem bằng cách đổi vai trò. Draft / Chờ xác nhận / Đã xác nhận / Success có trong luồng nghiệp vụ.</div></div>' : '') +
-            '<div><label class="switch"><input type="checkbox" data-act-change="notes.toggle"' + (s.tierNotes ? ' checked' : '') + '><span class="switch-track"></span><span><b>Hiện ghi chú A/B/C/D cấp màn</b><br><span class="small muted">Dải ghi chú SRS §4 dưới tiêu đề mỗi màn.</span></span></label></div>' +
             '<div class="row"><a class="btn btn-sm" href="#/demo/screens" data-close>' + I('grid', 'ic-sm') + 'Mục lục 39 màn</a><a class="btn btn-sm" href="#/demo/mapping" data-close>' + I('list', 'ic-sm') + 'Kiểm đếm mapping 52 chức năng</a></div>' +
             '<div class="divider"></div><div class="row-between"><div><b>Khôi phục dữ liệu demo</b><div class="small muted">Xóa thao tác demo, bản nháp, bộ lọc. Giữ gói đang xem.</div></div><button type="button" class="btn btn-danger btn-sm" data-act="data.reset">' + I('rotateCcw', 'ic-sm') + 'Khôi phục</button></div>' +
             (TH.store.storageOk ? '' : '<div class="alert alert-warning">' + I('alert', 'ic-sm') + '<div class="alert-body">Trình duyệt chặn localStorage (file://). Trạng thái chỉ giữ trong phiên hiện tại.</div></div>') +
@@ -331,7 +330,6 @@ var TH = window.TH = window.TH || {};
   };
   var CHANGE = TH.onChange;
   CHANGE['role.pick'] = function (el) { TH.store.set('role', el.value); app.refresh(); };
-  CHANGE['notes.toggle'] = function (el) { TH.store.set('tierNotes', el.checked); app.refresh(); };
 
   /* ---------------- Popover ---------------- */
   var pop = null, popOwner = null;

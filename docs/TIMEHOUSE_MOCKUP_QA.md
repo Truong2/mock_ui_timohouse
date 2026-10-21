@@ -229,3 +229,49 @@ Kiểm tra bổ sung: biển đang active ở hồ sơ khác → khai báo đư�
 | SYS-01 — cấu hình cảnh báo | [Ảnh](qa/schema9/sys01-expiry-1440.png) | [Ảnh](qa/schema9/sys01-expiry-375.png) |
 
 **Còn thiếu:** prorate theo ngày, override nhóm tòa, vòng đời HĐ đầy đủ, customerAuditLog riêng và persona mask chi tiết (Decision log §9.5). In/PDF, bàn phím/screen reader, Firefox/Safari, phân quyền backend, Excel giá gói, SRS v2.3 và 88 frame Figma chưa được nghiệm thu bởi lượt QA này.
+
+### 8.4 CR-CUS-02 — OCR hợp đồng theo mẫu đầy đủ (21/10/2026, schema 10)
+
+| Đại lượng | Giá trị |
+| --- | --- |
+| Smoke `#/demo/mapping` | **928 lượt · 0 lỗi** (94 biến thể + 22 dialog × 4 gói × 2 kỳ); route 44, tab 46 |
+| Mapping | 39/39 · 52/52 · 156/156 |
+| OCR-CON | 38 field / 7 nhóm / bảng 30 dòng; 9 mục độ tin cậy < 85% được tô (gói B+); 98 ô OCR trên bản scan |
+| Hồi quy | LNR Kinh doanh 09 16.937.599; Tổng 09 7.537.599; Kinh doanh 10 4.755.000; HS CG 09 72,3%; INV-2610-CG202 6.069.800 — **không đổi** |
+
+Kịch bản tự động: [`tools/qa-ocr.playwright.js`](../tools/qa-ocr.playwright.js) (kết quả: [`qa/schema10/results.json`](qa/schema10/results.json)); ảnh: [`qa/schema10/`](qa/schema10/).
+
+| Kiểm tra | Kết quả | Bằng chứng |
+| --- | --- | --- |
+| QA-OCR-01 khóa xác nhận | ✅ | Nút khóa khi 0/39; “Đánh dấu tất cả” → 39/39 mở khóa |
+| QA-OCR-02 tạo HĐ mới từ OCR | ✅ | HĐ-CG401/26: 7 dòng phí (ELEC chỉ số 4.000, WATER/SVC theo người 120.000, NET 100.000, xe máy 0 đ, xe đạp điện 150.000, SM 400.000), `refundDays` 10, gia hạn mặc nhiên, phạt 200.000, bàn giao 30 tài sản + 1.250 kWh / 85 m³, đã nộp 9.000.000, khách KH-019 có nơi cấp/HKTT và 1 xe máy chờ xác nhận; CUS-02 đủ 3 tab |
+| QA-OCR-03 đọc lại HĐ có sẵn | ✅ | HĐ-DD102/25: nước theo người từ kỳ 11 (2 × 120.000 = 240.000); INV-2610-DD102 giữ 4.970.800; SĐT đổi → +1 lịch sử liên hệ; `ocrJobs` contract/update |
+| QA-OCR-04 so khớp (C) | ✅ | Số người 3 > tối đa → cảnh báo đỏ, nút khóa; tích “đã kiểm tra” → mở; cảnh báo chỉ số bàn giao ≠ công tơ |
+| QA-OCR-05 tài sản bàn giao | ✅ | Sửa tình trạng “Giường” → lưu; đối chiếu HC-2610-01 chọn “Tường · thấm nhẹ góc trần” 300.000 → khấu trừ nguồn “Điều 2.2 · bàn giao…”, số hoàn 4.190.000, chuyển Chờ duyệt |
+| QA-OCR-06 điều khoản chỉ hiển thị | ✅ | Lưu trú hiện phí nhượng phòng 200.000 (Điều 4.3 — chỉ hiển thị), chậm nộp 200.000/ngày sau 3 ngày với nhãn “không tính vào công nợ”; công nợ CG-101 = 0 |
+| QA-OCR-07 gói A / vai trò | ✅ | Gói A: 0 chỉ số tin cậy, 5 mục khóa F012.B/C/D, vẫn xác nhận được; QL tòa có nút *Đọc hợp đồng*; Nhân sự không mở được CUS-02 (403) |
+| 375 px | ✅ | OCR-CON và CUS-02 (3 tab, HĐ mới) không tràn ngang; khung scan cuộn ngang nội bộ |
+
+Lưu ý: kết quả OCR là mô phỏng theo số liệu của mẫu; chưa kiểm thử với OCR thật.
+
+### 8.5 Bảng bị gãy dòng vì cột hẹp (21/10/2026)
+
+Công cụ: `tools/qa-table-wrap.playwright.js` — quét 116 trạng thái (mọi màn + tab/biến thể + dialog), đo số dòng chữ thật trong từng ô bảng. Lỗi = chữ ≤ 24 ký tự bị gãy, chữ ≤ 80 ký tự chiếm ≥ 3 dòng, badge/nút gãy, hoặc tiêu đề cột > 2 dòng. Ô xếp tầng có chủ ý (mã + dòng phụ, `<br>`, nhiều badge) không tính. Tham số: mở trước `index.html?qaWrapPkg=A&qaWrapW=1280`.
+
+| Lần đo (1440 px) | Gói D | Gói A |
+| --- | --- | --- |
+| Trước khi sửa | 832 ô · 91 cột ở ~30 màn (vd. CON-01 *Kỳ thu* 4 dòng ở 67 px, HR-01 *Chức vụ* 3 dòng, EXP-01 *Nhóm chi* 3 dòng, CUS-01 *NV vận hành* 2 dòng) | — |
+| Sau khi sửa | 1 ô | 1 ô |
+
+Ô còn lại: ghi chú khấu trừ ~75 ký tự trong thẻ *Tiền cọc & hoàn cọc* (cột phải hẹp của CUS-02) xuống 3 dòng — văn bản dài, chấp nhận.
+
+Cách sửa (`TH.table`, áp cho mọi bảng dùng component):
+- Tính trước nội dung từng cột: dòng dài nhất ≤ 24 ký tự → giữ 1 dòng (`nw`); dài hơn → được xuống dòng với độ rộng tối thiểu ≈ nửa dòng dài nhất (180–260 px; văn bản ≥ 70 ký tự: 240 px). Cột có thể ép bằng `nowrap: true` / `wrap: true`.
+- Tiêu đề dài hơn nội dung được xuống tối đa 2 dòng thay vì kéo rộng cột; cột bị khóa theo gói (ghost) thu gọn tương tự.
+- Cột thao tác cuối (không tiêu đề) dính bên phải khi bảng cuộn ngang.
+- Icon trong ô hiển thị cùng dòng (svg mặc định `display:block` từng đẩy chữ xuống dòng); mã đơn cách không ngắt ở dấu gạch; số tiền dùng khoảng trắng không ngắt (`4.200.000 ₫`, `7,4 tr`).
+- `TH.personCell` bỏ `min-width:140px` cứng; BLD-02 *Tài sản* xếp 2 bảng theo chiều dọc (trước chia đôi 546 px, 6–7 cột); lề ô 14 → 12 px.
+
+Đánh đổi: bảng nhiều cột (đặc biệt gói D, hoặc khi hiện cột khóa) cuộn ngang thay vì ép chữ — vd. EXP-01 ~350 px, HR-01 ~325 px, CON-01 ~170 px; SAL-01/RPT-02 vốn đã cuộn. Trang không tràn ngang ở 375 px.
+
+Hồi quy: smoke 928 lượt / 0 lỗi; `tools/qa-ocr.playwright.js` 9/9; `tools/qa-cus.playwright.js` 23/23 (đã cập nhật theo CR-CUS-02: schema ≥ 9, *Đọc hợp đồng* thay *Tự đọc bảng giá*, HĐ-DD102/25 theo mẫu đầy đủ); số hồi quy giữ nguyên.

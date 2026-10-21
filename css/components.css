@@ -215,13 +215,26 @@ img, svg { display: block; }
 .table-wrap { overflow: auto; position: relative; max-width: 100%; }
 .table-wrap.scroll-y { max-height: 560px; }
 .table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: var(--fs-13); }
-.table th, .table td { padding: 0 14px; height: 46px; border-bottom: 1px solid var(--n-100); text-align: left; vertical-align: middle; }
+.table th, .table td { padding: 0 12px; height: 46px; border-bottom: 1px solid var(--n-100); text-align: left; vertical-align: middle; }
 .table th {
   position: sticky; top: 0; z-index: 2; height: 40px;
   background: var(--n-50); color: var(--text-2); font-weight: 600; font-size: 12.5px; white-space: nowrap;
   border-bottom: 1px solid var(--border);
 }
 .table th.num, .table td.num { text-align: right; }
+.table th.th-wrap { white-space: normal; line-height: 1.3; padding-top: 6px; padding-bottom: 6px; }
+.table th.th-wrap .th-lock { text-align: left; }
+/* Icon trong ô đứng cùng dòng với chữ (svg mặc định display:block); mã đơn cách không ngắt giữa chừng */
+.table td .ic { display: inline-block; vertical-align: -2px; }
+.table td .mono { white-space: nowrap; }
+/* Cột thao tác cuối (không tiêu đề) dính phải khi bảng cuộn ngang để nút luôn nhìn thấy */
+.table .col-act { position: sticky; right: 0; background: #fff; box-shadow: inset 1px 0 0 var(--n-100); }
+.table th.col-act { z-index: 3; background: var(--n-50); }
+.table tbody tr:hover td.col-act { background: var(--n-25); }
+.table tbody tr.is-selected td.col-act { background: var(--teal-25); }
+/* Cột ngắn (mã, ngày, tên, trạng thái, nút) giữ 1 dòng; cột văn bản dài được xuống dòng nhưng không bị ép quá hẹp */
+.table td.nw { white-space: nowrap; }
+.table td.col-wrap { line-height: 1.45; padding-top: 6px; padding-bottom: 6px; }
 .table th.center, .table td.center { text-align: center; }
 .table tbody tr { transition: background var(--t-fast) var(--ease); }
 .table tbody tr:hover td { background: var(--n-25); }
@@ -234,7 +247,7 @@ img, svg { display: block; }
 .table .cell-sub { font-size: var(--fs-12); color: var(--text-3); }
 .table .row-actions { display: flex; gap: 4px; justify-content: flex-end; }
 .table td.is-ghost, .table th.is-ghost { background: repeating-linear-gradient(-45deg, rgba(248, 250, 252, 0.9), rgba(248, 250, 252, 0.9) 6px, rgba(241, 245, 249, 0.9) 6px, rgba(241, 245, 249, 0.9) 12px) !important; color: var(--n-400); }
-.table th.is-ghost .th-lock { display: inline-flex; gap: 4px; align-items: center; }
+.table th.is-ghost .th-lock { display: inline-flex; gap: 4px; align-items: center; flex-wrap: wrap; }
 .table-compact th, .table-compact td { height: 38px; padding: 0 10px; }
 .table-compact th { height: 34px; }
 .table .input-cell { height: 30px; width: 100%; min-width: 84px; padding: 0 8px; border: 1px solid var(--border-strong); border-radius: 6px; font-size: var(--fs-13); text-align: right; font-variant-numeric: tabular-nums; background: #fff; }
@@ -430,6 +443,7 @@ img, svg { display: block; }
 .dropzone { border: 1.5px dashed var(--border-strong); border-radius: var(--r-lg); padding: 28px; text-align: center; background: var(--n-25); display: flex; flex-direction: column; align-items: center; gap: 8px; color: var(--text-2); }
 .dropzone .state-ic { margin: 0; }
 .file-pill { display: inline-flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: #fff; }
+.file-pill b { white-space: nowrap; }
 .file-pill .ext { width: 34px; height: 40px; border-radius: 6px; display: grid; place-items: center; font-size: 10px; font-weight: 700; color: #fff; background: #16a34a; }
 .file-pill .ext.pdf { background: #dc2626; }
 .file-pill .ext.img { background: #7c3aed; }

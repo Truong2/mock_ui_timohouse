@@ -19,7 +19,7 @@ Bản demo tĩnh có tương tác cho hệ thống quản lý vận hành tòa n
 ```
 index.html?previewPackage=A#/demo/rpt-01      # mở báo cáo ở gói A
 index.html?previewPackage=C#/demo/pay-02      # công nợ & mốc 5/10/15 ở gói C
-index.html?previewPackage=D#/demo/ocr-con     # luồng phụ OCR hợp đồng (dialog trên CON-01)
+index.html?previewPackage=D#/demo/ocr-con     # OCR hợp đồng theo mẫu đầy đủ (dialog trên CON-01)
 index.html#/demo/inv-03/INV-2610-CG201        # chi tiết một hóa đơn
 ```
 
@@ -35,16 +35,19 @@ js/
   pnl.js                P&L tòa/kỳ theo mẫu báo cáo khách (TH.calc.pnl, chia cổ phần)
   reports-cr.js         CR-RPT-01: thêm RPT-04/05, cập nhật mô tả F045/F046, phần báo cáo của từng gói
   bld-cr.js             CR-BLD-01: cập nhật F001/F003/F004/F006/F013/F033/F036/F047 và ghi chú gói OWN/BLD theo note.md
-  cus-cr.js             CR-CUS-01: cập nhật F010/F012/F015/F016/F031 và ghi chú gói CUS-01/02 theo note.md §8
+  cus-cr.js             CR-CUS-01/02: cập nhật F010/F012/F015/F016/F031 và ghi chú gói CUS-01/02 theo note.md §8
+  views/ocr-contract.js CR-CUS-02: định nghĩa OCR hợp đồng theo mẫu đầy đủ (38 field, bảng tài sản Điều 2.2, bản scan minh họa, áp vào hồ sơ thuê)
   features.js           F001–F052 — SINH TỰ ĐỘNG từ SRS §5/§5A
   screens.js            39 Screen ID — SINH TỰ ĐỘNG từ SRS §4
-  store.js              gói, vai trò giả lập, scope, bộ lọc, nháp, lưu local (schema v9; tự nạp lại seed khi schema cũ)
+  store.js              gói, vai trò giả lập, scope, bộ lọc, nháp, lưu local (schema v10; tự nạp lại seed khi schema cũ)
   router.js · app.js    hash router, app shell, event delegation, công cụ demo
   components.js         bảng, badge, gate gói, dialog/drawer, toast, tooltip, chart SVG
   xlsx.js               xuất .xlsx/.csv không phụ thuộc thư viện
   views/                15 phân hệ + landing + package drawer + import/OCR dùng chung (bizreports.js = RPT-04/05, perf.js = hiển thị hiệu suất)
 tools/extract-srs.js    node tools/extract-srs.js → sinh lại screens.js/features.js khi SRS đổi
 tools/qa-cus.playwright.js  kịch bản QA CR-CUS chạy bằng Playwright browser_run_code
+tools/qa-ocr.playwright.js  kịch bản QA OCR hợp đồng mẫu đầy đủ (CR-CUS-02)
+tools/qa-table-wrap.playwright.js  quét mọi màn/tab/dialog tìm ô bảng bị gãy dòng + bảng cuộn ngang
 docs/                   plan · decision log · QA checklist
 ```
 
@@ -87,6 +90,14 @@ Kỳ 10/2026 đang mở (Thanh Xuân chưa lập hóa đơn, tiền thuê nhà c
 - `SYS-01 › Sao lưu & vận hành`: Admin đổi ngưỡng cảnh báo hết hạn (mặc định 35 ngày); tách khỏi nghĩa vụ báo trước 30 ngày của HĐ nếu có.
 - Đã áp bộ đề xuất K-01…K-09 theo CR_CUS_ANSWERS; trạng thái nguồn/phê duyệt và các phần còn thiếu ở Decision log §9.5. K-07 vẫn `BLOCKED_BY_REQUIREMENT`.
 
+## OCR hợp đồng khách thuê (CR-CUS-02, mẫu đầy đủ)
+
+- Mẫu duy nhất: `docs/tenplate/Hop_dong_thue_phong_demo_day_du.pdf` (mẫu P302 đã bỏ theo chỉ đạo 21/10/2026).
+- Đọc: Bên B (họ tên, ngày sinh, SĐT, CCCD mask, nơi cấp, HKTT); Điều 1 (phòng, số người, số xe); Điều 2.2 (30 tài sản bàn giao); Điều 3 (giao nhận, tính tiền, thời hạn, gia hạn mặc nhiên); Điều 4 (giá, tiền đã nộp, chỉ số, cọc, hoàn 10 ngày, phí nhượng phòng, hạn nộp, STK, biểu phí, phạt chậm nộp); 5.2.4 / 6.2.11.
+- Mỗi field và bảng phải được tích xác nhận; cảnh báo đỏ (so khớp) phải tích “đã kiểm tra”. OCR không tự ghi dữ liệu, không tự lập hóa đơn.
+- Áp vào hồ sơ: HĐ mới từ `CON-02`, hoặc `CUS-02 › Hợp đồng › Đọc hợp đồng` cho HĐ có sẵn (dòng phí hiệu lực kỳ sau; hóa đơn đã lập không đổi). Thẻ *Tài sản & chỉ số bàn giao* sửa được và dùng làm căn cứ khấu trừ khi đối chiếu cọc.
+- Phạt chậm nộp, phí nhượng phòng, bảo hành chỉ hiển thị ở *Điều khoản áp dụng*. Chi tiết và trạng thái quyết định: Decision log §9.6; kiểm thử: QA §8.4, `tools/qa-ocr.playwright.js`.
+
 ## Trạng thái nghiệm thu & công cụ QA
 
 - Trạng thái: **`TECHNICAL_QA_REPORTED_PASS`** — chưa phải nghiệm thu nghiệp vụ. Giá 4 gói là cấu hình demo, **chưa đối chiếu Excel báo giá**. Công thức lương/hiệu suất/cổ phần còn `DRAFT` (xem `docs/TIMEHOUSE_MOCKUP_DECISIONS.md` §8 và `docs/TIMEHOUSE_MOCKUP_QA.md` §7).
@@ -97,7 +108,6 @@ Kỳ 10/2026 đang mở (Thanh Xuân chưa lập hóa đơn, tiền thuê nhà c
 
 - Vai trò giả lập: Admin · Kế toán · Quản lý tòa (chỉ Cầu Giấy, không tự duyệt thu) · Nhân sự (chỉ HR/Lương).
 - Trạng thái dữ liệu cho màn đang xem: Đang tải · Không có dữ liệu · Lỗi API. 403 xem bằng cách đổi vai trò.
-- Bật/tắt dải ghi chú A/B/C/D cấp màn (SRS §4).
 - **Khôi phục dữ liệu demo** (có xác nhận): về dataset gốc, xóa nháp và bộ lọc, giữ gói đang xem.
 
 ## Kịch bản trình bày 8–10 phút
@@ -105,11 +115,11 @@ Kỳ 10/2026 đang mở (Thanh Xuân chưa lập hóa đơn, tiền thuê nhà c
 1. Landing → *Khám phá bản demo* → `RPT-01` gói D: thu, nợ, chi, lãi dòng tiền tạm tính; nhấn chỉ số để mở nguồn.
 2. Topbar *Đang xem: Gói D* → chọn **A**: các card B/C/D chuyển ghost, phần lõi vẫn dùng được.
 3. Chủ nhà `OWN-01` → *Import Excel* ở A (báo lỗi dòng) → chọn **B** → preview toàn bộ + tải file lỗi.
-4. Hợp đồng → *OCR hợp đồng* (`OCR-CON`): sửa field, đổi gói giữa chừng — bản nháp được giữ; B có độ tin cậy, C có đối chiếu phòng–khách, D có log correction.
+4. Hợp đồng → *OCR hợp đồng* (`OCR-CON`, mẫu đầy đủ): 38 field theo 7 nhóm + bảng 30 tài sản bàn giao; *Đánh dấu tất cả* → *Xác nhận* → `CON-02` *Chuyển vào form* → *Duyệt*: HĐ mới có dòng phí, điều khoản, bàn giao, tiền đã nộp, xe máy chờ xác nhận. B có độ tin cậy, C có so khớp (người/xe/chỉ số/giá), D có log sửa tay.
 5. `METER-01` nhập chỉ số (TX-201 thiếu, TX-102 số lùi, DD-301 đột biến) → `INV-01` chọn Thanh Xuân → *Sinh nháp* → *Xem trước & xác nhận*.
 6. `PAY-01` báo thu → đổi vai trò *Quản lý tòa*: không tự duyệt → *Kế toán* xác nhận `PAY-APP` → `PAY-02` công nợ giảm, bảng *Hiệu suất theo tòa* (A/B/C/D, tạm tính & thực tế) cập nhật; chọn **C** xem chống trùng/backdate.
 6b. `BLD-02/TH-CG` kỳ 09: tab *Vận hành & kết quả* (các bước A→D, HS 72,3%) → tab *Chủ nhà & hợp đồng* bấm *Chỉnh sửa* giá thuê, đổi tab giữa chừng để thấy hộp thoại lưu/bỏ → tab *Lịch thanh toán* (Đống Đa, Thanh Xuân quá hạn); chuyển **A → B → C** để thấy vai trò nhân sự, sinh lịch từ HĐ, đã trả/còn lại mở dần.
-6c. `CUS-01` lọc *Hồ sơ cọc* → mở `DD-302 — TH-DD`, tab *Tài chính*: Admin *Lập đối chiếu → gửi duyệt*, nhập khấu trừ thấm trần 500.000đ → số hoàn 3.990.000đ. Admin không tự duyệt; đổi *Kế toán* → *Duyệt hoàn* (chưa ghi sổ) → *Xác nhận đã chi / tất toán* với ngày và mã giao dịch. RPT-05 Tổng kỳ 10 giảm 3.990.000đ, Kinh doanh giữ 4.755.000đ. Mở `DD-102`: Đang thuê + Sắp hết HĐ + Chờ bàn giao. Tab *Hợp đồng*: **A → B** mở *Tự đọc bảng giá*, review 9 dòng; nước 2 × 120.000đ, hiệu lực kỳ 11. Mở KH-003 xem hai HĐ nối tiếp và phiếu chuyển cọc. `SYS-01 › Sao lưu & vận hành`: đổi cảnh báo 35 → 45 ngày (2 → 3 HĐ), rồi đặt lại 35.
+6c. `CUS-01` lọc *Hồ sơ cọc* → mở `DD-302 — TH-DD`, tab *Tài chính*: Admin *Lập đối chiếu → gửi duyệt*, nhập khấu trừ thấm trần 500.000đ → số hoàn 3.990.000đ. Admin không tự duyệt; đổi *Kế toán* → *Duyệt hoàn* (chưa ghi sổ) → *Xác nhận đã chi / tất toán* với ngày và mã giao dịch. RPT-05 Tổng kỳ 10 giảm 3.990.000đ, Kinh doanh giữ 4.755.000đ. Mở `DD-102`: Đang thuê + Sắp hết HĐ + Chờ bàn giao. Tab *Hợp đồng*: *Đọc hợp đồng* (OCR mẫu đầy đủ) → *Đánh dấu tất cả* → *Xác nhận & áp vào hồ sơ thuê*; nước 2 × 120.000đ, hiệu lực kỳ 11. Mở KH-003 xem hai HĐ nối tiếp và phiếu chuyển cọc. `SYS-01 › Sao lưu & vận hành`: đổi cảnh báo 35 → 45 ngày (2 → 3 HĐ), rồi đặt lại 35.
 7. Chọn **D** → `SAL-01`, `SHARE-01` với nhãn DRAFT (D-06, D-07) và truy vết.
 8. Menu *Báo cáo* → `RPT-04` kỳ 09/2026: đối chiếu với file G1 của khách (cùng thứ tự dòng, tỷ lệ, bảng chia cổ phần); bấm một dòng để mở chứng từ (B+); *Xuất Excel theo mẫu*.
 9. `RPT-05`: đổi *Báo cáo kinh doanh* ↔ *Báo cáo tổng* (cọc mới, mua sắm); C gộp theo nhóm nhà; bấm tên tòa để về `RPT-04`. Đổi sang **A** để khách thấy cả hai báo cáo đã có trong gói thấp nhất.

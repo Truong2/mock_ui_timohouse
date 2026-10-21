@@ -133,7 +133,7 @@
     var active = TH.store.ui(S, 'active', cfg.fields[0].key);
     var showConf = TH.has(cfg.inc.conf);
     var tplId = TH.has(cfg.inc.tpl) ? TH.store.ui(S, 'tpl', cfg.templates[0].id) : cfg.templates[0].id;
-    var confirmedCount = 0, edits = [];
+    var confirmedCount = 0, edits = [], lastGroup = null;
     var fieldsHtml = cfg.fields.map(function (f) {
       var val = TH.store.draft(form, f.key, f.ocr);
       var ok = !!TH.store.draft(form, 'ok_' + f.key, false);
@@ -141,13 +141,32 @@
       if (String(val) !== String(f.ocr)) edits.push({ f: f, val: val });
       var low = f.conf < 0.85;
       var id = 'ocr-' + S + '-' + f.key;
-      return '<div class="ocr-field' + (active === f.key ? ' is-active' : '') + '"><label for="' + id + '">' + esc(f.label) + '</label>' +
+      var head = '';
+      if (f.group && f.group !== lastGroup) { head = '<div class="ocr-group">' + esc(cfg.groups && cfg.groups[f.group] || f.group) + '</div>'; lastGroup = f.group; }
+      return head + '<div class="ocr-field' + (active === f.key ? ' is-active' : '') + '"><label for="' + id + '">' + esc(f.label) + '</label>' +
         '<input id="' + id + '" class="input input-sm' + (showConf && low && !ok ? ' is-warn' : '') + '" value="' + esc(val) + '" data-draft="' + form + '.' + f.key + '" data-focus-field="' + f.key + '" data-screen="' + S + '" data-live' + (f.num ? ' inputmode="numeric"' : '') + '>' +
         '<div class="row" style="gap:8px;flex-wrap:nowrap">' +
         (showConf ? '<span class="conf ' + (low ? 'conf-lo' : 'conf-hi') + '" data-tip="Độ tin cậy OCR (B): ' + F.pct(f.conf, 0) + (low ? ' — dưới ngưỡng 85%, cần soát kỹ' : '') + '">' + I(low ? 'alert' : 'checkCircle', 'ic-sm') + F.pct(f.conf, 0) + '</span>' : '') +
         '<label class="check" data-tip="Mỗi field phải được người dùng xác nhận (A)"><input type="checkbox" data-draft="' + form + '.ok_' + f.key + '"' + (ok ? ' checked' : '') + '><span class="small">Đúng</span></label></div></div>';
     }).join('');
-    var all = confirmedCount === cfg.fields.length;
+    /* Bảng OCR (vd. tài sản bàn giao Điều 2.2): ô nhập từng dòng, dòng conf thấp tô cảnh báo, một ô "Bảng đúng" cho cả bảng tính là 1 mục */
+    var tablesHtml = (cfg.tables || []).map(function (t) {
+      var okT = !!TH.store.draft(form, 'ok_tbl_' + t.key, false);
+      if (okT) confirmedCount++;
+      var rows = t.rows.map(function (r, i) {
+        var lowR = r.conf < 0.85;
+        return '<tr' + (showConf && lowR && !okT ? ' class="is-warn"' : '') + '>' + t.columns.map(function (c) {
+          var dk = 'tbl_' + t.key + '_' + i + '_' + c.key, val = TH.store.draft(form, dk, r[c.key]);
+          if (!c.readonly && String(val) !== String(r[c.key])) edits.push({ f: { label: t.title + ' › ' + r.name + ' · ' + c.label, ocr: r[c.key] }, val: val });
+          if (c.readonly) return '<td class="nw' + (active === dk ? ' is-active' : '') + '">' + esc(val) + '</td>';
+          return '<td><input id="ocr-' + S + '-' + dk + '" class="input input-sm' + (c.num ? ' num' : '') + '" value="' + esc(val) + '" data-draft="' + form + '.' + dk + '" data-focus-field="' + dk + '" data-screen="' + S + '" data-live' + (c.num ? ' inputmode="numeric"' : '') + ' aria-label="' + esc(r.name + ' · ' + c.label) + '"></td>';
+        }).join('') + (showConf ? '<td><span class="conf ' + (lowR ? 'conf-lo' : 'conf-hi') + '">' + F.pct(r.conf, 0) + '</span></td>' : '') + '</tr>';
+      }).join('');
+      return '<div class="ocr-table"><div class="row-between" style="margin:14px 0 6px"><b class="small">' + esc(t.title) + '</b><label class="check" data-tip="Xác nhận toàn bộ bảng sau khi soát từng dòng"><input type="checkbox" data-draft="' + form + '.ok_tbl_' + t.key + '"' + (okT ? ' checked' : '') + '><span class="small">Bảng đúng</span></label></div>' +
+        '<div class="table-wrap"><table class="table table-compact"><thead><tr>' + t.columns.map(function (c) { return '<th>' + esc(c.label) + '</th>'; }).join('') + (showConf ? '<th>Tin cậy</th>' : '') + '</tr></thead><tbody>' + rows + '</tbody></table></div></div>';
+    }).join('');
+    var totalItems = cfg.fields.length + (cfg.tables || []).length;
+    var all = confirmedCount === totalItems;
     var checks = TH.has(cfg.inc.match) ? cfg.checks() : [];
     var hasBlocking = checks.some(function (c) { return c.level === 'danger'; }) && !TH.store.draft(form, 'ackMatch', false);
     TH.app.guard = edits.length ? { tier: 'B', dirty: true, label: 'Soát field OCR' } : null;
@@ -163,10 +182,10 @@
       }) + '</div>';
 
     var right = '<div class="stack">' +
-      '<div class="row-between"><div><div class="card-title">Soát và xác nhận field</div><div class="small muted">' + confirmedCount + ' / ' + cfg.fields.length + ' field đã xác nhận · dữ liệu chưa xác nhận không được lưu tự động</div></div>' +
+      '<div class="row-between"><div><div class="card-title">Soát và xác nhận field</div><div class="small muted">' + confirmedCount + ' / ' + totalItems + ' mục đã xác nhận · dữ liệu chưa xác nhận không được lưu tự động</div></div>' +
       '<button type="button" class="btn btn-sm" data-act="ocr.all" data-screen="' + S + '" data-form="' + form + '">' + I('check', 'ic-sm') + 'Đánh dấu tất cả</button></div>' +
-      '<div class="progress"><span style="width:' + (confirmedCount / cfg.fields.length * 100) + '%"></span></div>' +
-      '<div>' + fieldsHtml + '</div>' +
+      '<div class="progress"><span style="width:' + (confirmedCount / totalItems * 100) + '%"></span></div>' +
+      '<div>' + fieldsHtml + tablesHtml + '</div>' +
       (cfg.sideExtra ? cfg.sideExtra() : '') +
       TH.gate(cfg.inc.match, '<div class="card"><div class="card-hd"><div class="card-title">' + I('compare', 'ic-sm') + esc(cfg.matchTitle || 'Đối chiếu dữ liệu') + TH.up(cfg.inc.match) + '</div></div><div class="card-bd stack-sm">' +
         (checks.length ? checks.map(function (c) { return '<div class="alert alert-' + (c.level === 'danger' ? 'danger' : c.level === 'warning' ? 'warning' : 'success') + '">' + I(c.level === 'ok' ? 'checkCircle' : 'alert', 'ic-sm') + '<div class="alert-body">' + c.text + '</div></div>'; }).join('') : '') +
@@ -182,7 +201,7 @@
       headExtra: '<button type="button" class="pkg-btn" data-act="pkg.open" style="height:32px">' + I('settings', 'ic-sm') + '<span class="pkg-key" style="width:20px;height:20px;font-size:11px">' + TH.store.state.pkg + '</span>' + TH.PACKAGES[TH.store.state.pkg].price + '</button>',
       flush: true,
       body: '<div class="split"><div class="split-left">' + left + '</div><div class="split-right">' + right + '</div></div>',
-      foot: '<span class="small muted">' + (all ? (hasBlocking ? I('alert', 'ic-sm') + ' Còn cảnh báo lệch chưa xử lý' : I('checkCircle', 'ic-sm') + ' Đủ điều kiện xác nhận') : 'Cần xác nhận đủ ' + cfg.fields.length + ' field') + '</span><span class="spacer"></span>' +
+      foot: '<span class="small muted">' + (all ? (hasBlocking ? I('alert', 'ic-sm') + ' Còn cảnh báo lệch chưa xử lý' : I('checkCircle', 'ic-sm') + ' Đủ điều kiện xác nhận') : 'Cần xác nhận đủ ' + totalItems + ' mục') + '</span><span class="spacer"></span>' +
         '<button type="button" class="btn" data-act="ocr.manual" data-form="' + form + '" data-screen="' + S + '">' + I('edit', 'ic-sm') + 'Nhập tay (fallback)</button>' +
         '<button type="button" class="btn" data-close>Lưu nháp & đóng</button>' +
         '<button type="button" class="btn btn-primary" data-act="' + cfg.confirmAct + '"' + (all && !hasBlocking ? '' : ' disabled') + '>' + I('check', 'ic-sm') + esc(cfg.confirmLabel) + '</button>',
@@ -197,11 +216,13 @@
   TH.act['ocr.all'] = function (el) {
     var v = TH.views[el.dataset.screen];
     v.ocrFields().forEach(function (f) { TH.store.setDraft(el.dataset.form, 'ok_' + f.key, true); });
+    (v.ocrTables ? v.ocrTables() : []).forEach(function (t) { TH.store.setDraft(el.dataset.form, 'ok_tbl_' + t.key, true); });
     TH.app.refresh();
   };
   TH.act['ocr.manual'] = function (el) {
     var v = TH.views[el.dataset.screen];
     v.ocrFields().forEach(function (f) { TH.store.setDraft(el.dataset.form, f.key, ''); TH.store.setDraft(el.dataset.form, 'ok_' + f.key, false); });
+    (v.ocrTables ? v.ocrTables() : []).forEach(function (t) { TH.store.setDraft(el.dataset.form, 'ok_tbl_' + t.key, false); t.rows.forEach(function (r, i) { t.columns.forEach(function (c) { if (!c.readonly) TH.store.setDraft(el.dataset.form, 'tbl_' + t.key + '_' + i + '_' + c.key, ''); }); }); });
     TH.app.refresh();
     TH.toast('Chuyển sang nhập tay', 'Đã xóa giá trị OCR — nhập trực tiếp và xác nhận từng field.', 'info');
   };

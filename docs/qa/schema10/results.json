@@ -1,0 +1,21 @@
+{
+  "run": "tools/qa-ocr.playwright.js",
+  "date": "2026-10-21",
+  "schema": 10,
+  "package": "D",
+  "passed": 9,
+  "results": [
+    { "id": "QA-OCR-01", "pass": true, "evidence": { "fields": 38, "groups": 7, "rows": 30, "warn": 9, "disabled": true } },
+    { "id": "QA-OCR-01-all", "pass": true, "evidence": "Đánh dấu tất cả mở khóa nút xác nhận" },
+    { "id": "QA-OCR-02", "pass": true, "evidence": { "lines": "ELEC,WATER,NET,SVC,PARK_MOTO,PARK_EBIKE,PARK_EV", "water": "per_person", "refund": 10, "auto": true, "late": 200000, "assets": 30, "e": 1250, "w": 85, "prepaid": 9000000, "veh": "Xe máy:pending", "idPlace": "Cục Cảnh sát QLHC về TTXH" } },
+    { "id": "QA-OCR-03", "pass": true, "evidence": { "before": { "inv": 4970800, "hist": 0 }, "q3": { "from": "2026-11", "water": "2x120000", "inv": 4970800, "hist": 1, "job": "contract/update" } } },
+    { "id": "QA-OCR-04", "pass": true, "evidence": { "q4": { "danger": 1, "disabled": true }, "q4b": false } },
+    { "id": "QA-OCR-05", "pass": true, "evidence": { "cond": "Trầy xước thành giường", "ded": "Điện nước 01–27/09 (chưa lập hóa đơn)|Chỉ số bà;Thấm trần — chờ xác định lỗi bên nào|Biên bản ;Hư hỏng: Tường|Điều 2.2 " } },
+    { "id": "QA-OCR-06", "pass": true, "evidence": { "transfer": true, "late": true, "debt": 0 } },
+    { "id": "QA-OCR-07", "pass": true, "evidence": { "conf": 0, "locked": 5, "enabled": true } },
+    { "id": "SMOKE", "pass": true, "evidence": { "total": 928, "fails": 0 } }
+  ],
+  "regression": { "lnr_kd_2026_09": 16937599, "lnr_tong_2026_09": 7537599, "lnr_kd_2026_10": 4755000, "hs_cg_2026_09": 0.7226573305363141, "inv_2610_cg202": 6069800 },
+  "mapping": "39/39 · 52/52 · 156/156",
+  "mobile375": { "ocr-con": "không tràn ngang trang; khung scan cuộn nội bộ", "cus-02": "stay/contract/fin không tràn" }
+}

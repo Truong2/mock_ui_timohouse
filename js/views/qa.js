@@ -7,7 +7,7 @@
   var I = TH.icon, esc = TH.esc, F = TH.fmt;
   var PKGS = ['A', 'B', 'C', 'D'], PERIODS = ['2026-09', '2026-10'];
   /* Mục còn chờ quyết định nghiệp vụ (Decision log + DECISIONS_ANSWERS): increment liên quan giữ trạng thái DRAFT/PROPOSED */
-  var PENDING = { F010: 'K-01…K-04, K-08', F011: 'D-02', F012: 'D-02/K-05', F015: 'K-05', F016: 'K-06', F031: 'K-03/K-04', F038: 'K-01', F020: 'D-03', F023: 'D-03', F026: 'D-05', F027: 'D-05', F032: 'G-01/D-04', F033: 'G-01…G-03/D-04', F040: 'D-06', F041: 'D-06', F043: 'R-05/D-07', F044: 'R-08/D-07', F045: 'R-01…R-09', F046: 'R-01…R-09', F048: 'R-01/R-07', F004: 'G-05…G-07', F006: 'G-08', F036: 'G-10' };
+  var PENDING = { F010: 'K-01…K-04, K-08', F011: 'D-02', F012: 'D-02/K-05/CR-CUS-02', F015: 'K-05', F016: 'K-06', F031: 'K-03/K-04', F038: 'K-01', F020: 'D-03', F023: 'D-03', F026: 'D-05', F027: 'D-05', F032: 'G-01/D-04', F033: 'G-01…G-03/D-04', F040: 'D-06', F041: 'D-06', F043: 'R-05/D-07', F044: 'R-08/D-07', F045: 'R-01…R-09', F046: 'R-01…R-09', F048: 'R-01/R-07', F004: 'G-05…G-07', F006: 'G-08', F036: 'G-10' };
 
   TH.qaCounts = function () {
     var srs = TH.SRS_SCREENS(), cr = TH.SCREENS.filter(function (s) { return s.cr; });

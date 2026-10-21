@@ -22,7 +22,7 @@ Ngày lập: 20/10/2026. Nguồn đối chiếu: `TIMEHOUSE_SRS_GOI_D_v1_1_CAU_H
 
 ## 2. Khác biệt giữa note cấp màn (§4) và increment cấp chức năng (§5A)
 
-Quy tắc áp dụng: **gate chi tiết bám §5A**; note cấp màn chỉ hiển thị ở dải ghi chú dưới tiêu đề để khách đối chiếu.
+Quy tắc áp dụng: **gate chi tiết bám §5A**; note cấp màn A/B/C/D tra ở Mục lục 39 màn; dải ghi chú dưới tiêu đề mỗi màn đã bỏ (21/10/2026 — đã có bộ chọn gói trên thanh trên cùng).
 
 | Màn | Note §4 | Increment §5A được gate | Ghi chú |
 | --- | --- | --- | --- |
@@ -334,3 +334,45 @@ Nguồn triển khai: [TIMEHOUSE_MOCKUP_CR_CUS_ANSWERS.md](TIMEHOUSE_MOCKUP_CR_C
 - `customerAuditLog` riêng: hiện dùng audit chung `TH.log`; `customerHistory` chỉ cho SĐT/địa chỉ.
 - Nhánh quyền chi tiết không có `vehicle.view`: code có mask, nhưng tất cả vai trò đang được mở CUS-02 đều có quyền này; chưa có persona kiểm thử riêng.
 - K-07 chưa đủ định nghĩa; ma trận quyền cọc thật, ký xác nhận nguồn QA-CUS-15, Excel giá gói, SRS v2.3 và Figma/QA ngoài HTML còn chờ đầu vào hoặc môi trường tương ứng.
+
+### 9.6 CR-CUS-02 — OCR hợp đồng khách thuê theo mẫu đầy đủ (21/10/2026, schema 10)
+
+**Chỉ đạo 21/10/2026:** phần khách thuê lấy thông tin bằng **OCR hợp đồng theo mẫu đầy đủ** `docs/tenplate/Hop_dong_thue_phong_demo_day_du.pdf`. Đã chốt: (1) OCR lấy **toàn bộ hồ sơ thuê**; (2) đọc **bảng tài sản bàn giao Điều 2.2**; (3) **chỉ dùng mẫu đầy đủ** — bỏ mẫu P302 khỏi dữ liệu và thư viện; (4) phạt chậm nộp / phí nhượng phòng **chỉ hiển thị**, không tính vào công nợ.
+
+**Trường trích xuất (38 field + 1 bảng) → nơi lưu → nơi dùng**
+
+| Điều | Trường OCR | Lưu vào | Hiển thị / dùng |
+| --- | --- | --- | --- |
+| Đầu HĐ | Số HĐ, ngày lập/ký | `ct.signedAt` (mã HĐ sinh theo phòng) | CON-02, CUS-02 › Hợp đồng |
+| Bên B | Họ tên, ngày sinh, SĐT, CCCD (mask), nơi cấp, hộ khẩu thường trú | `customers` (+ `idPlace`); đổi SĐT/địa chỉ → lịch sử liên hệ | CUS-02 › Lưu trú |
+| 1.1–1.2 | Phòng, số người, số người tối đa, số xe máy | `ct.people`, `terms.peopleMax`, `terms.vehiclesDeclared`; xe khai thiếu → xe **chờ xác nhận** | Lưu trú › Phương tiện; so khớp F012.C |
+| 2.2 | Bảng 30 tài sản (tên, SL, tình trạng) | `ct.handover.assets` | Hợp đồng › *Tài sản & chỉ số bàn giao*; chọn làm khấu trừ khi đối chiếu cọc |
+| 3.1–3.4 | Ngày giao nhận, ngày tính tiền, thời hạn, từ–đến, gia hạn mặc nhiên | `ct.handover.at/billingFrom`, `ct.start/end`, `terms.autoRenew/noticeDays` | Lưu trú › Thời gian HĐ, Điều khoản |
+| 4.1 | Giá thuê, đã thanh toán trước, đóng thêm khi ký | `ct.rent`, `ct.prepaid` | Hợp đồng › thẻ HĐ *Đã nộp khi ký* |
+| 4.2 | Chỉ số điện / nước bàn giao | `ct.handover.elecStart/waterStart` | Bàn giao; cảnh báo lệch với công tơ (F012.C) |
+| 4.3 | Cọc, hoàn trong 10 ngày, phí nhượng phòng | `ct.deposit`, `terms.refundDays`, `terms.transferFee` | Điều khoản; hạn hoàn trong hồ sơ cọc |
+| 4.4 | Hạn nộp 25–30, STK (mask), biểu phí (Internet, điện, nước/người, xe đạp điện, DV chung/người, xe điện SM), phạt 200.000 đ/ngày tối đa 3 ngày | `terms.payWindow/payAccount/lateFeePerDay/lateGraceDays`; `ct.priceList` 7 dòng (ELEC theo chỉ số, WATER/SVC theo người, NET theo phòng, PARK_MOTO 0 đ, PARK_EBIKE, PARK_EV theo xe đã xác nhận; ELEV/EVCHG không áp dụng) | Dòng phí; Điều khoản (chỉ hiển thị) |
+| 5.2.4 · 6.2.11 · 7.1 | Bảo hành 10 ngày, báo trước 30 ngày, mất cọc khi đơn phương chấm dứt | `terms.warrantyDays/noticeDays/earlyTermination` | Điều khoản áp dụng |
+
+**Luồng áp dụng**
+
+- `OCR-CON` (HĐ mới): soát 38 field theo 7 nhóm + bảng tài sản (ô “Bảng đúng”); nút xác nhận chỉ mở khi đủ 39 mục và không còn cảnh báo đỏ chưa tích “đã kiểm tra” → `CON-02` *Chuyển vào form* (F014.B) → *Duyệt*: tạo khách (Bên B + xe máy khai ở Điều 1 ở trạng thái chờ xác nhận), HĐ với dòng phí, điều khoản, bàn giao 30 tài sản + chỉ số, tiền đã nộp.
+- `CUS-02 › Hợp đồng › Đọc hợp đồng` (HĐ có sẵn): workspace cùng định nghĩa, giá trị định danh/thời hạn lấy từ hồ sơ, biểu phí/điều khoản từ mẫu; xác nhận → áp vào hồ sơ: dòng phí **hiệu lực từ kỳ sau** (hóa đơn đã lập không đổi), SĐT/địa chỉ vào lịch sử liên hệ, bàn giao, tiền đã nộp, xe thiếu → chờ xác nhận, phiên bản HĐ + `ocrJobs` (kind `contract`, target `update`).
+- Thẻ *Tài sản & chỉ số bàn giao* sửa được (Sửa/Lưu/Hủy); khi lập đối chiếu cọc có ô chọn tài sản hư hỏng theo biên bản → khấu trừ ghi nguồn “Điều 2.2 · bàn giao: …”.
+- Xếp gói: A — 1 mẫu đầy đủ, mỗi field/bảng phải xác nhận, áp vào hồ sơ; B — độ tin cậy từng field, map biểu phí → dòng phí, chọn mẫu thứ 2; C — so khớp phòng–khách–HĐ (người ≤ tối đa, xe khai ↔ xe đã xác nhận, chỉ số bàn giao ↔ công tơ, giá ↔ niêm yết, thời hạn ↔ từ–đến); D — log sửa tay, thư viện mẫu (mẫu phụ “Phụ lục gia hạn” ở trạng thái nháp). Gắn `CR-CUS-02` cho F012.
+
+**Cập nhật trạng thái quyết định** (mẫu đầy đủ nay là nguồn được chỉ định — thay cho `SOURCE_REQUIRED` của bộ trả lời 20/10):
+
+| Mã | Căn cứ trong mẫu đầy đủ | Trạng thái |
+| --- | --- | --- |
+| K-03 hạn hoàn cọc 10 ngày | Điều 4.3 | `PROPOSED (có căn cứ)` — tính từ ngày bàn giao thực tế; thành chính sách cần `PENDING_APPROVAL` |
+| K-04 mất cọc khi đơn phương chấm dứt | Điều 4.3, 7.1 | `PROPOSED (có căn cứ)` — mức giữ cọc vẫn nhập theo hồ sơ và được duyệt, cho phép hoàn một phần khi có thỏa thuận |
+| K-09 gia hạn mặc nhiên 12 tháng | Điều 3.4 | `PROPOSED (có căn cứ)` — chỉ áp khi đã kiểm tra không có thông báo chấm dứt trước 30 ngày; phụ lục/HĐ mới vẫn được hỗ trợ |
+| K-05 biểu phí | Điều 4.4: Internet 100.000/tháng, điện 4.000/số, nước 120.000/người, xe đạp điện 150.000/xe, DV chung 120.000/người, xe điện SM 400.000/xe | `CÓ CĂN CỨ`; xe máy 0 đ **suy từ Điều 1 không có dòng phí** (cần xác nhận); thang máy & sạc kWh: không có trong mẫu → `PENDING_APPROVAL` |
+| Phạt chậm nộp 200.000 đ/ngày, tối đa 3 ngày | Điều 4.4.4 | Có căn cứ — **chỉ hiển thị**, không tính công nợ (`PENDING_APPROVAL`). Ghi chú cũ “chưa thấy trong 2 PDF” không còn đúng với mẫu đầy đủ |
+| Phí nhượng phòng 200.000 đ; bảo hành 10 ngày | Điều 4.3; 5.2.4 | Có căn cứ — chỉ hiển thị |
+| Mẫu P302 (bản đồng bộ) | — | **Bỏ** khỏi dữ liệu và thư viện theo chỉ đạo 21/10; thư viện giữ mẫu phụ “Phụ lục gia hạn” (nháp) để minh họa F012.D |
+
+**Dữ liệu mẫu (schema 10 — trình duyệt tự nạp lại):** mọi HĐ (19) dùng điều khoản mẫu đầy đủ; `ct.handover` 30 tài sản + chỉ số đầu kỳ của phòng (DD-302: “Tường — thấm nhẹ góc trần” nối với khấu trừ của HC-2610-01; CG-102 rèm ố; TX-202 bình nóng lạnh rò); `ct.prepaid` cho HĐ đang thuê (1.000.000 trước ký + phần còn lại khi ký = cọc + tiền phòng kỳ đầu); khách có `idPlace`; `ocrTemplates` kind contract: mẫu đầy đủ (approved, 38 field + 1 bảng) và mẫu phụ (nháp). Số hồi quy giữ nguyên (xem QA §8.4).
+
+**Chưa làm / ngoài phạm vi:** OCR thật (vendor, PoC, consent); prorate theo ngày; đọc trọn Điều 5–7 (chỉ lưu các khoản dùng); đồng bộ chỉ số bàn giao sang METER (chỉ cảnh báo lệch); mẫu phụ chưa có field thật; chính sách phạt/gia hạn/mất cọc vẫn chờ khách phê duyệt.

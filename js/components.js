@@ -11,12 +11,12 @@ var TH = window.TH = window.TH || {};
   var nf = new Intl.NumberFormat('vi-VN');
   TH.fmt = {
     num: function (n) { return n === null || n === undefined || n === '' || isNaN(n) ? '—' : nf.format(Math.round(n)); },
-    money: function (n) { return n === null || n === undefined || isNaN(n) ? '—' : nf.format(Math.round(n)) + ' ₫'; },
+    money: function (n) { return n === null || n === undefined || isNaN(n) ? '—' : nf.format(Math.round(n)) + '\u00a0₫'; }, // NBSP: số tiền không bị ngắt dòng trước ₫
     short: function (n) {
       if (n === null || n === undefined || isNaN(n)) return '—';
       var a = Math.abs(n), s = n < 0 ? '−' : '';
-      if (a >= 1e9) return s + (a / 1e9).toLocaleString('vi-VN', { maximumFractionDigits: 2 }) + ' tỷ';
-      if (a >= 1e6) return s + (a / 1e6).toLocaleString('vi-VN', { maximumFractionDigits: 1 }) + ' tr';
+      if (a >= 1e9) return s + (a / 1e9).toLocaleString('vi-VN', { maximumFractionDigits: 2 }) + '\u00a0tỷ';
+      if (a >= 1e6) return s + (a / 1e6).toLocaleString('vi-VN', { maximumFractionDigits: 1 }) + '\u00a0tr';
       if (a >= 1e3) return s + Math.round(a / 1e3).toLocaleString('vi-VN') + 'k';
       return s + a;
     },
@@ -106,15 +106,43 @@ var TH = window.TH = window.TH || {};
   };
 
   /* ---------- Table ---------- */
+  /* Độ dài khối chữ dài nhất trong 1 ô (mỗi <div>/<br> là 1 dòng riêng) — dùng để quyết định cột có được xuống dòng hay không */
+  var NOWRAP_MAX = 24, LONG_MIN = 70;
+  function longestLine(html) {
+    return String(html == null ? '' : html).replace(/<(div|br|p|li)\b[^>]*>/gi, '\n').replace(/<[^>]+>/g, '').replace(/&[a-z#0-9]+;/gi, 'x')
+      .split('\n').reduce(function (m, l) { return Math.max(m, l.trim().length); }, 0);
+  }
   TH.table = function (o) {
     if (TH._rec) o.cols.forEach(function (c) { if (c.gate) TH._rec(c.gate); });
     var cols = o.cols.filter(function (c) { return !c.gate || TH.has(c.gate) || TH.store.state.showLocked; });
-    var head = cols.map(function (c) {
+    // Tính trước nội dung ô để biết cột ngắn (giữ 1 dòng) hay cột văn bản dài (được xuống dòng, có độ rộng tối thiểu)
+    var cells = o.rows.map(function (r, i) {
+      return cols.map(function (c) {
+        var locked = c.gate && !TH.has(c.gate);
+        return locked ? null : (c.render ? c.render(r, i) : esc(r[c.key]));
+      });
+    });
+    // Cột chữ vừa: độ rộng tối thiểu ≈ nửa dòng dài nhất (+ phần dư chỗ ngắt từ) để gói trong ~2 dòng; cột văn bản dài (≥ 70 ký tự) tối thiểu 240px
+    var minW = [];
+    var fit = cols.map(function (c, j) {
+      if (j === cols.length - 1 && !c.label && !c.labelHtml) return 'nw col-act';
+      if (c.nowrap) return 'nw';
+      var m = cells.reduce(function (mx, row) { return row[j] == null ? mx : Math.max(mx, longestLine(row[j])); }, 0);
+      if (!c.wrap && m <= NOWRAP_MAX) return 'nw';
+      minW[j] = m >= LONG_MIN ? 240 : Math.min(260, Math.max(180, Math.round((m / 2 + 4) * 6.8) + 24));
+      return 'col-wrap';
+    });
+    var head = cols.map(function (c, j) {
       var locked = c.gate && !TH.has(c.gate);
-      var cls = (c.num ? 'num ' : '') + (c.center ? 'center ' : '') + (c.cls || '') + (locked ? ' is-ghost' : '');
+      var cls = (c.num ? 'num ' : '') + (c.center ? 'center ' : '') + (c.cls || '') + (locked ? ' is-ghost' : '') + ' ' + fit[j];
       var lbl = locked ? '<button type="button" class="gate-mini th-lock" data-locked="' + c.gate + '" data-tip="' + esc(lockTip(TH.inc(c.gate))) + '">' + I('lock', 'ic-sm') + esc(c.label) + ' ' + TH.tierPill(TH.tierOf(c.gate)) + '</button>'
         : (c.labelHtml || esc(c.label)) + (c.gate && TH.tierOf(c.gate) !== 'A' ? TH.up(c.gate) : '');
-      return '<th class="' + cls + '"' + (c.width ? ' style="width:' + c.width + '"' : '') + ' scope="col">' + lbl + '</th>';
+      // Tiêu đề dài hơn nội dung: cho xuống tối đa 2 dòng thay vì kéo rộng cả cột (cột khóa tính thêm ổ khóa + nhãn gói)
+      var L = (c.labelHtml ? longestLine(c.labelHtml) : String(c.label || '').length), extra = locked ? 44 : c.gate && TH.tierOf(c.gate) !== 'A' ? 24 : 0, thMin = minW[j] || 0;
+      if (locked) { cls += ' th-wrap'; thMin = Math.max(76, Math.round(L * 4.8) + 24 + extra); }
+      else if (L + extra / 7 > 14) { cls += ' th-wrap'; thMin = Math.max(thMin, Math.round(L * 4.1) + 24 + extra); }
+      var st = (c.width ? 'width:' + c.width + ';' : '') + (thMin ? 'min-width:' + thMin + 'px;' : '');
+      return '<th class="' + cls + '"' + (st ? ' style="' + st + '"' : '') + ' scope="col">' + lbl + '</th>';
     }).join('');
     var body;
     if (!o.rows.length) {
@@ -122,10 +150,10 @@ var TH = window.TH = window.TH || {};
     } else {
       body = o.rows.map(function (r, i) {
         var attrs = o.rowAttrs ? o.rowAttrs(r, i) : '';
-        return '<tr ' + attrs + '>' + cols.map(function (c) {
+        return '<tr ' + attrs + '>' + cols.map(function (c, j) {
           var locked = c.gate && !TH.has(c.gate);
-          var cls = (c.num ? 'num ' : '') + (c.center ? 'center ' : '') + (c.tdCls || '') + (locked ? ' is-ghost' : '');
-          var v = locked ? '<span aria-hidden="true" style="display:inline-block;width:56px;height:8px;border-radius:4px;background:#e2e8f0"></span>' : (c.render ? c.render(r, i) : esc(r[c.key]));
+          var cls = (c.num ? 'num ' : '') + (c.center ? 'center ' : '') + (c.tdCls || '') + (locked ? ' is-ghost' : '') + ' ' + fit[j];
+          var v = locked ? '<span aria-hidden="true" style="display:inline-block;width:56px;height:8px;border-radius:4px;background:#e2e8f0"></span>' : cells[i][j];
           return '<td class="' + cls + '">' + v + '</td>';
         }).join('') + '</tr>';
       }).join('');
@@ -133,7 +161,7 @@ var TH = window.TH = window.TH || {};
     var foot = o.foot ? '<tfoot><tr>' + cols.map(function (c, i) {
       var locked = c.gate && !TH.has(c.gate);
       var v = locked ? '' : (o.foot[c.key] !== undefined ? o.foot[c.key] : (i === 0 ? (o.foot._label || 'Tổng') : ''));
-      return '<td class="' + (c.num ? 'num' : '') + (locked ? ' is-ghost' : '') + '">' + v + '</td>';
+      return '<td class="' + (c.num ? 'num' : '') + (locked ? ' is-ghost' : '') + ' ' + fit[i] + '">' + v + '</td>';
     }).join('') + '</tr></tfoot>' : '';
     return '<div class="table-wrap' + (o.scroll ? ' scroll-y' : '') + '"><table class="table' + (o.compact ? ' table-compact' : '') + '"' + (o.label ? ' aria-label="' + esc(o.label) + '"' : '') + '><thead><tr>' + head + '</tr></thead><tbody>' + body + '</tbody>' + foot + '</table></div>';
   };
@@ -207,7 +235,7 @@ var TH = window.TH = window.TH || {};
     return parts.join(' ').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').indexOf(q) > -1;
   };
 
-  /* ---------- Page header & tier notes ---------- */
+  /* ---------- Page header ---------- */
   TH.screen = function (id) { return TH.SCREENS.find(function (s) { return s.id === id; }); };
   TH.pageHeader = function (o) {
     var sc = TH.screen(o.screen) || {};
@@ -217,20 +245,8 @@ var TH = window.TH = window.TH || {};
     return '<div class="page-hd"><div style="min-width:0"><nav class="crumbs" aria-label="Breadcrumb">' + crumbs + '</nav>' +
       '<h1 class="page-title">' + esc(o.title || sc.title) + ' <span class="screen-id" data-tip="Screen ID theo SRS §4' + (sc.no ? ' · Screen ' + sc.no : '') + ' · ' + esc(sc.kind || '') + '">' + esc(o.screen) + '</span>' + (o.status || '') + '</h1>' +
       (o.desc ? '<p class="page-desc">' + o.desc + '</p>' : '') + '</div>' +
-      '<div class="page-actions">' + (o.actions || '') + '</div></div>' + (o.noNotes ? '' : TH.tierStrip(o.screen));
+      '<div class="page-actions">' + (o.actions || '') + '</div></div>';
   };
-  TH.tierStrip = function (screenId) {
-    if (!TH.store.state.tierNotes) return '';
-    var sc = TH.screen(screenId);
-    if (!sc) return '';
-    var lvl = TH.store.level();
-    return '<section class="tier-strip" aria-label="Ghi chú gói cấp màn (SRS §4)">' + TH.PKG_KEYS.map(function (k) {
-      var p = TH.PACKAGES[k], on = lvl >= p.level;
-      return '<div class="tier-cell' + (on ? '' : ' is-off') + (k === TH.store.state.pkg ? ' is-current' : '') + '">' + TH.tierPill(k, { lg: true }) +
-        '<div class="tc-text"><span class="tc-kind">' + (k === 'A' ? 'Cơ bản · ' + p.price : 'Nâng cấp ' + k + ' · ' + p.price) + (on ? '' : ' · ' + 'khóa') + '</span>' + esc(sc.notes[k]) + '</div></div>';
-    }).join('') + '</section>';
-  };
-
   /* ---------- Data states ---------- */
   TH.state = function (kind, o) {
     o = o || {};
@@ -597,7 +613,7 @@ var TH = window.TH = window.TH || {};
   };
   TH.personCell = function (name, sub) {
     var initials = (name || '?').split(' ').slice(-2).map(function (w) { return w[0]; }).join('').toUpperCase();
-    return '<div class="row" style="gap:10px;flex-wrap:nowrap"><span class="avatar avatar-sm">' + esc(initials) + '</span><div style="min-width:140px"><div class="cell-main" style="white-space:nowrap">' + esc(name) + '</div>' + (sub ? '<div class="cell-sub">' + sub + '</div>' : '') + '</div></div>';
+    return '<div class="row" style="gap:10px;flex-wrap:nowrap"><span class="avatar avatar-sm">' + esc(initials) + '</span><div style="min-width:0"><div class="cell-main" style="white-space:nowrap">' + esc(name) + '</div>' + (sub ? '<div class="cell-sub" style="white-space:nowrap">' + sub + '</div>' : '') + '</div></div>';
   };
   TH.link = function (href, text) { return '<a href="' + href + '">' + esc(text) + '</a>'; };
 })();

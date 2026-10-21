@@ -30,7 +30,7 @@ async (page) => {
   });
   await page.reload();
   const upgraded = await read(() => ({ schema: TH.DATA_SCHEMA, name: TH.db.customers[0].name, contracts: TH.db.contracts.length }));
-  check('SCHEMA-UPGRADE', upgraded.schema === 9 && upgraded.name !== 'SCHEMA-8-STALE' && upgraded.contracts === 19, upgraded);
+  check('SCHEMA-UPGRADE', upgraded.schema >= 9 && upgraded.name !== 'SCHEMA-8-STALE' && upgraded.contracts === 19, upgraded);
   await page.evaluate(() => {
     TH.modal.stack.slice().reverse().forEach(m => TH.modal.close(m.key, { silent: true }));
     TH.db = TH.seed();
@@ -46,7 +46,7 @@ async (page) => {
     invoice: TH.calc.invoice('INV-2610-CG202').total,
     hs: TH.calc.perfBuilding('2026-09', 'TH-CG').hs,
   }));
-  check('REGRESSION', initial.schema === 9 && initial.kd09 === 16937599 && initial.total09 === 7537599 && initial.kd10 === 4755000 && initial.invoice === 6069800 && Math.round(initial.hs * 1000) === 723, initial);
+  check('REGRESSION', initial.schema >= 9 && initial.kd09 === 16937599 && initial.total09 === 7537599 && initial.kd10 === 4755000 && initial.invoice === 6069800 && Math.round(initial.hs * 1000) === 723, initial);
   const heads = await read(() => ({ head: TH.calc.areaHead('TH-CG'), lead: TH.calc.teamLead('TH-CG'), tx: TH.calc.areaHead('TH-TX') }));
   check('QA-CUS-01', heads.head && heads.head !== heads.lead && !heads.tx, heads);
   const states = await read(() => TH.calc.tenancyStates(TH.calc.contract('HĐ-DD102/25')));
@@ -98,8 +98,10 @@ async (page) => {
   await role('admin');
   await go('CUS-02', 'HĐ-DD102/25', 'contract');
   const oldInvoice = await read(() => JSON.stringify(TH.db.invoices));
-  await click('cus.priceOcr');
-  await click('pocr.confirm');
+  // CR-CUS-02: đọc dòng phí qua OCR hợp đồng mẫu đầy đủ (cus.ctOcr thay cho cus.priceOcr)
+  await click('cus.ctOcr');
+  await click('ocr.all');
+  await click('ctocr.confirm');
   const pricing = await read(() => {
     const ct = TH.calc.contract('HĐ-DD102/25');
     const invoice = buildInvoice(TH.db, ct, '2026-11', 'draft');
@@ -123,10 +125,11 @@ async (page) => {
   check('VEHICLE-DUPLICATE', await read(() => TH.calc.customer('KH-001').vehicles.slice(-1)[0].status) === 'pending', 'Biển số đang hoạt động ở hồ sơ khác bị chặn xác nhận');
 
   const terms = await read(() => {
+    // CR-CUS-02: bỏ mẫu P302 — mọi HĐ theo mẫu đầy đủ (DAYDU): gia hạn mặc nhiên, hoàn cọc trong 10 ngày
     const p302 = TH.calc.contract('HĐ-DD102/25'), amendment = TH.calc.contract('HĐ-CG102/25'), current = TH.calc.contract('HĐ-CG201/25');
     return { p302: p302.terms, amendment: amendment.renewals[0], previous: current.previousContractId, transfer: TH.calc.depositCase('HĐ-CG201/24').state, count: TH.calc.customerContracts('KH-003').length, notice: TH.calc.contract('HĐ-CG101/25').terms.noticeDays, alert: TH.expiryDays() };
   });
-  check('QA-CUS-10/11/12/13/14', !terms.p302.autoRenew && terms.p302.refundDays === null && terms.amendment.mode === 'amendment' && terms.amendment.file && terms.previous === 'HĐ-CG201/24' && terms.transfer === 'transferred' && terms.count === 2 && terms.notice === 30 && terms.alert === 35, terms);
+  check('QA-CUS-10/11/12/13/14', terms.p302.template === 'DAYDU' && terms.p302.autoRenew && terms.p302.refundDays === 10 && terms.amendment.mode === 'amendment' && terms.amendment.file && terms.previous === 'HĐ-CG201/24' && terms.transfer === 'transferred' && terms.count === 2 && terms.notice === 30 && terms.alert === 35, terms);
   const historical = await read(() => {
     const k = TH.calc.customer('KH-018');
     const old = k.vehicles.find(v => v.plate);

@@ -64,7 +64,7 @@
       var body;
       if (tab === 'info') {
         body = '<div class="grid-main-side"><div class="card"><div class="card-hd"><div class="card-title">Điều khoản chính</div>' + (c.status === 'active' ? TH.badge('Bản đã xác nhận — không sửa trực tiếp', 'neutral', { icon: 'lock' }) : c.status === 'ended' || c.status === 'terminated' ? TH.badge((c.status === 'terminated' ? 'Phá HĐ ' : 'Kết thúc ') + F.date(c.endedAt), c.status === 'terminated' ? 'danger' : 'neutral') : '') + '</div><div class="card-bd">' +
-          TH.kv([['Số HĐ', '<span class="mono">' + esc(c.id) + '</span>'], ['Khách', k ? '<a href="' + TH.router.href('CUS-02', k.id) + '">' + esc(k.name) + '</a> · ' + esc(k.phone) : esc(custName(c))], ['Phòng', TH.roomLink(c.roomId) + ' · ' + esc(C.building(c.buildingId).name)], ['Giá thuê', '<b class="tnum">' + F.money(c.rent) + '</b>/tháng'], ['Tiền cọc', F.money(c.deposit) + ' <span class="small muted">(không tính doanh thu)</span>'], ['Kỳ', 'Ngày ' + String(c.billingDay).padStart(2, '0') + ' · tròn tháng'], ['Hiệu lực', F.date(c.start) + ' → ' + F.date(c.end)], ['Ngày ký', F.date(c.signedAt)], ['Số người ở', c.people]]) + '</div></div>' +
+          TH.kv([['Số HĐ', '<span class="mono">' + esc(c.id) + '</span>'], ['Khách', k ? '<a href="' + TH.router.href('CUS-02', k.id) + '">' + esc(k.name) + '</a> · ' + esc(k.phone) : esc(custName(c))], ['Phòng', TH.roomLink(c.roomId) + ' · ' + esc(C.building(c.buildingId).name)], ['Giá thuê', '<b class="tnum">' + F.money(c.rent) + '</b>/tháng'], ['Tiền cọc', F.money(c.deposit) + ' <span class="small muted">(không tính doanh thu)</span>'], ['Kỳ', 'Ngày ' + String(c.billingDay).padStart(2, '0') + ' · tròn tháng'], ['Hiệu lực', F.date(c.start) + ' → ' + F.date(c.end)], ['Ngày ký', F.date(c.signedAt)], ['Số người ở', c.people]].concat(c.handover ? [['Bàn giao', F.date(c.handover.at) + ' · điện ' + (c.handover.elecStart || 0) + ' kWh · nước ' + (c.handover.waterStart || 0) + ' m³ · ' + (c.handover.assets || []).length + ' tài sản <a href="#" data-act="cus.open" data-id="' + esc(c.id) + '" data-tab="contract">xem</a>']] : []).concat(c.prepaid ? [['Đã nộp khi ký', F.money(c.prepaid.total) + ' <span class="small muted">(' + esc(c.prepaid.allocation) + ')</span>']] : [])) + '</div></div>' +
           '<div class="stack"><div class="card"><div class="card-hd"><div class="card-title">' + I('paperclip', 'ic-sm') + 'Bản scan</div></div><div class="card-bd">' + TH.fileOf(c.scanFile) + '</div></div>' +
           TH.gate('F014.C', '<div class="card"><div class="card-hd"><div class="card-title">Phụ lục thay đổi giá ' + TH.up('F014.C') + '</div></div><div class="card-bd stack-sm"><p class="small muted">Thay đổi giá có hiệu lực từ tháng; cần duyệt trước khi áp dụng vào hóa đơn.</p>' + TH.permBtn('contract.edit', '<button type="button" class="btn btn-sm" data-act="con.addendum" data-id="' + esc(c.id) + '">' + I('plus', 'ic-sm') + 'Tạo phụ lục</button>', 'Tạo phụ lục · 403') + '</div></div>', { label: 'Phụ lục thay đổi giá có hiệu lực từ tháng', lines: 2 }) +
           TH.gate('F014.D', '<div class="card"><div class="card-hd"><div class="card-title">Phiên bản điều khoản ' + TH.up('F014.D') + '</div></div><div class="card-bd"><ul class="timeline">' + c.versions.slice().reverse().map(function (v) { return '<li><b>v' + v.v + '</b> · ' + esc(v.note) + '<div class="when">' + F.date(v.at) + (v.by ? ' · ' + esc(C.staffName(v.by)) : '') + '</div></li>'; }).join('') + '</ul></div></div>', { label: 'Hợp đồng/điều khoản nhiều phiên bản có audit', lines: 3 }) + '</div></div>';
@@ -131,7 +131,7 @@
     var set = function (k, v) { TH.store.setDraft(NEW, k, v); };
     set('customer', 'OCR'); set('room', f.room); set('rent', String(f.rent).replace(/\D/g, '')); set('deposit', String(f.deposit).replace(/\D/g, ''));
     var people = +String(f.people || 1).replace(/\D/g, '') || 1;
-    set('start', f.start); set('end', f.end); set('svc', String((+String(f.svc).replace(/\D/g, '') || 0) * people)); set('net', String(f.net).replace(/\D/g, ''));
+    set('start', f.start || f.billingFrom); set('end', f.end); set('svc', String((+String(f.feeSvc).replace(/\D/g, '') || 0) * people)); set('net', String(f.feeNet).replace(/\D/g, ''));
     TH.app.refresh(); TH.toast('Đã chuyển dữ liệu OCR vào form', 'Kiểm tra lại trước khi lưu — trạng thái vẫn là Nháp.', 'info');
   };
   function readNew() {
@@ -153,15 +153,31 @@
   TH.act['con.approve'] = function () {
     var d = readNew(), e = validNew(d);
     if (e) { TH.store.setDraft(NEW, '_err', e); TH.app.refresh(); return; }
-    var job = ocrDone(), cid = d.customer;
+    var job = ocrDone(), cid = d.customer, O = TH.CONTRACT_OCR, jf = job ? job.fields : null, jv = jf ? function (k) { return jf[k]; } : null;
+    var dg = function (x) { return +String(x === undefined || x === null ? '' : x).replace(/\D/g, '') || 0; };
     if (cid === 'OCR' && job) {
+      /* Khách mới từ OCR mẫu đầy đủ: Bên B + xe máy khai ở Điều 1 (chờ xác nhận đăng ký, chưa tính phí) */
       cid = 'KH-' + String(TH.db.customers.length + 1).padStart(3, '0');
-      TH.db.customers.push({ id: cid, name: job.fields.customer, dob: '1997-01-01', phone: '09•• ••• 777', idNo: '001097•••••' + '218', idType: 'CCCD', hometown: 'Hà Nội', oaLinked: false, oaConsentAt: null, status: 'active', createdAt: TH.TODAY });
+      var veh = [], nMoto = dg(jf.vehicles);
+      for (var j = 0; j < nMoto; j++) veh.push({ id: 'XE-' + cid.slice(3) + '-' + (j + 1), type: 'Xe máy', plate: null, brand: '', color: '', status: 'pending', from: d.start, to: null, feeCode: 'PARK_MOTO', note: 'Khai từ HĐ (Điều 1) — cần bổ sung biển số và xác nhận đăng ký' });
+      TH.db.customers.push({ id: cid, name: jf.customer, dob: jf.dob || '', phone: jf.phone || '—', idNo: jf.idNo || '—', idType: 'CCCD', idPlace: jf.idPlace || '', hometown: '—', permAddress: jf.permAddress || '', occupation: '', note: '', vehicles: veh, oaLinked: false, oaConsentAt: null, status: 'active', createdAt: TH.TODAY });
     }
-    var room = C.room(d.room);
+    var room = C.room(d.room), bb = C.building(room.buildingId);
     var id = 'HĐ-' + room.id.replace('-', '') + '/' + d.start.slice(2, 4);
-    TH.db.contracts.push({ id: id, roomId: room.id, buildingId: room.buildingId, customerId: cid, rent: d.rent, deposit: d.deposit || d.rent, start: d.start, end: d.end, signedAt: TH.TODAY, people: 1, billingDay: 1, status: 'active', scanFile: job ? job.file : 'scan_' + room.id + '.pdf',
-      fees: [{ code: 'SVC', name: 'Phí dịch vụ', price: d.svc, qty: 1, unit: 'tháng' }, { code: 'NET', name: 'Internet', price: d.net, qty: 1, unit: 'tháng' }], versions: [{ v: 1, at: TH.TODAY, note: 'Bản ký gốc', by: TH.me().id }] });
+    var ct = { id: id, roomId: room.id, buildingId: room.buildingId, customerId: cid, rent: d.rent, deposit: d.deposit || d.rent, start: d.start, end: d.end, signedAt: jf && jf.signedAt ? jf.signedAt : TH.TODAY, people: jf ? dg(jf.people) || 1 : 1, billingDay: 1, status: 'active', scanFile: job ? job.file : 'scan_' + room.id + '.pdf',
+      renewals: [], previousContractId: null, endKind: null, note: '', versions: [{ v: 1, at: TH.TODAY, note: job ? 'Bản ký gốc — tạo từ OCR mẫu đầy đủ (' + job.corrections + ' mục sửa tay)' : 'Bản ký gốc', by: TH.me().id }] };
+    if (jv) {
+      ct.terms = O.buildTerms(jv);
+      ct.priceList = O.buildPriceList(jv, d.start.slice(0, 7), 'OCR HĐ ' + jf.code + ' · xác nhận ' + job.at);
+      ct.handover = O.handoverOf(jv, job.assets || [], job.file);
+      ct.prepaid = O.prepaidOf(jv);
+    } else {
+      ct.terms = TH.termsOf('DAYDU', d.start);
+      ct.priceList = TH.seedPriceList(bb, d.start, 1);
+      ct.priceList.forEach(function (l) { if (l.code === 'SVC') l.price = d.svc; if (l.code === 'NET') l.price = d.net; });
+    }
+    TH.syncFees(ct);
+    TH.db.contracts.push(ct);
     TH.db.roomEvents.unshift({ roomId: room.id, at: TH.TODAY, from: room.status, to: 'occupied', by: TH.me().id, note: 'Kích hoạt HĐ ' + id });
     room.status = 'occupied';
     if (job) job.used = true;
@@ -258,76 +274,20 @@
     TH.toast('Đã lưu kết quả: ' + TH.statusLabel(res), res === 'extend' && TH.has('F017.C') ? 'Đã gửi duyệt gia hạn — hợp đồng gốc chưa đổi.' : 'Hợp đồng gốc không thay đổi.');
   };
 
-  /* ---------------- OCR-CON ---------------- */
+  /* ---------------- OCR-CON (mẫu đầy đủ — định nghĩa field/bảng/scan ở js/views/ocr-contract.js) ---------------- */
   var OCR_FORM = 'ocr-con';
-  /* Field theo mẫu "Hợp đồng cho thuê phòng — bản đồng bộ" của khách (docs/tenplate). Giá trị là OCR mô phỏng. */
-  var FIELDS = [
-    { key: 'code', label: 'Mã hợp đồng', ocr: 'HĐKH-THCG-P401-2026-001', conf: 0.97 },
-    { key: 'customer', label: 'Khách thuê (Bên B)', ocr: 'Trương Thị Diệu Linh', conf: 0.93 },
-    { key: 'idNo', label: 'CCCD khách', ocr: '001097•••218', conf: 0.9 },
-    { key: 'room', label: 'Phòng', ocr: 'CG-401', conf: 0.95 },
-    { key: 'rent', label: 'Tiền thuê / tháng', ocr: '6.800.000', conf: 0.72, num: true },
-    { key: 'deposit', label: 'Tiền cọc duy trì HĐ', ocr: '6.500.000', conf: 0.91, num: true },
-    { key: 'start', label: 'Ngày nhận phòng / tính tiền', ocr: '2026-11-01', conf: 0.9 },
-    { key: 'end', label: 'Ngày hết hạn', ocr: '2027-10-31', conf: 0.88 },
-    { key: 'people', label: 'Số người ở', ocr: '2', conf: 0.96, num: true },
-    { key: 'vehicles', label: 'Số xe máy', ocr: '1', conf: 0.94, num: true },
-    { key: 'elecStart', label: 'Chỉ số điện bàn giao', ocr: '1.250', conf: 0.83, num: true },
-    { key: 'waterStart', label: 'Chỉ số nước bàn giao', ocr: '85', conf: 0.87, num: true },
-    { key: 'svc', label: 'Dịch vụ chung (đ/người)', ocr: '120.000', conf: 0.81, num: true },
-    { key: 'net', label: 'Internet (đ/phòng)', ocr: '100.000', conf: 0.86, num: true },
-  ];
   TH.views['OCR-CON'] = {
     modal: { size: 'full' },
-    ocrFields: function () { return FIELDS; },
+    ocrFields: function () { return TH.CONTRACT_OCR.fields; },
+    ocrTables: function () { return [TH.CONTRACT_OCR.tableCfg()]; },
     render: function () {
-      var v = function (k) { return TH.store.draft(OCR_FORM, k, FIELDS.find(function (f) { return f.key === k; }).ocr); };
-      return TH.ocrWorkspace({
-        screen: 'OCR-CON', form: OCR_FORM, docTitle: 'hop_dong_CG401_scan.pdf', fields: FIELDS,
-        inc: { conf: 'F012.B', tpl: 'F012.B', match: 'F012.C', log: 'F012.D' },
-        templates: TH.db.ocrTemplates.filter(function (t) { return t.kind === 'contract'; }),
-        matchTitle: 'So khớp phòng – khách – hợp đồng',
-        confirmAct: 'ocrcon.confirm', confirmLabel: 'Xác nhận kết quả OCR',
-        checks: function () {
-          var out = [], room = C.room(v('room')), rent = +String(v('rent')).replace(/\D/g, '');
-          if (!room) out.push({ level: 'danger', text: 'Phòng “' + esc(v('room')) + '” không tồn tại.' });
-          else {
-            if (room.status !== 'vacant') out.push({ level: 'danger', text: 'Phòng ' + room.id + ' không trống — có thể xung đột hợp đồng hiện hành.' });
-            else out.push({ level: 'ok', text: 'Phòng ' + room.id + ' đang trống, không có HĐ xung đột.' });
-            if (rent && rent !== room.rent) out.push({ level: 'warning', text: 'Giá thuê OCR ' + F.money(rent) + ' lệch giá niêm yết ' + F.money(room.rent) + ' (' + (rent > room.rent ? '+' : '') + F.money(rent - room.rent) + ').' });
-          }
-          var k = TH.db.customers.find(function (x) { return x.name.toLowerCase() === String(v('customer')).toLowerCase(); });
-          out.push(k ? { level: 'ok', text: 'Khách khớp hồ sơ ' + k.id + '.' } : { level: 'warning', text: 'Chưa có hồ sơ khách “' + esc(v('customer')) + '” — sẽ tạo khi duyệt hợp đồng (hoặc OCR giấy tờ ở OCR-CUS).' });
-          if (TH.db.contracts.some(function (c) { return c.id === v('code'); })) out.push({ level: 'danger', text: 'Mã hợp đồng đã tồn tại.' });
-          return out;
-        },
-        sideExtra: function () {
-          var people = +String(v('people')).replace(/\D/g, '') || 1;
-          return TH.gate('F012.B', '<div class="card"><div class="card-hd"><div class="card-title">' + I('layers', 'ic-sm') + 'Map biểu phí (Điều 4) → phí cố định' + TH.up('F012.B') + '</div></div>' + TH.table({ compact: true, cols: [{ key: 'a', label: 'Dòng trong HĐ' }, { key: 'b', label: 'Mã phí' }, { key: 'q', label: 'SL' }, { key: 'c', label: 'Thành tiền/tháng', num: true }], rows: [{ a: 'Dịch vụ chung ' + F.money(+String(v('svc')).replace(/\D/g, '')) + '/người', b: 'SVC', q: people + ' người', c: F.money(+String(v('svc')).replace(/\D/g, '') * people) }, { a: 'Internet', b: 'NET', q: '1 phòng', c: F.money(+String(v('net')).replace(/\D/g, '')) }, { a: 'Xe máy 0 đ/xe', b: 'PARK', q: (v('vehicles') || 0) + ' xe', c: F.money(0) }, { a: 'Điện 4.000 đ/kWh · nước theo công tơ', b: '—', q: 'theo chỉ số', c: '<span class="muted small">điện nước</span>' }] }) + '</div>', { label: 'Tối đa 2 mẫu HĐ, map phí cố định', lines: 2 }) +
-            TH.gate('F012.D', '<div class="card"><div class="card-hd"><div class="card-title">' + I('folder', 'ic-sm') + 'Thư viện mẫu đã duyệt' + TH.up('F012.D') + '</div></div>' + TH.table({ compact: true, cols: [{ key: 'name', label: 'Mẫu' }, { key: 'fields', label: 'Field', num: true }, { key: 'acc', label: 'Chính xác', num: true, render: function (t) { return F.pct(t.accuracy, 0); } }, { key: 'st', label: '', render: function (t) { return TH.status(t.status === 'approved' ? 'approved' : 'draft'); } }], rows: TH.db.ocrTemplates.filter(function (t) { return t.kind === 'contract'; }) }) + '</div>', { label: 'Nhiều mẫu cố định đã duyệt', lines: 2 });
-        },
-        docHtml: function (box) {
-          return '<span class="sim-mark">' + TH.simBadge('Bản scan minh họa') + '</span><div class="doc-c" style="font-size:12px">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM<br><b>Độc lập – Tự do – Hạnh phúc</b></div><br>' +
-            '<h4>HỢP ĐỒNG CHO THUÊ PHÒNG</h4><div class="doc-c">Mã hợp đồng: ' + box('code', v('code')) + '</div>' +
-            '<p class="doc-c" style="font-size:11px;color:#64748b">Ngày lập: 20/10/2026. Địa điểm: Tòa TimeHouse Cầu Giấy, số 18 ngõ 75 đường Minh Họa, Cầu Giấy, Hà Nội.</p>' +
-            '<p><b>BÊN A – BÊN CHO THUÊ PHÒNG:</b> Ông Phạm Minh Đức; CCCD 0010••••••110; điện thoại 0903 ••• 110. Được quyền cho thuê lại tòa theo hợp đồng chủ nhà HĐCN-THCG-2024-001.</p>' +
-            '<p><b>BÊN B – KHÁCH THUÊ:</b> Bà ' + box('customer', v('customer')) + '; ngày sinh 14/08/1997; CCCD ' + box('idNo', v('idNo')) + '; điện thoại 09•• ••• 777.</p>' +
-            '<p><b>Điều 1. Phòng thuê.</b> Bên A cho Bên B thuê phòng ' + box('room', v('room')) + ' – tòa TimeHouse Cầu Giấy, tầng 4. Mục đích sử dụng: để ở; số người ở ' + box('people', String(v('people')).padStart(2, '0')) + ', số xe máy ' + box('vehicles', String(v('vehicles')).padStart(2, '0')) + '.</p>' +
-            '<p><b>Điều 2. Ngày ký, nhận phòng và thời hạn.</b> Ngày giao, nhận phòng và bắt đầu tính tiền: ' + box('start', F.date(v('start'))) + '. Thời hạn thuê 12 tháng, đến hết ' + box('end', F.date(v('end'))) + '. Mọi gia hạn phải được hai bên xác nhận bằng văn bản.</p>' +
-            '<p><b>Điều 3. Giá thuê, đặt cọc.</b> Tiền thuê phòng: ' + box('rent', v('rent')) + ' đồng/tháng. Tiền cọc duy trì hợp đồng: ' + box('deposit', v('deposit')) + ' đồng (tương đương 01 tháng tiền phòng). Kỳ trả tiền thuê: 01 tháng/lần.</p>' +
-            '<p><b>Điều 4. Biểu phí dịch vụ và chỉ số bàn giao.</b> Chỉ số bàn giao: điện ' + box('elecStart', v('elecStart')) + ' kWh; nước ' + box('waterStart', v('waterStart')) + ' m³. Điện 4.000 đồng/kWh theo chỉ số; Internet ' + box('net', v('net')) + ' đồng/phòng/tháng; Dịch vụ chung ' + box('svc', v('svc')) + ' đồng/người/tháng; xe máy 0 đồng/xe; xe đạp điện 150.000 đồng/xe nếu phát sinh.</p>' +
-            '<p><b>Điều 5. Lịch thanh toán.</b> Bên A gửi thông báo tiền thuê kỳ sau và phí dịch vụ phát sinh vào ngày 25 hằng tháng; Bên B thanh toán từ ngày 25 đến hết ngày 30 của tháng trước kỳ thuê.</p>' +
-            '<div class="doc-sig"><div>BÊN A – BÊN CHO THUÊ PHÒNG<br><br><i style="color:#94a3b8">(đã ký)</i></div><div>BÊN B – KHÁCH THUÊ<br><br><i style="color:#94a3b8">(đã ký)</i></div></div>';
-        },
-      });
+      return TH.CONTRACT_OCR.workspace({ form: OCR_FORM, fields: TH.CONTRACT_OCR.fields, mode: 'new', ct: null, confirmAct: 'ocrcon.confirm', confirmLabel: 'Xác nhận kết quả OCR', docTitle: 'hop_dong_CG401_scan.pdf' });
     },
   };
   TH.act['ocrcon.confirm'] = function () {
-    var vals = {};
-    FIELDS.forEach(function (f) { vals[f.key] = TH.store.draft(OCR_FORM, f.key, f.ocr); });
-    var corrections = FIELDS.filter(function (f) { return String(vals[f.key]) !== String(f.ocr); }).length;
-    TH.db.ocrJobs.unshift({ id: 'OCR-' + String(TH.db.ocrJobs.length + 1).padStart(4, '0'), kind: 'contract', file: 'hop_dong_CG401_scan.pdf', status: 'confirmed', fields: vals, by: TH.me().id, at: TH.TODAY, corrections: corrections });
-    TH.log('Xác nhận kết quả OCR HĐ', vals.code, corrections + ' field đã sửa', 'contract', 'TH-CG');
+    var O = TH.CONTRACT_OCR, vals = O.vals(OCR_FORM, O.fields), assets = O.assetsOf(OCR_FORM), corrections = O.corrections(OCR_FORM, O.fields);
+    TH.db.ocrJobs.unshift({ id: 'OCR-' + String(TH.db.ocrJobs.length + 1).padStart(4, '0'), kind: 'contract', target: 'new', file: 'hop_dong_CG401_scan.pdf', status: 'confirmed', fields: vals, assets: assets, by: TH.me().id, at: TH.TODAY, corrections: corrections });
+    TH.log('Xác nhận kết quả OCR HĐ', vals.code, corrections + ' mục đã sửa · ' + assets.length + ' tài sản bàn giao', 'contract', 'TH-CG');
     TH.store.clearDraft(OCR_FORM);
     TH.app.guard = null;
     TH.modal.close(TH.modal.top().key, { silent: true });

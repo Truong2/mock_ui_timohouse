@@ -9,7 +9,7 @@ var TH = window.TH = window.TH || {};
 TH.TODAY = '2026-10-20';
 TH.CURRENT_PERIOD = '2026-10';
 TH.PERIODS = ['2026-05', '2026-06', '2026-07', '2026-08', '2026-09', '2026-10'];
-TH.DATA_SCHEMA = 9;
+TH.DATA_SCHEMA = 10;
 
 /* Vai trò phụ trách tòa (CR-BLD-01, note.md §3.2 · cột NVVH/Lead/NVVS/NSKT trong docs/Thông tin nhà.xlsx).
    tier: gói bắt đầu được phân công vai trò này (A: một NV vận hành chính — F006.A; B: nhiều người theo vai trò — F006.B). */
@@ -25,7 +25,7 @@ TH.ROLE_MAIN = 'Nhân viên vận hành';
 TH.BLD_CONDITIONS = ['Mới', 'Khá mới', 'Trung bình', 'Cũ', 'Rất cũ', 'Chưa đánh giá'];
 /* G-07: trạng thái hồ sơ PCCC / ĐKKD */
 TH.DOC_STATES = { none: ['Chưa cập nhật', 'neutral'], has: ['Có hồ sơ — chưa kiểm tra', 'warning'], verified: ['Đã xác minh', 'success'], na: ['Không áp dụng / cần làm rõ', 'info'] };
-/* D-03: phương thức tính nước theo biểu phí (mặc định công tơ m³; HĐ mẫu P302 tính theo người) */
+/* D-03: phương thức tính nước theo biểu phí (dữ liệu mẫu theo công tơ m³; mẫu HĐ đầy đủ Điều 4.4 tính theo người) */
 TH.WATER_METHODS = { meter_m3: 'Theo công tơ (đ/m³)', per_person: 'Theo người (đ/người/tháng)', per_room: 'Theo phòng (đ/phòng/tháng)' };
 
 /* ---------- CR-CUS-01 (note.md §8) + trả lời CR_CUS_ANSWERS 20/10/2026 (K-01…K-09): khách thuê ---------- */
@@ -33,9 +33,20 @@ TH.CUS_EXPIRY_DAYS = 35; // mặc định demo (K-06) — giá trị áp dụng 
 TH.expiryDays = function () { var st = TH.db && TH.db.settings; return st && +st.expiryAlertDays > 0 ? +st.expiryAlertDays : TH.CUS_EXPIRY_DAYS; };
 /* Điều khoản áp dụng THEO TỪNG HĐ/mẫu ký thực tế (K-03, K-04, K-09) — không mặc định theo mẫu khác */
 TH.CONTRACT_TERMS = {
-  DAYDU: { id: 'DAYDU', name: 'Mẫu HĐ cho thuê phòng — bản đầy đủ', refundDays: 10, autoRenew: true, autoRenewMonths: 12, noticeDays: 30, earlyTermination: 'forfeit_all', source: 'Hop_dong_thue_phong_demo_day_du.pdf — Điều 3.4 (gia hạn mặc nhiên), 4.3 (hoàn cọc 10 ngày; mất cọc khi đơn phương chấm dứt), 6.2.11 (báo trước 30 ngày)' },
-  P302: { id: 'P302', name: 'Mẫu HĐ P302 — bản đồng bộ', refundDays: null, autoRenew: false, autoRenewMonths: null, noticeDays: null, earlyTermination: null, source: 'Hop_dong_khach_thue_P302_TH01_demo_dong_bo.pdf — Điều 2 (gia hạn phải xác nhận bằng văn bản), Điều 6 (hoàn cọc theo chứng từ, không ghi thời hạn)' },
+  /* Mẫu hợp đồng khách thuê duy nhất của mockup (chỉ đạo 21/10/2026): Hop_dong_thue_phong_demo_day_du.pdf. Các khoản tiền phạt/phí chỉ lưu để hiển thị. */
+  DAYDU: { id: 'DAYDU', name: 'Hợp đồng cho thuê phòng — mẫu đầy đủ 2026', refundDays: 10, autoRenew: true, autoRenewMonths: 12, noticeDays: 30, earlyTermination: 'forfeit_all',
+    transferFee: 200000, lateFeePerDay: 200000, lateGraceDays: 3, payNoticeDay: 25, payWindow: 'Từ ngày 25 đến ngày 30 của kỳ trước', payAccount: 'BIDV •••8058', warrantyDays: 10, peopleRule: 'Người mới ở quá 5 ngày thì tính thêm người (Điều 1.2)',
+    source: 'Hop_dong_thue_phong_demo_day_du.pdf — Điều 1.2 (số người/xe), 2.2 (tài sản bàn giao), 3.4 (mặc nhiên gia hạn 12 tháng nếu không báo trước 30 ngày), 4.1 (giá, tiền đã nộp), 4.2 (chỉ số), 4.3 (cọc 1 tháng; hoàn trong 10 ngày; mất cọc khi đơn phương chấm dứt; phí nhượng phòng 200.000), 4.4 (thông báo ngày 25, nộp 25–30, STK, biểu phí, phạt 200.000 đ/ngày tối đa 3 ngày), 5.2.4 (bảo hành 10 ngày), 6.2.11 (báo trước 30 ngày), 7.1 (mất cọc)' },
 };
+/* Điều 2.2 mẫu HĐ đầy đủ — tài sản trong phòng bàn giao (15 nội thất + 15 thiết bị); conf < 0,85 = dòng OCR cần soát */
+TH.HANDOVER_ASSETS = [
+  ['furniture', 'Giường', 1, 'cái'], ['furniture', 'Tủ quần áo', 1, 'cái'], ['furniture', 'Chăn ga gối', 1, 'bộ', 0.74], ['furniture', 'Đệm', 1, 'cái'], ['furniture', 'Rèm', 2, 'bộ'],
+  ['furniture', 'Bàn', 1, 'cái'], ['furniture', 'Ghế', 2, 'cái'], ['furniture', 'Kệ bếp, chậu rửa', 1, 'bộ'], ['furniture', 'Tủ bếp trên, dưới', 1, 'bộ'], ['furniture', 'Cửa nhà vệ sinh', 1, 'cái'],
+  ['furniture', 'Cửa ra vào', 1, 'cái'], ['furniture', 'Cửa ban công', 1, 'cái'], ['furniture', 'Cửa sổ', 1, 'cái'], ['furniture', 'Tường', 1, '—', 0.8, 'Sạch'], ['furniture', 'Đồ décor', 1, 'bộ', 0.7],
+  ['equipment', 'Điều hòa và điều khiển', 1, 'bộ'], ['equipment', 'Bình nóng lạnh', 1, 'cái'], ['equipment', 'Máy giặt', 1, 'cái'], ['equipment', 'Máy hút mùi', 1, 'cái'], ['equipment', 'Tủ lạnh', 1, 'cái'],
+  ['equipment', 'Thiết bị mạng', 1, 'cái'], ['equipment', 'Quạt trần', 1, 'cái'], ['equipment', 'Bóng điện', 4, 'cái'], ['equipment', 'Ổ cắm điện', 6, 'cái'], ['equipment', 'Bồn rửa mặt', 1, 'cái'],
+  ['equipment', 'Gương', 1, 'cái'], ['equipment', 'Vòi sen, vòi xịt, bồn cầu', 1, 'bộ'], ['equipment', 'Công tơ điện', 1, 'cái'], ['equipment', 'Đồng hồ nước', 1, 'cái'], ['equipment', 'Chìa khóa phòng, cổng', 2, 'bộ'],
+].map(function (a) { return { group: a[0], name: a[1], qty: a[2], unit: a[3], condition: a[5] || 'Bình thường', conf: a[4] || 0.92 }; });
 TH.END_KINDS = { expired: 'Hết hạn, không gia hạn', handover: 'Trả phòng — bàn giao', tenant_request: 'Khách chủ động chấm dứt trước hạn', breach: 'Vi phạm hợp đồng / nội quy', mutual: 'Hai bên thỏa thuận chấm dứt', lessor: 'Đơn vị cho thuê chấm dứt' };
 TH.EARLY_END = ['tenant_request', 'breach', 'mutual', 'lessor'];
 TH.RENEWAL_MODES = { amendment: 'Phụ lục gia hạn — giữ mã HĐ', new_contract: 'Ký HĐ mới — mã mới, liên kết HĐ cũ', auto_if_applicable: 'Mặc nhiên theo điều khoản HĐ' };
@@ -224,7 +235,7 @@ TH.seed = function () {
     ['KH-015', 'Cao Minh Đức', '1995-04-23', true],
   ];
   db.customers = C.map(function (c, i) {
-    return { id: c[0], name: c[1], dob: c[2], phone: '09' + (10 + i) + ' ••• ' + (100 + i * 37) % 1000, idNo: '0010' + (93 + i) + '•••••' + (512 + i * 41) % 1000, idType: 'CCCD', hometown: ['Nam Định', 'Thái Bình', 'Hải Dương', 'Nghệ An', 'Thanh Hóa', 'Bắc Ninh', 'Hà Nam'][i % 7], oaLinked: c[3], oaConsentAt: c[3] ? '2026-0' + (1 + (i % 8)) + '-1' + (i % 9) : null, status: 'active', createdAt: '2025-0' + (1 + (i % 9)) + '-0' + (1 + (i % 9)) };
+    return { id: c[0], name: c[1], dob: c[2], phone: '09' + (10 + i) + ' ••• ' + (100 + i * 37) % 1000, idNo: '0010' + (93 + i) + '•••••' + (512 + i * 41) % 1000, idType: 'CCCD', idPlace: 'Cục Cảnh sát QLHC về TTXH', hometown: ['Nam Định', 'Thái Bình', 'Hải Dương', 'Nghệ An', 'Thanh Hóa', 'Bắc Ninh', 'Hà Nam'][i % 7], oaLinked: c[3], oaConsentAt: c[3] ? '2026-0' + (1 + (i % 8)) + '-1' + (i % 9) : null, status: 'active', createdAt: '2025-0' + (1 + (i % 9)) + '-0' + (1 + (i % 9)) };
   });
   db.customerHistory = [
     { customerId: 'KH-003', at: '2026-08-12', field: 'Số điện thoại', before: '0912 ••• 101', after: db.customers[2].phone, by: 'NV-003' },
@@ -242,11 +253,11 @@ TH.seed = function () {
     var bb = db.buildings.find(function (x) { return x.id === room.buildingId; });
     var pl = seedPriceList(bb, start, people);
     if (room.id === 'CG-301') Object.assign(pl.find(function (l) { return l.code === 'EVCHG'; }), { price: 3500, method: 'per_kwh', active: true, note: 'Công tơ phụ ổ sạc — chưa có chỉ số xác nhận nên chưa vào hóa đơn (K-05 PENDING_APPROVAL)' });
-    /* K-03/K-04/K-09: điều khoản theo mẫu đã ký của từng HĐ (chẵn: mẫu đầy đủ; lẻ: mẫu P302) — không áp mẫu khác */
-    var terms = termsOf(i % 2 ? 'P302' : 'DAYDU', start);
+    /* K-03/K-04/K-09: điều khoản theo mẫu đã ký của từng HĐ — mockup chỉ dùng mẫu đầy đủ (CR-CUS-02); gia hạn xen kẽ mặc nhiên / phụ lục để demo chứng từ */
+    var terms = termsOf('DAYDU', start), amend = i % 2 === 1;
     return {
       terms: terms,
-      renewals: renewed ? [terms.autoRenew
+      renewals: renewed ? [!amend
         ? { n: 1, mode: 'auto_if_applicable', from: addMonths(start, 12), to: end, at: addMonths(start, 11), by: managerOf(db, room.buildingId), evidence: 'Đã kiểm tra: không có thông báo chấm dứt trước ' + terms.noticeDays + ' ngày (Điều 3.4 HĐ ký ' + start + ')', file: null }
         : { n: 1, mode: 'amendment', from: addMonths(start, 12), to: end, at: addMonths(start, 11), by: managerOf(db, room.buildingId), evidence: 'Phụ lục gia hạn hai bên ký ' + addMonths(start, 11), file: 'phu_luc_gia_han_' + room.id + '_' + addMonths(start, 11).slice(0, 4) + '.pdf' }] : [],
       previousContractId: room.id === 'CG-201' ? 'HĐ-CG201/24' : null, endKind: null,
@@ -606,12 +617,12 @@ TH.seed = function () {
     var room = db.rooms.find(function (r) { return r.id === e.room; }), b = db.buildings.find(function (x) { return x.id === room.buildingId; });
     var i = db.customers.length, k;
     if (e.k) {
-      k = { id: e.k[0], name: e.k[1], dob: e.k[2], phone: '09' + (10 + i) + ' ••• ' + (100 + i * 37) % 1000, idNo: '0010' + (93 + i) + '•••••' + (512 + i * 41) % 1000, idType: 'CCCD', hometown: ['Nam Định', 'Hưng Yên', 'Phú Thọ'][n], oaLinked: e.k[3], oaConsentAt: e.k[3] ? '2025-10-0' + (n + 1) : null, status: 'inactive', createdAt: addDays(e.start, -3) };
+      k = { id: e.k[0], name: e.k[1], dob: e.k[2], phone: '09' + (10 + i) + ' ••• ' + (100 + i * 37) % 1000, idNo: '0010' + (93 + i) + '•••••' + (512 + i * 41) % 1000, idType: 'CCCD', idPlace: 'Cục Cảnh sát QLHC về TTXH', hometown: ['Nam Định', 'Hưng Yên', 'Phú Thọ'][n], oaLinked: e.k[3], oaConsentAt: e.k[3] ? '2025-10-0' + (n + 1) : null, status: 'inactive', createdAt: addDays(e.start, -3) };
       db.customers.push(k);
     } else k = db.customers.find(function (x) { return x.id === e.customerId; });
     var id = 'HĐ-' + room.id.replace('-', '') + '/' + e.start.slice(2, 4);
     endedIds[e.room + (e.k ? '' : '#old')] = id;
-    var terms = termsOf(e.template, e.start);
+    var terms = termsOf('DAYDU', e.start);
     var ct = { id: id, roomId: room.id, buildingId: room.buildingId, customerId: k.id, rent: e.k ? room.rent : room.rent - 400000, deposit: e.k ? room.rent : room.rent - 400000, start: e.start, end: e.end, signedAt: addDays(e.start, -3), people: e.people, billingDay: 1, status: e.status, endedAt: e.endedAt, endKind: e.endKind, endReason: e.reason, nextContractId: e.nextId || null, previousContractId: null, scanFile: 'scan_' + room.id + '_' + e.start.slice(0, 4) + '.pdf',
       terms: terms,
       renewals: e.renew ? [{ n: 1, mode: 'auto_if_applicable', from: addMonths(e.start, 12), to: e.end, at: addMonths(e.start, 11), by: managerOf(db, room.buildingId), evidence: 'Đã kiểm tra: không có thông báo chấm dứt trước 30 ngày (Điều 3.4)', file: null }] : [],
@@ -627,18 +638,29 @@ TH.seed = function () {
   /* K-08 (không báo trùng tuyệt đối theo lịch sử): xe máy của KH-018 (đã ngừng 27/09) được KH-010 đăng ký lại từ 01/10 — hai khoảng đăng ký không chồng lấn */
   db.customers.find(function (x) { return x.id === 'KH-018'; }).vehicles.push({ id: 'XE-018-9', type: 'Xe máy', plate: '30K2-321.09', brand: 'Honda Wave', color: 'Đỏ', status: 'ended', from: '2025-09-28', to: '2026-09-27', feeCode: 'PARK_MOTO', note: 'Bán lại cho khách DD-202' });
   db.customers.find(function (x) { return x.id === 'KH-010'; }).vehicles.push({ id: 'XE-010-9', type: 'Xe máy', plate: '30K2-321.09', brand: 'Honda Wave', color: 'Đỏ', status: 'active', from: '2026-10-01', to: null, feeCode: 'PARK_MOTO', note: 'Mua lại xe của khách DD-302 cũ' });
+  /* CR-CUS-02: bàn giao theo Điều 2.2/4.2 (30 tài sản + chỉ số đầu kỳ của phòng) và tiền đã nộp khi ký (Điều 4.1) cho mọi HĐ — mô phỏng đã đọc từ bản scan mẫu đầy đủ */
+  db.contracts.forEach(function (ct) {
+    var p0 = ct.start.slice(0, 7) < TH.PERIODS[0] ? TH.PERIODS[0] : ct.start.slice(0, 7);
+    var rd = db.readings.find(function (r) { return r.roomId === ct.roomId && r.period === p0; }) || db.readings.find(function (r) { return r.roomId === ct.roomId; });
+    var assets = TH.HANDOVER_ASSETS.map(function (a) { return { group: a.group, name: a.name, unit: a.unit, qty: a.qty, condition: a.condition }; });
+    if (ct.roomId === 'DD-302') { assets[13].condition = 'Sạch — thấm nhẹ góc trần'; assets[15].condition = 'Trầy vỏ, hoạt động bình thường'; }
+    if (ct.roomId === 'CG-102') assets[4].condition = 'Ố màu nhẹ';
+    if (ct.roomId === 'TX-202') assets[16].condition = 'Rò nước nhẹ';
+    ct.handover = { at: ct.start, billingFrom: ct.start, elecStart: rd ? rd.elecPrev : 0, waterStart: rd ? rd.waterPrev : 0, assets: assets, source: 'OCR HĐ ' + ct.id + ' · xác nhận ' + ct.signedAt, file: ct.scanFile };
+    if (ct.status === 'active') ct.prepaid = { beforeSign: 1000000, atSign: ct.deposit + ct.rent - 1000000, total: ct.deposit + ct.rent, allocation: 'Cọc ' + ct.deposit.toLocaleString('vi-VN') + ' ₫ + tiền phòng kỳ đầu ' + ct.rent.toLocaleString('vi-VN') + ' ₫' };
+  });
   db.deposits.forEach(function (d) {
     if (d.id === 'COC-2609-01') { d.contractId = endedIds['CG-401']; d.customerId = 'KH-016'; }
     if (d.id === 'COC-2607-01') { d.contractId = endedIds['TX-202']; d.customerId = 'KH-017'; }
   });
   var dd102 = db.contracts.find(function (c) { return c.roomId === 'DD-102' && c.status === 'active'; });
   /* Hồ sơ cọc (K-03): người lập ≠ người duyệt; chỉ bước xác nhận THỰC CHI (có ngày/mã giao dịch) mới sinh dòng refund/forfeit trong db.deposits (P&L và dòng tiền chỉ đọc db.deposits đã xác nhận).
-     Hạn hoàn chỉ tính khi HĐ có điều khoản (refundDays); HĐ mẫu P302 không ghi SLA → dueAt null, không tự báo quá hạn. */
+     Hạn hoàn chỉ tính khi HĐ có điều khoản (refundDays) và chỉ từ ngày bàn giao thực tế; trước bàn giao dueAt = null, không tự báo quá hạn. */
   db.depositCases = [
     { id: 'HC-2609-01', contractId: endedIds['CG-401'], customerId: 'KH-016', amount: 6500000, state: 'refunded', handoverAt: '2026-08-31', dueAt: '2026-09-10', deductions: [{ name: 'Hư hỏng rèm, vệ sinh lại tường', amount: 300000, source: 'Biên bản bàn giao 31/08/2026 · Điều 6.2.5' }], forfeitAmount: 0, forfeitBasis: '', refundAmount: 6200000, proposedBy: 'NV-003', proposedAt: '2026-09-01', approvedBy: 'NV-001', approvedAt: '2026-09-02', paidBy: 'NV-002', paidAt: '2026-09-03', txnRef: 'CK-20260903-0417', depositId: 'COC-2609-01', note: 'Thanh lý đúng hạn, hoàn trong 3 ngày' },
     { id: 'HC-2607-01', contractId: endedIds['TX-202'], customerId: 'KH-017', amount: 4000000, state: 'forfeited', handoverAt: '2026-07-15', dueAt: null, deductions: [], forfeitAmount: 4000000, forfeitBasis: 'Điều 4.3 & 7.1 HĐ ký 29/07/2025 (mẫu đầy đủ) — khách đơn phương chấm dứt', refundAmount: 0, proposedBy: 'NV-005', proposedAt: '2026-07-15', approvedBy: 'NV-001', approvedAt: '2026-07-16', paidBy: null, paidAt: null, txnRef: null, forfeitId: 'COC-2607-01', note: 'Giữ toàn bộ cọc theo quyết định đã duyệt; ghi nhận doanh thu bỏ cọc kỳ 07' },
-    { id: 'HC-2610-01', contractId: endedIds['DD-302'], customerId: 'KH-018', amount: 4800000, state: 'reconciling', handoverAt: '2026-09-28', dueAt: '2026-10-08', deductions: [{ name: 'Điện nước 01–27/09 (chưa lập hóa đơn)', amount: 310000, source: 'Chỉ số bàn giao 28/09' }, { name: 'Thấm trần — chờ xác định lỗi bên nào', amount: 0, source: 'Biên bản 28/09 · chưa chốt', pending: true }], forfeitAmount: 0, forfeitBasis: '', refundAmount: null, proposedBy: 'NV-004', proposedAt: null, approvedBy: null, approvedAt: null, paidBy: null, paidAt: null, txnRef: null, note: 'Phòng chuyển “Đang sửa” sau bàn giao; chưa chốt khấu trừ — hạn 10 ngày theo Điều 4.3 HĐ ký 25/09/2025' },
-    { id: 'HC-2611-01', contractId: dd102.id, customerId: dd102.customerId, amount: dd102.deposit, state: 'awaiting_handover', handoverAt: '2026-11-15', dueAt: null, deductions: [], forfeitAmount: 0, forfeitBasis: '', refundAmount: null, proposedBy: 'NV-004', proposedAt: '2026-10-12', approvedBy: null, approvedAt: null, paidBy: null, paidAt: null, txnRef: null, note: 'Khách báo chuyển đi 15/11 (khảo sát gia hạn 12/10). HĐ mẫu P302 không ghi thời hạn hoàn cọc → chưa xác định hạn', planned: true },
+    { id: 'HC-2610-01', contractId: endedIds['DD-302'], customerId: 'KH-018', amount: 4800000, state: 'reconciling', handoverAt: '2026-09-28', dueAt: '2026-10-08', deductions: [{ name: 'Điện nước 01–27/09 (chưa lập hóa đơn)', amount: 310000, source: 'Chỉ số bàn giao 28/09' }, { name: 'Thấm trần — chờ xác định lỗi bên nào', amount: 0, source: 'Biên bản 28/09 · Điều 2.2 bàn giao: “Sạch — thấm nhẹ góc trần” · chưa chốt', pending: true }], forfeitAmount: 0, forfeitBasis: '', refundAmount: null, proposedBy: 'NV-004', proposedAt: null, approvedBy: null, approvedAt: null, paidBy: null, paidAt: null, txnRef: null, note: 'Phòng chuyển “Đang sửa” sau bàn giao; chưa chốt khấu trừ — hạn 10 ngày theo Điều 4.3 HĐ ký 25/09/2025' },
+    { id: 'HC-2611-01', contractId: dd102.id, customerId: dd102.customerId, amount: dd102.deposit, state: 'awaiting_handover', handoverAt: '2026-11-15', dueAt: null, deductions: [], forfeitAmount: 0, forfeitBasis: '', refundAmount: null, proposedBy: 'NV-004', proposedAt: '2026-10-12', approvedBy: null, approvedAt: null, paidBy: null, paidAt: null, txnRef: null, note: 'Khách báo chuyển đi 15/11 (khảo sát gia hạn 12/10). Hạn hoàn 10 ngày (Điều 4.3) chỉ tính từ ngày bàn giao thực tế → chưa xác định hạn', planned: true },
     { id: 'HC-2507-01', contractId: endedIds['CG-201#old'], customerId: 'KH-003', amount: 4800000, state: 'transferred', handoverAt: null, dueAt: null, deductions: [], forfeitAmount: 0, forfeitBasis: '', refundAmount: 0, proposedBy: 'NV-003', proposedAt: '2025-06-28', approvedBy: 'NV-002', approvedAt: '2025-06-30', paidBy: null, paidAt: null, txnRef: 'PCC-2507-01', transferToContractId: 'HĐ-CG201/25', note: 'Chuyển cọc sang HĐ mới qua phiếu chuyển cọc PCC-2507-01 (bù thêm 400.000 theo giá mới) — không nhân đôi cọc' },
   ];
   /* K-06: ngưỡng cảnh báo hết hạn là cấu hình doanh nghiệp (mặc định 35), khác với mốc khách phải báo trước theo HĐ */
@@ -646,8 +668,8 @@ TH.seed = function () {
 
   db.ocrJobs = [];
   db.ocrTemplates = [
-    { id: 'OCR-HĐ-01', kind: 'contract', name: 'Hợp đồng cho thuê phòng — bản đồng bộ (HĐKH-…)', status: 'approved', fields: 13, accuracy: 0.94 },
-    { id: 'OCR-HĐ-02', kind: 'contract', name: 'Hợp đồng cho thuê phòng — bản đầy đủ (DEMO-TH-…)', status: 'approved', fields: 13, accuracy: 0.88 },
+    { id: 'OCR-HĐ-01', kind: 'contract', name: 'Hợp đồng cho thuê phòng — mẫu đầy đủ 2026 (DEMO-TH-…)', status: 'approved', fields: 38, tables: 1, accuracy: 0.91 },
+    { id: 'OCR-HĐ-02', kind: 'contract', name: 'Phụ lục gia hạn / điều chỉnh giá (mẫu phụ)', status: 'draft', fields: 6, accuracy: 0.8 },
     { id: 'OCR-GT-01', kind: 'id', name: 'CCCD gắn chip — mặt trước', status: 'approved', fields: 6, accuracy: 0.96 },
     { id: 'OCR-GT-02', kind: 'id', name: 'CCCD mặt sau / giấy tạm trú', status: 'draft', fields: 4, accuracy: 0.81 },
   ];
@@ -756,9 +778,12 @@ function seedPriceList(b, start, people) {
   ];
 }
 function termsOf(templateId, start) {
-  var t = TH.CONTRACT_TERMS[templateId];
-  return { template: t.id, templateName: t.name, refundDays: t.refundDays, autoRenew: t.autoRenew, autoRenewMonths: t.autoRenewMonths, noticeDays: t.noticeDays, earlyTermination: t.earlyTermination, source: t.source, signedAt: addDays(start, -3) };
+  var t = TH.CONTRACT_TERMS[templateId] || TH.CONTRACT_TERMS.DAYDU;
+  return { template: t.id, templateName: t.name, refundDays: t.refundDays, autoRenew: t.autoRenew, autoRenewMonths: t.autoRenewMonths, noticeDays: t.noticeDays, earlyTermination: t.earlyTermination,
+    transferFee: t.transferFee, lateFeePerDay: t.lateFeePerDay, lateGraceDays: t.lateGraceDays, payNoticeDay: t.payNoticeDay, payWindow: t.payWindow, payAccount: t.payAccount, warrantyDays: t.warrantyDays, peopleMax: null, vehiclesDeclared: null, source: t.source, signedAt: addDays(start, -3) };
 }
+TH.termsOf = termsOf;
+TH.seedPriceList = seedPriceList;
 
 /* =========================================================
    CALC — mọi tổng hợp đều từ bản ghi gốc
