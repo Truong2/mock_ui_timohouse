@@ -174,6 +174,7 @@
     readonly: function (id) { return C.contract(id).status !== 'active'; },
     values: function (id) {
       var v = {};
+      var ct0 = C.contract(id); v.k_cycle = String(ct0.payCycle || 1); v.k_scope = ct0.cycleScope || 'rent';
       priceRows(C.contract(id)).forEach(function (l) { v['p_' + l.code] = l.method === 'na' ? '' : l.price; v['m_' + l.code] = l.method; v['s_' + l.code] = l.method === 'per_vehicle' ? (l.qtySource || 'vehicles') : ''; v['q_' + l.code] = l.method === 'per_vehicle' && l.qtySource === 'manual' ? (l.qty === undefined ? '' : l.qty) : ''; v['n_' + l.code] = l.note || ''; });
       return v;
     },
@@ -198,7 +199,9 @@
       }).join('');
       var preview = TH.gate('F015.C', '<div class="alert alert-neutral" style="margin-top:12px">' + I('chart', 'ic-sm') + '<div class="alert-body"><b>Preview tác động ' + TH.up('F015.C') + '</b><span>Phí cố định/tháng ' + F.money(oldFixed) + ' → <b>' + F.money(newFixed) + '</b> (' + (newFixed - oldFixed >= 0 ? '+' : '') + F.money(newFixed - oldFixed) + '/tháng). Áp dụng từ kỳ sau khi lưu; hóa đơn đã lập không tính lại.</span></div></div>', { mode: 'mini', label: 'Preview tác động khi đổi biểu phí' });
       return [{ html: '<div class="field span-2"><div class="table-wrap"><table class="table table-compact price-edit"><thead><tr><th>Dòng phí</th><th>Cách tính</th><th>Đơn giá</th><th>SL áp dụng</th><th>Ghi chú</th></tr></thead><tbody>' + rows + '</tbody></table></div>' + preview +
-        '<div class="field-hint" style="margin-top:8px">Cách tính theo mẫu HĐ đã ký của hồ sơ này (' + esc((ct.terms || {}).templateName || '') + '). Thang máy mặc định diễn giải trong Dịch vụ chung; sạc theo kWh cần công tơ phụ — hai mục này <b>PENDING_APPROVAL</b> (K-05). Căn cứ dòng phí: ' + esc((ct.priceList[0] || {}).basis || '') + '.</div></div>' }];
+        '<div class="field-hint" style="margin-top:8px">Cách tính theo mẫu HĐ đã ký của hồ sơ này (' + esc((ct.terms || {}).templateName || '') + '). Thang máy mặc định diễn giải trong Dịch vụ chung; sạc theo kWh cần công tơ phụ — hai mục này <b>PENDING_APPROVAL</b> (K-05). Căn cứ dòng phí: ' + esc((ct.priceList[0] || {}).basis || '') + '.</div></div>' },
+        { name: 'k_cycle', label: 'Kỳ thanh toán tiền phòng (cột Kỳ TT)', type: 'select', options: Object.keys(TH.PAY_CYCLES).map(function (k) { return { id: k, label: TH.PAY_CYCLES[k] }; }), hint: 'Áp dụng từ chu kỳ chưa lập hóa đơn; điện nước vẫn lập theo tháng' },
+        { name: 'k_scope', label: 'Đóng trước gồm', type: 'select', options: Object.keys(TH.CYCLE_SCOPES).map(function (k) { return { id: k, label: TH.CYCLE_SCOPES[k] }; }), hint: 'Ghi chú file: “2 tháng tiền nhà + dv” hoặc chỉ tiền nhà' }];
     },
     validate: function (v) {
       var bad = TH.FEE_TYPES.filter(function (t) { return v['m_' + t.code] !== 'na' && String(v['p_' + t.code]).replace(/[\s.,]/g, '') !== '' && !/^\d+$/.test(String(v['p_' + t.code]).replace(/[\s.,]/g, '')); });
@@ -206,7 +209,13 @@
     },
     save: function (id, v, changed) {
       var ct = C.contract(id), from = TH.addMonthsYm(TH.TODAY.slice(0, 7), 1), codes = {};
-      changed.forEach(function (k) { codes[k.slice(2)] = true; });
+      changed.forEach(function (k) { if (/^[mpsqn]_/.test(k)) codes[k.slice(2)] = true; });
+      /* CR-BILL: đổi kỳ TT áp từ kỳ sau chu kỳ đang chạy (không cắt chu kỳ đã thu) */
+      if (changed.indexOf('k_cycle') > -1 || changed.indexOf('k_scope') > -1) {
+        var curC = C.cycleOf(ct, TH.TODAY.slice(0, 7)), nextFrom = TH.addMonthsYm(curC.to, 1);
+        ct.payCycle = +v.k_cycle || 1; ct.cycleScope = v.k_scope || 'rent'; ct.cycleFrom = nextFrom;
+        ct.versions.push({ v: ct.versions.length + 1, at: TH.TODAY, by: TH.me().id, note: 'Kỳ thanh toán tiền phòng: ' + TH.PAY_CYCLES[ct.payCycle] + ' (' + TH.CYCLE_SCOPES[ct.cycleScope] + ') từ kỳ ' + F.period(nextFrom) });
+      }
       ct.priceList = TH.FEE_TYPES.map(function (t) {
         var l = ct.priceList.find(function (x) { return x.code === t.code; }) || { code: t.code, from: from, basis: '' };
         var m = v['m_' + t.code];
@@ -233,6 +242,7 @@
         { key: 'a', label: 'Dự kiến/tháng', num: true, render: function (l) { var e = estOf(ct, l); return e === null ? '<span class="muted small">theo sử dụng</span>' : '<b>' + F.money(e) + '</b>'; } },
         { key: 'from', label: 'Hiệu lực từ kỳ', gate: 'F015.B', render: function (l) { return F.period(l.from || ct.start.slice(0, 7)) + '<div class="cell-sub">' + esc(l.basis || '') + '</div>'; } },
       ], rows: on, foot: { _label: 'Phí cố định/tháng', a: '<b>' + F.money(total) + '</b>' } }) +
+        (function () { var cy = C.cycleOf(ct, TH.store.state.period); return '<p class="small" style="margin:8px 0 0"><b>Kỳ thanh toán tiền phòng:</b> ' + esc(TH.PAY_CYCLES[ct.payCycle || 1]) + (ct.payCycle > 1 ? ' · ' + esc(TH.CYCLE_SCOPES[ct.cycleScope || 'rent']) + ' · từ ' + F.period(ct.cycleFrom) + (cy.months > 1 ? ' · chu kỳ hiện tại ' + F.period(cy.from) + '–' + F.period(cy.to) : '') : '') + '</p>'; })() +
         '<p class="small muted" style="margin:8px 0 0">Dự kiến theo dòng phí — chưa gồm tiền phòng và điện/nước theo chỉ số công tơ. Dòng 0 đ (xe máy) vẫn lưu để đối chiếu số xe đăng ký.' + (off.length ? ' <b>Không áp dụng:</b> ' + off.map(function (l) { return esc(l.t.name) + (l.note ? ' (' + esc(l.note) + ')' : ''); }).join('; ') + '.' : '') + '</p>' +
         (mm ? TH.gate('F012.C', '<div class="alert alert-warning" style="margin-top:12px">' + I('alert', 'ic-sm') + '<div class="alert-body"><b>So khớp xe – dòng phí ' + TH.up('F012.C') + '</b><span>' + esc(mm) + ' — kiểm tra trước khi lập hóa đơn; số xe tính phí lấy theo xe đã xác nhận đăng ký.</span></div></div>', { mode: 'mini', label: 'So khớp số xe ↔ dòng phí' }) : '');
     },
@@ -341,7 +351,7 @@
     var files = TH.db.documents.filter(function (d) { return d.contractId === ct.id && d.kind !== 'CCCD (đã mask)'; });
     var job = TH.db.ocrJobs.find(function (j) { return j.kind === 'contract' && j.contractId === ct.id; });
     var summary = '<div class="card"><div class="card-hd"><div class="card-title">Hợp đồng ' + esc(ct.id) + '</div>' + TH.status(ct.status === 'active' && C.daysTo(ct.end) <= TH.expiryDays() ? 'expiring' : ct.status) + '</div><div class="card-bd">' +
-      TH.kv([['Phòng — tòa', '<b class="mono">' + esc(roomCode(ct)) + '</b>'], ['Giá thuê', '<b class="tnum">' + F.money(ct.rent) + '</b>/tháng'], ['Tiền cọc', F.money(ct.deposit)], ['Đã nộp khi ký', ct.prepaid ? F.money(ct.prepaid.total) + '<div class="small muted">' + esc(ct.prepaid.allocation) + '</div>' : '<span class="muted">Chưa đọc từ HĐ</span>'], ['Hiệu lực', F.date(ct.start) + ' → ' + F.date(ct.end)], ['Số người / xe (Điều 1)', ct.people + ' người · ' + ((ct.terms || {}).vehiclesDeclared !== undefined && (ct.terms || {}).vehiclesDeclared !== null ? ct.terms.vehiclesDeclared + ' xe máy khai báo' : 'chưa đọc số xe') + ' · ' + TH.vehiclesOf(ct, null, 'active').length + ' xe đã xác nhận'], ['Lần ký', signLabel(ct)], ['Mẫu HĐ', esc((ct.terms || {}).templateName || '—')]]) +
+      TH.kv([['Phòng — tòa', '<b class="mono">' + esc(roomCode(ct)) + '</b>'], ['Giá thuê', '<b class="tnum">' + F.money(ct.rent) + '</b>/tháng' + (ct.listRent && ct.listRent !== ct.rent ? ' <span class="small muted">(niêm yết ' + F.money(ct.listRent) + ')</span>' : '') + (ct.priceNote ? '<div class="cell-sub">' + esc(ct.priceNote) + '</div>' : '') + (ct.payCycle > 1 ? '<div class="cell-sub">Đóng ' + esc(TH.PAY_CYCLES[ct.payCycle]) + '</div>' : '')], ['Tiền cọc', F.money(ct.deposit)], ['Đã nộp khi ký', ct.prepaid ? F.money(ct.prepaid.total) + '<div class="small muted">' + esc(ct.prepaid.allocation) + '</div>' : '<span class="muted">Chưa đọc từ HĐ</span>'], ['Hiệu lực', F.date(ct.start) + ' → ' + F.date(ct.end)], ['Số người / xe (Điều 1)', ct.people + ' người · ' + ((ct.terms || {}).vehiclesDeclared !== undefined && (ct.terms || {}).vehiclesDeclared !== null ? ct.terms.vehiclesDeclared + ' xe máy khai báo' : 'chưa đọc số xe') + ' · ' + TH.vehiclesOf(ct, null, 'active').length + ' xe đã xác nhận'], ['Lần ký', signLabel(ct)], ['Mẫu HĐ', esc((ct.terms || {}).templateName || '—')]]) +
       '<a class="btn btn-sm" style="margin-top:12px" href="' + TH.router.href('CON-02', ct.id) + '">Mở CON-02</a></div></div>';
     var fileCard = '<div class="card card-flush">' + TH.cardHd(I('paperclip', 'ic-sm') + 'File hợp đồng', 'Gắn với khách, phòng và tòa tương ứng', ct.status === 'active' ? TH.permBtn('contract.edit', '<button type="button" class="btn btn-sm" data-act="cus.ctUpload" data-ct="' + esc(ct.id) + '">' + I('upload', 'ic-sm') + 'Tải lên</button>', 'Tải lên · 403') : '') +
       '<div class="card-bd stack-sm">' + (files.map(function (d) { return '<div class="row" style="justify-content:space-between;flex-wrap:nowrap">' + TH.fileOf(d.file) + '<span class="small muted" style="text-align:right">' + esc(d.kind) + '<br>' + F.date(d.uploadedAt) + ' · v' + d.version + '</span></div>'; }).join('') || '<span class="muted small">Chưa có file hợp đồng.</span>') + '</div></div>';
@@ -419,6 +429,25 @@
   /* ---- Hồ sơ cọc (K-03/K-04): lập ≠ duyệt; chỉ xác nhận thực chi mới ghi sổ; hạn hoàn theo điều khoản HĐ ---- */
   function caseOf(id) { return TH.db.depositCases.find(function (x) { return x.id === id; }); }
   function depDed(hc) { return C.sum(hc.deductions, function (d) { return d.amount || 0; }); }
+  /* CR-PAY: phiếu hoàn cọc theo sheet "HĐ (HOÀN CỌC)": Tiền phòng cọc − các khoản cố định (khấu hao, sửa chữa, dọn vệ sinh, sơn phòng…) = Tổng tiền hoàn cọc */
+  function refundDoc(hc) {
+    var ct = C.contract(hc.contractId), k = C.customer(hc.customerId), b = C.building(ct.buildingId);
+    var by = {}; hc.deductions.forEach(function (d) { var it = TH.REFUND_ITEMS.indexOf(d.item) > -1 ? d.item : 'DV khác'; (by[it] = by[it] || []).push(d); });
+    var rows = TH.REFUND_ITEMS.map(function (n) { var l = by[n] || []; return { name: n, amount: C.sum(l, function (d) { return d.amount || 0; }), note: l.map(function (d) { return d.name + (d.pending ? ' (chưa chốt)' : ''); }).join('; ') }; });
+    var ded = C.sum(rows, function (r) { return r.amount; }), refund = hc.amount - ded - (hc.forfeitAmount || 0);
+    return '<div class="print-doc bill-doc"><div class="pd-head"><div><b>TIMEHOUSE</b><br>' + esc(b.name) + '</div><div style="text-align:right"><span class="pd-stamp">DỮ LIỆU MINH HỌA</span></div></div>' +
+      '<div class="bd-title">HÓA ĐƠN HOÀN CỌC</div>' +
+      '<div class="bd-meta"><span>Mã KH: <b>' + esc(ct.roomId.replace('-', '')) + 'A001</b></span><span>Phòng số: <b>' + esc(ct.roomId) + '</b></span><span>Khách: <b>' + esc(k.name) + '</b></span><span>Ngày chốt số liệu: <b>' + F.date(hc.handoverAt) + '</b></span></div>' +
+      '<div class="bill-scroll"><table><thead><tr><th class="num">STT</th><th>Nội dung</th><th class="num">Thành tiền</th><th>Ghi chú</th></tr></thead><tbody>' +
+      '<tr><td class="num">1</td><td><b>Tiền phòng cọc</b></td><td class="num"><b>' + F.money(hc.amount) + '</b></td><td>' + esc(ct.id) + '</td></tr>' +
+      rows.map(function (r, i) { return '<tr><td class="num">' + (i + 2) + '</td><td>− ' + esc(r.name) + '</td><td class="num">' + (r.amount ? F.money(r.amount) : '') + '</td><td class="bd-sub">' + esc(r.note) + '</td></tr>'; }).join('') +
+      (hc.forfeitAmount ? '<tr><td class="num">' + (rows.length + 2) + '</td><td>− Cọc bị giữ (phá HĐ)</td><td class="num">' + F.money(hc.forfeitAmount) + '</td><td class="bd-sub">' + esc(hc.forfeitBasis || '') + '</td></tr>' : '') +
+      '<tr class="bd-total"><td colspan="2"><b>TỔNG TIỀN HOÀN CỌC</b></td><td class="num"><b>' + F.money(Math.max(0, refund)) + '</b></td><td>' + (refund < 0 ? '<span class="neg">Khách còn nợ ' + F.money(-refund) + ' — lập công nợ riêng</span>' : '') + '</td></tr></tbody></table></div>' +
+      '<div class="bd-note"><p>Trạng thái hồ sơ: <b>' + esc((TH.DEPOSIT_STATES[hc.state] || [hc.state])[0]) + '</b>' + (hc.txnRef ? ' · ' + esc(hc.txnRef) : '') + '</p></div>' +
+      '<div class="doc-c" style="margin-top:12px"><b>Xin chân thành cảm ơn khách hàng đã tin chọn Timehouse!</b></div></div>';
+  }
+  TH.refundDoc = refundDoc;
+  TH.act['dep.doc'] = function (el) { var hc = caseOf(el.dataset.id); TH.docPreview('Phiếu hoàn cọc ' + esc(C.contract(hc.contractId).roomId), 'Theo mẫu HĐ (HOÀN CỌC) · cọc − các khoản khấu trừ', refundDoc(hc)); };
   function depositCard(ct) {
     var hc = C.depositCase(ct.id), st = hc ? hc.state : 'holding', S = TH.DEPOSIT_STATES[st], T = ct.terms || {};
     var steps = ['Chờ bàn giao', 'Đối chiếu', 'Chờ duyệt', 'Đã duyệt · chờ chi', 'Đã hoàn / tất toán'], idx = { holding: -1, awaiting_handover: 0, reconciling: 1, pending_approval: 2, approved: 3, refunded: 5, settled: 5, forfeited: 5, transferred: 5 }[st];
@@ -430,12 +459,13 @@
       ['Người lập / đề xuất', who(hc.proposedBy, hc.proposedAt)], ['Người duyệt', who(hc.approvedBy, hc.approvedAt)], ['Xác nhận thực chi', hc.paidBy ? who(hc.paidBy, hc.paidAt) + (hc.txnRef ? ' · <span class="mono small">' + esc(hc.txnRef) + '</span>' : '') : (hc.txnRef ? '<span class="mono small">' + esc(hc.txnRef) + '</span>' : '<span class="muted">—</span>')],
     ] : []).concat(hc && st === 'transferred' ? [['Chuyển sang HĐ', ctLink(hc.transferToContractId, 'fin')]] : []));
     var calc = hc && (hc.refundAmount !== null && hc.refundAmount !== undefined || hc.forfeitAmount) ? '<div class="section-title" style="margin-top:12px">Đối chiếu</div>' + TH.kv([['Cọc đã giữ', F.money(hc.amount)], ['− Khấu trừ hợp lệ', F.money(depDed(hc))], ['− Cọc bị giữ (mất cọc)', (hc.forfeitAmount ? '<span class="neg">' + F.money(hc.forfeitAmount) + '</span>' : F.money(0)) + (hc.forfeitBasis ? '<div class="small muted">' + esc(hc.forfeitBasis) + '</div>' : '')], ['= Số hoàn cho khách', '<b class="tnum">' + F.money(hc.refundAmount || 0) + '</b>']]) : '';
-    var dedHtml = hc && hc.deductions.length ? '<div class="section-title" style="margin-top:12px">Khoản khấu trừ (mỗi khoản có nguồn)</div>' + TH.table({ compact: true, cols: [{ key: 'n', label: 'Khoản', render: function (d) { return esc(d.name) + '<div class="cell-sub">' + esc(d.source || '') + '</div>'; } }, { key: 'a', label: 'Số tiền', num: true, render: function (d) { return d.pending ? TH.badge('Chưa chốt', 'warning') : F.money(d.amount); } }], rows: hc.deductions }) : '';
+    var dedHtml = hc && hc.deductions.length ? '<div class="section-title" style="margin-top:12px">Khoản khấu trừ (mỗi khoản có nguồn)</div>' + TH.table({ compact: true, cols: [{ key: 'n', label: 'Khoản', render: function (d) { return (d.item ? '<b>' + esc(d.item) + '</b> · ' : '') + esc(d.name) + '<div class="cell-sub">' + esc(d.source || '') + '</div>'; } }, { key: 'a', label: 'Số tiền', num: true, render: function (d) { return d.pending ? TH.badge('Chưa chốt', 'warning') : F.money(d.amount); } }], rows: hc.deductions }) : '';
     var stepper = st === 'forfeited' ? '<div class="alert alert-danger" style="margin-top:12px">' + I('xCircle', 'ic-sm') + '<div class="alert-body"><b>Mất cọc' + (hc.refundAmount > 0 ? ' một phần' : '') + ' — theo quyết định đã duyệt, không tự suy từ lý do chấm dứt</b><span>' + esc(hc.forfeitBasis || hc.note || '') + (hc.forfeitId ? ' · ghi nhận ' + esc(hc.forfeitId) + ' (doanh thu bỏ cọc)' : '') + '</span></div></div>'
       : st === 'transferred' ? '<div class="alert alert-neutral" style="margin-top:12px">' + I('info', 'ic-sm') + '<div class="alert-body">' + esc(hc.note || '') + '</div></div>'
       : '<div class="stepper" style="margin-top:14px">' + steps.map(function (s, i) { return '<div class="step ' + (i < idx || idx === 5 ? 'is-done' : i === idx ? 'is-current' : '') + '"><span class="n">' + (i < idx || idx === 5 ? '✓' : i + 1) + '</span>' + s + '</div>' + (i < 4 ? '<span class="step-line"></span>' : ''); }).join('') + '</div>';
     var act = '', hint = '';
     if (st === 'holding' && ct.status === 'active') act = TH.permBtn('deposit.propose', '<button type="button" class="btn btn-sm" data-act="dep.open" data-ct="' + esc(ct.id) + '">' + I('plus', 'ic-sm') + 'Mở hồ sơ bàn giao / cọc</button>', 'NV vận hành / Kế toán lập · 403');
+    if (ct.status === 'active' && TH.can('contract.break') && TH.inScope(ct.buildingId)) act += '<button type="button" class="btn btn-sm btn-ghost" data-act="pay.break" data-id="' + esc(ct.id) + '">' + I('xCircle', 'ic-sm') + 'Ghi nhận phá HĐ</button>';
     if (st === 'awaiting_handover') act = TH.permBtn('deposit.propose', '<button type="button" class="btn btn-sm btn-primary" data-act="dep.handover" data-id="' + hc.id + '">' + I('door', 'ic-sm') + 'Ghi nhận bàn giao phòng</button>', 'NV vận hành / Kế toán · 403');
     if (st === 'reconciling') act = TH.permBtn('deposit.propose', '<button type="button" class="btn btn-sm btn-primary" data-act="dep.review" data-id="' + hc.id + '">' + I('fileCheck', 'ic-sm') + 'Lập đối chiếu → gửi duyệt</button>', 'NV vận hành / Kế toán · 403');
     if (st === 'pending_approval') {
@@ -448,7 +478,8 @@
     if (hc && hc.rejectNote && st === 'reconciling') hint = '<span class="warn-text">Bị trả lại: ' + esc(hc.rejectNote) + '</span>';
     return '<div class="card"><div class="card-hd"><div class="card-title">' + I('wallet', 'ic-sm') + 'Tiền cọc & hoàn cọc</div>' + TH.badge('ĐỀ XUẤT K-03/K-04', 'draft') + '</div><div class="card-bd">' + body + calc + dedHtml + stepper +
       (late ? '<div class="alert alert-danger" style="margin-top:12px">' + I('alert', 'ic-sm') + '<div class="alert-body">Quá hạn hoàn cọc theo điều khoản HĐ (' + T.refundDays + ' ngày kể từ bàn giao).</div></div>' : '') +
-      (act ? '<div class="row" style="margin-top:12px;gap:8px">' + act + '</div>' : '') + (hint ? '<div class="small muted" style="margin-top:6px">' + hint + '</div>' : '') +
+      (hc && st !== 'transferred' ? '<div class="row" style="margin-top:10px"><button type="button" class="btn btn-sm btn-ghost" data-act="dep.doc" data-id="' + hc.id + '">' + I('receipt', 'ic-sm') + 'Phiếu hoàn cọc (mẫu)</button></div>' : '') +
+      (act ? '<div class="row" style="margin-top:12px;gap:8px;flex-wrap:wrap">' + act + '</div>' : '') + (hint ? '<div class="small muted" style="margin-top:6px">' + hint + '</div>' : '') +
       '<p class="small muted" style="margin:10px 0 0">Luồng: lập/đề xuất khấu trừ (vận hành) → đối chiếu & duyệt (kế toán/Admin, không tự duyệt hồ sơ mình lập) → xác nhận thực chi có ngày/mã giao dịch. Chỉ bước cuối ghi dòng hoàn cọc / mất cọc vào sổ (RPT-05 chế độ Tổng, dòng tiền); P&L kinh doanh không đổi. Số hoàn = max(0, cọc − khấu trừ hợp lệ − cọc bị giữ).</p></div></div>';
   }
   function finTab(k, ct) {
@@ -456,7 +487,7 @@
     var others = ct ? C.customerContracts(k.id).filter(function (c) { return c.id !== ct.id && C.contractDebt(c.id).debt > 0; }) : [];
     var kpis = '<div class="grid-4" style="margin-bottom:16px">' +
       TH.kpi({ label: 'Phải thu (đã xác nhận)', icon: 'receipt', value: F.short(d.due), foot: inv.length + ' hóa đơn' + (ct ? ' · ' + esc(ct.id) : '') }) +
-      TH.kpi({ label: 'Đã thu (kế toán xác nhận)', icon: 'checkCircle', value: F.short(d.paid), foot: d.pending ? 'Báo thu chờ xác nhận ' + F.money(d.pending) + ' — chưa tính' : 'Không có báo thu chờ' }) +
+      TH.kpi({ label: 'Đã thu (đã xác nhận)', icon: 'checkCircle', value: F.short(d.paid), foot: d.pending ? 'Báo thu chờ xác nhận ' + F.money(d.pending) + ' — chưa tính' : 'Không có báo thu chờ' }) +
       TH.kpi({ label: 'Còn nợ', icon: 'wallet', value: F.short(d.debt), neg: d.debt > 0, foot: d.debt ? 'Từ hóa đơn & phiếu thu đã xác nhận' : 'Đã thu đủ' }) +
       TH.kpi({ label: 'Quá hạn', icon: 'alert', value: d.overdueCount + '<small> kỳ</small>', neg: d.overdueCount > 0, foot: d.overdue ? F.money(d.overdue) : 'Không quá hạn' }) + '</div>';
     var table = '<div class="card card-flush">' + TH.cardHd('Hóa đơn theo kỳ', 'Số tổng hợp lấy từ hóa đơn/phiếu thu nguồn — sửa tại INV/PAY') +
@@ -504,7 +535,7 @@
     var ded = C.sum(amt) + extra + assetAmt, refund = hc.amount - ded - forfeit;
     return { title: 'Lập đối chiếu cọc → gửi duyệt', sub: esc(hc.contractId) + ' · cọc ' + F.money(hc.amount) + ' · bàn giao ' + F.date(hc.handoverAt) + (early ? ' · kết thúc trước hạn (' + esc(TH.END_KINDS[ct.endKind] || '') + ')' : ''),
       body: '<div class="stack">' + (hc.deductions.length ? '<div class="form-grid">' + hc.deductions.map(function (d, i) { return TH.field({ form: form, name: 'a' + i, label: d.name, def: String(d.amount), num: true, inputmode: 'numeric', live: true, hint: esc(d.source || '') + (d.pending ? ' · chưa chốt — nhập số đã thống nhất' : '') }); }).join('') + '</div>' : '') +
-        '<div class="form-grid">' + TH.field({ form: form, name: 'extra', label: 'Khấu trừ thêm (đ)', def: '0', num: true, inputmode: 'numeric', live: true }) + TH.field({ form: form, name: 'reason', label: 'Khoản / nguồn chứng từ', def: '', placeholder: 'VD: tiền điện kỳ 10 chưa lập hóa đơn — chỉ số bàn giao' }) + '</div>' +
+        '<div class="form-grid">' + TH.field({ form: form, name: 'extra', label: 'Khấu trừ thêm (đ)', def: '0', num: true, inputmode: 'numeric', live: true }) + TH.field({ form: form, name: 'item', label: 'Loại khoản (mẫu phiếu hoàn cọc)', type: 'select', def: 'Khấu hao', options: TH.REFUND_ITEMS }) + TH.field({ form: form, name: 'reason', label: 'Diễn giải / nguồn chứng từ', def: '', placeholder: 'VD: tiền điện kỳ 10 chưa lập hóa đơn — chỉ số bàn giao', span: true }) + '</div>' +
         (ct.handover && ct.handover.assets && ct.handover.assets.length ? '<div class="form-grid">' + TH.field({ form: form, name: 'asset', label: 'Tài sản hư hỏng theo biên bản bàn giao (Điều 2.2)', type: 'select', def: '', options: [{ id: '', label: '— Không chọn —' }].concat(ct.handover.assets.map(function (a, i) { return { id: String(i), label: a.name + ' · ' + a.qty + (a.unit && a.unit !== '—' ? ' ' + a.unit : '') + ' · bàn giao: ' + a.condition }; })) }) + TH.field({ form: form, name: 'assetAmt', label: 'Giá trị khấu trừ (đ)', def: '0', num: true, inputmode: 'numeric', live: true, hint: 'Cần biên bản/chứng từ; căn cứ Điều 6.2.5' }) + '</div>' : '') +
         '<div class="form-grid">' + TH.field({ form: form, name: 'forfeit', label: 'Cọc bị giữ — mất cọc (đ)', def: String(hc.forfeitAmount || 0), num: true, inputmode: 'numeric', live: true, hint: early ? (T.earlyTermination === 'forfeit_all' ? 'HĐ ghi mất toàn bộ cọc khi đơn phương chấm dứt (Điều 4.3/7.1) — vẫn nhập mức giữ và cần duyệt; được hoàn một phần nếu có thỏa thuận' : 'HĐ không ghi điều khoản mất cọc — chỉ giữ cọc khi có quyết định đã duyệt') : 'Kết thúc đúng hạn — thường bằng 0' }) + TH.field({ form: form, name: 'basis', label: 'Căn cứ giữ cọc (điều khoản / quyết định)', def: hc.forfeitBasis || '', placeholder: 'VD: Điều 4.3 HĐ ký …; biên bản thỏa thuận …' }) + '</div>' +
         TH.kv([['Tổng khấu trừ', F.money(ded)], ['Cọc bị giữ', F.money(forfeit)], ['Số hoàn cho khách', '<b class="tnum ' + (refund < 0 ? 'neg' : '') + '">' + F.money(Math.max(0, refund)) + '</b>']]) +
@@ -517,9 +548,9 @@
     var hc = caseOf(el.dataset.id), form = 'dep-' + hc.id, ct = C.contract(hc.contractId);
     hc.deductions.forEach(function (d, i) { d.amount = digits(TH.store.draft(form, 'a' + i, String(d.amount))); d.pending = false; });
     var extra = digits(TH.store.draft(form, 'extra', '0'));
-    if (extra) hc.deductions.push({ name: TH.store.draft(form, 'reason', '') || 'Khấu trừ thêm', amount: extra, source: 'Đối chiếu ' + F.date(TH.TODAY) + ' · ' + C.staffName(TH.me().id) });
+    if (extra) { var item = TH.store.draft(form, 'item', 'Khấu hao'); hc.deductions.push({ item: item, name: TH.store.draft(form, 'reason', '') || item, amount: extra, source: 'Đối chiếu ' + F.date(TH.TODAY) + ' · ' + C.staffName(TH.me().id) }); }
     var ai = TH.store.draft(form, 'asset', ''), aAmt = digits(TH.store.draft(form, 'assetAmt', '0'));
-    if (ai !== '' && aAmt && ct.handover && ct.handover.assets[+ai]) { var asset = ct.handover.assets[+ai]; hc.deductions.push({ name: 'Hư hỏng: ' + asset.name, amount: aAmt, source: 'Điều 2.2 · bàn giao: ' + asset.condition + ' · Điều 6.2.5 · đối chiếu ' + F.date(TH.TODAY) }); }
+    if (ai !== '' && aAmt && ct.handover && ct.handover.assets[+ai]) { var asset = ct.handover.assets[+ai]; hc.deductions.push({ item: 'Sửa chữa', name: 'Hư hỏng: ' + asset.name, amount: aAmt, source: 'Điều 2.2 · bàn giao: ' + asset.condition + ' · Điều 6.2.5 · đối chiếu ' + F.date(TH.TODAY) }); }
     hc.forfeitAmount = digits(TH.store.draft(form, 'forfeit', String(hc.forfeitAmount || 0)));
     hc.forfeitBasis = (TH.store.draft(form, 'basis', hc.forfeitBasis || '') || '').trim();
     hc.refundAmount = Math.max(0, hc.amount - depDed(hc) - hc.forfeitAmount);

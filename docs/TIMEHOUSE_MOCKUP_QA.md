@@ -275,3 +275,71 @@ Cách sửa (`TH.table`, áp cho mọi bảng dùng component):
 Đánh đổi: bảng nhiều cột (đặc biệt gói D, hoặc khi hiện cột khóa) cuộn ngang thay vì ép chữ — vd. EXP-01 ~350 px, HR-01 ~325 px, CON-01 ~170 px; SAL-01/RPT-02 vốn đã cuộn. Trang không tràn ngang ở 375 px.
 
 Hồi quy: smoke 928 lượt / 0 lỗi; `tools/qa-ocr.playwright.js` 9/9; `tools/qa-cus.playwright.js` 23/23 (đã cập nhật theo CR-CUS-02: schema ≥ 9, *Đọc hợp đồng* thay *Tự đọc bảng giá*, HĐ-DD102/25 theo mẫu đầy đủ); số hồi quy giữ nguyên.
+
+### 8.6 METER-01 — chọn tòa trước (21/10/2026)
+
+| Kiểm tra | KQ | Bằng chứng |
+| --- | --- | --- |
+| Chưa chọn tòa (topbar Tất cả tòa) | ✅ | Danh sách tòa: Thanh Xuân 0/4 (Thiếu 1, 1 cần kiểm tra, nút *Nhập chỉ số*) xếp đầu, Cầu Giấy 6/6 và Đống Đa 5/5 *Đủ số*; tìm “đống” → 1 tòa; lọc *Chưa xong* → 1 tòa; bấm dòng mở bảng |
+| Chọn Thanh Xuân | ✅ | Bảng 4 phòng đang ở (TX-101, TX-102, TX-201, TX-301); *Hiện 1 phòng trống* thêm TX-202 |
+| Đổi tòa giữ nháp | ✅ | Gõ TX-201 → đổi sang Cầu Giấy bằng ô chọn tòa (“1 dòng chưa lưu (1 ở tòa khác)”) → quay lại, số còn nguyên; *Danh sách tòa* quay về bảng tòa |
+| Topbar 1 tòa / vai trò QL tòa | ✅ | Đống Đa → vào thẳng 5 phòng DD; Quản lý tòa → vào thẳng 6 phòng CG, không có thẻ chọn |
+| Gói A nhập từng phòng | ✅ | TX-201 *Nhập* → 4600 / 620 → đã xác nhận; thẻ Thanh Xuân cập nhật 1/4 |
+| 375 px | ✅ | Không tràn ngang khi chưa chọn và đã chọn tòa |
+
+Smoke: **952 lượt / 0 lỗi** (METER-01 thêm 3 biến thể: danh sách tòa, lọc *Chưa xong*, Thanh Xuân + phòng trống; variant 94 → 97). `qa-ocr` 9/9, `qa-cus` 23/23 (cập nhật số smoke 952). `qa-table-wrap`: không có ô gãy mới; bảng chỉ số cuộn ngang 31 px (trước 128 px, do bỏ tên tòa ở cột Phòng).
+
+### 8.7 CR-PAY — thu tiền theo file Excel tháng 9/2026 (21/10/2026, schema 11)
+
+`tools/qa-pay.playwright.js` **12/12**:
+
+| Mã | Kiểm tra | KQ | Bằng chứng (kỳ 10/2026, Admin) |
+| --- | --- | --- | --- |
+| QA-PAY-01 | Theo tòa = Σ check phòng; mốc 1/2/3; phải thu sau phá HĐ | ✅ | Cầu Giấy 40.952.600 / 24.479.200; Đống Đa 28.556.000 / 18.473.000, DT phá HĐ 5.723.400, thu được 3.000.000 |
+| QA-PAY-02 | Theo QL: tổng hệ thống = Σ tòa | ✅ | 69.508.600 / 46.952.200; phải thu sau phá HĐ 19.833.000 |
+| QA-PAY-03 | Tình trạng theo công thức Excel | ✅ | CG-101 Đủ; CG-302 Chưa TT có nợ cũ kỳ 09; DD-201 Thiếu; TX-202 Đóng cọc (giữ chỗ); TX-101 Chưa lập HĐ; CG-401 Trống |
+| QA-PAY-04 | DS phòng phá HĐ | ✅ | DD-201: 8 tháng ở, phải thu = tiền điện 581.400, đã thu 3.000.000, SĐT che, hồ sơ cọc chờ duyệt, chưa có bút toán cọc |
+| QA-PAY-05 | Điện nước không thu được | ✅ | CG-401 PT, DD-302 Đang sửa, TX-202 PT; DD-201 đã đóng đủ phần điện nước nên không vào danh sách |
+| QA-PAY-06 | QL ghi nhận thu vượt nợ | ✅ | CG-302 thu nợ kỳ 09 + kỳ 10 + 100.000 → 2 phiếu FIFO, xác nhận ngay bởi NV-003, *Thừa* +100.000 |
+| QA-PAY-07 | QL xác nhận báo thu chờ | ✅ | CG-202 → đã xác nhận bởi NV-003; Đống Đa ngoài phạm vi |
+| QA-PAY-08 | Kế toán chỉ hậu kiểm | ✅ | Không có nút xác nhận; *Đã đối soát* mã FT26290001, công nợ không đổi; *Sai lệch* thiếu ghi chú bị chặn |
+| QA-PAY-09 | QL ghi nhận phá HĐ CG-302 | ✅ | HĐ Phá hợp đồng, phòng Trống, vào DS phá HĐ + điện nước (Phá HĐ), hồ sơ cọc chờ duyệt, nhãn Phá HĐ, RPT *số phòng phá HĐ* = 1 |
+| QA-PAY-10 | Mẫu hóa đơn / hoàn cọc | ✅ | 12 dòng, tổng = cần đóng 10.403.600 (gồm nợ cũ), Mã KH CG302A001, nội dung CK CG-302, TK nhóm nhà; phiếu hoàn cọc HC-2609-01 6.200.000 (Sửa chữa 300.000) |
+| QA-PAY-11 | UI | ✅ | 6 tab PAY-02; bảng theo tòa đủ cột M5/M10/M15, mốc 1/2/3; 375 px không tràn ngang |
+
+Smoke: **1024 lượt / 0 lỗi** (PAY-02 thêm 7 biến thể tab/lọc → variant 104; dialog PAY-02 *Ghi nhận phá HĐ*, INV-03 *Mẫu hóa đơn*). `qa-cus` 23/23 (REGRESSION giữ nguyên số RPT-05), `qa-ocr` 9/9. `qa-table-wrap`: không có ô gãy mới (còn 1 ô ghi chú khấu trừ dài ở CUS-02 như §8.5); bảng *Theo tòa* 15 cột cuộn ngang trong vùng riêng như sheet gốc.
+
+Lưu ý dữ liệu: từ schema 11, DD-201 là phòng phá HĐ (phòng trống) → METER-01 Đống Đa còn **4** phòng đang ở (§8.6 ghi 5 phòng là trước thay đổi này); CUS-01 lọc *Phá HĐ* có 2 hồ sơ (TX-202, DD-201 — §8.2 ghi 1 là trước thay đổi này).
+
+### 8.8 CR-BILL — tính lẻ ngày, phòng mới, kỳ TT, điện chung, giảm trừ/phụ thu (21/10/2026, schema 12)
+
+`tools/qa-bill.playwright.js` **8/8**:
+
+| Mã | Kiểm tra | KQ | Bằng chứng (kỳ 10/2026) |
+| --- | --- | --- | --- |
+| QA-BILL-01 | Tính lẻ ÷30 | ✅ | *Sinh nháp* TX: TX-202 tiền phòng 20–31/10 = 12/30 ngày × 3.800.000 = **1.520.000**, hệ số 0,4 (mẫu hóa đơn dòng 1); DV cố định đủ tháng; mọi hóa đơn trước kỳ 09 tròn tháng |
+| QA-BILL-02 | Đổi quy tắc | ✅ | *Chia số ngày thực* → nháp TX-202 = 12/31 → **1.471.000**; hóa đơn đã xác nhận không đổi; đổi lại ÷30 → 1.520.000 |
+| QA-BILL-03 | Phòng mới | ✅ | TX-202: niêm yết 4.000.000, chốt 3.800.000, cọc 4.000.000, 12 ngày, *Đóng cọc*; quy tắc *tách cọc* → đã đóng 0 (cọc vẫn hiện riêng) |
+| QA-BILL-04 | Kỳ TT 3 tháng | ✅ | TX-301 kỳ 09: 3 × 4.900.000 = 14.700.000 (cover 09–11); kỳ 10 không tiền phòng, *đã trả đến 11/2026*; P&L TX tiền phòng TX-301 = 4.900.000 ở cả kỳ 09 và 10; HS TH1: thu trước 9.800.000; Kỳ TT 3 / 0 |
+| QA-BILL-05 | Điện chung | ✅ | 126 kWh × 4.000 = 504.000, Σ phân bổ = 504.000; TX-102 3 người (khai theo tháng); tăng số người TX-101 → nháp tính lại 112.000 → 151.200, tổng vẫn 504.000; mẫu hóa đơn dòng 11; kỳ trước 10 không có điện chung |
+| QA-BILL-06 | Giảm trừ / phụ thu | ✅ | QL: giảm 150.000 → tự duyệt, ghi kỳ 11 (CG-101 kỳ 10 đã xác nhận); phụ thu 700.000 → chờ duyệt. Kế toán: TX-301 phạt 600.000 chặn xác nhận → duyệt → hết chặn; TX-101 −120.000 trên hóa đơn; mẫu hóa đơn dòng 9 có lý do |
+| QA-BILL-07 | UI | ✅ | INV-01: thẻ quy tắc, bảng giảm trừ, *12/30 ngày*, *Đã trả trước đến 11/2026*; PAY-02 tab *Phòng mới* (TX-202); METER-01 TX: công tơ chung 5 phòng; 375 px không tràn ngang |
+
+Smoke: **1048 lượt / 0 lỗi** (thêm tab PAY-02 *Phòng mới*, INV-01 biến thể Cầu Giấy, dialog *Giảm trừ / phụ thu*; variant 106). `qa-pay` 12/12, `qa-cus` 23/23, `qa-ocr` 9/9. `qa-table-wrap`: không có ô gãy mới (vẫn 1 ô ghi chú khấu trừ đã biết); console sạch.
+
+Cập nhật kỳ vọng do dữ liệu schema 12 (có chủ ý, xem DECISIONS §9.9):
+- **`qa-pay`:**
+  - QA-PAY-05: danh sách điện nước không thu được còn CG-401 PT và DD-302 Đang sửa. TX-202 đã có khách từ 20/10.
+  - QA-PAY-11: PAY-02 có 7 tab.
+  - Smoke 1048.
+- **`qa-cus`:**
+  - SCHEMA-UPGRADE: 20 HĐ.
+  - REGRESSION kỳ 10 kinh doanh 9.655.000. Tăng do tiền phòng tháng 10 TX-301 thu trước.
+  - REGRESSION kỳ 09 kinh doanh 16.682.599, tổng 7.282.599. Lương HS QL Thanh Xuân tăng 255.000 vì A tính tiền thu trước (TH1/G-03).
+  - Hóa đơn CG-202 và HS Cầu Giấy 72,3% không đổi.
+- **`qa-ocr`:** smoke 1048.
+
+Các bảng QA cũ còn ghi số trước schema 12; số đúng như sau:
+- METER-01 Thanh Xuân: **5** phòng đang ở, không còn phòng trống (§8.6 ghi 4 + TX-202 trống).
+- QA-PAY-03 vẫn *TX-202 Đóng cọc*: cọc đã nhận, hóa đơn chưa lập.
+- QA-PAY-05: TX-202 PT không còn.

@@ -99,6 +99,8 @@ var TH = window.TH = window.TH || {};
     if (l.type === 'elec') return 'elec';
     if (l.type === 'water') return 'water';
     if (l.type === 'extra') return 'lift';
+    if (l.type === 'common') return 'elec'; // CR-BILL: điện chung phân bổ = doanh thu điện
+    if (l.type === 'adjust') return l.amount < 0 ? 'rent' : 'lift'; // giảm trừ trừ vào tiền phòng; phụ thu như DV khác
     if (l.code === 'NET') return 'net';
     if (l.code === 'PARK') return 'ev';
     return 'svcSplit';
@@ -116,6 +118,8 @@ var TH = window.TH = window.TH || {};
       var per = {};
       inv.lines.forEach(function (l) {
         var k = lineKey(l);
+        /* CR-BILL (G-03, ANSWERS 25-32): đóng nhiều tháng → kỳ thu chỉ nhận 1 tháng tiền phòng, các tháng sau nhận phần phân bổ (bên dưới) */
+        if (l.type === 'rent' && (l.months || 1) > 1) { per.rent = (per.rent || 0) + C.rentShare(l).first; return; }
         if (k === 'svcSplit') {
           var a = Math.round(l.amount / 3);
           per.clean = (per.clean || 0) + a; per.lift = (per.lift || 0) + a; per.wash = (per.wash || 0) + l.amount - 2 * a;
@@ -124,6 +128,9 @@ var TH = window.TH = window.TH || {};
       Object.keys(per).forEach(function (k) { add(v, k, per[k], { kind: 'invoice', id: inv.id, room: inv.roomId, amount: per[k] }); });
     });
     v.invoices = invs.length;
+    C.rentCovering(period, bId).forEach(function (x) {
+      add(v, 'rent', x.amount, { kind: 'prepaid', id: x.invoice.id, room: x.invoice.roomId, amount: x.amount, text: 'Phân bổ tiền phòng trả trước ' + x.line.months + ' tháng (' + TH.fmt.period(x.invoice.period) + ')' }, x.invoice.roomId + ' trả trước');
+    });
     v.unbilled = !db().invoices.some(function (i) { return i.buildingId === bId && i.period === period; });
     v.draftInvoices = C.invoicesIn(period, bId).filter(function (i) { return i.status === 'draft'; }).length;
     /* Tiền phòng phát sinh ngoài hóa đơn tháng (đã thu đủ) — cũng là thành phần C của hiệu suất */
@@ -135,7 +142,11 @@ var TH = window.TH = window.TH || {};
     (db().deposits || []).filter(function (d) { return d.buildingId === bId && d.period === period && d.status === 'confirmed'; }).forEach(function (d) {
       var k = d.type === 'in' ? 'depIn' : d.type === 'forfeit' ? 'depForfeit' : 'depRefund';
       add(v, k, d.amount, { kind: 'deposit', id: d.id, room: d.roomId, amount: d.amount, text: d.note }, d.roomId);
-      if (d.breach) add(v, 'cntBroke', 1, { kind: 'deposit', id: d.id, room: d.roomId, text: d.note }, d.roomId);
+      if (d.breach && !(db().breakCases || []).some(function (x) { return x.roomId === d.roomId && x.period === period; })) add(v, 'cntBroke', 1, { kind: 'deposit', id: d.id, room: d.roomId, text: d.note }, d.roomId);
+    });
+    /* CR-PAY: phòng phá HĐ ghi nhận trong kỳ (sheet DS phòng phá hđ) — không đếm trùng với bút toán giữ cọc breach cùng phòng */
+    (db().breakCases || []).filter(function (x) { return x.buildingId === bId && x.period === period; }).forEach(function (x) {
+      add(v, 'cntBroke', 1, { kind: 'break', id: x.id, room: x.roomId, text: (TH.BREAK_REASONS[x.reason] || '') + (x.note ? ' — ' + x.note : '') }, x.roomId);
     });
     db().contracts.filter(function (c) { return c.buildingId === bId && c.start.slice(0, 7) === period; }).forEach(function (c) {
       add(v, 'cntNew', 1, { kind: 'contract', id: c.id, room: c.roomId, text: 'Bắt đầu ' + TH.fmt.date(c.start) }, c.roomId);

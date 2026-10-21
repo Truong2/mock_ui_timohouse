@@ -1,0 +1,115 @@
+{
+  "reviewedAt": "2026-10-21T17:21:29.161813+07:00",
+  "scope": "Monitor the workspace Claude task, then update the report workflow plan; no application code changes by this review.",
+  "baseCommit": "70763e3",
+  "claudeTask": {
+    "processId": 20220,
+    "task": "CR-BILL",
+    "completionEvidence": "assistant end_turn",
+    "completedAt": "2026-10-21T17:14:37.752+07:00",
+    "followup": {
+      "topic": "Explain room state transitions",
+      "completedAt": "2026-10-21T17:17:27.808+07:00",
+      "changedApplicationCode": false
+    }
+  },
+  "verification": {
+    "independent": {
+      "schema": 12,
+      "smoke": {
+        "total": 1048,
+        "failed": 0
+      },
+      "regression": {
+        "kd09": 16682599,
+        "tong09": 7282599,
+        "kd10": 9655000
+      },
+      "prepaid": [
+        {
+          "kind": "prepaid",
+          "id": "INV-2609-TX301",
+          "room": "TX-301",
+          "amount": 4900000,
+          "text": "Phân bổ tiền phòng trả trước 3 tháng (09/2026)"
+        }
+      ],
+      "invoice09Rent": [
+        {
+          "amount": 14700000,
+          "months": 3,
+          "cover": [
+            "2026-09",
+            "2026-10",
+            "2026-11"
+          ]
+        }
+      ],
+      "confirmedCommon": 0,
+      "reportData": {
+        "runs": false,
+        "drafts": false
+      },
+      "monthEndFixture": {
+        "eventAt": "2026-10-31",
+        "expected": "occupied",
+        "actual": "vacant"
+      },
+      "billRules": {
+        "prorateBase": "d30",
+        "prorateFixed": "no",
+        "roundTo": 1000,
+        "depositInCollect": "yes",
+        "commonVacant": "spread",
+        "adjustApproveFrom": 500000,
+        "status": "proposed",
+        "updatedBy": "NV-002",
+        "updatedAt": "2026-10-21",
+        "note": "Đề xuất bám file Excel tháng 9/2026 — chờ khách duyệt (D-03/K-05)"
+      }
+    },
+    "reportedByClaude": {
+      "qaBill": "8/8",
+      "qaPay": "12/12",
+      "qaCus": "23/23",
+      "qaOcr": "9/9"
+    },
+    "limitations": "The reviewer independently ran smoke and targeted diagnostics, not the four full business suites. The month-end fixture is an isolated diagnostic and its failure remains open."
+  },
+  "sourceHashes": [
+    {
+      "Path": "C:\\Users\\truon\\Downloads\\mockup\\js\\data.js",
+      "Hash": "4427AB935A6100D28CC7712B5F1DD68F4FAF9DF3CA8C019FDA2D7194F5EC8F17"
+    },
+    {
+      "Path": "C:\\Users\\truon\\Downloads\\mockup\\js\\pnl.js",
+      "Hash": "AF7A04A75D5DA964E5C24E4F75674410D6A6B812246B6069BD4966AE9BB012B9"
+    },
+    {
+      "Path": "C:\\Users\\truon\\Downloads\\mockup\\js\\store.js",
+      "Hash": "884D2F091B2CE0A0E81C0233753B370D35CB93F1ECDFA9673248A850A018FC00"
+    },
+    {
+      "Path": "C:\\Users\\truon\\Downloads\\mockup\\js\\views\\bizreports.js",
+      "Hash": "E0740275CB33765C0C080ECA7CCFF4709878A4B73F5BC7ECB098CB73AF5C0800"
+    }
+  ],
+  "planStatus": "UPDATED",
+  "implementationStatus": "REPORT_WORKFLOW_NOT_IMPLEMENTED",
+  "openDefects": [
+    {
+      "id": "RPT-REVIEW-01",
+      "file": "js/pnl.js",
+      "symbol": "C.roomStateAt",
+      "issue": "Uses day 28 instead of the actual end of month; a room occupied on October 31 is reported as vacant.",
+      "action": "Fix the exclusive cutoff to next month's first day, add calendar boundary tests before implementing report workflows."
+    },
+    {
+      "id": "RPT-REVIEW-02",
+      "file": "js/views/bizreports.js",
+      "symbol": "srcLink / KIND",
+      "issue": "The new prepaid source kind lacks a localized label and invoice detail link.",
+      "action": "Add prepaid provenance support and trace the original invoice and monthly share."
+    }
+  ]
+}

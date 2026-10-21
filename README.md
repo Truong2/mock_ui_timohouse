@@ -48,6 +48,8 @@ tools/extract-srs.js    node tools/extract-srs.js → sinh lại screens.js/feat
 tools/qa-cus.playwright.js  kịch bản QA CR-CUS chạy bằng Playwright browser_run_code
 tools/qa-ocr.playwright.js  kịch bản QA OCR hợp đồng mẫu đầy đủ (CR-CUS-02)
 tools/qa-table-wrap.playwright.js  quét mọi màn/tab/dialog tìm ô bảng bị gãy dòng + bảng cuộn ngang
+tools/qa-pay.playwright.js  kịch bản QA CR-PAY: tiến độ thu theo QL/tòa/phòng, phá HĐ, điện nước không thu được, QL xác nhận thu, mẫu hóa đơn
+tools/qa-bill.playwright.js kịch bản QA CR-BILL: tính lẻ ngày, phòng mới, kỳ TT nhiều tháng, điện chung, giảm trừ/phụ thu
 docs/                   plan · decision log · QA checklist
 ```
 
@@ -116,10 +118,11 @@ Kỳ 10/2026 đang mở (Thanh Xuân chưa lập hóa đơn, tiền thuê nhà c
 2. Topbar *Đang xem: Gói D* → chọn **A**: các card B/C/D chuyển ghost, phần lõi vẫn dùng được.
 3. Chủ nhà `OWN-01` → *Import Excel* ở A (báo lỗi dòng) → chọn **B** → preview toàn bộ + tải file lỗi.
 4. Hợp đồng → *OCR hợp đồng* (`OCR-CON`, mẫu đầy đủ): 38 field theo 7 nhóm + bảng 30 tài sản bàn giao; *Đánh dấu tất cả* → *Xác nhận* → `CON-02` *Chuyển vào form* → *Duyệt*: HĐ mới có dòng phí, điều khoản, bàn giao, tiền đã nộp, xe máy chờ xác nhận. B có độ tin cậy, C có so khớp (người/xe/chỉ số/giá), D có log sửa tay.
-5. `METER-01` nhập chỉ số (TX-201 thiếu, TX-102 số lùi, DD-301 đột biến) → `INV-01` chọn Thanh Xuân → *Sinh nháp* → *Xem trước & xác nhận*.
-6. `PAY-01` báo thu → đổi vai trò *Quản lý tòa*: không tự duyệt → *Kế toán* xác nhận `PAY-APP` → `PAY-02` công nợ giảm, bảng *Hiệu suất theo tòa* (A/B/C/D, tạm tính & thực tế) cập nhật; chọn **C** xem chống trùng/backdate.
+5. `METER-01` chọn **Thanh Xuân** trong danh sách tòa (bảng chỉ gồm phòng đang ở; TX-202 khách mới từ 20/10; thẻ *Công tơ điện chung* chia theo số người, sửa được số người kỳ này) → nhập chỉ số (TX-201 thiếu, TX-102 số lùi; DD-301 đột biến ở Đống Đa) → `INV-01` chọn Thanh Xuân → *Sinh nháp* → *Xem trước & xác nhận*.
+6. `PAY-02` *Tiến độ thu tiền* (theo file hóa đơn tháng 9 của khách): tab *Theo quản lý* / *Theo tòa* (lũy kế M5/M10/M15, DT mốc 1/2/3, DT phá HĐ) → bấm Đống Đa → *Check theo phòng* (DD-201 Thiếu · Phá HĐ, CG-302 Chưa TT có nợ cũ, TX-202 Đóng cọc) → tab *Phòng phá HĐ* (phải thu = tiền điện) và *Điện nước không thu được*. Đổi vai trò *Quản lý tòa*: *Thu* CG-302 vượt nợ → xác nhận ngay, phân bổ kỳ cũ trước, hiện *Thừa*; nút ⓧ *Ghi nhận phá HĐ*. Đổi *Kế toán*: không xác nhận, `PAY-01` lọc *Chưa hậu kiểm* → *Đã đối soát*. `INV-03` → *Mẫu hóa đơn* (12 khoản, Mã KH, nội dung CK). Tab *Chi tiết hóa đơn & hiệu suất* giữ bảng mốc theo hóa đơn và HS A/B/C/D; chọn **C** xem chống trùng/backdate.
 6b. `BLD-02/TH-CG` kỳ 09: tab *Vận hành & kết quả* (các bước A→D, HS 72,3%) → tab *Chủ nhà & hợp đồng* bấm *Chỉnh sửa* giá thuê, đổi tab giữa chừng để thấy hộp thoại lưu/bỏ → tab *Lịch thanh toán* (Đống Đa, Thanh Xuân quá hạn); chuyển **A → B → C** để thấy vai trò nhân sự, sinh lịch từ HĐ, đã trả/còn lại mở dần.
 6c. `CUS-01` lọc *Hồ sơ cọc* → mở `DD-302 — TH-DD`, tab *Tài chính*: Admin *Lập đối chiếu → gửi duyệt*, nhập khấu trừ thấm trần 500.000đ → số hoàn 3.990.000đ. Admin không tự duyệt; đổi *Kế toán* → *Duyệt hoàn* (chưa ghi sổ) → *Xác nhận đã chi / tất toán* với ngày và mã giao dịch. RPT-05 Tổng kỳ 10 giảm 3.990.000đ, Kinh doanh giữ 4.755.000đ. Mở `DD-102`: Đang thuê + Sắp hết HĐ + Chờ bàn giao. Tab *Hợp đồng*: *Đọc hợp đồng* (OCR mẫu đầy đủ) → *Đánh dấu tất cả* → *Xác nhận & áp vào hồ sơ thuê*; nước 2 × 120.000đ, hiệu lực kỳ 11. Mở KH-003 xem hai HĐ nối tiếp và phiếu chuyển cọc. `SYS-01 › Sao lưu & vận hành`: đổi cảnh báo 35 → 45 ngày (2 → 3 HĐ), rồi đặt lại 35.
+6d. `INV-01` Thanh Xuân → *Sinh nháp*: TX-202 khách mới tiền phòng 12/30 ngày, TX-301 *Đã trả trước đến 11/2026* (đóng 3 tháng), dòng điện chung, TX-301 bị giữ nháp vì phạt 600.000 chờ duyệt (đổi *Kế toán* → *Duyệt*). Thẻ *Quy tắc tính tiền* đổi ÷30 ↔ ngày thực để khách so. `PAY-02` tab *Phòng mới* (giá chốt / niêm yết, cọc, cần đóng).
 7. Chọn **D** → `SAL-01`, `SHARE-01` với nhãn DRAFT (D-06, D-07) và truy vết.
 8. Menu *Báo cáo* → `RPT-04` kỳ 09/2026: đối chiếu với file G1 của khách (cùng thứ tự dòng, tỷ lệ, bảng chia cổ phần); bấm một dòng để mở chứng từ (B+); *Xuất Excel theo mẫu*.
 9. `RPT-05`: đổi *Báo cáo kinh doanh* ↔ *Báo cáo tổng* (cọc mới, mua sắm); C gộp theo nhóm nhà; bấm tên tòa để về `RPT-04`. Đổi sang **A** để khách thấy cả hai báo cáo đã có trong gói thấp nhất.

@@ -1,0 +1,85 @@
+{
+  "date": "2026-10-21",
+  "baseCommit": "70763e3",
+  "auditedState": "working tree, including pre-existing uncommitted edits",
+  "status": "NOT_MATCHED",
+  "sourceWorkbooksModified": false,
+  "appStorageWritten": false,
+  "files": [
+    {
+      "file": "mau_chu_nha_TIMEHOUSE.xlsx",
+      "columns": [
+        "Mã chủ",
+        "Tên",
+        "Liên hệ",
+        "Địa chỉ"
+      ],
+      "headerRow": 4,
+      "firstDataRow": 5,
+      "formattedInputColumns": 0,
+      "validations": 0,
+      "textNumberFormat": false,
+      "sampleFirstLine": 2
+    },
+    {
+      "file": "mau_toa_nha_TIMEHOUSE.xlsx",
+      "columns": [
+        "Mã tòa",
+        "Mã chủ",
+        "Tên tòa",
+        "Địa chỉ"
+      ],
+      "headerRow": 4,
+      "firstDataRow": 5,
+      "formattedInputColumns": 0,
+      "validations": 0,
+      "textNumberFormat": false,
+      "sampleFirstLine": 2
+    },
+    {
+      "file": "mau_phong_theo_toa.xlsx",
+      "columns": [
+        "Mã tòa",
+        "Mã phòng",
+        "Tầng",
+        "Giá",
+        "Trạng thái"
+      ],
+      "headerRow": 4,
+      "firstDataRow": 5,
+      "formattedInputColumns": 0,
+      "validations": 0,
+      "textNumberFormat": false,
+      "sampleFirstLine": 2
+    }
+  ],
+  "observations": [
+    {
+      "id": "owner-company",
+      "expected": "org",
+      "actual": "person"
+    },
+    {
+      "id": "owner-upsert-columns",
+      "nameUpdated": false,
+      "phoneUpdated": false,
+      "addressUpdated": true
+    },
+    {
+      "id": "building-invented-defaults",
+      "area": "Hoàng Mai",
+      "managerId": "NV-003",
+      "floors": 3,
+      "sourceColumnCount": 4
+    },
+    {
+      "id": "room-status",
+      "expected": "occupied",
+      "actual": "vacant",
+      "defaultAreaWithoutInput": 25
+    }
+  ],
+  "customerImportExists": false,
+  "customerImportButtonExists": false,
+  "scope": "Mock UI and generated OOXML. No actual XLSX upload/parser exists in this flow."
+}

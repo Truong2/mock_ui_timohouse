@@ -186,7 +186,7 @@
     dialogs: [function () { drill4Render('TH-CG', TH.CURRENT_PERIOD, 'rent'); }, function () { poolRender(TH.CURRENT_PERIOD); }],
   };
 
-  var KIND = { invoice: ['Hóa đơn', 'teal'], arising: ['Tiền phòng phát sinh', 'teal'], deposit: ['Cọc', 'info'], expense: ['Chi phí', 'warning'], pool: ['Phân bổ', 'neutral'], payroll: ['Lương', 'draft'], contract: ['Hợp đồng', 'teal'], room: ['Phòng', 'neutral'] };
+  var KIND = { invoice: ['Hóa đơn', 'teal'], arising: ['Tiền phòng phát sinh', 'teal'], deposit: ['Cọc', 'info'], expense: ['Chi phí', 'warning'], pool: ['Phân bổ', 'neutral'], payroll: ['Lương', 'draft'], contract: ['Hợp đồng', 'teal'], room: ['Phòng', 'neutral'], break: ['Phá HĐ', 'danger'] };
   function srcLink(s) {
     if (s.kind === 'invoice') return '<a href="' + TH.router.href('INV-03', s.id) + '" data-close>' + esc(s.id) + '</a>';
     if (s.kind === 'contract') return '<a href="' + TH.router.href('CON-02', s.id) + '" data-close>' + esc(s.id) + '</a>';

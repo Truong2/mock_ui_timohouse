@@ -9,7 +9,7 @@ var TH = window.TH = window.TH || {};
 TH.TODAY = '2026-10-20';
 TH.CURRENT_PERIOD = '2026-10';
 TH.PERIODS = ['2026-05', '2026-06', '2026-07', '2026-08', '2026-09', '2026-10'];
-TH.DATA_SCHEMA = 10;
+TH.DATA_SCHEMA = 12;
 
 /* Vai trò phụ trách tòa (CR-BLD-01, note.md §3.2 · cột NVVH/Lead/NVVS/NSKT trong docs/Thông tin nhà.xlsx).
    tier: gói bắt đầu được phân công vai trò này (A: một NV vận hành chính — F006.A; B: nhiều người theo vai trò — F006.B). */
@@ -108,6 +108,28 @@ TH.maskPlate = function (p) {
 /* Hồ sơ cọc (K-03/K-04): Chờ bàn giao → Chờ đối chiếu → Chờ duyệt → Đã duyệt/chờ chi → Đã hoàn | Đã tất toán (hoàn 0 đ) | Mất cọc (toàn bộ/một phần) | Chuyển sang HĐ mới. Luồng và vai trò là ĐỀ XUẤT. */
 TH.DEPOSIT_STATES = { holding: ['Đang giữ cọc', 'neutral'], awaiting_handover: ['Chờ bàn giao phòng', 'info'], reconciling: ['Chờ đối chiếu', 'warning'], pending_approval: ['Chờ duyệt hoàn', 'warning'], approved: ['Đã duyệt — chờ chi', 'info'], refunded: ['Đã hoàn cọc', 'success'], settled: ['Đã tất toán cọc', 'success'], forfeited: ['Mất cọc', 'danger'], transferred: ['Cọc chuyển sang HĐ mới', 'info'] };
 TH.DEPOSIT_OPEN = ['reconciling', 'pending_approval', 'approved'];
+/* CR-PAY (Excel "Hoá đơn tiền nhà tháng 9 và dịch vụ tháng 9 năm 2026" › DS phòng phá hđ): lý do phá HĐ hay gặp */
+TH.BREAK_REASONS = { runaway: 'Bỏ trốn', hometown: 'Về quê / nghỉ học', job: 'Chuyển chỗ làm / chỗ học', money: 'Không đủ tài chính', price: 'Không đồng ý giá mới', other: 'Lý do khác' };
+/* Tình trạng thu theo phòng — đúng công thức cột "Tình trạng" của sheet hóa đơn/BÁO CÁO CHECK THU TIỀN; thêm "Chưa lập HĐ" cho phòng đang ở chưa có hóa đơn kỳ */
+TH.BILL_STATES = { unpaid: ['Chưa TT', 'danger'], short: ['Thiếu', 'warning'], full: ['Đủ', 'success'], over: ['Thừa', 'info'], deposit: ['Đóng cọc', 'teal'], empty: ['Trống', 'neutral'], nobill: ['Chưa lập HĐ', 'draft'] };
+/* Mẫu phiếu hoàn cọc (sheet HĐ (HOÀN CỌC)): các khoản trừ vào tiền cọc */
+TH.REFUND_ITEMS = ['Tiền phòng lẻ ngày', 'Điện', 'Nước', 'Vệ sinh', 'Internet', 'Thang máy', 'Gửi xe', 'Máy giặt', 'Khấu hao', 'Sửa chữa', 'Dọn vệ sinh', 'Sơn phòng', 'DV khác'];
+/* CR-BILL (Excel tháng 9/2026: NHÀ T/G/S, PHÒNG MỚI THÁNG 9, "Điện vệ sinh chung", cột Kỳ TT / Ngày ở / Thu khác) —
+   quy tắc tính tiền ĐỀ XUẤT bám file, chờ khách duyệt (D-03/K-05, BILL-Q1…Q8). Đổi ở INV-01 › Quy tắc tính tiền; hóa đơn đã xác nhận không đổi hồi tố. */
+TH.BILL_RULES_DEFAULT = { prorateBase: 'd30', prorateFixed: 'no', roundTo: 1000, depositInCollect: 'yes', commonVacant: 'spread', adjustApproveFrom: 500000 };
+TH.BILL_RULE_LABELS = {
+  prorateBase: { label: 'Tính lẻ tiền phòng', options: { d30: 'Chia 30 ngày (mẫu "Hệ số ngày/30")', actual: 'Chia số ngày thực của tháng' } },
+  prorateFixed: { label: 'DV cố định khi ở lẻ ngày', options: { no: 'Thu đủ tháng (như file)', yes: 'Tính lẻ cùng hệ số tiền phòng' } },
+  depositInCollect: { label: 'Cọc khách mới trong tiến độ thu', options: { yes: 'Tính vào phải thu & 3 mốc (như file)', no: 'Tách riêng, không tính' } },
+  commonVacant: { label: 'Điện chung phần phòng trống', options: { spread: 'Chia cho người đang ở', loss: 'Công ty chịu (vào thất thoát)' } },
+};
+TH.billRules = function () { return Object.assign({}, TH.BILL_RULES_DEFAULT, (TH.db && TH.db.billRules) || {}); };
+TH.PAY_CYCLES = { 1: 'Hằng tháng', 2: '2 tháng / lần', 3: '3 tháng / lần' };
+TH.CYCLE_SCOPES = { rent: 'Chỉ tiền phòng', rent_svc: 'Tiền phòng + DV cố định' };
+TH.COMMON_METHODS = { per_person: 'Chia theo số người', per_room: 'Chia theo số phòng' };
+/* Giảm trừ / phụ thu (cột "Thu khác" và ghi chú hóa đơn trong file): hỗ trợ DV, CTV bù ngày, thêm người, phạt vi phạm… */
+TH.ADJUST_CATEGORIES = ['Hỗ trợ DV', 'CTV bù ngày', 'Thêm người', 'Phạt vi phạm', 'Khác'];
+TH.ADJUST_STATES = { pending: ['Chờ duyệt', 'warning'], approved: ['Đã duyệt', 'success'], rejected: ['Từ chối', 'neutral'] };
 
 TH.EXPENSE_CATS = {
   owner_rent: 'Tiền thuê trả chủ nhà',
@@ -274,6 +296,8 @@ TH.seed = function () {
       versions: i % 5 === 2 ? [{ v: 1, at: start, note: 'Bản ký gốc' }, { v: 2, at: '2026-04-01', note: 'Phụ lục điều chỉnh giá thuê' }] : [{ v: 1, at: start, note: 'Bản ký gốc' }],
     };
   });
+  /* CR-BILL: TX-301 đóng 3 tháng tiền phòng/lần từ kỳ 09/2026 (sheet NHÀ S "đến kì tt 3th"); DV và điện nước vẫn lập theo tháng */
+  Object.assign(db.contracts.find(function (c) { return c.roomId === 'TX-301'; }), { payCycle: 3, cycleFrom: '2026-09', cycleScope: 'rent', cycleNote: 'Khách đề nghị đóng 3 tháng tiền phòng/lần từ 09/2026' });
   db.followUps = [
     { contractId: contractIdOf(db, 'CG-202'), at: '2026-10-15', by: 'NV-003', result: 'no_answer', moveOutAt: null, callbackAt: '2026-10-22', note: 'Khách hẹn trả lời sau khi trao đổi với gia đình.' },
     { contractId: contractIdOf(db, 'DD-102'), at: '2026-10-12', by: 'NV-004', result: 'move_out', moveOutAt: '2026-11-15', callbackAt: null, note: 'Chuyển công tác, đã thông báo trước 30 ngày.' },
@@ -314,7 +338,7 @@ TH.seed = function () {
   db.invoices = [];
   TH.PERIODS.forEach(function (p) {
     db.contracts.forEach(function (ct) {
-      if (ct.start > p + '-28') return;
+      if (ct.start > monthEnd(p)) return;
       if (p === '2026-10' && ct.buildingId === 'TH-TX') return; // TX kỳ 10 chưa lập — dùng cho luồng INV-01
       db.invoices.push(buildInvoice(db, ct, p, 'confirmed'));
     });
@@ -449,8 +473,8 @@ TH.seed = function () {
     };
   });
   db.buildingGroups = [
-    { id: 'NHA-1', name: 'Nhóm nhà 1 · Cầu Giấy – Đống Đa', short: 'Nhóm nhà 1', buildings: ['TH-CG', 'TH-DD'] },
-    { id: 'NHA-2', name: 'Nhóm nhà 2 · Thanh Xuân', short: 'Nhóm nhà 2', buildings: ['TH-TX'] },
+    { id: 'NHA-1', name: 'Nhóm nhà 1 · Cầu Giấy – Đống Đa', short: 'Nhóm nhà 1', buildings: ['TH-CG', 'TH-DD'], payAccount: 'VPBank •••1201 · CT TNHH TimeHouse (minh họa)' },
+    { id: 'NHA-2', name: 'Nhóm nhà 2 · Thanh Xuân', short: 'Nhóm nhà 2', buildings: ['TH-TX'], payAccount: 'Techcombank •••6018 · CT TNHH TimeHouse (minh họa)' },
   ];
 
   /* ---------- Nhân sự ---------- */
@@ -657,12 +681,66 @@ TH.seed = function () {
   /* Hồ sơ cọc (K-03): người lập ≠ người duyệt; chỉ bước xác nhận THỰC CHI (có ngày/mã giao dịch) mới sinh dòng refund/forfeit trong db.deposits (P&L và dòng tiền chỉ đọc db.deposits đã xác nhận).
      Hạn hoàn chỉ tính khi HĐ có điều khoản (refundDays) và chỉ từ ngày bàn giao thực tế; trước bàn giao dueAt = null, không tự báo quá hạn. */
   db.depositCases = [
-    { id: 'HC-2609-01', contractId: endedIds['CG-401'], customerId: 'KH-016', amount: 6500000, state: 'refunded', handoverAt: '2026-08-31', dueAt: '2026-09-10', deductions: [{ name: 'Hư hỏng rèm, vệ sinh lại tường', amount: 300000, source: 'Biên bản bàn giao 31/08/2026 · Điều 6.2.5' }], forfeitAmount: 0, forfeitBasis: '', refundAmount: 6200000, proposedBy: 'NV-003', proposedAt: '2026-09-01', approvedBy: 'NV-001', approvedAt: '2026-09-02', paidBy: 'NV-002', paidAt: '2026-09-03', txnRef: 'CK-20260903-0417', depositId: 'COC-2609-01', note: 'Thanh lý đúng hạn, hoàn trong 3 ngày' },
+    { id: 'HC-2609-01', contractId: endedIds['CG-401'], customerId: 'KH-016', amount: 6500000, state: 'refunded', handoverAt: '2026-08-31', dueAt: '2026-09-10', deductions: [{ item: 'Sửa chữa', name: 'Hư hỏng rèm, vệ sinh lại tường', amount: 300000, source: 'Biên bản bàn giao 31/08/2026 · Điều 6.2.5' }], forfeitAmount: 0, forfeitBasis: '', refundAmount: 6200000, proposedBy: 'NV-003', proposedAt: '2026-09-01', approvedBy: 'NV-001', approvedAt: '2026-09-02', paidBy: 'NV-002', paidAt: '2026-09-03', txnRef: 'CK-20260903-0417', depositId: 'COC-2609-01', note: 'Thanh lý đúng hạn, hoàn trong 3 ngày' },
     { id: 'HC-2607-01', contractId: endedIds['TX-202'], customerId: 'KH-017', amount: 4000000, state: 'forfeited', handoverAt: '2026-07-15', dueAt: null, deductions: [], forfeitAmount: 4000000, forfeitBasis: 'Điều 4.3 & 7.1 HĐ ký 29/07/2025 (mẫu đầy đủ) — khách đơn phương chấm dứt', refundAmount: 0, proposedBy: 'NV-005', proposedAt: '2026-07-15', approvedBy: 'NV-001', approvedAt: '2026-07-16', paidBy: null, paidAt: null, txnRef: null, forfeitId: 'COC-2607-01', note: 'Giữ toàn bộ cọc theo quyết định đã duyệt; ghi nhận doanh thu bỏ cọc kỳ 07' },
-    { id: 'HC-2610-01', contractId: endedIds['DD-302'], customerId: 'KH-018', amount: 4800000, state: 'reconciling', handoverAt: '2026-09-28', dueAt: '2026-10-08', deductions: [{ name: 'Điện nước 01–27/09 (chưa lập hóa đơn)', amount: 310000, source: 'Chỉ số bàn giao 28/09' }, { name: 'Thấm trần — chờ xác định lỗi bên nào', amount: 0, source: 'Biên bản 28/09 · Điều 2.2 bàn giao: “Sạch — thấm nhẹ góc trần” · chưa chốt', pending: true }], forfeitAmount: 0, forfeitBasis: '', refundAmount: null, proposedBy: 'NV-004', proposedAt: null, approvedBy: null, approvedAt: null, paidBy: null, paidAt: null, txnRef: null, note: 'Phòng chuyển “Đang sửa” sau bàn giao; chưa chốt khấu trừ — hạn 10 ngày theo Điều 4.3 HĐ ký 25/09/2025' },
+    { id: 'HC-2610-01', contractId: endedIds['DD-302'], customerId: 'KH-018', amount: 4800000, state: 'reconciling', handoverAt: '2026-09-28', dueAt: '2026-10-08', deductions: [{ item: 'Điện', name: 'Điện nước 01–27/09 (chưa lập hóa đơn)', amount: 310000, source: 'Chỉ số bàn giao 28/09' }, { item: 'Sửa chữa', name: 'Thấm trần — chờ xác định lỗi bên nào', amount: 0, source: 'Biên bản 28/09 · Điều 2.2 bàn giao: “Sạch — thấm nhẹ góc trần” · chưa chốt', pending: true }], forfeitAmount: 0, forfeitBasis: '', refundAmount: null, proposedBy: 'NV-004', proposedAt: null, approvedBy: null, approvedAt: null, paidBy: null, paidAt: null, txnRef: null, note: 'Phòng chuyển “Đang sửa” sau bàn giao; chưa chốt khấu trừ — hạn 10 ngày theo Điều 4.3 HĐ ký 25/09/2025' },
     { id: 'HC-2611-01', contractId: dd102.id, customerId: dd102.customerId, amount: dd102.deposit, state: 'awaiting_handover', handoverAt: '2026-11-15', dueAt: null, deductions: [], forfeitAmount: 0, forfeitBasis: '', refundAmount: null, proposedBy: 'NV-004', proposedAt: '2026-10-12', approvedBy: null, approvedAt: null, paidBy: null, paidAt: null, txnRef: null, note: 'Khách báo chuyển đi 15/11 (khảo sát gia hạn 12/10). Hạn hoàn 10 ngày (Điều 4.3) chỉ tính từ ngày bàn giao thực tế → chưa xác định hạn', planned: true },
     { id: 'HC-2507-01', contractId: endedIds['CG-201#old'], customerId: 'KH-003', amount: 4800000, state: 'transferred', handoverAt: null, dueAt: null, deductions: [], forfeitAmount: 0, forfeitBasis: '', refundAmount: 0, proposedBy: 'NV-003', proposedAt: '2025-06-28', approvedBy: 'NV-002', approvedAt: '2025-06-30', paidBy: null, paidAt: null, txnRef: 'PCC-2507-01', transferToContractId: 'HĐ-CG201/25', note: 'Chuyển cọc sang HĐ mới qua phiếu chuyển cọc PCC-2507-01 (bù thêm 400.000 theo giá mới) — không nhân đôi cọc' },
   ];
+  /* CR-PAY — phá HĐ theo sheet "DS phòng phá hđ": hóa đơn kỳ vẫn giữ (DT phá HĐ), truy thu tiền điện, phần điện nước không thu được vào sheet
+     "ĐIỆN NƯỚC PHÒNG TRỐNG/KHÔNG THU ĐƯỢC". DD-201: khách chuyển chỗ làm, bỏ đi 16/10 sau khi đã đóng 3.000.000 → hồ sơ cọc chờ duyệt giữ cọc (không tự ghi mất cọc, K-04). */
+  var dd201 = db.contracts.find(function (c) { return c.roomId === 'DD-201' && c.status === 'active'; });
+  Object.assign(dd201, { status: 'terminated', endedAt: '2026-10-16', endKind: 'tenant_request', endReason: 'Khách chuyển chỗ làm, báo 15/10 và trả phòng 16/10 — phá HĐ trước hạn' });
+  db.rooms.find(function (r) { return r.id === 'DD-201'; }).status = 'vacant';
+  db.roomEvents.push({ roomId: 'DD-201', at: '2026-10-16', from: 'occupied', to: 'vacant', by: 'NV-004', note: 'Khách phá HĐ (chuyển chỗ làm)' });
+  db.customers.find(function (k) { return k.id === dd201.customerId; }).vehicles.forEach(function (v) { if (v.status === 'active') { v.status = 'ended'; v.to = '2026-10-16'; } });
+  db.depositCases.push({ id: 'HC-2610-02', contractId: dd201.id, customerId: dd201.customerId, amount: dd201.deposit, state: 'pending_approval', handoverAt: '2026-10-16', dueAt: '2026-10-26', deductions: [], forfeitAmount: dd201.deposit, forfeitBasis: 'Điều 4.3 & 7.1 HĐ — khách đơn phương chấm dứt trước hạn (đề xuất giữ toàn bộ cọc)', refundAmount: 0, proposedBy: 'NV-004', proposedAt: '2026-10-17', approvedBy: null, approvedAt: null, paidBy: null, paidAt: null, txnRef: null, note: 'Phá HĐ 16/10 — chờ duyệt mức giữ cọc' });
+  db.breakCases = [
+    { id: 'PHD-2607-01', roomId: 'TX-202', contractId: endedIds['TX-202'], customerId: 'KH-017', buildingId: 'TH-TX', period: '2026-07', at: '2026-07-15', reason: 'hometown', note: 'Khách về quê, đơn phương chấm dứt (trước khi lập hóa đơn trên hệ thống)', reportedBy: 'NV-005', reportedAt: '2026-07-15' },
+    { id: 'PHD-2610-01', roomId: 'DD-201', contractId: dd201.id, customerId: dd201.customerId, buildingId: 'TH-DD', period: '2026-10', at: '2026-10-16', reason: 'job', note: 'Chuyển chỗ làm, báo trước 1 ngày; đã đóng 3.000.000 ngày 09/10', reportedBy: 'NV-004', reportedAt: '2026-10-16' },
+  ];
+
+  /* ---------- CR-BILL — quy tắc tính tiền đề xuất, phòng mới tháng, điện chung, giảm trừ/phụ thu ---------- */
+  db.billRules = Object.assign({}, TH.BILL_RULES_DEFAULT, { status: 'proposed', updatedBy: 'NV-002', updatedAt: '2026-10-21', note: 'Đề xuất bám file Excel tháng 9/2026 — chờ khách duyệt (D-03/K-05)' });
+  /* Sheet PHÒNG MỚI: TX-202 — khách giữ chỗ 12/10 (cọc 4.000.000), vào ở 20/10, giá chốt thấp hơn niêm yết. Hóa đơn TX kỳ 10 chưa lập (luồng INV-01):
+     sinh nháp sẽ ra tiền phòng lẻ 12/30 ngày + DV đủ tháng + điện nước. CG-401 giữ trống cho luồng OCR hợp đồng mẫu. */
+  var r202 = db.rooms.find(function (r) { return r.id === 'TX-202'; }), bTX = db.buildings.find(function (b) { return b.id === 'TH-TX'; });
+  var k19 = { id: 'KH-019', name: 'Vương Thu Hà', dob: '2000-05-16', phone: '0936 ••• 512', idNo: '0012••••7512', idType: 'CCCD', idPlace: 'Cục Cảnh sát QLHC về TTXH', hometown: 'Phú Thọ', oaLinked: true, oaConsentAt: '2026-10-18', status: 'active', createdAt: '2026-10-12' };
+  db.customers.push(k19);
+  var ct202 = { id: 'HĐ-TX202/26', roomId: 'TX-202', buildingId: 'TH-TX', customerId: k19.id, rent: 3800000, listRent: r202.rent, priceNote: 'Chốt giá 3,8tr (niêm yết 4tr) — khách do CTV giới thiệu; cọc giữ chỗ 12/10 chuyển thành cọc HĐ', deposit: 4000000,
+    start: '2026-10-20', end: '2027-10-19', signedAt: '2026-10-18', people: 1, billingDay: 20, status: 'active', endKind: null, renewals: [], previousContractId: null, scanFile: 'scan_TX-202_2026.pdf', note: '',
+    terms: termsOf('DAYDU', '2026-10-20'), priceList: seedPriceList(bTX, '2026-10-20', 1),
+    fees: [{ code: 'SVC', name: 'Phí dịch vụ', price: 150000, qty: 1, unit: 'tháng' }, { code: 'NET', name: 'Internet', price: 100000, qty: 1, unit: 'tháng' }, { code: 'PARK', name: 'Gửi xe điện', price: 120000, qty: 1, unit: 'xe' }],
+    versions: [{ v: 1, at: '2026-10-18', note: 'Bản ký gốc' }] };
+  var rd202 = db.readings.find(function (r) { return r.roomId === 'TX-202' && r.period === '2026-10'; });
+  ct202.handover = { at: '2026-10-20', billingFrom: '2026-10-20', elecStart: rd202.elecPrev, waterStart: rd202.waterPrev, assets: TH.HANDOVER_ASSETS.map(function (a) { return { group: a.group, name: a.name, unit: a.unit, qty: a.qty, condition: a.condition }; }), source: 'OCR HĐ ' + ct202.id + ' · xác nhận 2026-10-18', file: ct202.scanFile };
+  ct202.prepaid = { beforeSign: 4000000, atSign: 0, total: 4000000, allocation: 'Cọc giữ chỗ 4.000.000 ₫ (12/10) chuyển thành cọc HĐ — tiền phòng kỳ đầu thu theo hóa đơn lẻ ngày' };
+  db.contracts.push(ct202);
+  seedCustomerExtra(k19, db.customers.length - 1, 1, ct202);
+  r202.status = 'occupied';
+  db.roomEvents.push({ roomId: 'TX-202', at: '2026-10-20', from: 'vacant', to: 'occupied', by: 'NV-005', note: 'Khách mới vào ở (' + ct202.id + ')' });
+  Object.assign(db.deposits.find(function (d) { return d.id === 'COC-2610-01'; }), { note: 'Giữ chỗ 12/10 → cọc HĐ mới TX-202 (vào ở 20/10)', contractId: ct202.id, customerId: k19.id });
+  db.documents.push({ id: 'TL-230', customerId: k19.id, contractId: ct202.id, roomId: 'TX-202', kind: 'Hợp đồng scan', file: ct202.scanFile, version: 1, uploadedAt: '2026-10-18', views: 1 });
+  db.documents.push({ id: 'TL-231', customerId: k19.id, contractId: ct202.id, roomId: 'TX-202', kind: 'CCCD (đã mask)', file: 'cccd_KH-019_mask.jpg', version: 1, uploadedAt: '2026-10-18', views: 1 });
+
+  /* Sheet "Điện vệ sinh chung": công tơ chung (WC/hành lang) TX — (CS mới − CS cũ) × đơn giá ÷ số người sử dụng; áp dụng từ kỳ 10 */
+  db.commonMeters = [
+    { id: 'CTC-TX-01', buildingId: 'TH-TX', name: 'WC chung + hành lang tầng 1–3', code: 'Đ-TX-CHUNG', rooms: ['TX-101', 'TX-102', 'TX-201', 'TX-202', 'TX-301'], method: 'per_person', price: 4000, from: '2026-10', note: 'Tòa có công tơ chung: Phí dịch vụ không gồm điện chung (đề xuất BILL-Q5)' },
+  ];
+  db.commonReadings = [
+    { meterId: 'CTC-TX-01', period: '2026-09', prev: 2410, cur: 2520, status: 'confirmed', enteredBy: 'NV-005', enteredAt: '2026-09-01', note: 'Kỳ theo dõi đầu — chưa phân bổ' },
+    { meterId: 'CTC-TX-01', period: '2026-10', prev: 2520, cur: 2646, status: 'confirmed', enteredBy: 'NV-005', enteredAt: '2026-10-01', note: '' },
+  ];
+  /* Số người ở thay đổi theo tháng (ghi chú "tháng 10 ở 2 ng" trong file) — dùng cho điện chung / nước theo người */
+  db.contracts.find(function (c) { return c.roomId === 'TX-102' && c.status === 'active'; }).peopleLog = [{ from: '2026-10', people: 3, note: 'Tháng 10 ở thêm 1 người (QL khai báo 05/10)', by: 'NV-005', at: '2026-10-05' }];
+  /* Giảm trừ / phụ thu (cột "Thu khác"): QL tự duyệt dưới ngưỡng; từ ngưỡng trở lên chờ kế toán/admin duyệt */
+  var ctOf = function (roomId) { return db.contracts.find(function (c) { return c.roomId === roomId && c.status === 'active'; }); };
+  db.billAdjusts = [
+    { id: 'DC-2610-01', roomId: 'TX-101', contractId: ctOf('TX-101').id, buildingId: 'TH-TX', period: '2026-10', kind: 'discount', category: 'Hỗ trợ DV', amount: 120000, reason: 'Khách về quê 10 ngày đầu tháng — hỗ trợ DV chung', status: 'approved', createdBy: 'NV-005', createdAt: '2026-10-02', approvedBy: 'NV-005', approvedAt: '2026-10-02' },
+    { id: 'DC-2610-02', roomId: 'TX-102', contractId: ctOf('TX-102').id, buildingId: 'TH-TX', period: '2026-10', kind: 'surcharge', category: 'Thêm người', amount: 200000, reason: 'Thêm 1 người ở quá 5 ngày (Điều 1.2 HĐ)', status: 'approved', createdBy: 'NV-005', createdAt: '2026-10-05', approvedBy: 'NV-005', approvedAt: '2026-10-05' },
+    { id: 'DC-2610-03', roomId: 'TX-301', contractId: ctOf('TX-301').id, buildingId: 'TH-TX', period: '2026-10', kind: 'surcharge', category: 'Phạt vi phạm', amount: 600000, reason: 'Làm bẩn, hỏng tường hành lang — phạt theo nội quy', status: 'pending', createdBy: 'NV-005', createdAt: '2026-10-08', approvedBy: null, approvedAt: null },
+  ];
+
   /* K-06: ngưỡng cảnh báo hết hạn là cấu hình doanh nghiệp (mặc định 35), khác với mốc khách phải báo trước theo HĐ */
   db.settings = { expiryAlertDays: 35, expiryAlertNote: 'Mặc định doanh nghiệp (đề xuất K-06) — override theo nhóm tòa cần phân quyền; chưa duyệt thành chính sách' };
 
@@ -723,6 +801,53 @@ function addMonthsYm(ym, n) {
   return y + '-' + String(m + 1).padStart(2, '0');
 }
 TH.addMonthsYm = addMonthsYm;
+/* ---------- CR-BILL helpers (dùng chung cho seed và TH.calc) ---------- */
+function monthDays(ym) { return new Date(+ym.slice(0, 4), +ym.slice(5, 7), 0).getDate(); }
+function monthEnd(ym) { return ym + '-' + String(monthDays(ym)).padStart(2, '0'); }
+function dayDiff(a, b) { return Math.round((new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / 86400000); }
+function monthsBetween(a, b) { return (+b.slice(0, 4) - +a.slice(0, 4)) * 12 + (+b.slice(5, 7) - +a.slice(5, 7)); }
+TH.monthEnd = monthEnd;
+function rulesOf(db) { return Object.assign({}, TH.BILL_RULES_DEFAULT, db.billRules || {}); }
+/* Ngày tính tiền của HĐ trong kỳ (F023.B): từ ngày bắt đầu tính tiền (bàn giao) đến ngày khách thực đi; tròn tháng → hệ số 1, lẻ → ngày ở ÷ 30 (hoặc ÷ số ngày của tháng) */
+function occupancy(db, ct, period) {
+  var R = rulesOf(db), first = period + '-01', last = monthEnd(period), md = monthDays(period);
+  var start = (ct.handover && ct.handover.billingFrom) || ct.start;
+  var endD = ct.status !== 'active' && ct.status !== 'draft' ? (ct.endedAt || ct.end) : null;
+  var from = start > first ? start : first, to = endD && endD < last ? endD : last;
+  var days = Math.max(0, dayDiff(from, to) + 1), full = from === first && to === last, base = R.prorateBase === 'actual' ? md : 30;
+  return { from: from, to: to, days: days, base: base, monthDays: md, full: full, k: full ? 1 : Math.min(1, days / base) };
+}
+/* Kỳ thanh toán nhiều tháng (cột "Kỳ TT"): chu kỳ tính từ cycleFrom; kỳ đầu chu kỳ thu tiền phòng × số tháng, các kỳ còn lại "đã trả trước" (Kỳ TT = 0) */
+function cycleOf(ct, period) {
+  var n = +ct.payCycle || 1, from0 = ct.cycleFrom || ((ct.handover && ct.handover.billingFrom) || ct.start).slice(0, 7);
+  if (n <= 1 || period < from0) return { months: 1, start: true, cover: [period], from: period, to: period };
+  var off = monthsBetween(from0, period) % n, cs = addMonthsYm(period, -off), cover = [];
+  for (var i = 0; i < n; i++) cover.push(addMonthsYm(cs, i));
+  return { months: n, start: off === 0, cover: cover, from: cs, to: cover[n - 1] };
+}
+/* Số người ở theo kỳ — khai báo theo tháng (peopleLog) ghi đè số người trên HĐ */
+function peopleAt(ct, period) {
+  var log = (ct.peopleLog || []).filter(function (x) { return x.from <= period; }).sort(function (a, b) { return a.from < b.from ? -1 : 1; });
+  return log.length ? +log[log.length - 1].people : (ct.people || 1);
+}
+/* Phân bổ điện chung (sheet "Điện vệ sinh chung"): (CS mới − CS cũ) × đơn giá ÷ số người (hoặc số phòng) đang ở; phần lẻ làm tròn dồn vào dòng cuối.
+   Phòng trống: rule commonVacant — 'spread' chia hết cho người đang ở, 'loss' tính 1 suất/phòng trống vào thất thoát. */
+function commonShare(db, m, period) {
+  if (typeof m === 'string') m = (db.commonMeters || []).find(function (x) { return x.id === m; });
+  var R = rulesOf(db), rd = (db.commonReadings || []).find(function (r) { return r.meterId === m.id && r.period === period; });
+  var ok = !!(rd && rd.status === 'confirmed' && rd.cur !== null && rd.cur !== '' && +rd.cur >= +rd.prev && m.from <= period);
+  var kwh = ok ? rd.cur - rd.prev : 0, amount = kwh * m.price, endP = monthEnd(period);
+  var rows = m.rooms.map(function (roomId) {
+    var ct = db.contracts.find(function (c) { return c.roomId === roomId && c.status === 'active' && c.start <= endP; });
+    return { roomId: roomId, contractId: ct ? ct.id : null, units: ct ? (m.method === 'per_person' ? peopleAt(ct, period) : 1) : 0, amount: 0 };
+  });
+  var units = rows.reduce(function (s, r) { return s + r.units; }, 0), vacant = rows.filter(function (r) { return !r.units; }).length;
+  var vacantUnits = R.commonVacant === 'loss' ? vacant : 0, base = units + vacantUnits, perUnit = base ? amount / base : 0;
+  var loss = Math.round(perUnit * vacantUnits), toSplit = amount - loss, done = 0, live = rows.filter(function (r) { return r.units; });
+  live.forEach(function (r, i) { r.amount = i === live.length - 1 ? toSplit - done : Math.round(perUnit * r.units); done += r.amount; });
+  return { meter: m, reading: rd || null, ok: ok, kwh: kwh, price: m.price, amount: amount, units: units, base: base, perUnit: perUnit, rows: rows, vacant: vacant, loss: ok ? loss : 0 };
+}
+TH.billOccupancy = occupancy; TH.billCycle = cycleOf; TH.peopleAt = peopleAt; TH.commonShare = commonShare;
 function managerOf(db, bId) {
   var b = db.buildings.find(function (x) { return x.id === bId; });
   return b ? b.managerId : null;
@@ -733,12 +858,26 @@ function contractIdOf(db, roomId) {
 }
 TH.addDays = addDays;
 
-/* Tạo hóa đơn từ hợp đồng + chỉ số + phí phát sinh (dùng chung cho seed và luồng INV-01). */
+/* Tạo hóa đơn từ hợp đồng + chỉ số + phí phát sinh (dùng chung cho seed và luồng INV-01).
+   CR-BILL: tiền phòng tính lẻ theo ngày ở (F023.B), kỳ TT nhiều tháng, điện chung phân bổ, giảm trừ/phụ thu — theo quy tắc db.billRules (đề xuất). */
 function buildInvoice(db, ct, period, status) {
   var b = db.buildings.find(function (x) { return x.id === ct.buildingId; });
   var rd = db.readings.find(function (r) { return r.roomId === ct.roomId && r.period === period; });
-  var lines = [{ type: 'rent', name: 'Tiền phòng tháng ' + period.slice(5) + '/' + period.slice(0, 4), qty: 1, unit: 'tháng', price: ct.rent }];
-  ct.fees.forEach(function (f) { lines.push({ type: 'fixed', code: f.code, name: f.name, qty: f.qty, unit: f.unit, price: f.price }); });
+  var R = rulesOf(db), occ = occupancy(db, ct, period), cyc = cycleOf(ct, period), mm = period.slice(5) + '/' + period.slice(0, 4);
+  var lines = [];
+  if (cyc.start) {
+    var firstAmt = occ.full ? ct.rent : Math.round(ct.rent * occ.k / (R.roundTo || 1)) * (R.roundTo || 1);
+    var rentName = cyc.months > 1 ? 'Tiền phòng ' + cyc.from.slice(5) + '–' + cyc.to.slice(5) + '/' + cyc.to.slice(0, 4) + ' (' + cyc.months + ' tháng)' + (occ.full ? '' : ' · tháng đầu ' + occ.days + '/' + occ.base + ' ngày')
+      : occ.full ? 'Tiền phòng tháng ' + mm : 'Tiền phòng ' + occ.from.slice(8) + '–' + occ.to.slice(8) + '/' + period.slice(5) + ' (' + occ.days + '/' + occ.base + ' ngày)';
+    lines.push({ type: 'rent', name: rentName, qty: cyc.months, unit: 'tháng', price: ct.rent, k: occ.full ? 1 : Math.round(occ.k * 10000) / 10000, days: occ.days, base: occ.base, from: occ.from, to: occ.to, months: cyc.months, cover: cyc.cover, amount: firstAmt + ct.rent * (cyc.months - 1) });
+  }
+  var fixedMul = cyc.months > 1 && ct.cycleScope === 'rent_svc' ? (cyc.start ? cyc.months : 0) : 1;
+  var fixedK = R.prorateFixed === 'yes' && !occ.full ? Math.round(occ.k * 10000) / 10000 : 1;
+  if (fixedMul) ct.fees.forEach(function (f) {
+    var l = { type: 'fixed', code: f.code, name: f.name + (fixedMul > 1 ? ' (' + fixedMul + ' tháng)' : ''), qty: f.qty * fixedMul, unit: f.unit, price: f.price };
+    if (fixedK !== 1) { l.k = fixedK; l.amount = Math.round(l.qty * l.price * fixedK); }
+    lines.push(l);
+  });
   var readingOk = rd && rd.elecCur !== null && rd.waterCur !== null && rd.waterCur >= rd.waterPrev && rd.elecCur >= rd.elecPrev;
   /* CR-CUS-01: đơn giá điện/nước lấy theo bảng giá của HĐ nếu có (dữ liệu mẫu = giá tòa nên số cũ không đổi); nước theo người/phòng không cần chỉ số */
   var pl = function (code) { return (ct.priceList || []).find(function (l) { return l.code === code && l.active; }); };
@@ -747,17 +886,28 @@ function buildInvoice(db, ct, period, status) {
     lines.push({ type: 'elec', name: 'Điện (' + rd.elecPrev + ' → ' + rd.elecCur + ')', qty: rd.elecCur - rd.elecPrev, unit: 'kWh', price: pe ? pe.price : b.elecPrice });
     if (!waterFixed) lines.push({ type: 'water', name: 'Nước (' + rd.waterPrev + ' → ' + rd.waterCur + ')', qty: rd.waterCur - rd.waterPrev, unit: 'm³', price: pw ? pw.price : b.waterPrice });
   }
-  if (waterFixed) lines.push({ type: 'water', name: pw.method === 'per_person' ? 'Nước (theo người)' : 'Nước (theo phòng)', qty: pw.method === 'per_person' ? ct.people || 1 : 1, unit: pw.method === 'per_person' ? 'người' : 'phòng', price: pw.price });
+  if (waterFixed) lines.push({ type: 'water', name: pw.method === 'per_person' ? 'Nước (theo người)' : 'Nước (theo phòng)', qty: pw.method === 'per_person' ? peopleAt(ct, period) : 1, unit: pw.method === 'per_person' ? 'người' : 'phòng', price: pw.price });
+  /* Điện chung (sheet "Điện vệ sinh chung"): phần phân bổ của phòng trên công tơ chung của tòa */
+  (db.commonMeters || []).filter(function (m) { return m.buildingId === ct.buildingId && m.from <= period && m.rooms.indexOf(ct.roomId) > -1; }).forEach(function (m) {
+    var sh = commonShare(db, m, period), row = sh.rows.find(function (x) { return x.roomId === ct.roomId; });
+    if (!sh.ok || !row || !row.amount) return;
+    lines.push({ type: 'common', code: 'ECOM', name: 'Điện chung ' + m.name + ' (' + sh.kwh + ' kWh ÷ ' + sh.base + ' ' + (m.method === 'per_person' ? 'người' : 'phòng') + ')', qty: row.units, unit: m.method === 'per_person' ? 'người' : 'phòng', price: Math.round(sh.perUnit), amount: row.amount, refId: m.id });
+  });
   (db.extraFees || []).filter(function (e) { return e.roomId === ct.roomId && e.period === period; }).forEach(function (e) {
     lines.push({ type: 'extra', name: e.name, qty: e.qty, unit: 'lần', price: e.price, refId: e.id, draft: e.status !== 'confirmed' });
   });
-  lines.forEach(function (l) { l.amount = l.qty * l.price; });
+  /* Giảm trừ / phụ thu ("Thu khác"): khoản chờ duyệt giữ hóa đơn ở nháp */
+  (db.billAdjusts || []).filter(function (a) { return a.roomId === ct.roomId && a.period === period && a.status !== 'rejected'; }).forEach(function (a) {
+    var sg = a.kind === 'discount' ? -1 : 1;
+    lines.push({ type: 'adjust', code: a.kind === 'discount' ? 'DISC' : 'SURC', name: (sg < 0 ? 'Giảm trừ' : 'Phụ thu') + ' · ' + a.category + (a.reason ? ' — ' + a.reason : ''), qty: 1, unit: 'lần', price: sg * a.amount, amount: sg * a.amount, refId: a.id, draft: a.status !== 'approved' });
+  });
+  lines.forEach(function (l) { if (l.amount === undefined) l.amount = l.qty * l.price; });
   var total = lines.reduce(function (s, l) { return s + l.amount; }, 0);
   return {
     id: 'INV-' + period.slice(2, 4) + period.slice(5) + '-' + ct.roomId.replace('-', ''),
     period: period, roomId: ct.roomId, buildingId: ct.buildingId, contractId: ct.id, customerId: ct.customerId,
     issuedAt: period + '-01', dueAt: period + '-10', lines: lines, total: total, status: status,
-    readingOk: !!readingOk,
+    readingOk: !!readingOk, days: occ.days, k: occ.full ? 1 : Math.round(occ.k * 10000) / 10000, prepaidTo: cyc.start ? null : cyc.to, cycle: cyc.months > 1 ? { months: cyc.months, from: cyc.from, to: cyc.to, start: cyc.start } : null,
     confirmedBy: status === 'confirmed' ? 'NV-002' : null, confirmedAt: status === 'confirmed' ? period + '-01' : null, version: 1,
   };
 }
@@ -1000,6 +1150,11 @@ TH.calc = (function () {
       r.occ = r.rentable ? r.occupied / r.rentable : 0;
       /* G-03 (TH1 trong "Cách tính lương phòng vận hành"): kỳ có cọc mới / thu trước nhiều tháng cần chuẩn hóa — mockup chỉ phát hiện, chưa áp */
       r.th1 = (db().deposits || []).filter(function (d) { return d.buildingId === bId && d.period === period && d.type === 'in' && d.status === 'confirmed'; });
+      /* CR-BILL: tiền thuê tháng tương lai thu trước (đóng nhiều tháng) — tính sẵn số chuẩn hóa G-03, chưa áp vào HS (thuật toán chờ duyệt) */
+      r.prepaidList = [];
+      api.invoicesIn(period, bId).filter(function (i) { return i.status === 'confirmed'; }).forEach(function (i) { i.lines.forEach(function (l) { if (l.type === 'rent' && (l.months || 1) > 1) r.prepaidList.push({ roomId: i.roomId, months: l.months, amount: l.price * (l.months - 1) }); }); });
+      r.prepaidFuture = sum(r.prepaidList, function (x) { return x.amount; });
+      r.revNorm = r.rev - r.prepaidFuture;
       return r;
     },
     /* Gộp nhiều tòa: cộng thành phần, B tính lại trên tổng; D/HS cộng từ từng tòa */
@@ -1069,6 +1224,165 @@ TH.calc = (function () {
       if (rows.length && base > 0) rows[0].amount += base - allocated; // dồn phần làm tròn cho dòng đầu
       return { base: base, rows: rows, summary: sm, ratioTotal: sum(rows, function (r) { return r.share.ratio; }) };
     },
+
+    /* ---- CR-PAY: thu tiền theo mẫu Excel tháng 9/2026 (sheet hóa đơn, cập nhật thu tiền, BÁO CÁO CHECK THU TIỀN, DS phòng phá hđ, ĐIỆN NƯỚC PHÒNG TRỐNG) ---- */
+    balance: function (inv) { return inv.status === 'confirmed' ? api.paid(inv.id) - inv.total : 0; },
+    breakCase: function (roomId, period) { return (db().breakCases || []).find(function (x) { return x.roomId === roomId && x.period === period; }) || null; },
+    /* Tình trạng theo thứ tự IF của Excel; "Đóng cọc" (đã đóng > 0, không có hóa đơn) xét trước "Thừa" để không bị che (công thức gốc không bao giờ ra Đóng cọc) */
+    billState: function (due, paid, hasBill) {
+      if (due > 0 && paid === 0) return 'unpaid';
+      if (paid > 0 && due === 0 && !hasBill) return 'deposit';
+      if (paid - due > 0) return 'over';
+      if (due === 0 && paid === 0) return 'empty';
+      return paid - due < 0 ? 'short' : 'full';
+    },
+    /* 1 dòng sheet "BÁO CÁO CHECK THU TIỀN" của phòng trong kỳ:
+         Cần đóng = hóa đơn kỳ + nợ cũ (có dấu: thừa kỳ trước làm giảm) + cọc KH mới thu cùng kỳ
+         Đã đóng = phiếu thu đã xác nhận của hóa đơn kỳ + phiếu trả nợ cũ nhận trong kỳ + cọc nhận trong kỳ
+         Công nợ = Đã đóng − Cần đóng */
+    roomBill: function (roomId, period) {
+      var room = api.room(roomId), start = period + '-01', end = period + '-31';
+      var inv = db().invoices.find(function (i) { return i.roomId === roomId && i.period === period && i.status === 'confirmed'; }) || null;
+      var prior = db().invoices.filter(function (i) { return i.roomId === roomId && i.period < period && i.status === 'confirmed'; });
+      var counted = [], oldDebt = 0;
+      prior.forEach(function (i) {
+        var rs = api.receiptsOf(i.id).filter(function (r) { return r.status === 'confirmed'; });
+        oldDebt += i.total - sum(rs.filter(function (r) { return r.receivedAt < start; }), function (r) { return r.amount; });
+        rs.forEach(function (r) { if (r.receivedAt >= start && r.receivedAt <= end) counted.push({ at: r.receivedAt, amount: r.amount, kind: 'old', id: r.id }); });
+      });
+      if (inv) api.receiptsOf(inv.id).forEach(function (r) { if (r.status === 'confirmed') counted.push({ at: r.receivedAt, amount: r.amount, kind: 'cur', id: r.id }); });
+      var deps = (db().deposits || []).filter(function (d) { return d.roomId === roomId && d.period === period && d.type === 'in' && d.status === 'confirmed'; });
+      /* CR-BILL: rule depositInCollect — 'yes' cọc khách mới vào cần đóng/đã đóng (như file Excel), 'no' tách riêng */
+      var depCount = TH.billRules().depositInCollect !== 'no';
+      if (depCount) deps.forEach(function (d) { counted.push({ at: d.date, amount: d.amount, kind: 'deposit', id: d.id }); });
+      var depositAll = sum(deps, function (d) { return d.amount; }), depositIn = depCount ? depositAll : 0;
+      var ct = inv ? api.contract(inv.contractId) : (api.contractOfRoom(roomId) || null);
+      var due = (inv ? inv.total + depositIn : 0) + oldDebt, paid = sum(counted, function (c) { return c.amount; });
+      var occupiedNoBill = !inv && ct && ct.status === 'active' && ct.start <= end;
+      var state = occupiedNoBill && !paid ? 'nobill' : api.billState(due, paid, !!inv);
+      var b = api.building(room.buildingId), bc = api.breakCase(roomId, period);
+      var cyc = ct ? cycleOf(ct, period) : null;
+      return { room: room, roomId: roomId, buildingId: room.buildingId, managerId: b.managerId, period: period, invoice: inv, contract: ct, invTotal: inv ? inv.total : 0, oldDebt: oldDebt, depositIn: depositIn, depositAll: depositAll,
+        cycle: cyc && cyc.months > 1 ? cyc : null, prepaidTo: cyc && cyc.months > 1 ? cyc.to : null, payCycle: cyc ? (cyc.start ? cyc.months : 0) : null,
+        due: due, paid: paid, balance: paid - due, pending: inv ? api.pending(inv.id) : 0, state: state, receipts: counted, broken: bc,
+        lastPaidAt: counted.reduce(function (m, c) { return c.at > m ? c.at : m; }, '') || null };
+    },
+    roomBills: function (period, scope) {
+      return db().rooms.filter(function (r) { return inScope(r.buildingId, scope); }).map(function (r) { return api.roomBill(r.id, period); });
+    },
+    /* Gộp các dòng phòng thành 1 dòng sheet "cập nhật thu tiền" (theo tòa / theo QL / tổng hệ thống).
+       Phải thu sau phá HĐ = Phải thu − Thực thu − (DT phá HĐ − Phá HĐ thu được) · lũy kế M5/M10/M15 = tiền đã đóng có ngày thực nhận ≤ ngày 5/10/15 của kỳ
+       DT mốc 1 = M5 · mốc 2 = (M10 − M5) × 90% · mốc 3 = (M15 − M10) × 70% */
+    collectOf: function (bills, period) {
+      var r = { due: 0, paid: 0, brokenDue: 0, brokenPaid: 0, cum5: 0, cum10: 0, cum15: 0, rooms: bills.length, broken: 0, pending: 0, states: {}, deposit: 0 };
+      var c5 = period + '-05', c10 = period + '-10', c15 = period + '-15';
+      bills.forEach(function (x) {
+        r.due += x.due; r.paid += x.paid; r.pending += x.pending; r.deposit += x.depositIn;
+        r.states[x.state] = (r.states[x.state] || 0) + 1;
+        if (x.broken) { r.broken++; r.brokenDue += x.due; r.brokenPaid += x.paid; }
+        x.receipts.forEach(function (c) { if (c.at <= c5) r.cum5 += c.amount; if (c.at <= c10) r.cum10 += c.amount; if (c.at <= c15) r.cum15 += c.amount; });
+      });
+      r.afterBreak = r.due - r.paid - (r.brokenDue - r.brokenPaid);
+      r.rate = r.due ? r.paid / r.due : null;
+      r.brokenRate = r.brokenDue ? r.brokenPaid / r.brokenDue : null;
+      r.brokenShare = r.due ? r.brokenDue / r.due : null;
+      r.m1 = r.cum5; r.m2 = (r.cum10 - r.cum5) * 0.9; r.m3 = (r.cum15 - r.cum10) * 0.7; r.msTotal = r.m1 + r.m2 + r.m3;
+      return r;
+    },
+    collectBuilding: function (period, bId) { var r = api.collectOf(api.roomBills(period, bId), period); r.buildingId = bId; r.managerId = api.building(bId).managerId; return r; },
+    collectManagers: function (period, ids) {
+      var by = {}, order = [];
+      ids.forEach(function (id) { var m = api.building(id).managerId; if (!by[m]) { by[m] = []; order.push(m); } by[m].push(id); });
+      return order.map(function (m) {
+        var bills = [];
+        by[m].forEach(function (id) { bills = bills.concat(api.roomBills(period, id)); });
+        var r = api.collectOf(bills, period); r.managerId = m; r.buildings = by[m];
+        return r;
+      });
+    },
+    /* Sheet "DS phòng phá hđ": tổng phải thu = TIỀN ĐIỆN hóa đơn kỳ (cọc bị giữ bù tiền phòng — "kh phá hd, thu tiền điện"), tổng đã thu = đã đóng của phòng */
+    breakList: function (period, scope) {
+      return (db().breakCases || []).filter(function (x) { return x.period === period && inScope(x.buildingId, scope); }).map(function (x) {
+        var ct = api.contract(x.contractId), k = api.customer(x.customerId), bill = api.roomBill(x.roomId, period), inv = bill.invoice;
+        var elec = inv ? sum(inv.lines.filter(function (l) { return l.type === 'elec'; }), function (l) { return l.amount; }) : 0;
+        var water = inv ? sum(inv.lines.filter(function (l) { return l.type === 'water'; }), function (l) { return l.amount; }) : 0;
+        var months = ct ? Math.max(0, (+x.at.slice(0, 4) - +ct.start.slice(0, 4)) * 12 + (+x.at.slice(5, 7) - +ct.start.slice(5, 7)) - (+x.at.slice(8, 10) < +ct.start.slice(8, 10) ? 1 : 0)) : null;
+        return { bc: x, contract: ct, customer: k, managerId: api.building(x.buildingId).managerId, start: ct ? ct.start : null, months: months, phone: k ? k.phone : '', bill: bill, invoice: inv,
+          elec: elec, water: water, chase: elec, paid: bill.paid, dtBroken: bill.due, deposit: api.depositCase(x.contractId) };
+      });
+    },
+    /* Sheet "ĐIỆN NƯỚC PHÒNG TRỐNG/KHÔNG THU ĐƯỢC": phòng trống/đang sửa có tiêu thụ trong kỳ (PT) + phòng phá HĐ chưa thu đủ phần điện nước (Phá HĐ) */
+    utilityLoss: function (period, scope) {
+      var out = [];
+      db().rooms.filter(function (r) { return inScope(r.buildingId, scope); }).forEach(function (room) {
+        var rd = api.reading(room.id, period);
+        if (!rd || rd.elecCur === null || rd.waterCur === null || rd.elecCur === '' || rd.waterCur === '') return;
+        var de = Math.max(0, rd.elecCur - rd.elecPrev), dw = Math.max(0, rd.waterCur - rd.waterPrev);
+        if (!de && !dw) return;
+        var b = api.building(room.buildingId), bc = api.breakCase(room.id, period), bill = api.roomBill(room.id, period);
+        var ep = b.elecPrice, wp = b.waterPrice, kind, lost;
+        if (bc) {
+          if (!bill.invoice) return;
+          var el = bill.invoice.lines.find(function (l) { return l.type === 'elec'; }), wl = bill.invoice.lines.find(function (l) { return l.type === 'water'; });
+          if (el) ep = el.price;
+          if (wl) wp = wl.price;
+          lost = Math.max(0, de * ep + dw * wp - bill.paid);
+          if (!lost) return;
+          kind = 'broken';
+        } else {
+          if (bill.invoice) return; // đã tính cho khách
+          var st = api.roomStateAt ? api.roomStateAt(room, period) : room.status;
+          if (st === 'occupied') return;
+          kind = st === 'maintenance' ? 'maintenance' : 'vacant';
+          lost = de * ep + dw * wp;
+        }
+        out.push({ room: room, reading: rd, kind: kind, note: kind === 'broken' ? 'Phá HĐ' : kind === 'maintenance' ? 'Đang sửa' : 'PT', breakCase: bc,
+          elec: { prev: rd.elecPrev, cur: rd.elecCur, qty: de, price: ep, amount: de * ep }, water: { prev: rd.waterPrev, cur: rd.waterCur, qty: dw, price: wp, amount: dw * wp }, lost: lost });
+      });
+      /* CR-BILL: phần điện chung của phòng trống khi quy tắc commonVacant = 'loss' (công ty chịu) */
+      (db().commonMeters || []).filter(function (m) { return inScope(m.buildingId, scope); }).forEach(function (m) {
+        var sh = commonShare(db(), m, period);
+        if (!sh.ok || !sh.loss) return;
+        out.push({ room: { id: m.code, buildingId: m.buildingId }, reading: sh.reading, kind: 'common', note: 'Điện chung – ' + sh.vacant + ' phòng trống', breakCase: null,
+          elec: { prev: sh.reading.prev, cur: sh.reading.cur, qty: sh.kwh, price: m.price, amount: sh.loss }, water: { prev: 0, cur: 0, qty: 0, price: 0, amount: 0 }, lost: sh.loss });
+      });
+      return out;
+    },
+    /* ---- CR-BILL ---- */
+    occupancy: function (ct, period) { return occupancy(db(), ct, period); },
+    cycleOf: function (ct, period) { return cycleOf(ct, period); },
+    peopleAt: function (ct, period) { return peopleAt(ct, period); },
+    commonMeters: function (bId) { return (db().commonMeters || []).filter(function (m) { return !bId || m.buildingId === bId; }); },
+    commonShare: function (m, period) { return commonShare(db(), m, period); },
+    commonReading: function (meterId, period) { return (db().commonReadings || []).find(function (r) { return r.meterId === meterId && r.period === period; }) || null; },
+    adjustsIn: function (period, scope) { return (db().billAdjusts || []).filter(function (a) { return a.period === period && inScope(a.buildingId, scope); }); },
+    /* Sheet "PHÒNG MỚI THÁNG …": HĐ bắt đầu tính tiền trong kỳ (hóa đơn đầu: tiền phòng lẻ ngày + DV + cọc) + phòng chỉ mới nhận cọc giữ chỗ */
+    newRooms: function (period, scope) {
+      var first = period + '-01', last = monthEnd(period), out = [];
+      db().contracts.filter(function (c) { var bf = (c.handover && c.handover.billingFrom) || c.start; return c.status !== 'draft' && bf >= first && bf <= last && inScope(c.buildingId, scope); }).forEach(function (ct) {
+        var room = api.room(ct.roomId), bill = api.roomBill(ct.roomId, period), inv = bill.invoice && bill.invoice.contractId === ct.id ? bill.invoice : null;
+        var pv = inv || buildInvoice(db(), ct, period, 'draft'), rl = pv.lines.filter(function (l) { return l.type === 'rent'; }); // chưa lập HĐ → số dự kiến
+        out.push({ kind: 'new', contract: ct, room: room, customer: api.customer(ct.customerId), buildingId: ct.buildingId, managerId: api.building(ct.buildingId).managerId, listRent: ct.listRent || room.rent, rent: ct.rent,
+          occ: occupancy(db(), ct, period), cycle: cycleOf(ct, period), rentAmount: sum(rl, function (l) { return l.amount; }), svc: pv.total - sum(rl, function (l) { return l.amount; }), est: !inv, people: peopleAt(ct, period),
+          deposit: bill.depositAll, invoice: inv, bill: bill, note: ct.priceNote || '' });
+      });
+      (db().deposits || []).filter(function (d) { return d.type === 'in' && d.status === 'confirmed' && d.period === period && inScope(d.buildingId, scope) && !out.some(function (x) { return x.room.id === d.roomId; }); }).forEach(function (d) {
+        var room = api.room(d.roomId);
+        out.push({ kind: 'hold', contract: null, room: room, customer: null, buildingId: d.buildingId, managerId: api.building(d.buildingId).managerId, listRent: room.rent, rent: null, occ: null, cycle: null, rentAmount: 0, svc: 0, people: null,
+          deposit: d.amount, invoice: null, bill: api.roomBill(d.roomId, period), note: d.note || 'Giữ chỗ' });
+      });
+      return out;
+    },
+    /* G-03: tiền phòng thu trước cho các tháng sau (đóng nhiều tháng) — phần thuộc tháng tương lai và phần các hóa đơn trước phân bổ vào kỳ này */
+    rentShare: function (l) { var n = l.months || 1; return n > 1 ? { first: l.amount - l.price * (n - 1), later: l.price, months: n } : { first: l.amount, later: 0, months: 1 }; },
+    rentCovering: function (period, scope) {
+      var out = [];
+      db().invoices.filter(function (i) { return i.status === 'confirmed' && i.period < period && inScope(i.buildingId, scope); }).forEach(function (i) {
+        i.lines.forEach(function (l) { if (l.type === 'rent' && (l.months || 1) > 1 && (l.cover || []).indexOf(period) > -1) out.push({ invoice: i, line: l, amount: l.price }); });
+      });
+      return out;
+    },
+    payAccount: function (bId) { var g = (db().buildingGroups || []).find(function (x) { return x.buildings.indexOf(bId) > -1; }); return g && g.payAccount ? g.payAccount : TH.CONTRACT_TERMS.DAYDU.payAccount + ' (minh họa)'; },
 
     expiring: function (days, scope) {
       var limit = TH.addDays(TH.TODAY, days);

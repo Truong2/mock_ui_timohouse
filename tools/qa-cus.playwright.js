@@ -30,7 +30,7 @@ async (page) => {
   });
   await page.reload();
   const upgraded = await read(() => ({ schema: TH.DATA_SCHEMA, name: TH.db.customers[0].name, contracts: TH.db.contracts.length }));
-  check('SCHEMA-UPGRADE', upgraded.schema >= 9 && upgraded.name !== 'SCHEMA-8-STALE' && upgraded.contracts === 19, upgraded);
+  check('SCHEMA-UPGRADE', upgraded.schema >= 9 && upgraded.name !== 'SCHEMA-8-STALE' && upgraded.contracts === 20, upgraded);
   await page.evaluate(() => {
     TH.modal.stack.slice().reverse().forEach(m => TH.modal.close(m.key, { silent: true }));
     TH.db = TH.seed();
@@ -46,7 +46,7 @@ async (page) => {
     invoice: TH.calc.invoice('INV-2610-CG202').total,
     hs: TH.calc.perfBuilding('2026-09', 'TH-CG').hs,
   }));
-  check('REGRESSION', initial.schema >= 9 && initial.kd09 === 16937599 && initial.total09 === 7537599 && initial.kd10 === 4755000 && initial.invoice === 6069800 && Math.round(initial.hs * 1000) === 723, initial);
+  check('REGRESSION', initial.schema >= 9 && initial.kd09 === 16682599 && initial.total09 === 7282599 && initial.kd10 === 9655000 && initial.invoice === 6069800 && Math.round(initial.hs * 1000) === 723, initial);
   const heads = await read(() => ({ head: TH.calc.areaHead('TH-CG'), lead: TH.calc.teamLead('TH-CG'), tx: TH.calc.areaHead('TH-TX') }));
   check('QA-CUS-01', heads.head && heads.head !== heads.lead && !heads.tx, heads);
   const states = await read(() => TH.calc.tenancyStates(TH.calc.contract('HĐ-DD102/25')));
@@ -168,6 +168,6 @@ async (page) => {
   await role('admin');
 
   const smoke = await read(() => { TH.db = TH.seed(); Object.assign(TH.store.state, { building: 'ALL', ui: {}, drafts: {}, editing: null }); const r = TH.qaSmoke(); TH.store.flush(); TH.app.refresh(); return { total: r.total, fails: r.fails, counts: TH.qaCounts() }; });
-  check('SMOKE', smoke.total === 928 && smoke.fails.length === 0, smoke);
+  check('SMOKE', smoke.total === 1048 && smoke.fails.length === 0, smoke);
   return { passed: results.length, results };
 }

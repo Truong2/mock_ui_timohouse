@@ -4,7 +4,7 @@
 
   var BENEFITS = [
     ['owner', 'Hồ sơ chủ nhà & tòa, một nguồn dữ liệu', 'Thông tin theo mẫu HĐ thuê nhà, giá thuê/cọc/giữ giá, nhân sự 4 vai trò, tài sản, PCCC/ĐKKD, lịch trả chủ nhà — nối tới phòng, hóa đơn, thu/chi và báo cáo.'],
-    ['shieldCheck', 'Báo thu khác thực thu', 'Quản lý tòa báo đã thu; chỉ kế toán/Admin xác nhận mới giảm công nợ. Người báo thu không tự duyệt.'],
+    ['shieldCheck', 'Báo thu khác thực thu', 'Quản lý tòa xác nhận thu tiền tòa mình (CR-PAY); chỉ tiền đã xác nhận mới giảm công nợ. Văn phòng xem tiến độ thu theo QL/tòa/phòng và hậu kiểm sao kê.'],
     ['scan', 'OCR có người xác nhận', 'OCR hợp đồng và giấy tờ chỉ là bản nháp: từng field được soát, sửa và xác nhận trước khi lưu.'],
     ['zap', 'Điện nước & hóa đơn theo kỳ', 'Tự lấy chỉ số kỳ trước, báo số bất thường, sinh hóa đơn nháp theo tòa và xem trước tổng tiền trước khi chốt.'],
     ['target', 'Mốc 5/10/15 & hiệu suất tòa', 'Doanh thu sau 3 mốc (100/90/70), trừ tỷ lệ dịch vụ, cộng tiền phòng phát sinh và khách bỏ cọc ÷ giá niêm yết — xem tạm tính và thực tế, đưa vào lương nháp.'],

@@ -119,6 +119,8 @@
       TH.field({ form: NEW, name: 'end', label: 'Ngày kết thúc', type: 'date', required: true }) +
       TH.field({ form: NEW, name: 'svc', label: 'Phí dịch vụ (đ/tháng)', num: true, def: '150000' }) +
       TH.field({ form: NEW, name: 'net', label: 'Internet (đ/tháng)', num: true, def: '100000' }) +
+      TH.field({ form: NEW, name: 'cyc', label: 'Kỳ thanh toán tiền phòng', type: 'select', options: Object.keys(TH.PAY_CYCLES).map(function (k) { return { id: k, label: TH.PAY_CYCLES[k] }; }), def: '1' }) +
+      TH.field({ form: NEW, name: 'pnote', label: 'Ghi chú giá chốt', def: '', placeholder: 'VD: chốt giá 3,7tr (niêm yết 3,9tr), CTV bù 7 ngày' }) +
       '</div><div style="margin-top:12px">' + fees + '</div></div></div>' +
       '<div class="stack"><div class="card"><div class="card-hd"><div class="card-title">' + I('paperclip', 'ic-sm') + 'Bản scan / file OCR</div></div><div class="card-bd">' + (job ? TH.fileOf(job.file) : '<div class="dropzone" style="padding:18px"><span class="small">Chưa có file</span><button type="button" class="btn btn-sm" data-act="con.ocr">' + I('upload', 'ic-sm') + 'Tải bản scan</button></div>') + '</div></div>' +
       '<div class="alert alert-neutral">' + I('info', 'ic-sm') + '<div class="alert-body">Không ký số/pháp lý tự động. Hợp đồng chỉ hiệu lực sau bước <b>Duyệt</b>; phòng chuyển “Đang thuê” khi duyệt.</div></div></div></div>' +
@@ -136,7 +138,7 @@
   };
   function readNew() {
     var g = function (k, d) { return TH.store.draft(NEW, k, d); };
-    return { customer: g('customer', ''), room: g('room', ''), rent: +String(g('rent', '')).replace(/\D/g, ''), deposit: +String(g('deposit', '')).replace(/\D/g, ''), start: g('start', ''), end: g('end', ''), svc: +String(g('svc', '150000')).replace(/\D/g, ''), net: +String(g('net', '100000')).replace(/\D/g, '') };
+    return { customer: g('customer', ''), room: g('room', ''), rent: +String(g('rent', '')).replace(/\D/g, ''), deposit: +String(g('deposit', '')).replace(/\D/g, ''), start: g('start', ''), end: g('end', ''), svc: +String(g('svc', '150000')).replace(/\D/g, ''), net: +String(g('net', '100000')).replace(/\D/g, ''), cyc: +g('cyc', '1') || 1, pnote: (g('pnote', '') || '').trim() };
   }
   function validNew(d) {
     if (!d.customer || !d.room || !d.rent || !d.start || !d.end) return 'Nhập đủ khách, phòng, giá thuê và thời hạn.';
@@ -176,6 +178,9 @@
       ct.priceList = TH.seedPriceList(bb, d.start, 1);
       ct.priceList.forEach(function (l) { if (l.code === 'SVC') l.price = d.svc; if (l.code === 'NET') l.price = d.net; });
     }
+    /* CR-BILL: giá niêm yết của phòng / giá chốt (sheet PHÒNG MỚI) và kỳ thanh toán tiền phòng (cột Kỳ TT) */
+    ct.listRent = room.rent; ct.priceNote = d.pnote;
+    if (d.cyc > 1) { ct.payCycle = d.cyc; ct.cycleScope = 'rent'; ct.cycleFrom = d.start.slice(0, 7); }
     TH.syncFees(ct);
     TH.db.contracts.push(ct);
     TH.db.roomEvents.unshift({ roomId: room.id, at: TH.TODAY, from: room.status, to: 'occupied', by: TH.me().id, note: 'Kích hoạt HĐ ' + id });

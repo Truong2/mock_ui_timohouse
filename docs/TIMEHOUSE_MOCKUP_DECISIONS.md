@@ -376,3 +376,87 @@ Nguồn triển khai: [TIMEHOUSE_MOCKUP_CR_CUS_ANSWERS.md](TIMEHOUSE_MOCKUP_CR_C
 **Dữ liệu mẫu (schema 10 — trình duyệt tự nạp lại):** mọi HĐ (19) dùng điều khoản mẫu đầy đủ; `ct.handover` 30 tài sản + chỉ số đầu kỳ của phòng (DD-302: “Tường — thấm nhẹ góc trần” nối với khấu trừ của HC-2610-01; CG-102 rèm ố; TX-202 bình nóng lạnh rò); `ct.prepaid` cho HĐ đang thuê (1.000.000 trước ký + phần còn lại khi ký = cọc + tiền phòng kỳ đầu); khách có `idPlace`; `ocrTemplates` kind contract: mẫu đầy đủ (approved, 38 field + 1 bảng) và mẫu phụ (nháp). Số hồi quy giữ nguyên (xem QA §8.4).
 
 **Chưa làm / ngoài phạm vi:** OCR thật (vendor, PoC, consent); prorate theo ngày; đọc trọn Điều 5–7 (chỉ lưu các khoản dùng); đồng bộ chỉ số bàn giao sang METER (chỉ cảnh báo lệch); mẫu phụ chưa có field thật; chính sách phạt/gia hạn/mất cọc vẫn chờ khách phê duyệt.
+
+### 9.7 METER-01 — chọn tòa trước, nhập theo phòng đang ở (21/10/2026)
+
+Theo yêu cầu khách: màn Điện nước không liệt kê toàn bộ phòng của mọi tòa.
+- Topbar "Tất cả tòa": hiện **danh sách tòa** dạng bảng (tìm theo tên/mã/địa chỉ, lọc *Chưa xong*, tòa chưa xong xếp trước) kèm tiến độ chốt số các phòng đang ở (thanh đã xác nhận x/y, thiếu, cần kiểm tra); chưa chọn thì chưa hiện bảng chỉ số. Đã chọn tòa: đổi tòa bằng ô chọn (mỗi lựa chọn ghi tiến độ) và nút *Danh sách tòa* — không dùng hàng thẻ/nút ngang vì không mở rộng được khi nhiều tòa. Lựa chọn được nhớ; topbar chọn 1 tòa hoặc vai trò chỉ có 1 tòa thì vào thẳng bảng tòa đó.
+- Bảng chỉ gồm phòng đang ở (có HĐ hiệu lực hoặc trạng thái Đang thuê). Phòng trống ẩn mặc định, mở bằng *Hiện N phòng trống* khi cần chốt số (bàn giao, kiểm tra).
+- Phí phát sinh, đơn giá, đối chiếu công tơ nguồn, snapshot tính theo tòa đang chọn. Số đã gõ (gói B) giữ khi đổi tòa; *Lưu* lưu mọi dòng nháp, thanh nhập báo số dòng nháp ở tòa khác.
+
+### 9.8 CR-PAY — Thu tiền, phá HĐ, điện nước không thu được, mẫu hóa đơn theo Excel tháng 9/2026 (21/10/2026, schema 11)
+
+Nguồn: `docs/Hoá đơn tiền nhà tháng 9 và dịch vụ tháng 9 năm 2026.xlsx` (sheet NHÀ T/G/S, G16–18, *cập nhật thu tiền*, *BÁO CÁO CHECK THU TIỀN*, *DS phòng phá hđ*, *ĐIỆN NƯỚC PHÒNG TRỐNG*, *HĐ (VP/VP-HẰNG/TECH/G1 TECH)*, *HĐ (HOÀN CỌC)*, *HOÀN CỌC*). Mockup chỉ dùng dữ liệu giả; không chép tên, SĐT, số tài khoản trong file.
+
+| Sheet Excel | Công thức / nghiệp vụ | Mockup |
+| --- | --- | --- |
+| NHÀ T/G/S (hóa đơn từng phòng) | `Tổng cần đóng = Tổng DV + Giá × Kỳ TT + Nợ cũ + Cọc + Thu khác`; `Công nợ = Đã đóng − Cần đóng`; *Tình trạng* = Chưa TT / Thừa / Trống / Đóng cọc / Thiếu / Đủ | `C.roomBill`: cần đóng = hóa đơn kỳ + nợ cũ (có dấu, thừa kỳ trước làm giảm) + cọc KH mới thu cùng kỳ; đã đóng = phiếu thu đã xác nhận của hóa đơn kỳ + phiếu trả nợ cũ nhận trong kỳ + cọc nhận trong kỳ. Thêm *Chưa lập HĐ* cho phòng đang ở chưa có hóa đơn kỳ |
+| cập nhật thu tiền — theo QL | Phải thu, thực thu, **phải thu sau phá HĐ = phải thu − thực thu − (DT phá HĐ − DT phá HĐ thu được)**, tỉ lệ, DT phá HĐ, thu được, tỉ lệ thu được, phá HĐ / phải thu, dòng *Tổng hệ thống* | `C.collectManagers` → PAY-02 tab *Theo quản lý* |
+| cập nhật thu tiền — theo tòa | Mã tòa, QL, phải thu, thu được, DT phá HĐ (= cần đóng của phòng phá HĐ), thu được, tỉ lệ thu, tỉ lệ phá HĐ, lũy kế **M5/M10/M15**, **DT mốc 1 = M5 · mốc 2 = (M10 − M5) × 90% · mốc 3 = (M15 − M10) × 70%** | `C.collectBuilding` → tab *Theo tòa*. File gốc các cột DT MỐC đang lỗi `#REF!`/lệch dòng — mockup tính đúng công thức trên từng tòa |
+| BÁO CÁO CHECK THU TIỀN | Mã phòng, QL, cần đóng, đã đóng, công nợ, tình trạng, ngày thanh toán, ghi chú | Tab *Check theo phòng* (lọc tình trạng/tòa, tìm kiếm, nút *Thu* và *Phá HĐ*) |
+| DS phòng phá hđ | STT, mã phòng, QL, ngày vào ở, số tháng ở, lý do, SĐT, **tổng phải thu = tiền điện kỳ** (cọc bị giữ bù tiền phòng — “kh phá hd, thu tiền điện”), tổng đã thu | `db.breakCases` + `C.breakList` → tab *Phòng phá HĐ* (SĐT che, kèm DT phá HĐ và trạng thái hồ sơ cọc) |
+| ĐIỆN NƯỚC PHÒNG TRỐNG/KHÔNG THU ĐƯỢC | Điện/nước CS cũ, mới, SL, đơn giá, thành tiền; ghi chú *PT* hoặc *kh phá hd* | `C.utilityLoss`: phòng trống/đang sửa có tiêu thụ (PT) + phần điện nước của phòng phá HĐ chưa thu (sau khi trừ tiền khách đã đóng) |
+| HĐ (VP/TECH…) | 12 dòng cố định, Mã KH = mã phòng + A001, ngày chốt số liệu, hạn 25–31, phạt 200k/ngày, nội dung CK = mã phòng, mỗi nhóm nhà 1 tài khoản nhận | INV-03 *Mẫu hóa đơn* (xem trước + in): map dòng hóa đơn vào 12 khoản, nợ cũ/cọc từ `C.roomBill`; `buildingGroups.payAccount` (số giả, đã che) |
+| HĐ (HOÀN CỌC) | Tiền phòng cọc − (tiền phòng lẻ, điện, nước, vệ sinh, mạng, thang máy, gửi xe, máy giặt, khấu hao, sửa chữa, dọn vệ sinh, sơn phòng, DV khác) = tổng hoàn | CUS-02 › Tài chính › *Phiếu hoàn cọc (mẫu)*; khấu trừ có *loại khoản* theo danh sách này (`TH.REFUND_ITEMS`) |
+
+**Quyết định (đề xuất, chờ khách xác nhận):**
+
+| Mã | Quyết định | Ghi chú |
+| --- | --- | --- |
+| PAY-Q1 | **QL tòa xác nhận thu tiền** của tòa mình (`receipt.confirm` cho vai trò Quản lý tòa, theo phạm vi tòa). *Ghi nhận thu* của QL có hiệu lực ngay; báo thu của người khác chờ QL tòa xác nhận ở PAY-APP. Bỏ chặn “người báo không tự duyệt” với QL | Thay SRS F030 “Kế toán/Admin xác nhận thực thu” theo yêu cầu khách 21/10/2026 |
+| PAY-Q2 | **Văn phòng xem tiến độ thu** (PAY-02 tab Theo QL / Theo tòa / Check phòng) và **hậu kiểm**: *Đã đối soát* (mã sao kê) hoặc *Sai lệch — trả QL* (bắt buộc ghi chú). Hậu kiểm không đổi công nợ. Kế toán không còn `receipt.confirm` (có `receipt.audit`) | Admin (`*`) vẫn thao tác được |
+| PAY-Q3 | Cho phép **đóng thừa**: số vượt nợ phân bổ FIFO cho hóa đơn còn nợ khác của phòng (kỳ cũ trước), phần dư nằm ở hóa đơn mới nhất = *Thừa*, tự trừ vào nợ cũ kỳ sau. `C.debt` vẫn ≥ 0 cho các màn cũ; `C.balance` có dấu | Trước đây số vượt bị cắt khi xác nhận |
+| PAY-Q4 | **Ghi nhận phá HĐ** (`contract.break`: QL tòa, kế toán, admin) từ bảng check hoặc CUS-02: HĐ → *Phá hợp đồng*, phòng → *Trống*, hóa đơn kỳ giữ làm DT phá HĐ, mở hồ sơ cọc *Chờ duyệt* đề xuất giữ cọc (không tự ghi mất cọc — K-04). RPT-04/05 *Tổng số phòng phá HĐ* đếm theo `breakCases` ∪ bút toán giữ cọc vi phạm, không đếm trùng | — |
+| PAY-Q5 | Tình trạng *Đóng cọc* (đã đóng > 0, không có hóa đơn) xét trước *Thừa* | Công thức IF gốc xét *Thừa* trước nên không bao giờ ra *Đóng cọc* |
+| PAY-Q6 | Lũy kế M5/M10/M15 của tab Theo tòa tính trên **mọi khoản đã đóng** (gồm trả nợ cũ, cọc) như file Excel; A của hiệu suất (HS) giữ cách cũ: phiếu thu của hóa đơn kỳ nhận trong tháng | Cần khách chốt có thống nhất hai số này không (D-04) |
+
+**Dữ liệu mẫu (schema 11 — trình duyệt tự nạp lại):** DD-201 phá HĐ 16/10 (chuyển chỗ làm), đã đóng 3.000.000 → *Thiếu*; HĐ `terminated`, phòng trống, hồ sơ cọc HC-2610-02 chờ duyệt giữ 4.600.000 (chưa ghi sổ → RPT-05 kỳ 10 không đổi). TX-202 (07/2026) vào danh sách phá HĐ lịch sử. Hệ quả: Đống Đa còn 4 phòng đang ở (METER-01, lấp đầy kỳ 10). Nhóm nhà có tài khoản nhận giả `VPBank •••1201` / `Techcombank •••6018`.
+
+**Ngoài phạm vi lần này:** Kỳ TT nhiều tháng (E = 2/3), tính lẻ theo ngày ở / ngày DV (÷ 30), phân bổ điện chung theo người (dòng *Điện chung* có trong mẫu, giá trị trống), sheet *PHÒNG MỚI THÁNG 9* (hóa đơn đầu cho khách mới có cọc). → **Đã làm ở §9.9 CR-BILL** (quy tắc đề xuất, chờ khách duyệt).
+
+### 9.9 CR-BILL — Tính lẻ ngày, phòng mới tháng, kỳ TT nhiều tháng, điện chung, giảm trừ/phụ thu (21/10/2026, schema 12)
+
+Làm tiếp 4 mục §9.8 để ngoài phạm vi và các điều chỉnh gõ tay ở cột ghi chú, cùng nguồn `docs/Hoá đơn tiền nhà tháng 9 và dịch vụ tháng 9 năm 2026.xlsx`. Quy tắc chưa chốt được làm theo **đề xuất bám file** và gom vào `db.billRules` (INV-01 › thẻ *Quy tắc tính tiền*, nhãn *CHỜ KHÁCH DUYỆT · D-03*). Admin/kế toán đổi qua lại để khách xem; đổi quy tắc chỉ tính lại hóa đơn nháp, hóa đơn đã xác nhận giữ nguyên.
+
+| Mục | File Excel đang làm | Mockup |
+| --- | --- | --- |
+| Tính lẻ theo ngày ở (F023.B) | Cột *Ngày ở / Ngày DV* luôn 30, không công thức nào dùng; nhân viên gõ tay `=(giá/30)*ngày`, có chỗ ÷31 (≈ 32 dòng). Mẫu hóa đơn có cột *Hệ số (ngày/30)*. DV khách mới không tính lẻ (`/31*31`) | `occupancy(ct, kỳ)`: từ ngày bắt đầu tính tiền (bàn giao) đến ngày khách thực đi; tròn tháng → hệ số 1, lẻ → ngày ở ÷ 30 (hoặc ÷ số ngày thực của tháng). Tiền phòng lẻ làm tròn 1.000đ. INV-01/INV-PREV cột *Lẻ kỳ / Kỳ TT*; INV-03 hiện hệ số; mẫu hóa đơn cột *Hệ số (ngày/30)*. INV-01 lập hóa đơn cho HĐ bắt đầu tới cuối tháng (trước đây chỉ tới ngày 28) |
+| Phòng mới tháng (sheet PHÒNG MỚI THÁNG 7/9/10) | Giá niêm yết, giá QL (chốt), giá phòng kỳ này (lẻ), cọc; *Cần đóng = DV + giá lẻ + cọc + nợ cũ + thu khác*; ghi chú "chốt giá…, CTV bù 7 ngày" | HĐ có `listRent` (giá niêm yết) và `priceNote` (form tạo HĐ có ô *Ghi chú giá chốt*). `C.newRooms` → PAY-02 tab **Phòng mới**: kỳ TT, giá chốt/niêm yết, ngày ở, tiền phòng kỳ này (dự kiến nếu chưa lập HĐ), cọc, DV + điện nước, cần đóng, đã đóng, tình trạng; phòng chỉ nhận cọc giữ chỗ cũng liệt kê. Xuất .xlsx thêm sheet *Phong moi* |
+| Kỳ TT nhiều tháng | *Cần đóng = giá × Kỳ TT* (2/3); Kỳ TT = 0 ở tháng đã trả trước; ghi chú "2 tháng tiền nhà + dv" hoặc chỉ tiền nhà | HĐ có `payCycle` (1/2/3), `cycleFrom`, `cycleScope` (*chỉ tiền phòng* / *tiền phòng + DV cố định*). Kỳ đầu chu kỳ: tiền phòng × số tháng; các kỳ còn lại không có dòng tiền phòng, ghi *Đã trả trước đến …*; điện nước vẫn lập hằng tháng. CUS-02 › bảng giá sửa *Kỳ thanh toán* (áp từ sau chu kỳ đang chạy). PAY-02 Check theo phòng cột *Kỳ TT* |
+| Doanh thu thu trước (G-03) | — | P&L: mỗi kỳ nhận 1 tháng tiền phòng (kỳ thu nhận phần tháng đầu, các kỳ sau nhận phần phân bổ — nguồn *Phân bổ tiền phòng trả trước*) theo trả lời G-03. Hiệu suất: TH1 tính sẵn *DT phải thu chuẩn hóa = DT phải thu − tiền thuê tháng tương lai thu trước* nhưng **chưa áp vào HS** (thuật toán chờ duyệt) |
+| Điện chung (F018.D) | *Điện vệ sinh chung*: (CS mới − cũ) × đơn giá ÷ số người; nơi khác cột *Điện chung* = (CS mới − cũ)/2 mỗi phòng; đơn giá 3.800 hoặc 4.000 | `db.commonMeters` + `db.commonReadings`; `commonShare` chia theo người (hoặc phòng) đang ở, làm tròn dồn dòng cuối để tổng khớp. Số người theo tháng `ct.peopleLog` (dùng cả cho nước theo người). METER-01 thẻ **Công tơ điện chung**: nhập số mới, sửa *Số người kỳ này*, bảng phân bổ. Hóa đơn dòng *Điện chung* → mẫu hóa đơn dòng 11; P&L vào doanh thu điện; đối chiếu F020.D cộng phần này |
+| Giảm trừ / phụ thu (cột *Thu khác*, ghi chú) | Gõ tay: hỗ trợ DV khách về quê, phạt bẩn tường cộng vào cần đóng, tăng 200k vì thêm người… | `db.billAdjusts` (loại, khoản, số tiền, lý do, người lập/duyệt). INV-01 thẻ *Giảm trừ / phụ thu* + nút trên INV-01/INV-03. Dưới ngưỡng QL tự duyệt; từ ngưỡng chờ kế toán/admin (người lập không tự duyệt); khoản chờ duyệt giữ hóa đơn ở nháp. Hóa đơn đã xác nhận → khoản ghi vào kỳ sau. Mẫu hóa đơn dòng 9 kèm lý do; P&L: giảm trừ trừ vào tiền phòng, phụ thu vào DV khác |
+
+**Quy tắc đề xuất (chờ khách chốt):**
+
+| Mã | Đề xuất trong mockup | Câu hỏi cho khách |
+| --- | --- | --- |
+| BILL-Q1 | Tiền phòng lẻ = giá × ngày ở ÷ **30** (đổi được sang ngày thực của tháng), làm tròn 1.000đ; tròn tháng luôn hệ số 1 | Chia 30 cố định hay số ngày thực? Làm tròn đến đâu? |
+| BILL-Q2 | DV cố định **thu đủ tháng** khi ở lẻ (như file); có tùy chọn tính lẻ cùng hệ số | DV cố định (mạng, vệ sinh, DV chung) có tính lẻ không? |
+| BILL-Q3 | Ngày bắt đầu tính = ngày bàn giao (`handover.billingFrom`, mặc định ngày bắt đầu HĐ); ngày kết thúc = ngày khách thực đi (HĐ đang hiệu lực không cắt theo ngày hết hạn vì gia hạn mặc nhiên) | Tính từ ngày ký hay ngày vào ở? |
+| BILL-Q4 | Cọc khách mới **tính vào phải thu & 3 mốc** của tiến độ thu (như file), không phải doanh thu (R-01) | Cọc có tính vào tỉ lệ thu / 3 mốc không? |
+| BILL-Q5 | Tòa có công tơ chung: điện chung chia **theo người đang ở**, đơn giá theo công tơ; DV chung không còn gồm điện chung | Chia theo người hay theo phòng? Đơn giá điện chung? |
+| BILL-Q6 | Phần điện chung của phòng trống **chia hết cho người đang ở** (tùy chọn: công ty chịu, vào *Điện nước không thu được*) | Phòng trống có chịu phần chia không? |
+| BILL-Q7 | Kỳ TT nhiều tháng: tiền thu ở kỳ đầu chu kỳ (tiến độ thu tính tiền mặt); P&L phân bổ mỗi tháng 1 tháng; HS chưa chuẩn hóa | Duyệt thuật toán chuẩn hóa G-03 cho HS / lương? |
+| BILL-Q8 | Giảm trừ/phụ thu từ **500.000đ** cần kế toán/admin duyệt (theo ngưỡng F021.C) | Ngưỡng duyệt? Ai được duyệt? |
+
+**Dữ liệu mẫu (schema 12 — trình duyệt tự nạp lại):**
+- **TX-202:** khách mới KH-019 vào ở 20/10. Cọc giữ chỗ 4.000.000 (12/10) chuyển thành cọc HĐ; giá chốt 3.800.000, niêm yết 4.000.000. Hóa đơn TX kỳ 10 chưa lập: *Sinh nháp* ra tiền phòng 12/30 ngày = 1.520.000. CG-401 vẫn trống cho luồng OCR hợp đồng mẫu.
+- **TX-301:** đóng 3 tháng tiền phòng từ kỳ 09. Hóa đơn kỳ 09 có 14.700.000 tiền phòng (3 tháng); hóa đơn kỳ 10 không có tiền phòng.
+- **Công tơ chung TH-TX:** CTC-TX-01, 126 kWh × 4.000 = 504.000, chia theo người từ kỳ 10. TX-102 khai 3 người từ kỳ 10.
+- **Giảm trừ / phụ thu TX kỳ 10:**
+  - TX-101: giảm trừ 120.000 (hỗ trợ DV), đã duyệt.
+  - TX-102: phụ thu 200.000 (thêm người), đã duyệt.
+  - TX-301: phạt 600.000, chờ kế toán duyệt.
+
+**Thay đổi số báo cáo (có chủ ý):**
+- RPT-05 *Kinh doanh* kỳ 10: 4.755.000 → **9.655.000** (+4.900.000). Đây là tiền phòng tháng 10 của TX-301 đã thu trước ở kỳ 09.
+- RPT-05 kỳ 09: kinh doanh 16.937.599 → **16.682.599**, tổng 7.537.599 → **7.282.599** (−255.000). Lương HS của QL tòa Thanh Xuân tăng vì A tính cả tiền thu trước 3 tháng; đây đúng là vấn đề TH1/G-03 đang chờ chốt (BILL-Q7).
+- Tiến độ thu Cầu Giấy / Đống Đa / hệ thống kỳ 10 không đổi.
+
+**Chưa làm:**
+- Tính lẻ điện chung theo ngày ở.
+- Đổi kỳ TT giữa chu kỳ có hoàn/bù.
+- Nhiều đoạn giá trong một kỳ (F023.D vẫn là thẻ mô tả).
+- Chuẩn hóa G-03 vào HS/lương.
+- Import sheet PHÒNG MỚI từ Excel.
