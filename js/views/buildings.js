@@ -21,6 +21,7 @@
       var rows = all.filter(function (b) { return (area === 'all' || b.area === area) && TH.match(q, [b.id, b.name, b.address, C.owner(b.ownerId).name]); });
       var table = TH.table({
         label: 'Danh sách tòa',
+        mobile: { identity: 'n', primary: 'cap', visible: ['n', 'ad', 's', 'cap', 'go'] },
         cols: [
           { key: 'n', label: 'Mã / tên tòa', render: function (b) { return '<div class="cell-main"><a href="' + TH.router.href('BLD-02', b.id) + '">' + esc(b.name) + '</a></div><div class="cell-sub"><span class="mono">' + b.id + '</span></div>'; } },
           { key: 'ad', label: 'Địa chỉ', render: function (b) { return '<span class="small">' + esc(shortAddr(b.address)) + '</span>'; } },
@@ -36,8 +37,15 @@
         empty: { title: 'Không có tòa phù hợp', text: 'Đổi từ khóa hoặc khu vực.' },
       });
       var areas = [{ id: 'all', label: 'Mọi khu vực' }].concat(all.map(function (b) { return { id: b.area, label: b.area }; }));
-      return TH.pageHeader({ screen: S, desc: 'Danh sách chỉ hiện thông tin chính. Mở chi tiết để xem hồ sơ, chủ nhà & hợp đồng, nhân sự, tài sản, minh chứng, vận hành & kết quả, lịch thanh toán.', actions: '<button type="button" class="btn" data-act="imp.open" data-screen="BLD-IMP">' + I('upload', 'ic-sm') + 'Import Excel</button>' + TH.permBtn('master.edit', '<button type="button" class="btn btn-primary" data-act="bld.add">' + I('plus', 'ic-sm') + 'Thêm tòa</button>', 'Thêm · 403') }) +
-        '<div class="card card-flush"><div class="toolbar">' + TH.searchBox(S, 'Tìm mã, tên, địa chỉ, chủ nhà…') + TH.uiSelect(S, 'area', areas, area, 'Khu vực') + '</div>' + table + '</div>';
+      var roomBoard = TH.canScreen('ROOM-01') && rows.length ? '<section class="card room-board" aria-labelledby="room-board-title"><div class="card-hd"><div><h2 id="room-board-title" class="card-title">Sơ đồ phòng</h2><p class="card-sub">Tình trạng hiện tại · chọn phòng để mở hồ sơ</p></div><div class="room-legend">' +
+        ['occupied', 'vacant', 'maintenance', 'reserved'].map(function (status) { return '<span><i class="room-swatch room-' + status + '"></i>' + esc(TH.statusLabel(status)) + '</span>'; }).join('') + '</div></div><div class="room-board-body">' + rows.map(function (b) {
+          return '<div class="room-board-row"><a class="room-building" href="' + TH.router.href('BLD-02', b.id) + '">' + esc(b.short) + '</a><div class="room-slots">' + roomsOf(b.id).map(function (r) {
+            var text = esc(r.code || r.id.split('-').slice(1).join('-')), name = 'Phòng ' + r.id + ' · ' + TH.statusLabel(r.status) + ' · ' + b.short;
+            return TH.canScreen('ROOM-02') ? '<a class="room-slot room-' + esc(r.status) + '" href="' + TH.router.href('ROOM-02', r.id) + '" aria-label="' + esc(name) + '" title="' + esc(name) + '">' + text + '</a>' : '<span class="room-slot room-' + esc(r.status) + '" title="' + esc(name) + '">' + text + '</span>';
+          }).join('') + '</div></div>';
+        }).join('') + '</div></section>' : '';
+      return TH.pageHeader({ screen: S, desc: 'Thông tin tòa, công suất phòng và tình trạng vận hành.', actions: '<button type="button" class="btn" data-act="imp.open" data-screen="BLD-IMP">' + I('upload', 'ic-sm') + 'Import Excel</button>' + TH.permBtn('master.edit', '<button type="button" class="btn btn-primary" data-act="bld.add">' + I('plus', 'ic-sm') + 'Thêm tòa</button>', 'Thêm · 403') }) +
+        '<div class="card card-flush"><div class="toolbar">' + TH.searchBox(S, 'Tìm mã, tên, địa chỉ, chủ nhà…') + TH.uiSelect(S, 'area', areas, area, 'Khu vực') + '</div>' + table + '</div>' + roomBoard;
     },
     dialogs: [function () { bldForm(); }],
   };

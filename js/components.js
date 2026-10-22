@@ -146,15 +146,24 @@ var TH = window.TH = window.TH || {};
     }).join('');
     var body;
     if (!o.rows.length) {
-      body = '<tr><td colspan="' + cols.length + '" style="height:auto;padding:0">' + TH.state('empty', o.empty || { title: 'Không có dữ liệu phù hợp', text: 'Thử đổi bộ lọc, scope tòa hoặc kỳ.' }) + '</td></tr>';
+      body = '<tr class="table-empty"><td colspan="' + cols.length + '" style="height:auto;padding:0">' + TH.state('empty', o.empty || { title: 'Không có dữ liệu phù hợp', text: 'Thử đổi bộ lọc, scope tòa hoặc kỳ.' }) + '</td></tr>';
     } else {
       body = o.rows.map(function (r, i) {
         var attrs = o.rowAttrs ? o.rowAttrs(r, i) : '';
-        return '<tr ' + attrs + '>' + cols.map(function (c, j) {
+        return '<tr role="row" ' + attrs + '>' + cols.map(function (c, j) {
           var locked = c.gate && !TH.has(c.gate);
           var cls = (c.num ? 'num ' : '') + (c.center ? 'center ' : '') + (c.tdCls || '') + (locked ? ' is-ghost' : '') + ' ' + fit[j];
           var v = locked ? '<span aria-hidden="true" style="display:inline-block;width:56px;height:8px;border-radius:4px;background:#e2e8f0"></span>' : cells[i][j];
-          return '<td class="' + cls + '">' + v + '</td>';
+          if (o.mobile) {
+            var identity = c.key === o.mobile.identity;
+            var secondary = o.mobile.visible.indexOf(c.key) === -1;
+            var label = c.label || (c.labelHtml ? String(c.labelHtml).replace(/<[^>]+>/g, '') : '');
+            cls += (identity ? ' mobile-identity' : '') + (secondary ? ' mobile-secondary' : '') + (c.key === o.mobile.primary ? ' mobile-primary' : '');
+            if (locked) v = TH.gate(c.gate, '', { mode: 'mini', label: 'Có từ gói ' + TH.tierOf(c.gate) });
+            v = '<span class="mobile-cell-label" aria-hidden="true">' + esc(label) + (c.gate ? TH.up(c.gate) : '') + '</span><div class="mobile-cell-value">' + v + '</div>' +
+              (identity && cols.some(function (col) { return o.mobile.visible.indexOf(col.key) === -1; }) ? '<button type="button" class="mobile-row-toggle" data-act="table.details" aria-expanded="false">Thông tin khác' + I('chevronDown', 'ic-sm') + '</button>' : '');
+          }
+          return '<td role="cell" class="' + cls + '">' + v + '</td>';
         }).join('') + '</tr>';
       }).join('');
     }
@@ -163,8 +172,35 @@ var TH = window.TH = window.TH || {};
       var v = locked ? '' : (o.foot[c.key] !== undefined ? o.foot[c.key] : (i === 0 ? (o.foot._label || 'Tổng') : ''));
       return '<td class="' + (c.num ? 'num' : '') + (locked ? ' is-ghost' : '') + ' ' + fit[i] + '">' + v + '</td>';
     }).join('') + '</tr></tfoot>' : '';
-    return '<div class="table-wrap' + (o.scroll ? ' scroll-y' : '') + '"><table class="table' + (o.compact ? ' table-compact' : '') + '"' + (o.label ? ' aria-label="' + esc(o.label) + '"' : '') + '><thead><tr>' + head + '</tr></thead><tbody>' + body + '</tbody>' + foot + '</table></div>';
+    return '<div class="table-wrap' + (o.scroll ? ' scroll-y' : '') + (o.mobile ? ' table-records' : '') + '"><table class="table' + (o.compact ? ' table-compact' : '') + '" role="table"' + (o.label ? ' aria-label="' + esc(o.label) + '"' : '') + '><thead role="rowgroup"><tr role="row">' + head + '</tr></thead><tbody role="rowgroup">' + body + '</tbody>' + foot + '</table></div>';
   };
+
+  // Open supplementary fields in place; the source cells, controls and package gates stay the same.
+  TH.act = TH.act || {};
+  TH.act['table.details'] = function (el, ev) {
+    ev.stopPropagation();
+    var row = el.closest('tr'), expanded = el.getAttribute('aria-expanded') !== 'true';
+    row.classList.toggle('is-expanded', expanded);
+    el.setAttribute('aria-expanded', String(expanded));
+    el.innerHTML = (expanded ? 'Thu gọn thông tin' : 'Thông tin khác') + I('chevronDown', 'ic-sm');
+  };
+
+  var compactSummary = window.matchMedia('(max-width: 640px)');
+  TH.summaryBlock = function (title, value, html) {
+    return '<details class="summary-fold"' + (compactSummary.matches ? '' : ' open') + '><summary><span>' + esc(title) + '</span>' +
+      (value ? '<b class="tnum">' + esc(value) + '</b>' : '') + I('chevronDown', 'ic-sm') + '</summary><div class="summary-content">' + html + '</div></details>';
+  };
+  compactSummary.addEventListener('change', function (event) {
+    document.querySelectorAll('.summary-fold').forEach(function (panel) { panel.open = !event.matches; });
+  });
+  var printSummaries = [];
+  window.addEventListener('beforeprint', function () {
+    printSummaries = Array.prototype.map.call(document.querySelectorAll('.summary-fold'), function (panel) { var saved = { panel: panel, open: panel.open }; panel.open = true; return saved; });
+  });
+  window.addEventListener('afterprint', function () {
+    printSummaries.forEach(function (saved) { if (saved.panel.isConnected) saved.panel.open = saved.open; });
+    printSummaries = [];
+  });
 
   /* Phân trang client-side */
   TH.paginate = function (screen, rows, size) {
@@ -429,9 +465,13 @@ var TH = window.TH = window.TH || {};
     return 'M' + x + ',' + (y + h) + 'V' + (y + r) + 'Q' + x + ',' + y + ' ' + (x + r) + ',' + y + 'H' + (x + w - r) + 'Q' + (x + w) + ',' + y + ' ' + (x + w) + ',' + (y + r) + 'V' + (y + h) + 'Z';
   }
   /* Cột nhóm: categories × series. Hover tooltip từng cột, legend khi ≥2 series. */
+  function chartFrame(o) {
+    var compact = window.matchMedia('(max-width: 640px)').matches;
+    return { compact: compact, width: compact ? Math.min(o.width || 560, Math.max(260, window.innerWidth - 80)) : o.width || 560, height: compact ? 200 : o.height || 240 };
+  }
   TH.chart = {
     bars: function (o) {
-      var W = o.width || 560, H = o.height || 240, pl = 52, pr = 8, pt = 12, pb = 30;
+      var frame = chartFrame(o), W = frame.width, H = frame.height, pl = 52, pr = 8, pt = 12, pb = 30;
       var all = []; o.series.forEach(function (s) { all = all.concat(s.values); });
       var ax = axis(all), minV = ax.lo, maxV = ax.hi;
       var ih = H - pt - pb, iw = W - pl - pr;
@@ -456,10 +496,10 @@ var TH = window.TH = window.TH || {};
       });
       var base = '<line class="axis-line" x1="' + pl + '" x2="' + (W - pr) + '" y1="' + y(0) + '" y2="' + y(0) + '"/>';
       var legend = o.series.length > 1 ? '<div class="legend" style="margin-bottom:10px">' + o.series.map(function (s, si) { return '<span><i style="background:' + (s.color || COLORS[si]) + '"></i>' + esc(s.label) + '</span>'; }).join('') + '</div>' : '';
-      return legend + '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(o.label || 'Biểu đồ cột') + '">' + grid + base + bars + '</svg>';
+      return legend + '<svg class="chart' + (frame.compact ? ' chart-compact' : '') + '" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(o.label || 'Biểu đồ cột') + '">' + grid + base + bars + '</svg>';
     },
     lines: function (o) {
-      var W = o.width || 560, H = o.height || 240, pl = 52, pr = 16, pt = 12, pb = 30;
+      var frame = chartFrame(o), W = frame.width, H = frame.height, pl = 52, pr = 16, pt = 12, pb = 30;
       var all = []; o.series.forEach(function (s) { all = all.concat(s.values); });
       var ax = axis(all), minV = ax.lo, maxV = ax.hi;
       var ih = H - pt - pb, iw = W - pl - pr, n = o.categories.length;
@@ -470,7 +510,7 @@ var TH = window.TH = window.TH || {};
       var paths = o.series.map(function (s, si) {
         var col = s.color || COLORS[si];
         var d = s.values.map(function (v, i) { return (i ? 'L' : 'M') + x(i) + ',' + y(v); }).join('');
-        var dots = s.values.map(function (v, i) { return '<circle cx="' + x(i) + '" cy="' + y(v) + '" r="4" fill="' + col + '" stroke="#fff" stroke-width="2"/>'; }).join('');
+        var dots = s.values.length === 1 ? '<circle cx="' + x(0) + '" cy="' + y(s.values[0]) + '" r="3" fill="' + col + '"/>' : '';
         var lastV = s.values[s.values.length - 1];
         var lbl = o.series.length <= 4 ? '<text x="' + (x(n - 1) - 6) + '" y="' + (y(lastV) - 9) + '" text-anchor="end" style="fill:var(--text-2);font-weight:600">' + F.short(lastV) + '</text>' : '';
         return '<path d="' + d + '" fill="none" stroke="' + col + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>' + dots + lbl;
@@ -478,10 +518,11 @@ var TH = window.TH = window.TH || {};
       var hits = o.categories.map(function (c, i) {
         var tip = c + ' — ' + o.series.map(function (s) { return s.label + ': ' + F.money(s.values[i]); }).join(' · ');
         var w = n > 1 ? iw / (n - 1) : iw;
-        return '<rect x="' + (x(i) - w / 2) + '" y="' + pt + '" width="' + w + '" height="' + ih + '" fill="transparent" data-tip="' + esc(tip) + '"/><text x="' + x(i) + '" y="' + (H - 10) + '" text-anchor="middle">' + esc(c) + '</text>';
+        var showLabel = !frame.compact || i % Math.max(1, Math.ceil(n / 4)) === 0;
+        return '<rect x="' + (x(i) - w / 2) + '" y="' + pt + '" width="' + w + '" height="' + ih + '" fill="transparent" data-tip="' + esc(tip) + '"/>' + (showLabel ? '<text x="' + x(i) + '" y="' + (H - 10) + '" text-anchor="' + (frame.compact && i === 0 ? 'start' : frame.compact && i === n - 1 ? 'end' : 'middle') + '">' + esc(c) + '</text>' : '');
       }).join('');
       var legend = o.series.length > 1 ? '<div class="legend" style="margin-bottom:10px">' + o.series.map(function (s, si) { return '<span><i style="background:' + (s.color || COLORS[si]) + '"></i>' + esc(s.label) + '</span>'; }).join('') + '</div>' : '';
-      return legend + '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(o.label || 'Biểu đồ xu hướng') + '">' + grid + '<line class="axis-line" x1="' + pl + '" x2="' + (W - pr) + '" y1="' + y(0) + '" y2="' + y(0) + '"/>' + paths + hits + '</svg>';
+      return legend + '<svg class="chart' + (frame.compact ? ' chart-compact' : '') + '" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(o.label || 'Biểu đồ xu hướng') + '">' + grid + '<line class="axis-line" x1="' + pl + '" x2="' + (W - pr) + '" y1="' + y(0) + '" y2="' + y(0) + '"/>' + paths + hits + '</svg>';
     },
     /* Thanh chồng ngang cho mốc 5/10/15 — một hue theo thứ bậc, khe 2px giữa các đoạn. */
     stack: function (parts, total) {

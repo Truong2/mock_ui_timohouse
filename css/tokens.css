@@ -68,17 +68,17 @@
   --tier-a-soft: #f0fdfa;
   --tier-b: #0369a1;
   --tier-b-soft: #f0f9ff;
-  --tier-c: #6d28d9;
-  --tier-c-soft: #f5f3ff;
+  --tier-c: #475569;
+  --tier-c-soft: #f1f5f9;
   --tier-d: #b45309;
   --tier-d-soft: #fffbeb;
 
   /* Chart */
-  /* Chart — thứ tự cố định, đã chạy validate_palette (light): PASS cả 5 kiểm tra */
-  --chart-1: #0d9488;
-  --chart-2: #d97706;
-  --chart-3: #6366f1;
-  --chart-4: #db2777;
+  /* Một hue cho dữ liệu thu; các chuỗi so sánh dùng sắc trung tính. */
+  --chart-1: #0f766e;
+  --chart-2: #94a3a6;
+  --chart-3: #34494b;
+  --chart-4: #c6d0d0;
   /* Mốc 5/10/15 (thứ bậc, một hue): */
   --seq-1: #115e59;
   --seq-2: #0d9488;
@@ -117,8 +117,8 @@
   --r-lg: 12px;
   --r-xl: 16px;
   --r-full: 999px;
-  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
-  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.04);
+  --shadow-xs: none;
+  --shadow-sm: none;
   --shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
   --shadow-lg: 0 16px 40px -12px rgba(15, 23, 42, 0.22), 0 4px 12px -4px rgba(15, 23, 42, 0.06);
   --shadow-xl: 0 32px 64px -24px rgba(15, 23, 42, 0.3);

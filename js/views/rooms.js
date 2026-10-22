@@ -12,6 +12,7 @@
       var cnt = function (k) { return all.filter(function (r) { return r.status === k; }).length; };
       var table = TH.table({
         label: 'Danh sách phòng',
+        mobile: { identity: 'id', primary: 'p', visible: ['id', 'b', 'p', 's', 'k'] },
         cols: [
           { key: 'id', label: 'Mã phòng', render: function (r) { return '<a class="cell-main" href="' + TH.router.href('ROOM-02', r.id) + '">' + r.id + '</a>'; } },
           { key: 'b', label: 'Tòa', render: function (r) { return esc(C.building(r.buildingId).short); } },

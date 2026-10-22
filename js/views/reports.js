@@ -30,7 +30,7 @@
   TH.periodBadge = periodBadge;
   function filterBar(extra) {
     var s = TH.store.state, bOpts = TH.buildingOptions();
-    return '<div class="card" style="margin-bottom:16px"><div class="toolbar" style="border:0">' + I('filter', 'ic-sm') + '<span class="small strong">Lọc</span>' +
+    return '<div class="card report-filters" style="margin-bottom:16px"><div class="toolbar" style="border:0">' + I('filter', 'ic-sm') + '<span class="small strong">Lọc</span>' +
       '<label class="sr-only" for="f-b">Tòa</label><select id="f-b" class="select select-sm" data-global="building" style="width:auto">' + bOpts.map(function (o) { return '<option value="' + o.id + '"' + (o.id === TH.scope() ? ' selected' : '') + '>' + esc(o.label) + '</option>'; }).join('') + '</select>' +
       '<label class="sr-only" for="f-p">Kỳ</label><select id="f-p" class="select select-sm" data-global="period" style="width:auto">' + TH.PERIODS.slice().reverse().map(function (p) { return '<option value="' + p + '"' + (p === s.period ? ' selected' : '') + '>Kỳ ' + F.period(p) + '</option>'; }).join('') + '</select>' +
       '<span class="grow"></span>' + (extra || '') + '</div></div>';
@@ -47,16 +47,24 @@
       var snap = TH.has('F045.C') ? snapshotOf(p) : null;
       var locked = TH.periodLocked(p);
 
-      var kpis = '<div class="grid-5" style="margin-bottom:16px">' +
-        TH.kpi({ label: 'Doanh thu (hóa đơn đã xác nhận)', icon: 'receipt', value: F.short(sm.billed), href: TH.router.href('INV-02'), foot: sm.invoices + ' hóa đơn · nguồn INV-02' }) +
-        TH.kpi({ label: 'Thu thực đã xác nhận', icon: 'checkCircle', value: F.short(sm.collected), href: TH.router.href('PAY-02'), foot: '<span class="warn-text">' + F.short(sm.pending) + ' chờ xác nhận — chưa tính</span>' }) +
-        TH.kpi({ label: 'Công nợ', icon: 'wallet', value: F.short(sm.debt), href: TH.router.href('PAY-02'), foot: 'HĐ đã xác nhận − phiếu thu đã xác nhận' }) +
-        TH.kpi({ label: 'Chi phí đã duyệt', icon: 'expense', value: F.short(sm.expenses), href: TH.router.href('EXP-01'), foot: F.short(sm.expensesPending) + ' chờ duyệt/nháp — chưa tính' }) +
-        TH.kpi({ label: 'Lãi dòng tiền tạm tính', icon: 'trend', value: F.short(sm.profit), neg: sm.profit < 0, accent: true, foot: TH.openBadge('D-07', 'DRAFT') + ' Thu thực − chi đã duyệt, không phải LN ròng' }) +
+      var kpis = '<div class="grid-5 overview-kpis" style="margin-bottom:16px">' +
+        TH.kpi({ label: 'Lãi dòng tiền tạm tính', value: F.short(sm.profit), neg: sm.profit < 0, accent: true, foot: TH.openBadge('D-07', 'DRAFT') + ' Thu − chi đã duyệt; chưa phải LN ròng' }) +
+        TH.kpi({ label: 'Doanh thu đã xác nhận', value: F.short(sm.billed), href: TH.router.href('INV-02'), foot: sm.invoices + ' hóa đơn đã xác nhận' }) +
+        TH.kpi({ label: 'Thu thực đã xác nhận', value: F.short(sm.collected), href: TH.router.href('PAY-02'), foot: '<span class="warn-text">' + F.short(sm.pending) + ' chờ xác nhận</span>' }) +
+        TH.kpi({ label: 'Công nợ', value: F.short(sm.debt), href: TH.router.href('PAY-02'), foot: 'Hóa đơn trừ phiếu thu đã xác nhận' }) +
+        TH.kpi({ label: 'Chi phí đã duyệt', value: F.short(sm.expenses), href: TH.router.href('EXP-01'), foot: F.short(sm.expensesPending) + ' chờ duyệt / nháp' }) +
         '</div>';
 
       var alerts = '';
-      if (sm.notBilled.length && p === TH.CURRENT_PERIOD) alerts += '<div class="alert alert-warning" style="margin-bottom:16px">' + I('alert', 'ic-sm') + '<div class="alert-body"><b>' + sm.notBilled.map(function (b) { return esc(b.name); }).join(', ') + ' chưa lập hóa đơn kỳ ' + F.period(p) + '.</b><span>Doanh thu và công nợ của tòa này chưa có trong báo cáo. <a href="' + TH.router.href('INV-01') + '">Mở Lập hóa đơn (INV-01)</a></span></div></div>';
+      if (sm.notBilled.length && p === TH.CURRENT_PERIOD) alerts += '<div class="alert alert-warning">' + I('alert', 'ic-sm') + '<div class="alert-body"><b>' + sm.notBilled.map(function (b) { return esc(b.name); }).join(', ') + ' chưa lập hóa đơn.</b><span>Chưa tính doanh thu và công nợ kỳ ' + F.period(p) + '. <a href="' + TH.router.href('INV-01') + '">Lập hóa đơn ' + I('arrowRight', 'ic-sm') + '</a></span></div></div>';
+
+      var pendingReceipts = TH.db.receipts.filter(function (r) { var inv = C.invoice(r.invoiceId); return r.status === 'pending' && inv && TH.inScope(inv.buildingId) && (scope === 'ALL' || inv.buildingId === scope); }).length;
+      var pendingReadings = TH.db.readings.filter(function (r) { var room = C.room(r.roomId); return room && r.period === p && r.status !== 'confirmed' && TH.inScope(room.buildingId) && (scope === 'ALL' || room.buildingId === scope); }).length;
+      var expiryCount = C.expiring(TH.expiryDays(), scope).length;
+      var tasks = '<div class="overview-tasks"><h2>Cần xử lý</h2>' +
+        '<a class="task-row" href="' + TH.router.href('PAY-01') + '"><strong>' + pendingReceipts + '</strong><span>Phiếu thu chờ xác nhận</span>' + I('chevronRight', 'ic-sm') + '</a>' +
+        '<a class="task-row" href="' + TH.router.href('METER-01') + '"><strong>' + pendingReadings + '</strong><span>Chỉ số chưa xác nhận</span>' + I('chevronRight', 'ic-sm') + '</a>' +
+        '<a class="task-row" href="' + TH.router.href('CON-03') + '"><strong>' + expiryCount + '</strong><span>Hợp đồng sắp hết hạn</span>' + I('chevronRight', 'ic-sm') + '</a></div>';
 
       var drill = TH.has('F045.B');
       var rows = bs.map(function (b) { var s = C.summary(p, b.id); s.b = b; return s; });
@@ -81,14 +89,14 @@
         label: 'Thu thực, chi phí và lãi tạm tính theo tòa',
         categories: rows.map(function (r) { return r.b.short; }),
         series: [{ label: 'Thu thực', values: rows.map(function (r) { return r.collected; }) }, { label: 'Chi đã duyệt', values: rows.map(function (r) { return r.expenses; }) }, { label: 'Lãi tạm tính', values: rows.map(function (r) { return r.profit; }), color: 'var(--chart-3)' }],
-        height: 250, width: 560,
+        height: 200, width: 560,
       });
 
       var trendPs = periods6(p);
       var trend = TH.gate('F046.B', '<div class="card">' + TH.cardHd(I('trend', 'ic-sm') + 'Xu hướng 6 kỳ' + TH.up('F046.B'), 'Kéo tự động từ hóa đơn, phiếu thu, chi phí đã duyệt') + '<div class="card-bd">' +
         TH.chart.lines({ label: 'Xu hướng doanh thu, thu thực, chi phí', categories: trendPs.map(F.period), series: [
-          { label: 'Doanh thu', values: trendPs.map(function (x) { return C.summary(x, scope).billed; }) },
-          { label: 'Thu thực', values: trendPs.map(function (x) { return C.summary(x, scope).collected; }), color: 'var(--chart-3)' },
+          { label: 'Doanh thu', values: trendPs.map(function (x) { return C.summary(x, scope).billed; }), color: 'var(--chart-3)' },
+          { label: 'Thu thực', values: trendPs.map(function (x) { return C.summary(x, scope).collected; }), color: 'var(--chart-1)' },
           { label: 'Chi đã duyệt', values: trendPs.map(function (x) { return C.summary(x, scope).expenses; }), color: 'var(--chart-2)' },
         ] }) + '</div></div>', { label: 'Xu hướng 3–6 tháng, kéo nguồn tự động', lines: 5 });
 
@@ -120,12 +128,13 @@
 
       var actions = TH.exportBtn('rpt1.xlsx', 'Xuất Excel (.xlsx)') + '<button type="button" class="btn" data-act="rpt1.print">' + I('printer', 'ic-sm') + 'In / lưu PDF</button>';
 
-      return TH.pageHeader({ screen: 'RPT-01', title: 'Báo cáo tòa: thu, nợ, chi phí, lãi', status: periodBadge(p), desc: 'Tổng hợp từ hóa đơn đã xác nhận, phiếu thu đã xác nhận và chi phí đã duyệt. Nhấn vào chỉ số để mở dữ liệu nguồn.', actions: actions }) +
-        filterBar('<span class="small muted">' + esc(TH.scopeLabel()) + '</span>') + alerts + kpis +
-        '<div class="card card-flush" style="margin-bottom:16px">' + TH.cardHd(I('building', 'ic-sm') + 'Theo tòa', 'Lấy từ cùng dataset · ' + esc(TH.scopeLabel()) + (drill ? ' · nhấn vào dòng để drill-down' : '')) + table + '</div>' +
-        '<div class="grid-2" style="margin-bottom:16px"><div class="card">' + TH.cardHd(I('chart', 'ic-sm') + 'So sánh theo tòa', 'Rê chuột vào cột để xem số') + '<div class="card-bd">' + chart + '</div></div>' + trend + '</div>' +
-        '<div class="grid-2" style="margin-bottom:16px">' + split + adjust + '</div>' +
-        '<div class="grid-2" style="margin-bottom:16px">' + snapCard + hist + '</div>' +
+      return TH.pageHeader({ screen: 'RPT-01', title: 'Tổng quan vận hành', status: periodBadge(p), desc: 'Thu, chi và công nợ từ chứng từ đã xác nhận · ' + bs.length + ' tòa · ' + sm.occupied + '/' + sm.rooms + ' phòng đang thuê.', actions: actions }) +
+        filterBar('<span class="small muted">' + esc(TH.scopeLabel()) + '</span>') + kpis +
+        '<div class="overview-grid"><div class="card overview-chart">' + TH.cardHd('Dòng tiền theo tòa', 'Thu thực, chi đã duyệt và lãi tạm tính · ' + F.period(p)) + '<div class="card-bd">' + chart + '</div></div><aside class="overview-rail" aria-label="Công việc cần xử lý">' + alerts + tasks + '</aside></div>' +
+        '<div class="card card-flush overview-table overview-section">' + TH.cardHd('Kết quả theo tòa', esc(TH.scopeLabel()) + (drill ? ' · chọn tòa để xem chứng từ' : '')) + table + '</div>' +
+        '<div class="grid-2 overview-section">' + trend + split + '</div>' +
+        '<div class="grid-2 overview-section">' + adjust + hist + '</div>' +
+        '<div class="overview-snapshot">' + snapCard + '</div>' +
         net;
     },
     dialogs: [function () { drillRender('TH-CG'); }],

@@ -28,6 +28,7 @@
       var sel = TH.store.ui(S, 'sel', []), canBatch = TH.has('F030.B') && TH.can('receipt.confirm');
       var table = TH.table({
         label: 'Báo đã thu',
+        mobile: { identity: 'id', primary: 'a', visible: ['ck', 'id', 'inv', 'a', 's', 'x'] },
         cols: [
           { key: 'ck', label: '', labelHtml: '<span class="sr-only">Chọn</span>', gate: 'F030.B', cls: 'cell-check', tdCls: 'cell-check', render: function (r) { return r.status === 'pending' && canBatch && canConfirm(r) ? '<input type="checkbox" aria-label="Chọn ' + r.id + '" data-act="pay.sel" data-id="' + r.id + '"' + (sel.indexOf(r.id) > -1 ? ' checked' : '') + '>' : ''; } },
           { key: 'id', label: 'Phiếu', render: function (r) { return '<span class="mono">' + r.id + '</span><div class="cell-sub">' + esc(r.method) + '</div>'; } },
@@ -58,9 +59,9 @@
       }).join('') + '</div></div></div>', { label: 'Theo dõi tiến độ thu theo kỳ', lines: 2 });
       var filters = TH.has('F029.B') ? TH.chips(S, 'st', [{ id: 'pending', label: 'Chờ xác nhận', count: all.filter(function (r) { return r.status === 'pending'; }).length }, { id: 'confirmed', label: 'Đã xác nhận', count: all.filter(function (r) { return r.status === 'confirmed'; }).length }, { id: 'unaudited', label: 'Chưa hậu kiểm', count: all.filter(function (r) { return r.status === 'confirmed' && !r.audit; }).length }, { id: 'rejected', label: 'Từ chối', count: all.filter(function (r) { return r.status === 'rejected'; }).length }, { id: 'all', label: 'Tất cả', count: all.length }], st) + TH.up('F029.B')
         : '<span class="small muted">Danh sách báo thu kỳ ' + F.period(p) + ' (chờ xác nhận lên đầu)</span><span class="grow"></span>' + TH.gate('F029.B', '', { mode: 'btn', label: 'Lọc theo kỳ & trạng thái', size: 'btn-sm' });
-      return TH.pageHeader({ screen: S, desc: '<b>Quản lý tòa xác nhận thu tiền</b> của tòa mình (kèm chứng từ, ngày thực nhận) — xác nhận xong mới giảm công nợ và tính mốc 5/10/15. Văn phòng xem tiến độ thu ở PAY-02 và hậu kiểm sao kê.',
+      return TH.pageHeader({ screen: S, desc: 'Phiếu thu có hiệu lực sau khi quản lý tòa xác nhận. Văn phòng đối soát chứng từ và sao kê.',
         actions: '<a class="btn" href="' + TH.router.href('PAY-02') + '">' + I('activity', 'ic-sm') + 'Tiến độ thu</a>' + TH.permBtn('receipt.report', '<button type="button" class="btn btn-primary" data-act="pay.report">' + I('handCoins', 'ic-sm') + (TH.can('receipt.confirm') ? 'Ghi nhận thu' : 'Báo đã thu') + '</button>', 'Báo thu · 403') }) +
-        progress + '<div class="card card-flush"><div class="toolbar">' + filters + '</div>' + batchBar + table + TH.pager(S, pg) + '</div>';
+        TH.summaryBlock('Tiến độ thu theo tòa', '', progress) + '<div class="card card-flush"><div class="toolbar"><div class="filter-options" role="group" aria-label="Trạng thái phiếu thu">' + filters + '</div></div>' + batchBar + table + TH.pager(S, pg) + '</div>';
     },
     dialogs: [function () { reportForm(); }],
   };

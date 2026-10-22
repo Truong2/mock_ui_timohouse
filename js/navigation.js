@@ -97,6 +97,15 @@
     var old = document.getElementById('workspace-navigation'); if (old) old.remove();
     if (!found || route.notFound || !TH.canScreen(route.page)) return;
     var sections = visibleSections(found.group), actions = contextActions(found, route);
+    // A shortcut already present in the page's actions does not need a second row in the workspace.
+    if (actions) {
+      var actionBox = document.createElement('div'); actionBox.innerHTML = actions;
+      actionBox.querySelectorAll('a[href]').forEach(function (a) {
+        var present = Array.prototype.some.call(document.querySelectorAll('#view .page-actions a[href]'), function (pageAction) { return pageAction.getAttribute('href') === a.getAttribute('href'); });
+        if (present) a.remove();
+      });
+      actions = actionBox.innerHTML;
+    }
     if (sections.length < 2 && !actions) return;
     var box = document.createElement('div'); box.id = 'workspace-navigation'; box.className = 'workspace-navigation';
     box.innerHTML = '<div class="workspace-caption">' + I(found.group.icon, 'ic-sm') + '<span>' + esc(found.group.label) + '</span></div>' +

@@ -54,8 +54,9 @@
       var pg = TH.paginate(S, rows, 12);
       var table = TH.table({
         label: 'Danh sách hồ sơ thuê',
+        mobile: { identity: 'room', primary: 'debt', visible: ['room', 'debt', 's', 'a'] },
         cols: [
-          { key: 'room', label: 'Mã phòng / Mã tòa', render: function (x) { var c = x.ct; return '<a class="cell-main' + (c ? ' mono' : '') + '" style="white-space:nowrap" href="' + TH.router.href('CUS-02', rowParam(x)) + '">' + esc(c ? roomCode(c) : x.k.name) + '</a><div class="cell-sub" style="white-space:nowrap">' + (c ? esc(x.k.name) + ' · <span class="mono">' + esc(c.id) + '</span>' : 'Chưa gán phòng · <span class="mono">' + x.k.id + '</span>'); } },
+          { key: 'room', label: 'Mã phòng / Mã tòa', render: function (x) { var c = x.ct; return '<a class="cell-main' + (c ? ' mono' : '') + '" style="white-space:nowrap" href="' + TH.router.href('CUS-02', rowParam(x)) + '">' + esc(c ? roomCode(c) : x.k.name) + '</a><div class="cell-sub" style="white-space:nowrap">' + (c ? esc(x.k.name) + ' · <span class="mono">' + esc(c.id) + '</span>' : 'Chưa gán phòng · <span class="mono">' + x.k.id + '</span>') + '</div>'; } },
           { key: 'lead', label: 'Trưởng khu vực (TPVH)', gate: 'F006.B', nowrap: true, render: function (x) {
             var c = x.ct; if (!c) return '<span class="muted">—</span>';
             var h = C.areaHead(c.buildingId), l = C.teamLead(c.buildingId);
@@ -86,8 +87,8 @@
       var actions = '<button type="button" class="btn" data-act="go" data-href="' + TH.router.href('OCR-CUS') + '">' + I('scan', 'ic-sm') + 'OCR giấy tờ</button>' +
         TH.gate('F031.B', TH.exportBtn('cus.debtx', 'Xuất công nợ (.xlsx)'), { mode: 'btn', label: 'Danh sách quá hạn / xuất file' }) +
         TH.permBtn('contract.edit', '<button type="button" class="btn btn-primary" data-act="cus.add">' + I('userPlus', 'ic-sm') + 'Thêm khách</button>', 'Thêm · 403');
-      return TH.pageHeader({ screen: S, actions: actions, desc: 'Danh sách theo <b>hồ sơ thuê</b> (mỗi hợp đồng một dòng) — nhấn mã phòng hoặc <b>Xem chi tiết</b> để mở thông tin lưu trú, hợp đồng và tài chính.' }) + kpis +
-        '<div class="card card-flush"><div class="toolbar">' + TH.searchBox(S, 'Tìm mã phòng, mã tòa, số HĐ, tên, số liên hệ…') + TH.chips(S, 'st', chips, st) + '</div>' + table + TH.pager(S, pg) + '</div>' +
+      return TH.pageHeader({ screen: S, actions: actions, desc: 'Theo dõi khách, hợp đồng và công nợ theo từng hồ sơ thuê.' }) + TH.summaryBlock('Tổng quan hồ sơ', all.length + ' hồ sơ · ' + F.short(debtAll) + ' còn nợ', kpis) +
+        '<div class="card card-flush customer-list"><div class="toolbar">' + TH.searchBox(S, 'Tìm mã phòng, mã tòa, số HĐ, tên, số liên hệ…') + '<div class="customer-filters" role="group" aria-label="Lọc hồ sơ thuê">' + TH.chips(S, 'st', chips, st) + '</div></div>' + table + TH.pager(S, pg) + '</div>' +
         '<p class="small muted" style="margin-top:10px">' + I('shield', 'ic-sm') + ' Thông tin định danh và biển số được che (mask) trong danh sách, tooltip và file xuất. Trạng thái = 1 trạng thái vòng đời + nhãn theo trục (kết thúc, thời hạn, bàn giao, cọc); công nợ tính từ hóa đơn/phiếu thu đã xác nhận. Mô hình là <b>PROPOSED</b> theo bộ trả lời K-01…K-09 (CR-CUS-01), chưa phải khách phê duyệt.</p>';
     },
     dialogs: [function () { cusForm(); }],

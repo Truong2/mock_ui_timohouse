@@ -276,6 +276,7 @@
       var bulkSel = TH.has('F025.B');
       var table = TH.table({
         label: 'Danh sách hóa đơn & công nợ',
+        mobile: { identity: 'id', primary: 'd', visible: ['ck', 'id', 'r', 'k', 'd', 's'] },
         cols: [
           { key: 'ck', label: '', labelHtml: '<span class="sr-only">Chọn</span>', gate: 'F025.B', cls: 'cell-check', tdCls: 'cell-check', render: function (i) { return i.status === 'confirmed' ? '<input type="checkbox" aria-label="Chọn ' + i.id + '" data-act="inv.sel" data-id="' + i.id + '"' + (sel.indexOf(i.id) > -1 ? ' checked' : '') + '>' : ''; } },
           { key: 'id', label: 'Số HĐơn', render: function (i) { return '<a class="mono" href="' + TH.router.href('INV-03', i.id) + '">' + i.id + '</a><div class="cell-sub">Kỳ ' + F.period(i.period) + '</div>'; } },
@@ -283,7 +284,7 @@
           { key: 'k', label: 'Khách', render: function (i) { return esc(C.customer(i.customerId).name); } },
           { key: 't', label: 'Tổng tiền', num: true, render: function (i) { return F.money(i.total); } },
           { key: 'pd', label: 'Đã thu', num: true, render: function (i) { var pd = C.paid(i.id), pe = C.pending(i.id); return F.money(pd) + (pe ? '<div class="cell-sub warn-text">+' + F.short(pe) + ' chờ XN</div>' : ''); } },
-          { key: 'd', label: 'Còn nợ', num: true, render: function (i) { var d = C.debt(i); return d ? '<b class="neg">' + F.money(d) + '</b>' : '<span class="muted">0</span>'; } },
+          { key: 'd', label: 'Còn nợ', num: true, render: function (i) { var d = C.debt(i); return d ? '<b class="neg">' + F.money(d) + '</b>' : '<span class="muted">' + F.money(0) + '</span>'; } },
           { key: 's', label: 'Trạng thái', render: function (i) { return TH.status(C.payState(i)); } },
           { key: 'v', label: 'Phiên bản', gate: 'F025.C', render: function (i) { return 'v' + (i.version || 1); } },
           { key: 'l', label: 'Khóa kỳ', gate: 'F025.D', render: function (i) { return TH.periodLocked(i.period) ? TH.badge('Đã khóa', 'neutral', { icon: 'lock' }) : '<span class="muted small">Mở</span>'; } },
@@ -295,9 +296,9 @@
       var sm = { t: C.sum(base.filter(function (i) { return i.status === 'confirmed'; }), function (i) { return i.total; }), pd: C.sum(base, function (i) { return C.paid(i.id); }), d: C.sum(base, function (i) { return C.debt(i); }) };
       var bulkBar = bulkSel && sel.length ? '<div class="toolbar" style="background:var(--teal-25)">' + TH.tierPill('B') + '<b class="small">' + sel.length + ' hóa đơn đã chọn</b><span class="grow"></span><button type="button" class="btn btn-sm" data-act="inv.bulkPdf">' + I('printer', 'ic-sm') + 'Xuất hàng loạt (PDF)</button><button type="button" class="btn btn-sm btn-primary" data-act="inv.bulkSend">' + I('send', 'ic-sm') + 'Gửi danh sách khách (Zalo)</button><button type="button" class="btn btn-sm btn-ghost" data-act="inv.selClear">Bỏ chọn</button></div>' : '';
       return TH.pageHeader({ screen: S, actions: TH.exportBtn('inv2.xlsx', 'Xuất Excel (.xlsx)') + TH.gate('F025.B', '', { mode: 'btn', label: 'Xuất hàng loạt & gửi danh sách' }) + '<a class="btn btn-primary" href="' + TH.router.href('INV-01') + '">' + I('plus', 'ic-sm') + 'Lập hóa đơn</a>' }) +
-        '<div class="grid-3" style="margin-bottom:16px">' + TH.kpi({ label: 'Tổng hóa đơn đã xác nhận', icon: 'receipt', value: F.short(sm.t), foot: esc(allP === 'all' ? 'Mọi kỳ' : 'Kỳ ' + F.period(p)) }) + TH.kpi({ label: 'Đã thu (đã xác nhận)', icon: 'checkCircle', value: F.short(sm.pd) }) + TH.kpi({ label: 'Còn nợ', icon: 'wallet', value: F.short(sm.d), neg: sm.d > 0, foot: 'Nợ = HĐ đã xác nhận − phiếu thu đã xác nhận' }) + '</div>' +
+        TH.summaryBlock('Tổng quan hóa đơn', base.length + ' hóa đơn · ' + F.short(sm.d) + ' còn nợ', '<div class="grid-3" style="margin-bottom:16px">' + TH.kpi({ label: 'Tổng hóa đơn đã xác nhận', icon: 'receipt', value: F.short(sm.t), foot: esc(allP === 'all' ? 'Mọi kỳ' : 'Kỳ ' + F.period(p)) }) + TH.kpi({ label: 'Đã thu (đã xác nhận)', icon: 'checkCircle', value: F.short(sm.pd) }) + TH.kpi({ label: 'Còn nợ', icon: 'wallet', value: F.short(sm.d), neg: sm.d > 0, foot: 'Nợ = HĐ đã xác nhận − phiếu thu đã xác nhận' }) + '</div>') +
         '<div class="card card-flush"><div class="toolbar">' + TH.searchBox(S, 'Tìm số HĐơn, phòng, khách…') + TH.uiSelect(S, 'allp', [{ id: 'cur', label: 'Kỳ ' + F.period(p) }, { id: 'all', label: 'Tất cả kỳ' }], allP, 'Kỳ') + '</div>' +
-        '<div class="toolbar" style="gap:6px">' + TH.chips(S, 'st', [{ id: 'all', label: 'Tất cả', count: base.length }, { id: 'draft', label: 'Nháp', count: cnt('draft') }, { id: 'unpaid', label: 'Chưa thu', count: cnt('unpaid') }, { id: 'reported', label: 'Chờ xác nhận thu', count: cnt('reported') }, { id: 'partial', label: 'Thu một phần', count: cnt('partial') }, { id: 'overdue', label: 'Quá hạn', count: cnt('overdue') }, { id: 'paid', label: 'Đã thu đủ', count: cnt('paid') }], st) + '</div>' + bulkBar + table + TH.pager(S, pg) + '</div>';
+        '<div class="toolbar" style="gap:6px"><div class="filter-options" role="group" aria-label="Trạng thái hóa đơn">' + TH.chips(S, 'st', [{ id: 'all', label: 'Tất cả', count: base.length }, { id: 'draft', label: 'Nháp', count: cnt('draft') }, { id: 'unpaid', label: 'Chưa thu', count: cnt('unpaid') }, { id: 'reported', label: 'Chờ xác nhận thu', count: cnt('reported') }, { id: 'partial', label: 'Thu một phần', count: cnt('partial') }, { id: 'overdue', label: 'Quá hạn', count: cnt('overdue') }, { id: 'paid', label: 'Đã thu đủ', count: cnt('paid') }], st) + '</div></div>' + bulkBar + table + TH.pager(S, pg) + '</div>';
     },
   };
   TH.act['inv.sel'] = function (el, ev) {
