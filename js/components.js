@@ -804,7 +804,18 @@ var TH = window.TH = window.TH || {};
       run.forEach(function (el) { el.remove(); });
     });
   };
-  TH.uiPolish = function (root) { TH.gateGroup(root); TH.reviewFilter(root); TH.compactActions(root); TH.a11yIconButtons(root); };
+  /* CR-UI-ENT — breadcrumb kiểu PageContainer: nhóm có nhiều mục để crumbs rỗng (navigation.js),
+     nên sinh "Nhóm / Mục đang chọn" từ thanh mục của nhóm. */
+  TH.pageCrumbs = function (root) {
+    var view = root && root.id === 'view' ? root : document.getElementById('view');
+    if (!view) return;
+    var cr = view.querySelector(':scope > .page-hd .crumbs'), cap = view.querySelector(':scope > .workspace-navigation .workspace-caption span');
+    if (!cr || !cap || cr.children.length) return;
+    var cur = view.querySelector(':scope > .workspace-navigation .workspace-tabs a[aria-current="page"]'), home = document.querySelector('#nav a[aria-current="page"]');
+    cr.innerHTML = (home ? '<a href="' + esc(home.getAttribute('href')) + '">' + esc(cap.textContent) + '</a>' : '<span>' + esc(cap.textContent) + '</span>') +
+      (cur ? I('chevronRight') + '<span>' + esc(cur.textContent) + '</span>' : '');
+  };
+  TH.uiPolish = function (root) { TH.gateGroup(root); TH.pageCrumbs(root); TH.reviewFilter(root); TH.compactActions(root); TH.a11yIconButtons(root); };
   /* Menu thao tác: mở/đóng, phím Escape, click ngoài */
   function closeMenus(except) {
     document.querySelectorAll('.action-menu .action-pop:not([hidden])').forEach(function (p) {

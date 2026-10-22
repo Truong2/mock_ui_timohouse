@@ -29,7 +29,7 @@ Thứ tự lấy gói: `previewPackage` hợp lệ → lựa chọn đã lưu �
 
 ```
 index.html              trang giới thiệu + mount ứng dụng
-css/                    tokens · components · layouts (responsive, print) · navigation (shell); không còn refinement.css (CR-UI-STD)
+css/                    tokens · components · layouts (responsive, print) · navigation (shell enterprise kiểu Ant Design Pro: header teal + sidebar trắng, CR-UI-ENT)
 js/
   data.js               dataset mẫu (3 tòa, 18 phòng, 19 HĐ: 15 đang thuê + 4 đã kết thúc, 18 khách, 6 kỳ, dòng phí theo HĐ, hồ sơ cọc, sổ cọc, chi phí chung, HĐ thuê tòa, lịch trả chủ nhà, tài sản) + TH.calc (gồm perfBuilding: hiệu suất A/B/C/D)
   pnl.js                P&L tòa/kỳ theo mẫu báo cáo khách (TH.calc.pnl, chia cổ phần)
@@ -52,7 +52,7 @@ tools/qa-pay.playwright.js  kịch bản QA CR-PAY: tiến độ thu theo QL/tò
 tools/qa-bill.playwright.js kịch bản QA CR-BILL: tính lẻ ngày, phòng mới, kỳ TT nhiều tháng, điện chung, giảm trừ/phụ thu
 tools/qa-report.playwright.js kịch bản QA CR-RPT-02: báo cáo theo mẫu Excel — xem trước, bản lưu, phiên bản, truy nguồn, Excel từ bản lưu
 tools/lint-ui.js        node tools/lint-ui.js → kiểm tra tĩnh chuẩn UI (hex thô, chữ < 12px, weight, inline style, nhãn tiếng Anh)
-tools/qa-ui-standard.playwright.js kịch bản QA CR-UI-STD: chế độ review, màu primary, tương phản, menu "Thêm", danh sách, lỗi form tại ô, 375px
+tools/qa-ui-standard.playwright.js kịch bản QA CR-UI-STD: chế độ review, màu primary, tương phản, menu "Thêm", danh sách, lỗi form tại ô, 375px; CR-UI-ENT: header, page header, kích thước, mobile
 docs/                   plan · decision log · QA checklist
 ```
 

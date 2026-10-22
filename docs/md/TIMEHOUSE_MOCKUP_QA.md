@@ -413,3 +413,44 @@ Chạy với route no-cache để tránh CSS cũ.
   - lỗi hiện đỏ dưới ô Mã tòa/Tên tòa;
   - không còn mã F0xx hay pill gói khi review tắt.
 - Ảnh lưu ngoài repo (scratchpad phiên làm việc), không commit.
+
+### 8.11 CR-UI-ENT — Thiết kế lại theo Ant Design Pro (22/10/2026)
+
+**Cách chạy:** `tools/qa-ui-standard.playwright.js` (nay 19 kiểm tra), Playwright `browser_run_code`, route no-cache, kèm `node tools/lint-ui.js`.
+
+| ID | Kiểm tra | Kết quả | Ghi chú |
+|---|---|---|---|
+| UI-ENT-01 | Header | ✅ | `.topbar` cố định, toàn ngang (left 0, top 0), nền `--header-bg`. Chữ trắng tương phản ≥ 7:1. `.topbar-brand` hiện; `#sidebar .brand` ẩn ở desktop |
+| UI-ENT-02 | Nền và card | ✅ | `.content` không bo góc; nền shell = `--bg-layout`; `.card` bo 8px |
+| UI-ENT-03 | Kích thước | ✅ | Nút và input 32px, tiêu đề trang 20px, KPI 24px, hàng tiêu đề bảng ≤ 41px, padding ô 6px |
+| UI-ENT-04 | Page header | ✅ | Tiêu đề nằm trên thanh mục. Breadcrumb INV-02 = "Hóa đơn & thu tiền › Hóa đơn"; CUS-01 có breadcrumb |
+| UI-ENT-05 | Bộ lọc lặp | ✅ | RPT-01/02/03 không còn select `data-global` trong nội dung trang |
+| UI-ENT-06 | Mobile 375 | ✅ | Header teal, không cuộn ngang. Drawer mở có brand (đo ở reduced-motion, vì tab headless không chạy transition) |
+| UI-STD-01…12, SMOKE | Bộ CR-UI-STD | ✅ | Tương phản, sàn 12px, aria-label, header ≤ 3 nút, menu "Thêm", danh sách, lỗi tại ô, gom gate, không cuộn ngang 375/768/1440; smoke 1088/0 |
+| LINT-UI | Kiểm tra tĩnh | ✅ | 0 vi phạm; inline style 97 |
+
+**Hồi quy (cổng 8779, no-cache):**
+
+| Bộ QA | Kết quả |
+|---|---|
+| `qa-bill` | 8/8 |
+| `qa-pay` | 12/12 |
+| `qa-cus` | 23/23 (baseline 16.682.599 / 7.282.599 / 9.655.000 giữ nguyên) |
+| `qa-ocr` | 9/9 |
+| `qa-report` | 11/11 |
+| `qa-navigation` | 22/22 (sidebar 232/72, brand trong drawer, NAV-05 đi qua tab phân hệ trên trang chi tiết, NAV-07) |
+| `qa-ui-refinement` | 80/80 |
+| `qa-table-wrap` | 1 ô đã biết |
+
+Console không lỗi JS. `qa-navigation` ghi đè ảnh trong `docs/qa/navigation/*.png`, nên các ảnh này nay là shell mới.
+
+**Kiểm tra mắt (after, 1440 và 375):** RPT-01, INV-02, CUS-01, CUS-02, BLD-02, PAY-02, form thêm tòa (lỗi tại ô, `*` trước nhãn), drawer mobile.
+- **Đạt:**
+  - header teal và sidebar trắng;
+  - page header trắng có breadcrumb, tab ở đáy;
+  - KPI card rời;
+  - bảng header xám nhạt;
+  - bộ lọc dạng Radio.Button;
+  - trạng thái dạng chấm;
+  - modal bo 8.
+- Ảnh before/after lưu ngoài repo, trong scratchpad phiên làm việc.

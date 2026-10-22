@@ -28,14 +28,6 @@
     return TH.badge('Kỳ ' + F.period(p) + ' · đang mở', 'warning', { dot: true });
   }
   TH.periodBadge = periodBadge;
-  function filterBar(extra) {
-    var s = TH.store.state, bOpts = TH.buildingOptions();
-    return '<div class="card report-filters u-mb-16"><div class="toolbar" style="border:0">' + I('filter', 'ic-sm') + '<span class="small strong">Lọc</span>' +
-      '<label class="sr-only" for="f-b">Tòa</label><select id="f-b" class="select select-sm u-w-auto" data-global="building">' + bOpts.map(function (o) { return '<option value="' + o.id + '"' + (o.id === TH.scope() ? ' selected' : '') + '>' + esc(o.label) + '</option>'; }).join('') + '</select>' +
-      '<label class="sr-only" for="f-p">Kỳ</label><select id="f-p" class="select select-sm u-w-auto" data-global="period">' + TH.PERIODS.slice().reverse().map(function (p) { return '<option value="' + p + '"' + (p === s.period ? ' selected' : '') + '>Kỳ ' + F.period(p) + '</option>'; }).join('') + '</select>' +
-      '<span class="grow"></span>' + (extra || '') + '</div></div>';
-  }
-  TH.reportFilterBar = filterBar;
 
   /* =========================================================
      RPT-01 — Báo cáo tòa: thu, nợ, chi phí, lãi
@@ -128,8 +120,8 @@
 
       var actions = TH.exportBtn('rpt1.xlsx', 'Xuất Excel (.xlsx)') + '<button type="button" class="btn" data-act="rpt1.print">' + I('printer', 'ic-sm') + 'In / lưu PDF</button>';
 
-      return TH.pageHeader({ screen: 'RPT-01', title: 'Tổng quan vận hành', status: periodBadge(p), desc: 'Thu, chi và công nợ từ chứng từ đã xác nhận · ' + bs.length + ' tòa · ' + sm.occupied + '/' + sm.rooms + ' phòng đang thuê.', actions: actions }) +
-        filterBar('<span class="small muted">' + esc(TH.scopeLabel()) + '</span>') + kpis +
+      return TH.pageHeader({ screen: 'RPT-01', title: 'Tổng quan vận hành', status: periodBadge(p), desc: esc(TH.scopeLabel()) + ' · thu, chi và công nợ từ chứng từ đã xác nhận · ' + bs.length + ' tòa · ' + sm.occupied + '/' + sm.rooms + ' phòng đang thuê.', actions: actions }) +
+        kpis +
         '<div class="overview-grid"><div class="card overview-chart">' + TH.cardHd('Dòng tiền theo tòa', 'Thu thực, chi đã duyệt và lãi tạm tính · ' + F.period(p)) + '<div class="card-bd">' + chart + '</div></div><aside class="overview-rail" aria-label="Công việc cần xử lý">' + alerts + tasks + '</aside></div>' +
         '<div class="card card-flush overview-table overview-section">' + TH.cardHd('Kết quả theo tòa', esc(TH.scopeLabel()) + (drill ? ' · chọn tòa để xem chứng từ' : '')) + table + '</div>' +
         '<div class="grid-2 overview-section">' + trend + split + '</div>' +
@@ -260,8 +252,8 @@
 
       var tplSel = TH.gate('F046.D', '<label class="sr-only" for="rpt2-tpl">Mẫu báo cáo</label><select id="rpt2-tpl" class="select select-sm u-w-auto" data-ui="RPT-02.tpl">' + TH.db.reportTemplates.filter(function (t) { return !t.report; }).map(function (t) { return '<option value="' + t.id + '"' + (TH.store.ui('RPT-02', 'tpl', 'MAU-01') === t.id ? ' selected' : '') + '>' + esc(t.name) + ' · v' + t.version + (t.status === 'draft' ? ' (nháp)' : '') + '</option>'; }).join('') + '</select>' + TH.up('F046.D'), { mode: 'btn', label: 'Mẫu báo cáo quản trị', size: '' });
 
-      return TH.pageHeader({ screen: 'RPT-02', status: periodBadge(p), desc: 'Tổng hợp toàn công ty: tòa, nhóm, kỳ, mốc thu 5/10/15, lấp đầy và hợp đồng. Số thu thực tách bạch với doanh thu quy đổi tính hiệu suất.', actions: tplSel + TH.exportBtn('rpt2.xlsx', 'Xuất Excel (.xlsx)') }) +
-        filterBar() + kpis +
+      return TH.pageHeader({ screen: 'RPT-02', status: periodBadge(p), desc: esc(TH.scopeLabel()) + ' · ' + 'Tổng hợp toàn công ty: tòa, nhóm, kỳ, mốc thu 5/10/15, lấp đầy và hợp đồng. Số thu thực tách bạch với doanh thu quy đổi tính hiệu suất.', actions: tplSel + TH.exportBtn('rpt2.xlsx', 'Xuất Excel (.xlsx)') }) +
+        kpis +
         '<div class="card card-flush u-mb-16">' + TH.cardHd(I('target', 'ic-sm') + 'Thu theo mốc 5/10/15 & hiệu suất tòa', 'A = M5 × 100% + (M10 − M5) × 90% + (M15 − M10) × 70% · D = A − A × B + C · HS = D ÷ giá niêm yết', TH.openBadge('D-04')) + msTable +
         '<div class="card-ft">' + TH.perfFormulaNote() + '</div></div>' +
         '<div class="grid-2 u-mb-16">' + trend + byMgr + '</div>' +
@@ -317,8 +309,7 @@
         '</div><p class="small muted u-mt-12">Trạng thái bảng lương kỳ ' + F.period(p) + ' lấy từ SAL-01. Duyệt tại màn Lương.</p></div></div>', { label: 'Bảng lương/CP có quy trình duyệt', lines: 3 });
       var tpl = TH.gate('F049.D', '<div class="card">' + TH.cardHd(I('sheet', 'ic-sm') + 'Mẫu kết quả gần nguồn T8' + TH.up('F049.D')) + '<div class="card-bd"><p class="small">Bố cục xuất theo mẫu kết quả tháng 08/2026 đã được khách xác nhận (cột, thứ tự, làm tròn).</p><div class="row u-mt-8">' + TH.badge('Mẫu T8/2026 · đã xác nhận', 'success') + TH.openBadge('D-06') + '</div></div></div>', { label: 'Mẫu kết quả gần nguồn tháng 8', lines: 3 });
 
-      return TH.pageHeader({ screen: 'RPT-03', status: TH.badge('Nháp — đối chiếu bằng Excel', 'draft', { dot: true }), desc: 'Hai biểu báo cáo nháp: lương theo nhân viên/kỳ và lợi nhuận chia theo cổ đông/tòa. Lương và phân bổ cổ phần không tự tạo chi tiền.', actions: '<button type="button" class="btn" data-act="rpt3.preview">' + I('eye', 'ic-sm') + 'Xem trước</button>' + TH.exportBtn('rpt3.xlsx', 'Xuất Excel 2 biểu (.xlsx)') }) +
-        filterBar() +
+      return TH.pageHeader({ screen: 'RPT-03', status: TH.badge('Nháp — đối chiếu bằng Excel', 'draft', { dot: true }), desc: esc(TH.scopeLabel()) + ' · ' + 'Hai biểu báo cáo nháp: lương theo nhân viên/kỳ và lợi nhuận chia theo cổ đông/tòa. Lương và phân bổ cổ phần không tự tạo chi tiền.', actions: '<button type="button" class="btn" data-act="rpt3.preview">' + I('eye', 'ic-sm') + 'Xem trước</button>' + TH.exportBtn('rpt3.xlsx', 'Xuất Excel 2 biểu (.xlsx)') }) +
         '<div class="grid-main-side"><div class="card card-flush">' + TH.tabs('RPT-03', tabs, tab) + content + '</div><div class="stack">' + src + flow + tpl + '</div></div>';
     },
   };

@@ -574,3 +574,40 @@ Route cũ `RPT-04`/`RPT-05` mở form tạo đã điền sẵn loại, kỳ và 
 - Gom gate trong lưới nhiều cột (EXP-01, RPT-01, RPT-02, AUTH-01); hiện vẫn là từng thẻ mờ cạnh nhau.
 - Tên bảng "Bảng chia CP" ở màn cổ đông giữ nguyên chữ viết tắt theo file khách, chờ xác nhận nghĩa.
 - 98 inline style còn lại là giá trị động (độ rộng thanh, màu biểu đồ) hoặc bố cục riêng từng chỗ.
+
+### 9.12 CR-UI-ENT — Thiết kế lại theo chuẩn enterprise (Ant Design Pro) (22/10/2026)
+
+**Bối cảnh.** Sau CR-UI-STD, giao diện vẫn theo hướng "framed sheet" (tờ trắng bo 16px trên khung tint, tiêu đề 24px, hàng bảng 48px, chip viên thuốc), người dùng thấy chưa giống phần mềm doanh nghiệp.
+
+**Người dùng chọn:**
+- Chuẩn **Ant Design Pro**.
+- Shell **header màu thương hiệu + sidebar sáng** (mix layout).
+- Mật độ **chuẩn doanh nghiệp**.
+- Phạm vi gồm shell, token, component và 4 mẫu trang.
+
+**Hướng "framed sheet" trong `.taste-skill/direction.json` được thay thế.** File đó không bị sửa vì thuộc agent khác.
+
+| # | Quyết định | Vị trí |
+|---|---|---|
+| ENT-01 | **Token:** `--header-bg` (teal-800), `--bg-layout` `#f5f7f8`, `--border-split`, `--table-head`, `--ctl-h` 32 / `--ctl-h-sm` 24 / `--ctl-h-lg` 40, `--row-h` 40, `--r-xs` 4. `--r-xl` còn 8 (dialog), `--fs-title` 20, `--fs-kpi` 24, bóng Ant. Token cũ (`--frame`, `--sheet-edge`, `--panel-edge`, `--surface-tint*`, `--nav-active-bg`) thành alias | `css/tokens.css` |
+| ENT-02 | **Shell mix layout:** `.topbar` cố định toàn ngang, cao 56px, nền teal-800. Header thêm `a.topbar-brand` (logo + TIMEHOUSE, rộng bằng sidebar; thu gọn còn logo). Ô tìm kiếm, select tòa/kỳ, nút gói, công cụ và account đều đảo màu trắng trên teal. Sidebar trắng nằm dưới header, item 40px, mục đang chọn nền teal-50 chữ teal-800. `#sidebar .brand` ẩn ở desktop, hiện trong drawer mobile. Giữ 232/72px và mọi hook của `navigation.js` | `js/app.js`, `css/navigation.css` |
+| ENT-03 | **PageContainer:** nội dung trên nền xám, không còn tờ bo góc. Page header là dải trắng tràn ngang theo thứ tự breadcrumb → tiêu đề 20/600 + tag trạng thái + actions → mô tả → tab phân hệ ở đáy dải. Thứ tự chỉ đổi bằng CSS (`#view` flex-column + `order`), DOM giữ nguyên nên `.rptf-return` vẫn là con đầu tiên. Breadcrumb "Nhóm › Mục" sinh bởi `TH.pageCrumbs`, chạy ở microtask sau khi `navigation.js` gắn thanh mục | `css/navigation.css`, `js/components.js`, `js/app.js` |
+| ENT-04 | **Trang chi tiết:** facts thành Descriptions ("nhãn: giá trị", lưới 3–4 cột); tab đối tượng dính đáy dải header. Tab phân hệ thu thành dải link nhỏ phía trên breadcrumb; vẫn giữ vì kiểm thử NAV-05 điều hướng từ trang chi tiết qua tab này | `css/components.css`, `css/navigation.css` |
+| ENT-05 | **Nút:** 32px, chữ 400; mặc định hover thì viền và chữ chuyển teal; thêm `.btn-link`. Cỡ sm 28 / xs 24 / lg 40. Cột thao tác dạng link 28px | `css/components.css` |
+| ENT-06 | **Form dọc:** nhãn 14/400, `*` đỏ **trước** nhãn, control 32, lưới 20×24, lỗi 13 đỏ dưới ô | `css/components.css` |
+| ENT-07 | **Trạng thái = Ant Badge status** (chấm 6px theo tone + chữ, không nền). Ở tiêu đề trang, nhãn viền và nhãn mô phỏng dùng Tag có nền, bo 4. Tag phân loại cao 22, có viền | `css/components.css` |
+| ENT-08 | **Bảng ProTable:** chữ 13, header nền `--table-head` 13/500, hàng 40 (padding 6×12), cột đầu/cuối lùi 24 theo lề card, hover nền xám nhạt, tfoot cùng nền header | `css/components.css` |
+| ENT-09 | **Bộ lọc nhanh = Radio.Button liền khối:** viên thuốc tô đặc thay bằng nhóm nút; mục đang chọn có viền và chữ teal; số đếm xám. Pager căn phải; trang hiện tại có viền teal | `css/components.css` |
+| ENT-10 | **Card, KPI, tab:** card bo 8, header 16/600 (padding 24), body 24. KPI là Statistic card rời (nhãn 14, số 24/500, chân có đường kẻ), bỏ dải nối liền. Line tabs cách 32px, ink bar 2px | `css/components.css` |
+| ENT-11 | **Modal, menu, toast:** modal bo 8, header 16/600, body 24, footer căn phải, nền mờ đen 45%. Menu item 32px. Toast nền trắng có bóng, icon theo tone. Empty state dùng icon xám tròn 64. Tiêu đề nhóm viết thường 14/600, không in hoa | `css/components.css` |
+| ENT-12 | **Dashboard:** bỏ thanh lọc tòa/kỳ lặp ở RPT-01/02/03 (`filterBar`, đã gỡ). Phạm vi ghi trong mô tả trang ("Tất cả tòa · Kỳ 10/2026 · …"). Rail bên phải 360px | `js/views/reports.js`, `css/navigation.css` |
+
+**Giữ nguyên:**
+- Dữ liệu, nghiệp vụ, route, id, `data-act`.
+- Màu primary teal-700, font Inter.
+- Mọi hook mà `qa-navigation` khóa: sidebar 232/72, `#nav > a[data-workspace]`, `.workspace-tabs a`, brand trong `#sidebar`.
+
+**Chưa làm / ghi chú:**
+- Hàng bảng thực tế cao khoảng 50px vì gần như mọi danh sách có dòng phụ (tên + mã). Hàng 1 dòng cao 40px.
+- `btn-sm` để 28px thay vì 24px của Ant, cho dễ bấm ở toolbar và pager.
+- Biến thể dark header/sidebar chưa làm.

@@ -327,7 +327,7 @@
   .form-grid .span-2 { grid-column: auto; }
   .page-title { font-size: var(--fs-20); }
   .overlay { padding: 0; align-items: flex-end; }
-  .dialog, .dialog-lg, .dialog-xl, .dialog-full { width: 100%; max-height: 92vh; border-radius: 16px 16px 0 0; height: auto; }
+  .dialog, .dialog-lg, .dialog-xl, .dialog-full { width: 100%; max-height: 92vh; border-radius: var(--r-lg) var(--r-lg) 0 0; height: auto; }
   .dialog-full { height: 92vh; }
   .drawer { width: 100%; }
   .l-nav-links { display: none; }

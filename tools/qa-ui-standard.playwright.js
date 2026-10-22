@@ -170,6 +170,46 @@ async (page) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   check('UI-STD-11 no-hscroll', !over.length, over.slice(0, 10));
 
+  // ---------- CR-UI-ENT: Ant Design Pro mix layout ----------
+  const hex2rgb = h => { const v = h.trim().replace('#', ''); return 'rgb(' + [0, 2, 4].map(i => parseInt(v.substr(i, 2), 16)).join(', ') + ')'; };
+  await page.setViewportSize({ width: 1440, height: 900 }); await reset('D', false); await go({ id: 'INV-02' });
+  const ent = await read(() => {
+    const cs = (el, p) => el ? getComputedStyle(el)[p] : null, root = getComputedStyle(document.documentElement);
+    const tb = document.querySelector('.topbar'), r = tb.getBoundingClientRect();
+    const L = c => { const m = c.match(/[\d.]+/g).map(Number); const f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(m[0]) + 0.7152 * f(m[1]) + 0.0722 * f(m[2]); };
+    const ratio = (a, b) => { const x = L(a), y = L(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+    /* hàng 1 dòng = --row-h 40: đo hàng tiêu đề (luôn 1 dòng) và padding ô thân bảng */
+    const row = document.querySelector('#view .table thead tr').getBoundingClientRect().height, tdPad = cs(document.querySelector('#view .table tbody td'), 'paddingTop');
+    return {
+      header: { pos: cs(tb, 'position'), left: r.left, width: r.width, top: r.top, bg: cs(tb, 'backgroundColor'), brand: !!document.querySelector('.topbar-brand') && document.querySelector('.topbar-brand').offsetWidth > 0,
+        contrastFg: ratio(cs(tb, 'color'), cs(tb, 'backgroundColor')), sbBrandHidden: cs(document.querySelector('#sidebar .brand'), 'display') === 'none' },
+      headerBgToken: root.getPropertyValue('--teal-800'), layoutToken: root.getPropertyValue('--bg-layout'),
+      content: { radius: cs(document.getElementById('view'), 'borderTopLeftRadius'), shellBg: cs(document.getElementById('shell'), 'backgroundColor') },
+      card: cs(document.querySelector('#view .card'), 'borderTopLeftRadius'),
+      sizes: { btn: document.querySelector('#view .page-actions .btn')?.getBoundingClientRect().height, input: document.querySelector('#view .toolbar .input')?.getBoundingClientRect().height,
+        title: cs(document.querySelector('#view .page-title'), 'fontSize'), kpi: cs(document.querySelector('#view .kpi-value'), 'fontSize'), headRow: row, tdPad },
+      order: (() => { const h = document.querySelector('#view > .page-hd'), w = document.querySelector('#view > .workspace-navigation'); return h && w ? h.getBoundingClientRect().top < w.getBoundingClientRect().top : false; })(),
+      crumbs: document.querySelector('#view > .page-hd .crumbs')?.innerText.replace(/\s+/g, ' ').trim(),
+    };
+  });
+  check('UI-ENT-01 header', ent.header.pos === 'fixed' && ent.header.left === 0 && ent.header.top === 0 && ent.header.width >= 1400 && ent.header.bg === hex2rgb(ent.headerBgToken) && ent.header.brand && ent.header.sbBrandHidden && ent.header.contrastFg >= 7, ent.header);
+  check('UI-ENT-02 layout+card', ent.content.radius === '0px' && ent.content.shellBg === hex2rgb(ent.layoutToken) && ent.card === '8px', { ...ent.content, card: ent.card });
+  check('UI-ENT-03 sizes', Math.round(ent.sizes.btn) === 32 && Math.round(ent.sizes.input) === 32 && ent.sizes.title === '20px' && ent.sizes.kpi === '24px' && ent.sizes.headRow <= 41 && ent.sizes.tdPad === '6px', ent.sizes);
+  await go({ id: 'CUS-01' }); await page.waitForTimeout(50);
+  const cusCrumb = await read(() => document.querySelector('#view > .page-hd .crumbs')?.innerText.replace(/\s+/g, ' ').trim());
+  check('UI-ENT-04 page-header', ent.order && /Hóa đơn & thu tiền/.test(ent.crumbs || '') && /Hóa đơn$/.test(ent.crumbs || '') && !!cusCrumb, { order: ent.order, inv: ent.crumbs, cus: cusCrumb });
+  const dupBad = [];
+  for (const id of ['RPT-01', 'RPT-02', 'RPT-03']) { await go({ id }); const n = await read(() => document.querySelectorAll('#view [data-global]').length); if (n) dupBad.push(id + ':' + n); }
+  check('UI-ENT-05 no-dup-scope', !dupBad.length, dupBad);
+  await page.setViewportSize({ width: 375, height: 812 }); await go({ id: 'INV-02' });
+  const mob = await read(() => ({ bg: getComputedStyle(document.querySelector('.topbar')).backgroundColor, over: document.documentElement.scrollWidth - innerWidth }));
+  /* tab headless không chạy khung hình → transition trượt drawer đứng yên; đo ở reduced-motion */
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.click('.menu-toggle'); await page.waitForTimeout(300);
+  const drw = await read(() => { const b = document.querySelector('#sidebar .brand'); const r = b.getBoundingClientRect(); return { brand: getComputedStyle(b).display !== 'none' && r.width > 0 && r.left >= 0, open: document.getElementById('shell').classList.contains('nav-open') }; });
+  await page.keyboard.press('Escape'); await page.emulateMedia({ reducedMotion: null }); await page.setViewportSize({ width: 1440, height: 900 });
+  check('UI-ENT-06 mobile', mob.bg === hex2rgb(ent.headerBgToken) && mob.over <= 0 && drw.brand && drw.open, { mob, drw });
+
   const smoke = await read(() => { TH.db = TH.seed(); Object.assign(TH.store.state, { building: 'ALL', ui: {}, drafts: {}, editing: null, role: 'admin', pkg: 'D', reviewMode: false }); const r = TH.qaSmoke(); TH.store.flush(); TH.app.refresh(); return { total: r.total, fails: r.fails.length }; });
   check('SMOKE', smoke.total >= 1048 && smoke.fails === 0 && !errors.length, { smoke, errors: errors.slice(0, 3) });
   return { passed: results.length, results };

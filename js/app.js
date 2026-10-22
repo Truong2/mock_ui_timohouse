@@ -47,6 +47,7 @@ var TH = window.TH = window.TH || {};
     var initials = me.name.split(' ').slice(-2).map(function (w) { return w[0]; }).join('');
     document.getElementById('topbar').innerHTML =
       '<button type="button" class="btn btn-ghost btn-icon menu-toggle" data-act="nav.toggle" aria-label="Mở menu">' + I('menu') + '</button>' +
+      '<a class="topbar-brand" href="#/" aria-label="TIMEHOUSE — về trang giới thiệu"><span class="brand-mark">' + I('logo') + '</span><span class="topbar-brand-name">TIMEHOUSE</span></a>' +
       '<div class="topbar-search"><div class="input-wrap">' + I('search') + '<label class="sr-only" for="gsearch">Tìm màn, phòng, khách, hóa đơn</label><input id="gsearch" class="input" type="search" placeholder="Tìm màn, phòng, khách, hóa đơn…" autocomplete="off"></div><kbd>/</kbd><div class="search-results" id="gresults" hidden></div></div>' +
       '<div class="grow"></div>' +
       '<div class="scope-group"><label class="sr-only" for="scope-b">Scope tòa</label><select id="scope-b" class="select scope-building" data-global="building">' +
@@ -133,6 +134,8 @@ var TH = window.TH = window.TH || {};
     view.innerHTML = html;
     document.body.classList.toggle('is-review', TH.isReview());
     if (!r.extra) TH.uiPolish(view);
+    /* navigation.js gắn thanh mục sau lượt render này → breadcrumb nhóm/mục chạy ở microtask kế tiếp */
+    if (!r.extra && TH.pageCrumbs) Promise.resolve().then(function () { TH.pageCrumbs(view); });
     if (navigated) {
       view.classList.remove('is-entering'); void view.offsetWidth; view.classList.add('is-entering');
       window.scrollTo(0, 0);

@@ -36,7 +36,19 @@
   --primary-soft: var(--teal-50);
   --primary-ring: rgba(15, 118, 110, 0.28);
 
-  --bg: var(--n-50);
+  /* CR-UI-ENT — nền layout xám nhạt, card/page header trắng (Ant Design Pro) */
+  --bg-layout: #f5f7f8;
+  --border-split: #eceff2;
+  --table-head: #fafbfc;
+  --header-bg: var(--teal-800);
+  --header-fg: #ffffff;
+  --header-fg-2: rgba(255, 255, 255, 0.82);
+  --header-ctl-bg: rgba(255, 255, 255, 0.12);
+  --header-ctl-hover: rgba(255, 255, 255, 0.2);
+  --header-ctl-line: rgba(255, 255, 255, 0.28);
+  --header-shadow: 0 1px 4px rgba(0, 21, 41, 0.12);
+
+  --bg: var(--bg-layout);
   --surface: var(--n-0);
   --surface-muted: var(--n-50);
   --border: var(--n-200);
@@ -79,13 +91,13 @@
   --file-sheet: #16a34a;
   --file-pdf: #dc2626;
   --file-img: #7c3aed;
-  /* Framed sheet (khung tint + tờ trắng) */
-  --frame: #f2f6f5;
-  --sheet-edge: #e5eae8;
-  --panel-edge: #edf0ef;
-  --surface-tint: #f6f8f7;
-  --surface-tint-teal: #f4f8f6;
-  --nav-active-bg: #e2eae7;
+  /* Alias từ hướng framed sheet cũ — trỏ về token enterprise (CR-UI-ENT) */
+  --frame: var(--bg-layout);
+  --sheet-edge: var(--border-split);
+  --panel-edge: var(--border-split);
+  --surface-tint: var(--table-head);
+  --surface-tint-teal: var(--teal-25);
+  --nav-active-bg: var(--teal-50);
   --room-occupied-bg: #e4f3ed;
   --room-occupied-line: #bfd8ce;
   --split-bg: #e9eef3;
@@ -134,13 +146,13 @@
   --fs-caption: var(--fs-12);
   --fs-body: var(--fs-14);
   --fs-sub: var(--fs-16);
-  --fs-title: var(--fs-22);
-  --fs-kpi: var(--fs-28);
+  --fs-title: var(--fs-20);
+  --fs-kpi: var(--fs-24);
   --fw-regular: 400;
   --fw-medium: 500;
   --fw-semibold: 600;
   --lh-tight: 1.25;
-  --lh-base: 1.5;
+  --lh-base: 1.5715;
   --lh-loose: 1.6;
 
   /* Spacing — grid 8px */
@@ -155,21 +167,26 @@
   --s-12: 48px;
   --s-16: 64px;
 
-  /* Radius & elevation — control 6 · card 8 · sheet/dialog 16 */
+  /* Radius & elevation — tag 4 · control 6 · card/dialog 8 (Ant Design) */
+  --r-xs: 4px;
   --r-sm: 6px;
   --r-md: 6px;
   --r-lg: 8px;
-  --r-xl: 16px;
+  --r-xl: 8px;
   --r-full: 999px;
   --shadow-xs: none;
   --shadow-sm: none;
-  --shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
-  --shadow-lg: 0 16px 40px -12px rgba(15, 23, 42, 0.22), 0 4px 12px -4px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 1px 2px rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px rgba(0, 0, 0, 0.02);
+  --shadow-lg: 0 6px 16px rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
   --shadow-xl: 0 32px 64px -24px rgba(15, 23, 42, 0.3);
 
   /* Layout */
   --sidebar-w: 232px;
   --topbar-h: 56px;
+  --ctl-h: 32px;
+  --ctl-h-sm: 24px;
+  --ctl-h-lg: 40px;
+  --row-h: 40px;
   --content-max: none;
   /* Lớp xếp chồng */
   --z-sticky: 2;
