@@ -44,7 +44,7 @@
 
   --text: var(--n-900);
   --text-2: var(--n-600);
-  --text-3: var(--n-500);
+  --text-3: #5b6b80; /* ≥ 4.97:1 trên trắng, frame, n-50, n-100 (CR-UI-STD) */
   --text-inverse: #ffffff;
 
   --success: #15803d;
@@ -62,6 +62,37 @@
   --draft: #7c2d12;
   --draft-soft: #fff7ed;
   --draft-line: #fed7aa;
+  /* Chữ đậm theo tone (alert, nhãn trên nền nhạt) */
+  --success-fg: #14532d;
+  --warning-fg: #78350f;
+  --danger-fg: #7f1d1d;
+  --info-fg: #1e3a8a;
+  --warning-line-strong: #f59e0b;
+  --danger-line-strong: #fca5a5;
+  --danger-hover: #991b1b;
+  --open-fg: #9a3412;
+  --open-line: #fdba74;
+  /* Toast (nền tối) & loại tệp */
+  --toast-success: #4ade80;
+  --toast-warning: #fbbf24;
+  --toast-danger: #f87171;
+  --file-sheet: #16a34a;
+  --file-pdf: #dc2626;
+  --file-img: #7c3aed;
+  /* Framed sheet (khung tint + tờ trắng) */
+  --frame: #f2f6f5;
+  --sheet-edge: #e5eae8;
+  --panel-edge: #edf0ef;
+  --surface-tint: #f6f8f7;
+  --surface-tint-teal: #f4f8f6;
+  --nav-active-bg: #e2eae7;
+  --room-occupied-bg: #e4f3ed;
+  --room-occupied-line: #bfd8ce;
+  --split-bg: #e9eef3;
+  /* Bản in / tài liệu */
+  --doc-ink: #1f2937;
+  --doc-rule: var(--n-400);
+  --stamp: #c2410c;
 
   /* Package tiers */
   --tier-a: #0f766e;
@@ -97,7 +128,20 @@
   --fs-20: 20px;
   --fs-24: 24px;
   --fs-28: 28px;
+  --fs-22: 22px;
   --fs-32: 32px;
+  /* Cỡ chữ theo vai trò — sàn 12px */
+  --fs-caption: var(--fs-12);
+  --fs-body: var(--fs-14);
+  --fs-sub: var(--fs-16);
+  --fs-title: var(--fs-22);
+  --fs-kpi: var(--fs-28);
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --lh-tight: 1.25;
+  --lh-base: 1.5;
+  --lh-loose: 1.6;
 
   /* Spacing — grid 8px */
   --s-1: 4px;
@@ -111,10 +155,10 @@
   --s-12: 48px;
   --s-16: 64px;
 
-  /* Radius & elevation */
+  /* Radius & elevation — control 6 · card 8 · sheet/dialog 16 */
   --r-sm: 6px;
-  --r-md: 8px;
-  --r-lg: 12px;
+  --r-md: 6px;
+  --r-lg: 8px;
   --r-xl: 16px;
   --r-full: 999px;
   --shadow-xs: none;
@@ -124,9 +168,19 @@
   --shadow-xl: 0 32px 64px -24px rgba(15, 23, 42, 0.3);
 
   /* Layout */
-  --sidebar-w: 264px;
-  --topbar-h: 64px;
-  --content-max: 1400px;
+  --sidebar-w: 232px;
+  --topbar-h: 56px;
+  --content-max: none;
+  /* Lớp xếp chồng */
+  --z-sticky: 2;
+  --z-sticky-head: 3;
+  --z-topbar: 50;
+  --z-sidebar: 60;
+  --z-overlay: 400;
+  --z-popover: 500;
+  --z-toast: 900;
+  --z-tip: 1000;
+  /* Breakpoints (tham chiếu; media query dùng giá trị số): 640 · 1024 · 1280 */
 
   /* Motion */
   --ease: cubic-bezier(0.2, 0, 0, 1);

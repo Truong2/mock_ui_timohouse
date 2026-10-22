@@ -57,11 +57,11 @@
     ]);
     cols = cols.concat([
       { key: 'A', label: 'A · sau 3 mốc', num: true, render: function (r) { return F.money(Math.round(r.A)); } },
-      { key: 'B', label: 'B · tỷ lệ DV', num: true, gate: 'F033.B', render: function (r) { return r.rev ? F.pct(r.B, 1) : '<span class="muted">—</span>'; } },
+      { key: 'B', label: 'B · tỷ lệ dịch vụ', num: true, gate: 'F033.B', render: function (r) { return r.rev ? F.pct(r.B, 1) : '<span class="muted">—</span>'; } },
       { key: 'C', label: 'C · thu thêm', num: true, gate: 'F033.C', render: function (r) { return r.C ? F.money(r.C) : '<span class="muted">0</span>'; } },
       { key: 'D', label: 'D · quy đổi', num: true, render: function (r) { return '<b class="pos">' + F.money(Math.round(r.t.D)) + '</b>'; } },
       { key: 'N', label: 'Giá niêm yết', num: true, render: function (r) { return F.money(r.listed); } },
-      { key: 'hs', label: TH.has('F033.B') ? 'HS thực tế' : 'Chỉ số sơ bộ (chưa tách DV)', num: true, render: function (r) { return r.invoices ? (r.closed ? TH.hsCell(r.t.hs) : '<span class="muted small">chờ mốc 15</span>') : '<span class="muted small">chưa lập HĐơn</span>'; } },
+      { key: 'hs', label: TH.has('F033.B') ? 'HS thực tế' : 'Chỉ số sơ bộ (chưa tách DV)', num: true, render: function (r) { return r.invoices ? (r.closed ? TH.hsCell(r.t.hs) : '<span class="muted small">chờ mốc 15</span>') : '<span class="muted small">chưa lập hóa đơn</span>'; } },
       { key: 'hp', label: TH.has('F033.B') ? 'HS tạm tính' : 'Sơ bộ tạm tính', num: true, render: function (r) { return r.invoices ? TH.hsCell(r.t.hsProv, true) : '<span class="muted">—</span>'; } },
       { key: 'o', label: 'Lấp đầy (riêng)', num: true, render: function (r) { return F.pct(r.occ, 0) + '<div class="cell-sub">' + r.occupied + '/' + r.rentable + ' phòng cho thuê được</div>'; } },
     ]);
@@ -75,7 +75,7 @@
   TH.perfSheet = function (p, bs) {
     var rows = bs.map(function (b) { var r = C.perfBuilding(p, b.id), t = TH.perfTier(r); return [b.name, r.cum5, r.cum10, r.cum15, r.late, Math.round(r.A), t.useB ? r.B : null, t.useC ? r.C : null, Math.round(t.D), r.listed, r.invoices && r.closed ? t.hs : null, r.invoices ? t.hsProv : null, r.occ]; });
     return { name: 'Hieu suat', title: 'Hiệu suất tòa theo mốc 5/10/15 — kỳ ' + F.period(p), note: 'DRAFT · HS% = [A − A×B + C] ÷ tổng giá niêm yết (note khách 20/10/2026, D-04) · B/C theo gói đang xem',
-      columns: [{ label: 'Tòa', width: 26 }, { label: 'DT M5 (lũy kế)', type: 'money' }, { label: 'DT M10 (lũy kế)', type: 'money' }, { label: 'DT M15 (lũy kế)', type: 'money' }, { label: 'Thu sau 15', type: 'money' }, { label: 'A · sau 3 mốc', type: 'money' }, { label: 'B · tỷ lệ DV', type: 'pct' }, { label: 'C · thu thêm', type: 'money' }, { label: 'D · quy đổi', type: 'money' }, { label: 'Tổng giá niêm yết', type: 'money' }, { label: TH.has('F033.B') ? 'HS thực tế' : 'Chỉ số sơ bộ (chưa tách DV)', type: 'pct' }, { label: 'Tạm tính đến ' + F.date(TH.TODAY) + ' (chưa áp trọng số)', type: 'pct' }, { label: 'Lấp đầy (riêng)', type: 'pct' }],
+      columns: [{ label: 'Tòa', width: 26 }, { label: 'DT M5 (lũy kế)', type: 'money' }, { label: 'DT M10 (lũy kế)', type: 'money' }, { label: 'DT M15 (lũy kế)', type: 'money' }, { label: 'Thu sau 15', type: 'money' }, { label: 'A · sau 3 mốc', type: 'money' }, { label: 'B · tỷ lệ dịch vụ', type: 'pct' }, { label: 'C · thu thêm', type: 'money' }, { label: 'D · quy đổi', type: 'money' }, { label: 'Tổng giá niêm yết', type: 'money' }, { label: TH.has('F033.B') ? 'HS thực tế' : 'Chỉ số sơ bộ (chưa tách DV)', type: 'pct' }, { label: 'Tạm tính đến ' + F.date(TH.TODAY) + ' (chưa áp trọng số)', type: 'pct' }, { label: 'Lấp đầy (riêng)', type: 'pct' }],
       rows: rows };
   };
   TH.perfFormulaNote = function () {

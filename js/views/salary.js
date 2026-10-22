@@ -69,9 +69,9 @@
         '<div class="small">' + TH.tierPill('A') + ' Kế toán xác nhận bằng file Excel ngoài hệ thống.</div>' +
         (st.status === 'confirmed' ? TH.badge('Đã xác nhận ngoài hệ thống · ' + F.date(st.at), 'success', { icon: 'check' }) : '') +
         '<div class="row">' + TH.exportBtn('sal.xlsx', 'Xuất Excel (.xlsx)') + (st.status === 'draft' && TH.can('salary.edit') ? '<button type="button" class="btn btn-sm" data-act="sal.extConfirm">Đánh dấu đã xác nhận (Excel)</button>' : '') + '</div>' +
-        TH.gate('F041.B', '<div class="divider" style="margin:8px 0"></div><div class="small">' + TH.tierPill('B') + ' Duyệt bản preview trong phần mềm</div>' + (st.status === 'preview' || locked ? TH.badge('Đã duyệt preview', 'success') : TH.permBtn('salary.edit', '<button type="button" class="btn btn-sm btn-soft" data-act="sal.preview">' + I('eye', 'ic-sm') + 'Duyệt preview</button>', '403')), { mode: 'mini', label: 'Duyệt bản preview trong phần mềm' }) +
-        TH.gate('F041.C', '<div class="divider" style="margin:8px 0"></div><div class="small">' + TH.tierPill('C') + ' Khóa kỳ & audit số liệu</div>' + (locked ? TH.badge('Đã khóa kỳ lương', 'neutral', { icon: 'lock' }) : TH.permBtn('salary.edit', '<button type="button" class="btn btn-sm" data-act="sal.lock">' + I('lock', 'ic-sm') + 'Khóa kỳ lương</button>', '403')), { mode: 'mini', label: 'Khóa kỳ/duyệt và audit số liệu' }) +
-        TH.gate('F041.D', '<div class="divider" style="margin:8px 0"></div><div class="small">' + TH.tierPill('D') + ' Phiếu chi lương thủ công & kiểm soát chênh lệch: bảng lương ' + F.money(C.sum(list, function (r) { return r.total; })) + ' vs phiếu chi 0 ₫ → chênh ' + F.money(C.sum(list, function (r) { return r.total; })) + ' (chưa chi).</div>', { mode: 'mini', label: 'Phiếu chi lương thủ công' }) +
+        TH.gate('F041.B', '<div class="divider u-my-8"></div><div class="small">' + TH.tierPill('B') + ' Duyệt bản preview trong phần mềm</div>' + (st.status === 'preview' || locked ? TH.badge('Đã duyệt preview', 'success') : TH.permBtn('salary.edit', '<button type="button" class="btn btn-sm btn-soft" data-act="sal.preview">' + I('eye', 'ic-sm') + 'Duyệt preview</button>', '403')), { mode: 'mini', label: 'Duyệt bản xem trước trong phần mềm' }) +
+        TH.gate('F041.C', '<div class="divider u-my-8"></div><div class="small">' + TH.tierPill('C') + ' Khóa kỳ & audit số liệu</div>' + (locked ? TH.badge('Đã khóa kỳ lương', 'neutral', { icon: 'lock' }) : TH.permBtn('salary.edit', '<button type="button" class="btn btn-sm" data-act="sal.lock">' + I('lock', 'ic-sm') + 'Khóa kỳ lương</button>', '403')), { mode: 'mini', label: 'Khóa kỳ/duyệt và nhật ký số liệu' }) +
+        TH.gate('F041.D', '<div class="divider u-my-8"></div><div class="small">' + TH.tierPill('D') + ' Phiếu chi lương thủ công & kiểm soát chênh lệch: bảng lương ' + F.money(C.sum(list, function (r) { return r.total; })) + ' vs phiếu chi 0 ₫ → chênh ' + F.money(C.sum(list, function (r) { return r.total; })) + ' (chưa chi).</div>', { mode: 'mini', label: 'Phiếu chi lương thủ công' }) +
         '</div></div>';
       var policy = '<div class="card">' + TH.cardHd(I('calculator', 'ic-sm') + 'Rule tính nháp', null, TH.openBadge('D-06')) + '<div class="card-bd stack-sm">' +
         TH.kv([['Công thức', 'Lương cơ bản + phụ cấp + lương HS + lương trưởng nhóm + điều chỉnh'], ['A · DT sau 3 mốc', 'M5 × 100% + (M10 − M5) × 90% + (M15 − M10) × 70%'], ['B · tỷ lệ dịch vụ', 'DV phải thu ÷ DT phải thu'], ['C · thu thêm', 'Tiền phòng phát sinh đã thu đủ + khoản khách bỏ cọc'], ['Hiệu suất', 'HS% = (A − A × B + C) ÷ tổng giá niêm yết'], ['Mức lương/phòng', 'HS × đơn giá tham chiếu ÷ 90 (' + F.money(TH.db.salaryPolicy.ratePerRoom.senior) + ' thâm niên ≥ 1 năm · ' + F.money(TH.db.salaryPolicy.ratePerRoom.junior) + ' dưới 1 năm)'], ['Lương HS', 'mức lương/phòng × số phòng phụ trách'], ['Trưởng nhóm', F.money(TH.db.salaryPolicy.leaderPerRoom) + ' × số phòng của đội'], ['Nguồn DT', auto ? 'Tự kéo từ mốc 5/10/15 (B)' : 'Nhập tay từ báo cáo PAY-02 (A)']]) +
@@ -84,8 +84,8 @@
       var actions = TH.gate('F039.B', TH.permBtn('salary.edit', '<button type="button" class="btn" data-act="sal.import">' + I('upload', 'ic-sm') + 'Import bảng lương nguồn' + TH.up('F039.B') + '</button>', '403'), { mode: 'btn', label: 'Import bảng lương nguồn' }) +
         '<a class="btn" href="' + TH.router.href('SAL-ADJ') + '">' + I('edit', 'ic-sm') + 'Điều chỉnh</a>' + TH.exportBtn('sal.xlsx', 'Xuất Excel (.xlsx)');
       return TH.pageHeader({ screen: S, status: TH.badge('Bảng lương ' + { draft: 'nháp', confirmed: 'đã xác nhận (Excel)', preview: 'đã duyệt preview', locked: 'đã khóa' }[st.status], st.status === 'locked' ? 'neutral' : 'draft', { dot: true }), desc: 'Lương cơ bản + phụ cấp + lương hiệu suất (HS% = [A − A × B + C] ÷ tổng giá niêm yết) + lương trưởng nhóm + điều chỉnh kế toán. Bảng lương nháp không tạo chi tiền.', actions: actions }) +
-        '<div class="grid-4" style="margin-bottom:16px">' + TH.kpi({ label: 'Tổng lương nháp', icon: 'calculator', value: F.short(C.sum(list, function (r) { return r.total; })), accent: true }) + TH.kpi({ label: 'Cơ bản + phụ cấp', value: F.short(C.sum(list, function (r) { return r.base + r.allowance; })) }) + TH.kpi({ label: 'Lương HS + trưởng nhóm', value: F.short(C.sum(list, function (r) { return r.perf + r.lead; })), href: TH.router.href('PAY-02'), foot: 'Nguồn: mốc 5/10/15 · HS% = D ÷ giá niêm yết' }) + TH.kpi({ label: 'Điều chỉnh', value: F.short(C.sum(list, function (r) { return r.adj; })), href: TH.router.href('SAL-ADJ') }) + '</div>' +
-        '<div class="card card-flush" style="margin-bottom:16px">' + TH.tabs(S, tabs, tab) + content + '</div><div class="grid-2">' + approve + policy + '</div>';
+        '<div class="grid-4 u-mb-16">' + TH.kpi({ label: 'Tổng lương nháp', icon: 'calculator', value: F.short(C.sum(list, function (r) { return r.total; })), accent: true }) + TH.kpi({ label: 'Cơ bản + phụ cấp', value: F.short(C.sum(list, function (r) { return r.base + r.allowance; })) }) + TH.kpi({ label: 'Lương HS + trưởng nhóm', value: F.short(C.sum(list, function (r) { return r.perf + r.lead; })), href: TH.router.href('PAY-02'), foot: 'Nguồn: mốc 5/10/15 · HS% = D ÷ giá niêm yết' }) + TH.kpi({ label: 'Điều chỉnh', value: F.short(C.sum(list, function (r) { return r.adj; })), href: TH.router.href('SAL-ADJ') }) + '</div>' +
+        '<div class="card card-flush u-mb-16">' + TH.tabs(S, tabs, tab) + content + '</div><div class="grid-2">' + approve + policy + '</div>';
     },
   };
   TH.act['sal.xlsx'] = function () {
@@ -129,9 +129,9 @@
           TH.field({ form: form, name: 'staff', label: 'Nhân viên', type: 'select', options: staffOpts, def: r.param && C.staff(r.param) ? r.param : 'NV-003' }) +
           TH.field({ label: 'Kỳ lương', value: 'Kỳ ' + F.period(p), readonly: true, id: 'saladj-p' }) +
           TH.field({ form: form, name: 'type', label: 'Loại điều chỉnh', type: 'select', options: [{ id: 'bonus', label: 'Thưởng' }, { id: 'penalty', label: 'Trừ' }, { id: 'other', label: 'Khác' }], def: 'bonus' }) +
-          TH.field({ form: form, name: 'amount', label: 'Số tiền (đ)', num: true, inputmode: 'numeric', def: '' }) +
-          TH.field({ form: form, name: 'reason', label: 'Lý do', type: 'textarea', span: true, def: '', required: true }) + '</div>' +
-          TH.gate('F041.C', '<div class="small" style="margin-top:10px">' + TH.tierPill('C') + ' Điều chỉnh sau khi duyệt/khóa được ghi audit số liệu.</div>', { mode: 'mini', label: 'Audit điều chỉnh sau khóa' }) + '</div></div></div>',
+          TH.field({ form: form, required: true, name: 'amount', label: 'Số tiền (đ)', num: true, inputmode: 'numeric', def: '' }) +
+          TH.field({ form: form, required: true, name: 'reason', label: 'Lý do', type: 'textarea', span: true, def: '', required: true }) + '</div>' +
+          TH.gate('F041.C', '<div class="small u-mt-12">' + TH.tierPill('C') + ' Điều chỉnh sau khi duyệt/khóa được ghi audit số liệu.</div>', { mode: 'mini', label: 'Nhật ký điều chỉnh sau khóa' }) + '</div></div></div>',
         foot: '<button type="button" class="btn" data-close>Đóng</button>' + TH.permBtn('salary.edit', '<button type="button" class="btn btn-primary" data-act="saladj.save">' + I('plus', 'ic-sm') + 'Thêm điều chỉnh</button>', 'Chỉ Kế toán/Admin · 403'),
       };
     },
@@ -139,7 +139,8 @@
   TH.act['saladj.save'] = function () {
     var g = function (k, d) { return TH.store.draft('saladj', k, d); };
     var amt = +String(g('amount', '')).replace(/\D/g, ''), reason = (g('reason', '') || '').trim(), type = g('type', 'bonus');
-    if (!amt || !reason) { TH.toast('Thiếu thông tin', 'Nhập số tiền và lý do.', 'danger'); return; }
+    var errs = {}; if (!amt) errs.amount = 'Nhập số tiền lớn hơn 0.'; if (!reason) errs.reason = 'Nhập lý do điều chỉnh.';
+    if (!TH.formErrors('saladj', errs)) { TH.modal.rerenderAll(); return; }
     var rec = { id: 'DC-' + Date.now().toString().slice(-5), staffId: g('staff', 'NV-003'), period: TH.store.state.period, type: type, amount: type === 'penalty' ? -amt : amt, reason: reason, createdBy: TH.me().id, createdAt: TH.TODAY, status: 'draft' };
     TH.db.salaryAdjustments.push(rec);
     TH.log('Thêm điều chỉnh lương', rec.staffId, F.money(rec.amount) + ' · ' + reason, 'salary');

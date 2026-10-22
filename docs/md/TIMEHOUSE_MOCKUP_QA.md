@@ -362,3 +362,54 @@ Các bảng QA cũ còn ghi số trước schema 12; số đúng như sau:
 | QA-RPT-10 | Route cũ và 375px | ✅ | `#/demo/rpt-04` mở form điền sẵn RPT-04 + Đống Đa, không tạo bản lưu; preview, bản lưu, danh sách không tràn ngang ở 375px; không có lỗi JS |
 
 Smoke: **1088 lượt / 0 lỗi** (thêm màn REPORTS: 3 biến thể, 2 dialog truy nguồn; RPT-04/05 nay mở form tạo). Hồi quy: `qa-bill` 8/8, `qa-pay` 12/12, `qa-cus` 23/23 (REGRESSION giữ baseline schema 12: 16.682.599 / 7.282.599 / 9.655.000), `qa-ocr` 9/9. Bốn bộ cũ đổi điều kiện smoke thành ≥ 1048 lượt và 0 lỗi, không khóa cứng tổng (theo plan). `qa-table-wrap`: không có ô gãy mới (vẫn 1 ô ghi chú khấu trừ đã biết).
+
+### 8.10 CR-UI-STD — Chuẩn hóa UI enterprise (22/10/2026)
+
+**Công cụ:**
+- Kiểm tra tĩnh: `node tools/lint-ui.js`.
+- Kiểm tra trình duyệt: `tools/qa-ui-standard.playwright.js`, chạy qua Playwright `browser_run_code`.
+
+Chạy với route no-cache để tránh CSS cũ.
+
+| ID | Kiểm tra | Kết quả | Ghi chú |
+|---|---|---|---|
+| LINT-UI | Hex thô, font < 12px, weight ngoài 400/500/600, inline hex, số inline style, nhãn Anh trong danh sách đen | ✅ 0 vi phạm | Inline style 98 (mốc 334, ngưỡng ≤ 100) |
+| UI-STD-01 | Chế độ review | ✅ | Tắt: không còn mã nội bộ trong text/tooltip, không có pill gói. Bật: hiện lại |
+| UI-STD-02 | Màu primary | ✅ | Nút primary, link trong bảng/card và tab active cùng `--primary` (teal) |
+| UI-STD-03 | Tương phản | ✅ | Chữ hiển thị ≥ 4.5:1 (≥ 3:1 với chữ lớn) |
+| UI-STD-04 | Cỡ chữ | ✅ | Không phần tử chữ nào dưới 12px (computed) |
+| UI-STD-05 | Nút icon | ✅ | Mọi nút chỉ có icon đều có `aria-label` |
+| UI-STD-06 | Header | ✅ | Tối đa 3 nút hiển thị; phần dư vào menu "Thêm" |
+| UI-STD-07 | Menu "Thêm" | ✅ | Mở bằng Enter, di chuyển bằng mũi tên, đóng bằng Esc |
+| UI-STD-08 | Danh sách | ✅ | OWN-01, BLD-01, ROOM-01, CUS-01, CON-01, INV-02, PAY-01, EXP-01 có tìm kiếm + phân trang hoặc empty state; cột trạng thái có tiêu đề |
+| UI-STD-09 | Lỗi form | ✅ | Gửi form trống ở thêm tòa, thêm phòng, thêm chi phí, phí chỉ số, giảm trừ → lỗi tại ô (`aria-invalid`), không toast. Kỳ trả chủ nhà số tiền 0 → lỗi ở ô số tiền; từ chối báo thu không lý do → lỗi ở ô lý do, phiếu vẫn "chờ" |
+| UI-STD-12 | Gom gate | ✅ | Gói A: INV-01, OA-01, RPT-03 có 1 thẻ gom ≥ 2 mục, không còn gate rời liền nhau trong cột; bấm mục mở màn nâng gói |
+| UI-STD-10 | Trạng thái và chi tiết | ✅ | Tone theo registry; trang chi tiết có dải facts, tab-card, breadcrumb 2 cấp |
+| UI-STD-11 | Bố cục | ✅ | Không cuộn ngang trang ở 375 / 768 / 1440 |
+| SMOKE | Smoke | ✅ | 1088 lượt / 0 lỗi |
+
+**Hồi quy:**
+
+| Bộ QA | Kết quả |
+|---|---|
+| `qa-bill` | 8/8 |
+| `qa-pay` | 12/12 |
+| `qa-cus` | 23/23 (REGRESSION giữ baseline 16.682.599 / 7.282.599 / 9.655.000) |
+| `qa-ocr` | 9/9 |
+| `qa-report` | 11/11 |
+| `qa-navigation` | 22/22 |
+| `qa-ui-refinement` | 80/80 |
+
+- `qa-table-wrap`: chỉ còn 1 ô đã biết (CUS-02, ghi chú khấu trừ cọc). Bộ này nay cho phép khối có từ 2 badge xuống dòng (cột trạng thái CUS-01).
+- `qa-import-schema` kiểm nhãn mới "Nhập từ Excel".
+- Console: không lỗi JS.
+
+**Kiểm tra mắt:** chụp before/after (1440 và 390) cho các màn overview RPT-01, CUS-01, INV-02, INV-03, BLD-02, CUS-02, PAY-02, INV-01, REPORTS và form thêm tòa có lỗi.
+- **Sau chuẩn hóa:**
+  - nút chính teal;
+  - header gọn với menu "Thêm";
+  - dải facts ở đầu trang chi tiết;
+  - tab không icon;
+  - lỗi hiện đỏ dưới ô Mã tòa/Tên tòa;
+  - không còn mã F0xx hay pill gói khi review tắt.
+- Ảnh lưu ngoài repo (scratchpad phiên làm việc), không commit.

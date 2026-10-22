@@ -18,9 +18,9 @@
   ];
   var PLAN_POINTS = {
     A: ['Đủ 39 màn / 52 nhóm chức năng', 'Hồ sơ chủ nhà, HĐ thuê tòa, tài sản, PCCC/ĐKKD; nhập tay + Excel mẫu', 'OCR 1 mẫu, người dùng xác nhận', 'Hóa đơn, công nợ, Zalo đủ điều kiện', 'Lương & cổ phần nháp', 'Báo cáo doanh thu theo tòa & kinh doanh tháng đúng mẫu Excel'],
-    B: ['Toàn bộ gói A', 'Phân công Trưởng nhóm/vệ sinh/kỹ thuật; tự sinh lịch trả chủ nhà từ HĐ', 'Preview import, tải file lỗi', 'OCR 2 mẫu, độ tin cậy field', 'Nhập chỉ số hàng loạt theo tòa', 'Nhắc Zalo 3 mốc', 'Báo cáo: mở chứng từ từng dòng, xu hướng 6 kỳ'],
-    C: ['Toàn bộ gói B', 'Hiệu suất cộng thu thêm (C); lịch trả: đã trả/còn lại/quá hạn', 'Duyệt & chống trùng thu/chi', 'Đối chiếu phòng–khách–hợp đồng', 'Lịch sử thay đổi, phụ lục giá', 'Kiểm tỷ lệ cổ phần 100%, khóa nháp lương', 'Báo cáo: snapshot duyệt kỳ, phân bổ chi phí chung, nhóm nhà'],
-    D: ['Toàn bộ gói C', 'Audit & truy vết chứng từ', 'Khóa kỳ, snapshot báo cáo', 'Đối soát sao kê, phân bổ phiếu thu', 'Phiên bản công thức & mẫu báo cáo', 'Báo cáo: đối chiếu 3 kỳ, chốt phiên bản'],
+    B: ['Toàn bộ gói A', 'Phân công Trưởng nhóm/vệ sinh/kỹ thuật; tự sinh lịch trả chủ nhà từ HĐ', 'Xem trước import, tải file lỗi', 'OCR 2 mẫu, độ tin cậy field', 'Nhập chỉ số hàng loạt theo tòa', 'Nhắc Zalo 3 mốc', 'Báo cáo: mở chứng từ từng dòng, xu hướng 6 kỳ'],
+    C: ['Toàn bộ gói B', 'Hiệu suất cộng thu thêm (C); lịch trả: đã trả/còn lại/quá hạn', 'Duyệt & chống trùng thu/chi', 'Đối chiếu phòng–khách–hợp đồng', 'Lịch sử thay đổi, phụ lục giá', 'Kiểm tỷ lệ cổ phần 100%, khóa nháp lương', 'Báo cáo: bản chốt duyệt kỳ, phân bổ chi phí chung, nhóm nhà'],
+    D: ['Toàn bộ gói C', 'Nhật ký & truy vết chứng từ', 'Khóa kỳ, bản chốt báo cáo', 'Đối soát sao kê, phân bổ phiếu thu', 'Phiên bản công thức & mẫu báo cáo', 'Báo cáo: đối chiếu 3 kỳ, chốt phiên bản'],
   };
 
   var RPT_CARDS = [

@@ -34,7 +34,7 @@
   function scopeIds() { var s = TH.scope(); return TH.db.buildings.filter(function (b) { return TH.inScope(b.id) && (s === 'ALL' || b.id === s); }).map(function (b) { return b.id; }); }
   function periodSelect(id) {
     var s = TH.store.state;
-    return '<label class="sr-only" for="' + id + '">Kỳ</label><select id="' + id + '" class="select select-sm" data-global="period" style="width:auto">' + TH.PERIODS.slice().reverse().map(function (p) { return '<option value="' + p + '"' + (p === s.period ? ' selected' : '') + '>Kỳ ' + F.period(p) + '</option>'; }).join('') + '</select>';
+    return '<label class="sr-only" for="' + id + '">Kỳ</label><select id="' + id + '" class="select select-sm u-w-auto" data-global="period">' + TH.PERIODS.slice().reverse().map(function (p) { return '<option value="' + p + '"' + (p === s.period ? ' selected' : '') + '>Kỳ ' + F.period(p) + '</option>'; }).join('') + '</select>';
   }
   function templateBadge(text) { return '<span class="badge badge-teal" data-tip="Bố cục và tên dòng giữ đúng file mẫu khách gửi ngày 20/10/2026">' + I('sheet', 'ic-sm') + esc(text) + '</span>'; }
   function crBadge() { return '<span class="badge badge-info" data-tip="' + esc(TH.CR_RPT.id + ' · ' + TH.CR_RPT.title + ' (' + F.date(TH.CR_RPT.date) + '). Xem Decision log §6.') + '">' + esc(TH.CR_RPT.id) + '</span>'; }
@@ -47,12 +47,12 @@
     if (v.pool && v.pool.status === 'draft') items.push('Bảng phân bổ chi phí chung kỳ ' + F.period(p) + ' đang <b>nháp</b>.');
     if (!items.length) return '';
     var pp = prevP(p);
-    return '<div class="alert alert-warning" style="margin-bottom:16px">' + I('alert', 'ic-sm') + '<div class="alert-body"><b>Số liệu kỳ ' + F.period(p) + ' chưa đủ để chốt</b><ul class="rpt-alert-list">' + items.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>' +
-      (pp && TH.periodLocked(pp) ? '<div style="margin-top:6px"><button type="button" class="btn btn-sm" data-act="rptx.period" data-p="' + pp + '">' + I('history', 'ic-sm') + 'Xem kỳ ' + F.period(pp) + ' (đã khóa)</button></div>' : '') + '</div></div>';
+    return '<div class="alert alert-warning u-mb-16">' + I('alert', 'ic-sm') + '<div class="alert-body"><b>Số liệu kỳ ' + F.period(p) + ' chưa đủ để chốt</b><ul class="rpt-alert-list">' + items.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>' +
+      (pp && TH.periodLocked(pp) ? '<div class="u-mt-8"><button type="button" class="btn btn-sm" data-act="rptx.period" data-p="' + pp + '">' + I('history', 'ic-sm') + 'Xem kỳ ' + F.period(pp) + ' (đã khóa)</button></div>' : '') + '</div></div>';
   }
   TH.act['rptx.period'] = function (el) { TH.store.set('period', el.dataset.p); TH.app.refresh(); };
 
-  /* Snapshot P&L theo kỳ duyệt (C) — tạo lúc duyệt kỳ; kỳ đã duyệt từ trước được tạo lười */
+  /* Bản chốt P&L theo kỳ duyệt (C) — tạo lúc duyệt kỳ; kỳ đã duyệt từ trước được tạo lười */
   TH.pnlSnapshotCreate = function (p) {
     var db = TH.db, data = {};
     db.pnlSnaps = db.pnlSnaps || {};
@@ -91,7 +91,7 @@
       body += '<tr class="' + cls + '" ' + attrs + '><th scope="row" class="rpt-label' + (line.indent ? ' rpt-ind' : '') + '">' + esc(o.labelOf ? o.labelOf(line) : line.label) + (hint ? ' <span class="rpt-hint" data-tip="' + esc(hint) + '" tabindex="0">' + I('info', 'ic-sm') + '</span>' : '') + lineTags(line) + '</th>' +
         cols.map(function (c) {
           var locked = c.gate && !TH.has(c.gate);
-          return '<td class="' + (c.num ? 'num ' : '') + (locked ? 'is-ghost ' : '') + (c.tdCls || '') + '">' + (locked ? '<span aria-hidden="true" style="display:inline-block;width:56px;height:8px;border-radius:4px;background:#e2e8f0"></span>' : c.cell(line)) + '</td>';
+          return '<td class="' + (c.num ? 'num ' : '') + (locked ? 'is-ghost ' : '') + (c.tdCls || '') + '">' + (locked ? '<span class="ghost-bar" aria-hidden="true"></span>' : c.cell(line)) + '</td>';
         }).join('') + '</tr>';
     });
     return '<div class="table-wrap"><table class="table table-compact rpt-table' + (o.matrix ? ' rpt-matrix' : '') + '" aria-label="' + esc(o.label) + '"><thead><tr>' + head + '</tr></thead><tbody>' + body + '</tbody></table></div>';
@@ -118,9 +118,9 @@
     var p1 = prevP(p), p2 = prevP(p, 2), v1 = p1 ? C.pnl(p1, bId, 'tong') : null, v2 = p2 ? C.pnl(p2, bId, 'tong') : null;
     var snap = TH.has('F045.C') ? snapOf(p) : null, sn = snap && snap.data[bId];
     var KEYS = ['total', 'rent', 'svc', 'gv', 'cpbh', 'lng', 'lnr'];
-    var hist = '<div class="card card-flush">' + TH.cardHd(I('history', 'ic-sm') + 'Snapshot duyệt kỳ & lịch sử ' + esc(b.short)) + stmt({ label: 'So sánh kỳ ' + b.short, firstLabel: 'Chỉ tiêu', lines: TH.PNL_LINES.filter(function (l) { return KEYS.indexOf(l.k) > -1; }), cols: [
+    var hist = '<div class="card card-flush">' + TH.cardHd(I('history', 'ic-sm') + 'Bản chốt duyệt kỳ & lịch sử ' + esc(b.short)) + stmt({ label: 'So sánh kỳ ' + b.short, firstLabel: 'Chỉ tiêu', lines: TH.PNL_LINES.filter(function (l) { return KEYS.indexOf(l.k) > -1; }), cols: [
       { label: 'Hiện tại', num: true, cell: function (l) { return cellVal(l, v[l.k]); } },
-      { label: 'Snapshot duyệt kỳ', num: true, gate: 'F045.C', cell: function (l) { return sn ? '<div class="tnum small">' + num(sn[l.k]) + '</div>' + delta(v[l.k], sn[l.k]) : '<span class="muted small">Chưa duyệt kỳ</span>'; } },
+      { label: 'Bản chốt duyệt kỳ', num: true, gate: 'F045.C', cell: function (l) { return sn ? '<div class="tnum small">' + num(sn[l.k]) + '</div>' + delta(v[l.k], sn[l.k]) : '<span class="muted small">Chưa duyệt kỳ</span>'; } },
       { label: 'Tháng ' + (p1 ? mm(p1) : '—'), num: true, gate: 'F045.D', cell: function (l) { return v1 ? cellVal(l, v1[l.k]) : '<span class="muted">—</span>'; } },
       { label: 'Tháng ' + (p2 ? mm(p2) : '—'), num: true, gate: 'F045.D', cell: function (l) { return v2 ? cellVal(l, v2[l.k]) : '<span class="muted">—</span>'; } },
     ] }) + '</div>';
@@ -130,7 +130,7 @@
       poolCard = '<div class="card">' + TH.cardHd(I('split', 'ic-sm') + 'Chi phí chung phân bổ', v.rooms + '/' + pool.portfolioRooms + ' phòng toàn công ty · ' + F.pct(ratio, 2), TH.badge(pool.status === 'approved' ? 'Kế toán đã nhập' : 'Nháp', pool.status === 'approved' ? 'success' : 'draft', { dot: true })) + '<div class="card-bd">' +
         TH.table({ compact: true, label: 'Chi phí chung', cols: [{ key: 'l', label: 'Khoản' }, { key: 'a', label: 'Toàn công ty', num: true, render: function (r) { return num(r.a); } }, { key: 'b', label: 'Phân bổ ' + esc(b.short), num: true, render: function (r) { return '<b>' + num(Math.round(r.a * ratio)) + '</b>'; } }],
           rows: Object.keys(POOL_LABEL).map(function (k) { return { l: POOL_LABEL[k], a: pool.lines[k] || 0 }; }) }) +
-        '<div class="row" style="margin-top:12px;gap:8px">' + (TH.periodLocked(p) ? TH.badge('Kỳ đã khóa', 'neutral', { icon: 'lock' }) : TH.permBtn('report.all', '<button type="button" class="btn btn-sm" data-act="rpt4.pool">' + I('edit', 'ic-sm') + 'Sửa bảng phân bổ kỳ</button>', 'Sửa bảng phân bổ · 403')) + '<span class="small muted">Sửa xong bấm Tính lại preview.</span></div>' +
+        '<div class="row u-mt-12 u-gap-8">' + (TH.periodLocked(p) ? TH.badge('Kỳ đã khóa', 'neutral', { icon: 'lock' }) : TH.permBtn('report.all', '<button type="button" class="btn btn-sm" data-act="rpt4.pool">' + I('edit', 'ic-sm') + 'Sửa bảng phân bổ kỳ</button>', 'Sửa bảng phân bổ · 403')) + '<span class="small muted">Sửa xong bấm Tính lại preview.</span></div>' +
         TH.gate('F043.C', '<div class="rpt-rule">' + I('checkCircle', 'ic-sm') + '<div><b>Rule PB-01 v1 · theo số phòng' + TH.up('F043.C') + '</b><div class="small muted">Lương quản lý tòa và trưởng nhóm tự kéo từ bảng lương kỳ ' + F.period(p) + ' (' + esc(TH.statusLabel((TH.db.payrollStatus[p] || { status: 'draft' }).status)) + ').</div></div></div>', { label: 'Chi phí chung theo rule, kéo từ lương đã duyệt', lines: 2 }) +
         '</div></div>';
     }
@@ -138,7 +138,7 @@
     var cash = TH.gate('F048.B', '<div class="card">' + TH.cardHd(I('wallet', 'ic-sm') + 'Đối chiếu dòng tiền' + TH.up('F048.B'), 'Doanh thu theo mẫu ≠ tiền đã thu') + '<div class="card-bd">' +
       TH.kv([['Tổng doanh thu (mẫu)', '<b class="tnum">' + F.money(v.total) + '</b>'], ['Doanh thu hóa đơn kỳ', '<span class="tnum">' + F.money(v.rent + v.svc) + '</span>'], ['Đã thu cho hóa đơn kỳ', '<span class="tnum">' + F.money(sm.collectedForPeriod) + '</span>'], ['Còn nợ hóa đơn kỳ', '<span class="tnum ' + (sm.debtPeriod ? 'neg' : '') + '">' + F.money(sm.debtPeriod) + '</span>'], ['Thu thực trong kỳ (gồm nợ cũ)', '<span class="tnum">' + F.money(sm.collected) + '</span>'], ['Cọc ròng (mới + bỏ − hoàn)', '<span class="tnum">' + F.money(v.depIn + v.depForfeit - v.depRefund) + '</span>']]) +
       '</div></div>', { label: 'Phân tách doanh thu thuộc kỳ và dòng tiền', lines: 4 });
-    return '<div style="margin-bottom:12px">' + lockCard(p) + '</div><div style="margin-bottom:16px">' + hist + '</div><div class="grid-2 rpt-grid" style="margin-bottom:16px">' + (poolCard || '<div></div>') + cash + '</div>';
+    return '<div class="u-mb-12">' + lockCard(p) + '</div><div class="u-mb-16">' + hist + '</div><div class="grid-2 rpt-grid u-mb-16">' + (poolCard || '<div></div>') + cash + '</div>';
   }
   TH.views['RPT-04'] = {
     render: function () {
@@ -188,7 +188,7 @@
       title: I('split') + ' Bảng phân bổ chi phí chung · kỳ ' + F.period(p),
       sub: 'Tổng toàn công ty (' + pool.portfolioRooms + ' phòng). Hệ thống chia về từng tòa theo số phòng.',
       body: '<div class="form-grid">' + Object.keys(POOL_LABEL).map(function (k) { return TH.field({ form: form, name: k, label: POOL_LABEL[k] + ' (đ/kỳ)', def: String(pool.lines[k] || 0), num: true, inputmode: 'numeric' }); }).join('') + '</div>' +
-        '<p class="small muted" style="margin-top:12px">Gói A: nhập tay theo kỳ. Gói C: lương kéo từ bảng lương đã duyệt theo rule phân bổ có version.</p>',
+        '<p class="small muted u-mt-12">Gói A: nhập tay theo kỳ. Gói C: lương kéo từ bảng lương đã duyệt theo quy tắc phân bổ có phiên bản.</p>',
       foot: '<button type="button" class="btn" data-close>Hủy</button><span class="spacer"></span><button type="button" class="btn btn-primary" data-act="rpt4.poolSave" data-p="' + p + '">' + I('check', 'ic-sm') + 'Lưu bảng phân bổ</button>',
     };
   }
@@ -273,7 +273,7 @@
         { key: 'r', label: 'LNR/DT', num: true, render: function (x) { return isFinite(x.r) ? ratioVal({}, x.r) : '<span class="muted">Không áp dụng</span>'; } },
         { key: 's', label: 'Đánh giá', render: function (x) { return !isFinite(x.r) ? TH.badge('Chưa có doanh thu', 'neutral') : x.r < 0 ? TH.badge('Lỗ', 'danger', { icon: 'alert' }) : x.r < 0.1 ? TH.badge('Biên thấp', 'warning', { icon: 'alert' }) : TH.badge('Đạt', 'success', { icon: 'check' }); } },
       ], rows: warnRows }) + '</div>', { label: 'Cảnh báo biên lợi nhuận, so kỳ trước', lines: 4 });
-    return '<div style="margin-bottom:12px">' + lockCard(p) + '</div><div class="grid-2" style="margin-bottom:16px">' + trend + warn + '</div>';
+    return '<div class="u-mb-12">' + lockCard(p) + '</div><div class="grid-2 u-mb-16">' + trend + warn + '</div>';
   }
   TH.rptExtras = { rpt4: rpt4Extras, rpt5: rpt5Extras };
   TH.views['RPT-05'] = {

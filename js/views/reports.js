@@ -30,9 +30,9 @@
   TH.periodBadge = periodBadge;
   function filterBar(extra) {
     var s = TH.store.state, bOpts = TH.buildingOptions();
-    return '<div class="card report-filters" style="margin-bottom:16px"><div class="toolbar" style="border:0">' + I('filter', 'ic-sm') + '<span class="small strong">Lọc</span>' +
-      '<label class="sr-only" for="f-b">Tòa</label><select id="f-b" class="select select-sm" data-global="building" style="width:auto">' + bOpts.map(function (o) { return '<option value="' + o.id + '"' + (o.id === TH.scope() ? ' selected' : '') + '>' + esc(o.label) + '</option>'; }).join('') + '</select>' +
-      '<label class="sr-only" for="f-p">Kỳ</label><select id="f-p" class="select select-sm" data-global="period" style="width:auto">' + TH.PERIODS.slice().reverse().map(function (p) { return '<option value="' + p + '"' + (p === s.period ? ' selected' : '') + '>Kỳ ' + F.period(p) + '</option>'; }).join('') + '</select>' +
+    return '<div class="card report-filters u-mb-16"><div class="toolbar" style="border:0">' + I('filter', 'ic-sm') + '<span class="small strong">Lọc</span>' +
+      '<label class="sr-only" for="f-b">Tòa</label><select id="f-b" class="select select-sm u-w-auto" data-global="building">' + bOpts.map(function (o) { return '<option value="' + o.id + '"' + (o.id === TH.scope() ? ' selected' : '') + '>' + esc(o.label) + '</option>'; }).join('') + '</select>' +
+      '<label class="sr-only" for="f-p">Kỳ</label><select id="f-p" class="select select-sm u-w-auto" data-global="period">' + TH.PERIODS.slice().reverse().map(function (p) { return '<option value="' + p + '"' + (p === s.period ? ' selected' : '') + '>Kỳ ' + F.period(p) + '</option>'; }).join('') + '</select>' +
       '<span class="grow"></span>' + (extra || '') + '</div></div>';
   }
   TH.reportFilterBar = filterBar;
@@ -47,7 +47,7 @@
       var snap = TH.has('F045.C') ? snapshotOf(p) : null;
       var locked = TH.periodLocked(p);
 
-      var kpis = '<div class="grid-5 overview-kpis" style="margin-bottom:16px">' +
+      var kpis = '<div class="grid-5 overview-kpis u-mb-16">' +
         TH.kpi({ label: 'Lãi dòng tiền tạm tính', value: F.short(sm.profit), neg: sm.profit < 0, accent: true, foot: TH.openBadge('D-07', 'DRAFT') + ' Thu − chi đã duyệt; chưa phải LN ròng' }) +
         TH.kpi({ label: 'Doanh thu đã xác nhận', value: F.short(sm.billed), href: TH.router.href('INV-02'), foot: sm.invoices + ' hóa đơn đã xác nhận' }) +
         TH.kpi({ label: 'Thu thực đã xác nhận', value: F.short(sm.collected), href: TH.router.href('PAY-02'), foot: '<span class="warn-text">' + F.short(sm.pending) + ' chờ xác nhận</span>' }) +
@@ -72,12 +72,12 @@
         label: 'Báo cáo theo tòa',
         cols: [
           { key: 'b', label: 'Tòa', render: function (r) { return '<div class="cell-main">' + esc(r.b.name) + '</div><div class="cell-sub">' + r.occupied + '/' + r.rooms + ' phòng đang thuê · ' + F.pct(r.occupancy, 0) + '</div>'; } },
-          { key: 'billed', label: 'Doanh thu', num: true, render: function (r) { return r.invoices ? F.money(r.billed) : '<span class="muted small">Chưa lập HĐơn</span>'; } },
+          { key: 'billed', label: 'Doanh thu', num: true, render: function (r) { return r.invoices ? F.money(r.billed) : '<span class="muted small">Chưa lập hóa đơn</span>'; } },
           { key: 'collected', label: 'Thu thực', num: true, render: function (r) { return F.money(r.collected); } },
           { key: 'debt', label: 'Công nợ', num: true, render: function (r) { return r.debt ? '<span class="neg">' + F.money(r.debt) + '</span>' : F.money(0); } },
           { key: 'expenses', label: 'Chi đã duyệt', num: true, render: function (r) { return F.money(r.expenses); } },
           { key: 'profit', label: 'Lãi tạm tính', num: true, render: function (r) { return '<b class="' + (r.profit < 0 ? 'neg' : '') + '">' + F.money(r.profit) + '</b>'; } },
-          { key: 'snap', label: 'Lệch snapshot', num: true, gate: 'F045.C', render: function (r) { var sn = snap && snap.data[r.b.id]; return sn ? delta(r.profit, sn.profit) : '<span class="muted small">Chưa duyệt kỳ</span>'; } },
+          { key: 'snap', label: 'Lệch bản chốt', num: true, gate: 'F045.C', render: function (r) { var sn = snap && snap.data[r.b.id]; return sn ? delta(r.profit, sn.profit) : '<span class="muted small">Chưa duyệt kỳ</span>'; } },
           { key: 'dd', label: '', gate: 'F045.B', render: function (r) { return '<button type="button" class="btn btn-xs" data-act="rpt.drill" data-id="' + r.b.id + '">' + I('chevronRight', 'ic-sm') + 'Chi tiết</button>'; } },
         ],
         rows: rows,
@@ -108,11 +108,11 @@
         TH.table({ compact: true, cols: [{ key: 'k', label: 'Khoản' }, { key: 'v', label: 'Số tiền', num: true, render: function (r) { return F.money(r.v); } }, { key: 'n', label: 'Xử lý', render: function (r) { return '<span class="small muted">' + esc(r.n) + '</span>'; } }],
           rows: [{ k: 'Tiền cọc nhận trong kỳ', v: 0, n: 'Loại trừ — cọc không là doanh thu' }, { k: 'Thu trước kỳ sau', v: 0, n: 'Chuyển kỳ sau' }, { k: 'Thu nợ kỳ trước', v: oldDebtCollected, n: 'Giữ trong dòng tiền, ghi chú nguồn' }] }) + '</div></div>', { label: 'Điều chỉnh/loại trừ cọc, thu trước', lines: 4 });
 
-      var snapCard = TH.gate('F045.C', '<div class="card">' + TH.cardHd(I('stamp', 'ic-sm') + 'Snapshot sau duyệt kỳ' + TH.up('F045.C'), snap ? 'Duyệt bởi ' + esc(C.staffName(snap.by)) + ' · ' + F.date(snap.at) : 'Kỳ chưa duyệt — chưa có snapshot', snap ? '' : TH.permBtn('report.all', '<button type="button" class="btn btn-sm btn-primary" data-act="rpt.approve">' + I('check', 'ic-sm') + 'Duyệt kỳ</button>', 'Duyệt kỳ · 403')) + '<div class="card-bd">' +
-        (snap ? TH.table({ compact: true, cols: [{ key: 'k', label: 'Chỉ tiêu' }, { key: 's', label: 'Snapshot', num: true, render: function (r) { return F.money(r.s); } }, { key: 'c', label: 'Hiện tại', num: true, render: function (r) { return F.money(r.c); } }, { key: 'd', label: 'Sai lệch', num: true, render: function (r) { return delta(r.c, r.s); } }],
+      var snapCard = TH.gate('F045.C', '<div class="card">' + TH.cardHd(I('stamp', 'ic-sm') + 'Bản chốt sau duyệt kỳ' + TH.up('F045.C'), snap ? 'Duyệt bởi ' + esc(C.staffName(snap.by)) + ' · ' + F.date(snap.at) : 'Kỳ chưa duyệt — chưa có bản chốt', snap ? '' : TH.permBtn('report.all', '<button type="button" class="btn btn-sm btn-primary" data-act="rpt.approve">' + I('check', 'ic-sm') + 'Duyệt kỳ</button>', 'Duyệt kỳ · 403')) + '<div class="card-bd">' +
+        (snap ? TH.table({ compact: true, cols: [{ key: 'k', label: 'Chỉ tiêu' }, { key: 's', label: 'Bản chốt', num: true, render: function (r) { return F.money(r.s); } }, { key: 'c', label: 'Hiện tại', num: true, render: function (r) { return F.money(r.c); } }, { key: 'd', label: 'Sai lệch', num: true, render: function (r) { return delta(r.c, r.s); } }],
           rows: [['Doanh thu', 'billed'], ['Thu thực', 'collected'], ['Công nợ', 'debt'], ['Chi đã duyệt', 'expenses'], ['Lãi tạm tính', 'profit']].map(function (x) { return { k: x[0], s: snap.data[scope][x[1]], c: sm[x[1]] }; }) }) +
-          (Math.abs(snap.data[scope].profit - sm.profit) > 0 ? '<div class="alert alert-warning" style="margin-top:12px">' + I('alert', 'ic-sm') + '<div class="alert-body">Số liệu thay đổi sau khi duyệt kỳ — cần giải trình hoặc duyệt lại.</div></div>' : '')
-          : '<p class="small muted">Duyệt kỳ để lưu snapshot số liệu; mọi thay đổi sau đó được theo dõi sai lệch.</p>') + '</div></div>', { label: 'Snapshot sau duyệt kỳ + theo dõi sai lệch', lines: 5 });
+          (Math.abs(snap.data[scope].profit - sm.profit) > 0 ? '<div class="alert alert-warning u-mt-12">' + I('alert', 'ic-sm') + '<div class="alert-body">Số liệu thay đổi sau khi duyệt kỳ — cần giải trình hoặc duyệt lại.</div></div>' : '')
+          : '<p class="small muted">Duyệt kỳ để lưu bản chốt số liệu; mọi thay đổi sau đó được theo dõi sai lệch.</p>') + '</div></div>', { label: 'Bản chốt sau duyệt kỳ + theo dõi sai lệch', lines: 5 });
 
       var pp = prevPeriod(p), ps = pp ? C.summary(pp, scope) : null;
       var role = TH.ROLES[TH.store.state.role];
@@ -122,8 +122,8 @@
         '</div></div>', { label: 'Đối chiếu theo kỳ lịch sử và theo vai trò', lines: 5 });
 
       var net = TH.gate('F048.D', '<div class="card">' + TH.cardHd(I('calculator', 'ic-sm') + 'Lợi nhuận ròng theo rule' + TH.up('F048.D'), 'Rule LN-01 v0.1 · gắn phiên bản kỳ chốt', TH.openBadge('D-07')) + '<div class="card-bd">' +
-        TH.kv([['Lãi dòng tiền tạm tính', F.money(sm.profit)], ['(−) Phân bổ chi phí chung (mô phỏng 2% doanh thu)', F.money(-Math.round(sm.billed * 0.02))], ['(±) Điều chỉnh cọc / thu trước', F.money(0)], ['Lợi nhuận ròng theo rule (dự thảo)', '<b>' + F.money(sm.profit - Math.round(sm.billed * 0.02)) + '</b>']]) + '<p class="small muted" style="margin-top:8px">Chưa gồm ' + F.money(sm.expensesPending) + ' chi phí chờ duyệt.</p>' +
-        '<div class="row" style="margin-top:12px">' + (locked ? TH.badge('Đã chốt phiên bản kỳ ' + F.period(p), 'neutral', { icon: 'lock' }) : TH.permBtn('report.all', '<button type="button" class="btn btn-sm" data-act="rpt.lock">' + I('lock', 'ic-sm') + 'Khóa kỳ & chốt phiên bản</button>', 'Khóa kỳ · 403')) + '</div>' +
+        TH.kv([['Lãi dòng tiền tạm tính', F.money(sm.profit)], ['(−) Phân bổ chi phí chung (mô phỏng 2% doanh thu)', F.money(-Math.round(sm.billed * 0.02))], ['(±) Điều chỉnh cọc / thu trước', F.money(0)], ['Lợi nhuận ròng theo rule (dự thảo)', '<b>' + F.money(sm.profit - Math.round(sm.billed * 0.02)) + '</b>']]) + '<p class="small muted u-mt-8">Chưa gồm ' + F.money(sm.expensesPending) + ' chi phí chờ duyệt.</p>' +
+        '<div class="row u-mt-12">' + (locked ? TH.badge('Đã chốt phiên bản kỳ ' + F.period(p), 'neutral', { icon: 'lock' }) : TH.permBtn('report.all', '<button type="button" class="btn btn-sm" data-act="rpt.lock">' + I('lock', 'ic-sm') + 'Khóa kỳ & chốt phiên bản</button>', 'Khóa kỳ · 403')) + '</div>' +
         '</div></div>', { label: 'Lợi nhuận ròng gắn rule, phiên bản kỳ chốt', lines: 5 });
 
       var actions = TH.exportBtn('rpt1.xlsx', 'Xuất Excel (.xlsx)') + '<button type="button" class="btn" data-act="rpt1.print">' + I('printer', 'ic-sm') + 'In / lưu PDF</button>';
@@ -165,14 +165,14 @@
   };
   TH.act['rpt.approve'] = function () {
     var p = TH.store.state.period;
-    TH.confirm({ title: 'Duyệt kỳ ' + F.period(p) + '?', body: '<p>Lưu snapshot số liệu hiện tại của tất cả tòa. Mọi thay đổi sau đó sẽ hiện ở cột <b>Lệch snapshot</b>.</p>', ok: 'Duyệt & lưu snapshot' }).then(function (ok) {
+    TH.confirm({ title: 'Duyệt kỳ ' + F.period(p) + '?', body: '<p>Lưu bản chốt số liệu hiện tại của tất cả tòa. Mọi thay đổi sau đó sẽ hiện ở cột <b>Lệch bản chốt</b>.</p>', ok: 'Duyệt & lưu bản chốt' }).then(function (ok) {
       if (!ok) return;
       TH.db.periodApprovals[p] = { by: TH.me().id, at: TH.TODAY };
       TH.db.snapshots[p] = makeSnapshot(p, TH.db.periodApprovals[p]);
       if (TH.pnlSnapshotCreate) TH.pnlSnapshotCreate(p);
-      TH.log('Duyệt kỳ', 'Kỳ ' + F.period(p), 'Lưu snapshot báo cáo', 'period');
+      TH.log('Duyệt kỳ', 'Kỳ ' + F.period(p), 'Lưu bản chốt báo cáo', 'period');
       TH.store.persist(); TH.app.refresh();
-      TH.toast('Đã duyệt kỳ ' + F.period(p), 'Snapshot đã lưu. Thay đổi sau đó sẽ được theo dõi sai lệch.');
+      TH.toast('Đã duyệt kỳ ' + F.period(p), 'Bản chốt đã lưu. Thay đổi sau đó sẽ được theo dõi sai lệch.');
     });
   };
   TH.act['rpt.lock'] = function () {
@@ -206,7 +206,7 @@
       '<table><thead><tr><th>Tòa</th><th class="num">Doanh thu</th><th class="num">Thu thực</th><th class="num">Công nợ</th><th class="num">Chi đã duyệt</th><th class="num">Lãi tạm tính</th></tr></thead><tbody>' +
       bs.map(function (b) { var s = C.summary(p, b.id); return '<tr><td>' + esc(b.name) + '</td><td class="num">' + F.money(s.billed) + '</td><td class="num">' + F.money(s.collected) + '</td><td class="num">' + F.money(s.debt) + '</td><td class="num">' + F.money(s.expenses) + '</td><td class="num">' + F.money(s.profit) + '</td></tr>'; }).join('') +
       '<tr><td><b>Tổng</b></td><td class="num"><b>' + F.money(t.billed) + '</b></td><td class="num"><b>' + F.money(t.collected) + '</b></td><td class="num"><b>' + F.money(t.debt) + '</b></td><td class="num"><b>' + F.money(t.expenses) + '</b></td><td class="num"><b>' + F.money(t.profit) + '</b></td></tr></tbody></table>' +
-      '<p style="margin-top:12px">Lãi dòng tiền tạm tính = thu thực đã xác nhận − chi đã duyệt; không phải lợi nhuận ròng kế toán. Chính sách D-07 đang OPEN.</p></div>');
+      '<p class="u-mt-12">Lãi dòng tiền tạm tính = thu thực đã xác nhận − chi đã duyệt; không phải lợi nhuận ròng kế toán. Chính sách D-07 đang OPEN.</p></div>');
   };
 
   /* =========================================================
@@ -219,7 +219,7 @@
       var sm = C.summary(p, scope), ms = C.milestones(p, scope);
       var contracts = TH.db.contracts.filter(function (c) { return c.status === 'active' && TH.inScope(c.buildingId) && (scope === 'ALL' || c.buildingId === scope); });
       var expiring = C.expiring(TH.expiryDays(), scope).length;
-      var kpis = '<div class="grid-4" style="margin-bottom:16px">' +
+      var kpis = '<div class="grid-4 u-mb-16">' +
         TH.kpi({ label: 'Tòa · phòng', icon: 'building', value: bs.length + '<small> tòa · ' + sm.rooms + ' phòng</small>', foot: sm.occupied + ' đang thuê' }) +
         TH.kpi({ label: 'Tỷ lệ lấp đầy', icon: 'door', value: F.pct(sm.occupancy, 0), href: TH.router.href('ROOM-01'), foot: (sm.rooms - sm.occupied) + ' phòng trống/đang sửa' }) +
         TH.kpi({ label: 'Hợp đồng còn hiệu lực', icon: 'contract', value: String(contracts.length), href: TH.router.href('CON-03'), foot: expiring + ' HĐ hết hạn trong ' + TH.expiryDays() + ' ngày' }) +
@@ -252,19 +252,19 @@
 
       var snap = snapshotOf(p);
       var origVsApproved = TH.gate('F047.C', '<div class="card">' + TH.cardHd(I('stamp', 'ic-sm') + 'Mốc gốc vs phiên bản duyệt' + TH.up('F047.C')) + '<div class="card-bd">' +
-        (snap ? TH.kv([['Thu thực tại snapshot', F.money(snap.data[scope].collected)], ['Thu thực hiện tại', F.money(sm.collected)], ['Chênh lệch', delta(sm.collected, snap.data[scope].collected) || '0']]) : '<p class="small muted">Kỳ ' + F.period(p) + ' chưa duyệt — chưa có phiên bản để so sánh. Duyệt kỳ ở RPT-01.</p>') + '</div></div>', { label: 'So sánh mốc gốc và phiên bản duyệt', lines: 3 });
+        (snap ? TH.kv([['Thu thực tại bản chốt', F.money(snap.data[scope].collected)], ['Thu thực hiện tại', F.money(sm.collected)], ['Chênh lệch', delta(sm.collected, snap.data[scope].collected) || '0']]) : '<p class="small muted">Kỳ ' + F.period(p) + ' chưa duyệt — chưa có phiên bản để so sánh. Duyệt kỳ ở RPT-01.</p>') + '</div></div>', { label: 'So sánh mốc gốc và phiên bản duyệt', lines: 3 });
 
       var edits = TH.db.receiptEdits.filter(function (e) { return e.period === p && TH.inScope(C.room(e.receiptRoom).buildingId); });
       var explain = TH.gate('F047.D', '<div class="card">' + TH.cardHd(I('history', 'ic-sm') + 'Giải trình sửa ngày thực nhận' + TH.up('F047.D'), 'Thay đổi received_at / backdate ảnh hưởng mốc') + '<div class="card-bd">' +
         (edits.length ? '<ul class="timeline">' + edits.map(function (e) { return '<li><b>' + esc(e.receiptRoom) + '</b>: ' + F.date(e.from) + ' → ' + F.date(e.to) + ' <span class="badge badge-info">Sau 15 → Mốc 15</span><div>' + esc(e.reason) + '</div><div class="when">' + esc(C.staffName(e.by)) + ' · ' + F.date(e.at) + '</div></li>'; }).join('') + '</ul>' : '<p class="small muted">Không có thay đổi ngày thực nhận trong kỳ.</p>') + '</div></div>', { label: 'Giải trình thay đổi do sửa received_at/backdate', lines: 3 });
 
-      var tplSel = TH.gate('F046.D', '<label class="sr-only" for="rpt2-tpl">Mẫu báo cáo</label><select id="rpt2-tpl" class="select select-sm" data-ui="RPT-02.tpl" style="width:auto">' + TH.db.reportTemplates.filter(function (t) { return !t.report; }).map(function (t) { return '<option value="' + t.id + '"' + (TH.store.ui('RPT-02', 'tpl', 'MAU-01') === t.id ? ' selected' : '') + '>' + esc(t.name) + ' · v' + t.version + (t.status === 'draft' ? ' (nháp)' : '') + '</option>'; }).join('') + '</select>' + TH.up('F046.D'), { mode: 'btn', label: 'Mẫu báo cáo quản trị', size: '' });
+      var tplSel = TH.gate('F046.D', '<label class="sr-only" for="rpt2-tpl">Mẫu báo cáo</label><select id="rpt2-tpl" class="select select-sm u-w-auto" data-ui="RPT-02.tpl">' + TH.db.reportTemplates.filter(function (t) { return !t.report; }).map(function (t) { return '<option value="' + t.id + '"' + (TH.store.ui('RPT-02', 'tpl', 'MAU-01') === t.id ? ' selected' : '') + '>' + esc(t.name) + ' · v' + t.version + (t.status === 'draft' ? ' (nháp)' : '') + '</option>'; }).join('') + '</select>' + TH.up('F046.D'), { mode: 'btn', label: 'Mẫu báo cáo quản trị', size: '' });
 
       return TH.pageHeader({ screen: 'RPT-02', status: periodBadge(p), desc: 'Tổng hợp toàn công ty: tòa, nhóm, kỳ, mốc thu 5/10/15, lấp đầy và hợp đồng. Số thu thực tách bạch với doanh thu quy đổi tính hiệu suất.', actions: tplSel + TH.exportBtn('rpt2.xlsx', 'Xuất Excel (.xlsx)') }) +
         filterBar() + kpis +
-        '<div class="card card-flush" style="margin-bottom:16px">' + TH.cardHd(I('target', 'ic-sm') + 'Thu theo mốc 5/10/15 & hiệu suất tòa', 'A = M5 × 100% + (M10 − M5) × 90% + (M15 − M10) × 70% · D = A − A × B + C · HS = D ÷ giá niêm yết', TH.openBadge('D-04')) + msTable +
+        '<div class="card card-flush u-mb-16">' + TH.cardHd(I('target', 'ic-sm') + 'Thu theo mốc 5/10/15 & hiệu suất tòa', 'A = M5 × 100% + (M10 − M5) × 90% + (M15 − M10) × 70% · D = A − A × B + C · HS = D ÷ giá niêm yết', TH.openBadge('D-04')) + msTable +
         '<div class="card-ft">' + TH.perfFormulaNote() + '</div></div>' +
-        '<div class="grid-2" style="margin-bottom:16px">' + trend + byMgr + '</div>' +
+        '<div class="grid-2 u-mb-16">' + trend + byMgr + '</div>' +
         '<div class="grid-3">' + compare + origVsApproved + explain + '</div>';
     },
   };
@@ -314,10 +314,10 @@
         TH.kv([['Phiếu thu đã xác nhận', C.receiptsReceivedIn(p, scope).length + ' phiếu'], ['Chi phí đã duyệt', C.expensesIn(p, scope, 'approved').length + ' khoản'], ['Phân công / đội', TH.db.assignments.filter(function (a) { return !a.to; }).length + ' phân công'], ['Bảng tỷ lệ cổ phần', TH.db.shares.filter(function (s) { return !s.to; }).length + ' dòng hiệu lực']]) + '</div></div>', { label: 'Tự kéo từ receipt/cost/team/share', lines: 4 });
       var flow = TH.gate('F049.C', '<div class="card">' + TH.cardHd(I('fileCheck', 'ic-sm') + 'Quy trình duyệt' + TH.up('F049.C')) + '<div class="card-bd"><div class="stepper">' +
         [['draft', 'Nháp'], ['pending', 'Chờ duyệt'], ['confirmed', 'Đã duyệt']].map(function (s, i, arr) { var order = ['draft', 'pending', 'confirmed'], cur = order.indexOf(appr.status), me = order.indexOf(s[0]); return '<div class="step ' + (me < cur ? 'is-done' : me === cur ? 'is-current' : '') + '"><span class="n">' + (me < cur ? '✓' : i + 1) + '</span>' + s[1] + '</div>' + (i < arr.length - 1 ? '<span class="step-line"></span>' : ''); }).join('') +
-        '</div><p class="small muted" style="margin-top:10px">Trạng thái bảng lương kỳ ' + F.period(p) + ' lấy từ SAL-01. Duyệt tại màn Lương.</p></div></div>', { label: 'Bảng lương/CP có quy trình duyệt', lines: 3 });
-      var tpl = TH.gate('F049.D', '<div class="card">' + TH.cardHd(I('sheet', 'ic-sm') + 'Mẫu kết quả gần nguồn T8' + TH.up('F049.D')) + '<div class="card-bd"><p class="small">Bố cục xuất theo mẫu kết quả tháng 08/2026 đã được khách xác nhận (cột, thứ tự, làm tròn).</p><div class="row" style="margin-top:8px">' + TH.badge('Mẫu T8/2026 · đã xác nhận', 'success') + TH.openBadge('D-06') + '</div></div></div>', { label: 'Mẫu kết quả gần nguồn tháng 8', lines: 3 });
+        '</div><p class="small muted u-mt-12">Trạng thái bảng lương kỳ ' + F.period(p) + ' lấy từ SAL-01. Duyệt tại màn Lương.</p></div></div>', { label: 'Bảng lương/CP có quy trình duyệt', lines: 3 });
+      var tpl = TH.gate('F049.D', '<div class="card">' + TH.cardHd(I('sheet', 'ic-sm') + 'Mẫu kết quả gần nguồn T8' + TH.up('F049.D')) + '<div class="card-bd"><p class="small">Bố cục xuất theo mẫu kết quả tháng 08/2026 đã được khách xác nhận (cột, thứ tự, làm tròn).</p><div class="row u-mt-8">' + TH.badge('Mẫu T8/2026 · đã xác nhận', 'success') + TH.openBadge('D-06') + '</div></div></div>', { label: 'Mẫu kết quả gần nguồn tháng 8', lines: 3 });
 
-      return TH.pageHeader({ screen: 'RPT-03', status: TH.badge('Nháp — đối chiếu bằng Excel', 'draft', { dot: true }), desc: 'Hai biểu báo cáo nháp: lương theo nhân viên/kỳ và lợi nhuận chia theo cổ đông/tòa. Lương và phân bổ cổ phần không tự tạo chi tiền.', actions: '<button type="button" class="btn" data-act="rpt3.preview">' + I('eye', 'ic-sm') + 'Preview</button>' + TH.exportBtn('rpt3.xlsx', 'Xuất Excel 2 biểu (.xlsx)') }) +
+      return TH.pageHeader({ screen: 'RPT-03', status: TH.badge('Nháp — đối chiếu bằng Excel', 'draft', { dot: true }), desc: 'Hai biểu báo cáo nháp: lương theo nhân viên/kỳ và lợi nhuận chia theo cổ đông/tòa. Lương và phân bổ cổ phần không tự tạo chi tiền.', actions: '<button type="button" class="btn" data-act="rpt3.preview">' + I('eye', 'ic-sm') + 'Xem trước</button>' + TH.exportBtn('rpt3.xlsx', 'Xuất Excel 2 biểu (.xlsx)') }) +
         filterBar() +
         '<div class="grid-main-side"><div class="card card-flush">' + TH.tabs('RPT-03', tabs, tab) + content + '</div><div class="stack">' + src + flow + tpl + '</div></div>';
     },
@@ -334,7 +334,7 @@
   TH.act['rpt3.preview'] = function () {
     var p = TH.store.state.period, pay = C.payroll(p);
     TH.modal.open({ key: 'rpt3prev', size: 'lg', render: function () {
-      return { title: 'Preview báo cáo lương & chia lợi nhuận', sub: 'Kỳ ' + F.period(p) + ' · bản nháp', body: '<div class="alert alert-draft" style="margin-bottom:12px">' + I('stamp', 'ic-sm') + '<div class="alert-body">NHÁP — số liệu chờ đối chiếu Excel; chính sách lương (D-06) và chia lãi (D-07) đang OPEN.</div></div>' +
+      return { title: 'Xem trước báo cáo lương & chia lợi nhuận', sub: 'Kỳ ' + F.period(p) + ' · bản nháp', body: '<div class="alert alert-draft u-mb-12">' + I('stamp', 'ic-sm') + '<div class="alert-body">NHÁP — số liệu chờ đối chiếu Excel; chính sách lương (D-06) và chia lãi (D-07) đang OPEN.</div></div>' +
         TH.kv([['Tổng lương nháp', F.money(C.sum(pay, function (r) { return r.total; }))], ['Tổng lãi tạm tính phân bổ', F.money(C.sum(scopeBuildings(), function (b) { return Math.max(0, C.allocation(b.id, p).base); }))], ['Số nhân viên', pay.length], ['Số tòa', scopeBuildings().length]]),
         foot: '<button type="button" class="btn" data-close>Đóng</button><button type="button" class="btn btn-primary" data-act="rpt3.xlsx">' + I('download', 'ic-sm') + 'Xuất Excel (.xlsx)</button>' };
     } });

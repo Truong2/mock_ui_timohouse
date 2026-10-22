@@ -25,12 +25,12 @@
             '<div class="alert alert-warning">' + I('info', 'ic-sm') + '<div class="alert-body">Đây là chế độ xem phạm vi báo giá, không thay đổi quyền, dữ liệu hoặc gói thanh toán. Giá hiển thị thống nhất với cấu hình demo, <b>chưa đối chiếu Excel báo giá gốc</b> (QA-B01).</div></div>' +
             '<fieldset style="border:0;margin:0;padding:0"><legend class="section-title">Chọn gói A / B / C / D</legend><div class="pkg-options">' + opts + '</div></fieldset>' +
             '<label class="switch"><input type="checkbox" data-act-change="pkg.locked"' + (s.showLocked ? ' checked' : '') + '><span class="switch-track"></span><span><b>Hiện tính năng gói cao hơn dưới dạng khóa</b><br><span class="small muted">Tắt để ẩn toàn bộ phần nâng cấp vượt gói. Phần lõi A luôn hiển thị.</span></span></label>' +
-            '<button type="button" class="btn" data-act="pkg.compare" style="justify-content:flex-start">' + I('compare') + 'So sánh 52 chức năng<span style="margin-left:auto" class="muted small">bảng rộng</span></button>' +
+            '<button type="button" class="btn" data-act="pkg.compare" style="justify-content:flex-start">' + I('compare') + 'So sánh 52 chức năng<span class="muted small u-ml-auto">bảng rộng</span></button>' +
             bldPack(lvl) +
             cusPack(lvl) +
             reportPack(lvl) +
             here +
-            '<div><div class="section-title">Liên kết gửi khách</div><div class="copy-field"><label class="sr-only" for="pkg-link">Deep link</label><input id="pkg-link" class="input input-sm" readonly value="' + esc(TH.store.deepLink()) + '"><button type="button" class="btn btn-sm" data-act="pkg.copy">' + I('copy', 'ic-sm') + 'Chép</button></div><div class="field-hint" style="margin-top:6px"><code>?previewPackage=' + s.pkg + '</code> là [UX PROPOSED], không phải route/API production.</div></div>' +
+            '<div><div class="section-title">Liên kết gửi khách</div><div class="copy-field"><label class="sr-only" for="pkg-link">Deep link</label><input id="pkg-link" class="input input-sm" readonly value="' + esc(TH.store.deepLink()) + '"><button type="button" class="btn btn-sm" data-act="pkg.copy">' + I('copy', 'ic-sm') + 'Chép</button></div><div class="field-hint u-mt-8"><code>?previewPackage=' + s.pkg + '</code> là [UX PROPOSED], không phải route/API production.</div></div>' +
             '</div>',
           foot: '<button type="button" class="btn" data-close>Đóng</button><span class="spacer"></span><button type="button" class="btn btn-primary" data-act="pkg.full"' + (s.pkg === 'D' ? ' disabled' : '') + '>' + I('layers', 'ic-sm') + 'Xem toàn bộ gói</button>',
         };
@@ -42,21 +42,21 @@
     return '<div><div class="section-title">Hồ sơ chủ nhà & tòa trong gói <span class="badge badge-info" data-tip="' + esc(TH.CR_BLD.title + ' · ' + TH.CR_BLD.id) + '">CR</span></div><div class="rpt-pack">' + TH.PKG_KEYS.map(function (k) {
       var on = lvl >= TH.PACKAGES[k].level, rp = TH.BLD_PACK[k];
       return '<div class="rpt-pack-row' + (on ? '' : ' is-off') + '">' + TH.tierPill(k, { plus: k !== 'A' }) + '<div><b class="small rpt-pack-hd">' + (on ? '' : I('lock', 'ic-sm')) + esc(rp.head) + '</b><ul>' + rp.items.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></div></div>';
-    }).join('') + '</div><div class="row" style="margin-top:8px;gap:8px"><a class="btn btn-sm" href="' + TH.router.href('OWN-02', 'CN-001') + '" data-close>' + I('owner', 'ic-sm') + 'Hồ sơ chủ nhà</a><a class="btn btn-sm" href="' + TH.router.href('BLD-02', 'TH-CG') + '" data-close>' + I('building', 'ic-sm') + 'Hồ sơ tòa</a></div></div>';
+    }).join('') + '</div><div class="row u-mt-8 u-gap-8"><a class="btn btn-sm" href="' + TH.router.href('OWN-02', 'CN-001') + '" data-close>' + I('owner', 'ic-sm') + 'Hồ sơ chủ nhà</a><a class="btn btn-sm" href="' + TH.router.href('BLD-02', 'TH-CG') + '" data-close>' + I('building', 'ic-sm') + 'Hồ sơ tòa</a></div></div>';
   }
   /* Hồ sơ khách thuê trong từng gói (CR-CUS-01) */
   function cusPack(lvl) {
     return '<div><div class="section-title">Hồ sơ khách thuê trong gói <span class="badge badge-info" data-tip="' + esc(TH.CR_CUS.title + ' · ' + TH.CR_CUS.id) + '">CR</span></div><div class="rpt-pack">' + TH.PKG_KEYS.map(function (k) {
       var on = lvl >= TH.PACKAGES[k].level, rp = TH.CUS_PACK[k];
       return '<div class="rpt-pack-row' + (on ? '' : ' is-off') + '">' + TH.tierPill(k, { plus: k !== 'A' }) + '<div><b class="small rpt-pack-hd">' + (on ? '' : I('lock', 'ic-sm')) + esc(rp.head) + '</b><ul>' + rp.items.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></div></div>';
-    }).join('') + '</div><div class="row" style="margin-top:8px;gap:8px"><a class="btn btn-sm" href="' + TH.router.href('CUS-01') + '" data-close>' + I('users', 'ic-sm') + 'Danh sách khách</a><a class="btn btn-sm" href="' + TH.router.href('CUS-02', 'KH-008') + '" data-close>' + I('user', 'ic-sm') + 'Hồ sơ DD-102</a></div></div>';
+    }).join('') + '</div><div class="row u-mt-8 u-gap-8"><a class="btn btn-sm" href="' + TH.router.href('CUS-01') + '" data-close>' + I('users', 'ic-sm') + 'Danh sách khách</a><a class="btn btn-sm" href="' + TH.router.href('CUS-02', 'KH-008') + '" data-close>' + I('user', 'ic-sm') + 'Hồ sơ DD-102</a></div></div>';
   }
   /* Báo cáo theo mẫu khách có trong từng gói (CR-RPT-01) */
   function reportPack(lvl) {
     return '<div><div class="section-title">Báo cáo theo mẫu khách trong gói <span class="badge badge-info" data-tip="' + esc(TH.CR_RPT.title + ' · ' + TH.CR_RPT.id) + '">CR</span></div><div class="rpt-pack">' + TH.PKG_KEYS.map(function (k) {
       var on = lvl >= TH.PACKAGES[k].level, rp = TH.REPORT_PACK[k];
       return '<div class="rpt-pack-row' + (on ? '' : ' is-off') + '">' + TH.tierPill(k, { plus: k !== 'A' }) + '<div><b class="small rpt-pack-hd">' + (on ? '' : I('lock', 'ic-sm')) + esc(rp.head) + '</b><ul>' + rp.items.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></div></div>';
-    }).join('') + '</div><div class="row" style="margin-top:8px;gap:8px"><a class="btn btn-sm" href="' + TH.router.href('RPT-04') + '" data-close>' + I('building', 'ic-sm') + 'Doanh thu theo tòa</a><a class="btn btn-sm" href="' + TH.router.href('RPT-05') + '" data-close>' + I('chart', 'ic-sm') + 'Báo cáo kinh doanh</a></div></div>';
+    }).join('') + '</div><div class="row u-mt-8 u-gap-8"><a class="btn btn-sm" href="' + TH.router.href('RPT-04') + '" data-close>' + I('building', 'ic-sm') + 'Doanh thu theo tòa</a><a class="btn btn-sm" href="' + TH.router.href('RPT-05') + '" data-close>' + I('chart', 'ic-sm') + 'Báo cáo kinh doanh</a></div></div>';
   }
   TH.onChange['pkg.pick'] = function (el) { TH.app.setPackage(el.value).then(function (ok) { if (!ok) TH.modal.rerenderAll(); }); };
   TH.onChange['pkg.locked'] = function (el) {
@@ -96,9 +96,9 @@
         rows.forEach(function (f) {
           if (f.module !== lastMod) { body += '<tr class="is-module"><td colspan="7">' + esc(f.module) + '</td></tr>'; lastMod = f.module; }
           body += '<tr><td class="nowrap"><b class="mono">' + f.id + '</b></td><td style="min-width:200px"><div class="cell-main">' + esc(f.name) + '</div>' +
-            '<div class="cell-sub" style="margin-top:4px"><b>UAT:</b> ' + esc(f.uat) + '</div>' +
-            (f.cr ? '<div style="margin-top:6px">' + TH.badge((TH.CRS[f.cr] || { title: 'Cập nhật' }).title + ' · ' + f.cr, 'info', { tip: 'Bổ sung 20/10/2026. Nội dung SRS gốc xem ở tooltip từng ô CR.' }) + '</div>' : '') +
-            (f.limit || OPEN_HINT[f.id] ? '<div style="margin-top:6px">' + TH.badge('Chưa chốt quy tắc' + (OPEN_HINT[f.id] ? ' · ' + OPEN_HINT[f.id] : ''), 'draft', { tip: f.limit || 'Xem Decision Log §7' }) + '</div>' : '') + '</td>' +
+            '<div class="cell-sub u-mt-4"><b>UAT:</b> ' + esc(f.uat) + '</div>' +
+            (f.cr ? '<div class="u-mt-8">' + TH.badge((TH.CRS[f.cr] || { title: 'Cập nhật' }).title + ' · ' + f.cr, 'info', { tip: 'Bổ sung 20/10/2026. Nội dung SRS gốc xem ở tooltip từng ô CR.' }) + '</div>' : '') +
+            (f.limit || OPEN_HINT[f.id] ? '<div class="u-mt-8">' + TH.badge('Chưa chốt quy tắc' + (OPEN_HINT[f.id] ? ' · ' + OPEN_HINT[f.id] : ''), 'draft', { tip: f.limit || 'Xem Decision Log §7' }) + '</div>' : '') + '</td>' +
             cell(f, 'A') + cell(f, 'B') + cell(f, 'C') + cell(f, 'D') +
             '<td style="min-width:120px">' + f.ui.map(function (u) { return '<a class="screen-id" style="display:inline-block;margin:0 4px 4px 0" href="' + TH.router.href(u) + '" data-close>' + u + '</a>'; }).join('') + '</td></tr>';
         });
@@ -108,8 +108,8 @@
           sub: 'Nguồn SRS §5A (1:1 với sheet A_50_60 … D_90_100). Đang xem <b>' + TH.PACKAGES[pkg].name + ' · ' + TH.PACKAGES[pkg].price + '</b>. A = lõi, B+/C+/D+ = phần nâng cấp cộng dồn.',
           headExtra: '<div class="seg">' + TH.PKG_KEYS.map(function (k) { return '<button type="button" aria-pressed="' + (k === pkg) + '" data-act="pkg.seg" data-pkg="' + k + '">' + k + '</button>'; }).join('') + '</div>',
           flush: true,
-          body: '<div class="toolbar" style="position:sticky;top:0;background:#fff;z-index:5">' + TH.searchBox('CMP', 'Tìm mã/tên chức năng, ví dụ F012 hoặc OCR…') + '<span class="small muted tnum">' + rows.length + ' / 52 dòng</span></div>' +
-            '<div class="toolbar" style="gap:6px">' + TH.chips('CMP', 'mod', chipOpts, mod) + '</div>' +
+          body: '<div class="toolbar" style="position:sticky;top:0;background:var(--surface);z-index:5">' + TH.searchBox('CMP', 'Tìm mã/tên chức năng, ví dụ F012 hoặc OCR…') + '<span class="small muted tnum">' + rows.length + ' / 52 dòng</span></div>' +
+            '<div class="toolbar u-gap-6">' + TH.chips('CMP', 'mod', chipOpts, mod) + '</div>' +
             '<div class="table-wrap"><table class="table cmp-table"><thead><tr><th>Mã</th><th>Nhóm / chức năng</th><th>A · 50–60</th><th>B · thêm</th><th>C · thêm</th><th>D · thêm</th><th>UI-ID</th></tr></thead><tbody>' +
             (body || '<tr><td colspan="7">' + TH.state('empty', { title: 'Không có chức năng khớp', text: 'Bộ lọc không ẩn phân hệ — thử từ khóa khác.' }) + '</td></tr>') + '</tbody></table></div>',
           foot: '<span class="small muted">Legend: ' + TH.badge('Có trong gói', 'success', { icon: 'check' }) + ' ' + TH.badge('Có từ C', 'neutral', { icon: 'lock' }) + ' ' + TH.badge('Chưa chốt quy tắc', 'draft') + '</span><span class="spacer"></span><button type="button" class="btn" data-close>Đóng</button>',
@@ -130,11 +130,11 @@
       return '<div class="page-hd"><div><nav class="crumbs"><span>Công cụ demo</span></nav><h1 class="page-title">Mục lục 39 màn / luồng</h1><p class="page-desc">Danh mục Screen ID theo SRS §4. Màn kiểu <b>Popup</b> mở dạng dialog/workspace phủ trên màn gốc; tất cả có deep link và giữ gói đang xem.</p></div>' +
         '<div class="page-actions">' + TH.badge('39 màn production', 'teal') + TH.badge('+2 báo cáo ' + TH.CR_RPT.id, 'info') + TH.badge('+1 DEMO-PKG-01', 'neutral') + '</div></div>' +
         Object.keys(groups).map(function (m) {
-          return '<div style="margin-bottom:20px"><div class="section-title">' + esc(m) + '</div><div class="screen-grid">' + groups[m].map(function (s) {
+          return '<div class="u-mb-20"><div class="section-title">' + esc(m) + '</div><div class="screen-grid">' + groups[m].map(function (s) {
             return '<a class="screen-card" href="' + TH.router.href(s.id) + '"><div class="row-between"><span class="screen-id">' + s.id + '</span><span class="small muted">#' + s.no + ' · ' + esc(s.kind) + '</span></div><div class="t">' + esc(s.title) + '</div><div class="m">A: ' + esc(s.notes.A) + '</div></a>';
           }).join('') + '</div></div>';
         }).join('') +
-        '<div style="margin-bottom:20px"><div class="section-title">Báo cáo bổ sung theo mẫu khách · ' + esc(TH.CR_RPT.id) + '</div><div class="screen-grid">' + crCards + '</div></div>' +
+        '<div class="u-mb-20"><div class="section-title">Báo cáo bổ sung theo mẫu khách · ' + esc(TH.CR_RPT.id) + '</div><div class="screen-grid">' + crCards + '</div></div>' +
         '<div class="section-title">Surface trình diễn</div><div class="screen-grid"><a class="screen-card" href="#" data-act="pkg.open"><div class="row-between"><span class="screen-id">DEMO-PKG-01</span><span class="small muted">#40 · UX DEMO ONLY</span></div><div class="t">Cấu hình hiển thị gói A–B–C–D</div><div class="m">Drawer + bảng so sánh 52 chức năng</div></a>' +
         '<a class="screen-card" href="#/"><div class="row-between"><span class="screen-id">LANDING</span><span class="small muted">Đề xuất trình bày</span></div><div class="t">Trang giới thiệu</div><div class="m">Không thuộc 39 màn nghiệp vụ</div></a></div>';
     },
@@ -171,7 +171,7 @@
           var id = f.id + '.' + k, where = rec[id] ? Object.keys(rec[id]) : [];
           total++;
           if (where.length) covered++; else missing.push(id);
-          return '<td>' + (where.length ? TH.badge(where.length + ' màn', 'success', { icon: 'check' }) + '<div class="cell-sub" style="margin-top:4px">' + where.join(', ') + '</div>' : TH.badge('Chưa gắn', 'danger', { icon: 'x' })) + '</td>';
+          return '<td>' + (where.length ? TH.badge(where.length + ' màn', 'success', { icon: 'check' }) + '<div class="cell-sub u-mt-4">' + where.join(', ') + '</div>' : TH.badge('Chưa gắn', 'danger', { icon: 'x' })) + '</td>';
         }).join('');
         var screensA = f.ui.filter(function (u) { return TH.views[u]; });
         return '<tr><td><b class="mono">' + f.id + '</b></td><td><div class="cell-main">' + esc(f.name) + '</div><div class="cell-sub">' + esc(f.module) + '</div></td><td>' + TH.badge('Lõi A · ' + screensA.length + '/' + f.ui.length + ' màn', screensA.length === f.ui.length ? 'teal' : 'warning') + '</td>' + cells + '</tr>';
@@ -179,7 +179,7 @@
       var screensDone = TH.SRS_SCREENS().filter(function (s) { return TH.views[s.id]; }).length;
       var crDone = TH.SCREENS.filter(function (s) { return s.cr && TH.views[s.id]; }).map(function (s) { return s.id; });
       return '<div class="page-hd"><div><nav class="crumbs"><span>Công cụ demo</span></nav><h1 class="page-title">Kiểm đếm mapping gói</h1><p class="page-desc">Quét render toàn bộ màn (kể cả tab/dialog khai báo) và ghi lại nơi mỗi increment B/C/D được gắn gate. Nguồn: SRS §5A' + (crDone.length ? ' + ' + esc(TH.CR_RPT.id) + ' (' + crDone.join(', ') + ' cũng được quét)' : '') + ' · ' + esc(TH.CR_BLD.id) + ' cập nhật nội dung OWN/BLD, F033, F036; ' + esc(TH.CR_CUS.id) + ' cập nhật CUS-01/02, F010, F012, F015, F016, F031 (cùng 39 màn).</p></div><div class="page-actions">' + TH.exportBtn('qa.rtm', 'Xuất RTM (.xlsx)') + '</div></div>' +
-        '<div class="grid-4" style="margin-bottom:16px">' +
+        '<div class="grid-4 u-mb-16">' +
         TH.kpi({ label: 'Màn đã dựng', value: screensDone + '<small>/ 39</small>', icon: 'grid' }) +
         TH.kpi({ label: 'Nhóm chức năng', value: TH.FEATURES.length + '<small>/ 52</small>', icon: 'layers' }) +
         TH.kpi({ label: 'Increment B/C/D đã gắn', value: covered + '<small>/ ' + total + '</small>', icon: 'checkCircle' }) +

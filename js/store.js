@@ -55,13 +55,13 @@ TH.store = (function () {
 
   var state = {
     pkg: 'D', showLocked: true, role: 'admin', building: 'ALL', period: TH.CURRENT_PERIOD,
-    tierNotes: true, ui: {}, drafts: {}, dataState: {}, schema: TH.DATA_SCHEMA,
+    tierNotes: true, reviewMode: false, ui: {}, drafts: {}, dataState: {}, schema: TH.DATA_SCHEMA,
   };
 
   var saveTimer = null;
   function flush() {
     clearTimeout(saveTimer); saveTimer = null;
-    return write({ schema: TH.DATA_SCHEMA, pkg: state.pkg, showLocked: state.showLocked, role: state.role, building: state.building, period: state.period, tierNotes: state.tierNotes, ui: state.ui, drafts: state.drafts, db: TH.db });
+    return write({ schema: TH.DATA_SCHEMA, pkg: state.pkg, showLocked: state.showLocked, role: state.role, building: state.building, period: state.period, tierNotes: state.tierNotes, reviewMode: state.reviewMode, ui: state.ui, drafts: state.drafts, db: TH.db });
   }
   function persist() {
     clearTimeout(saveTimer);
@@ -80,7 +80,7 @@ TH.store = (function () {
       var saved = read();
       var fresh = !saved || saved.schema !== TH.DATA_SCHEMA;
       if (!fresh) {
-        ['showLocked', 'role', 'building', 'period', 'tierNotes', 'ui', 'drafts'].forEach(function (k) { if (saved[k] !== undefined) state[k] = saved[k]; });
+        ['showLocked', 'role', 'building', 'period', 'tierNotes', 'reviewMode', 'ui', 'drafts'].forEach(function (k) { if (saved[k] !== undefined) state[k] = saved[k]; });
         TH.db = saved.db || TH.seed();
       } else {
         TH.db = TH.seed();

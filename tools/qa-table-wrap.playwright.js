@@ -61,7 +61,7 @@ async (page) => {
         let bad = false, why = '';
         if (brokenChip) { bad = true; why = 'chip/nút gãy dòng'; }
         else if (blocks.length) {
-          const bl = blocks.find(b => tooMany(lines(b), b.textContent.trim().length));
+          const bl = blocks.find(b => b.querySelectorAll('.badge').length < 2 && tooMany(lines(b), b.textContent.trim().length)); // khối chứa nhiều badge được phép xuống hàng
           if (bl) { bad = true; why = 'khối gãy dòng: ' + bl.textContent.trim().slice(0, 40); }
           else { const tw = document.createTreeWalker(cell, NodeFilter.SHOW_TEXT); let loose = false, t; while ((t = tw.nextNode())) { if (t.nodeValue.trim() && !blocks.some(b => b.contains(t))) { loose = true; break; } } const allowed = Math.max(1, blocks.length + (loose ? 1 : 0)) + brs + Math.max(0, chips - 1); if (n > allowed && tooMany(n - allowed + 1, txt.length)) { bad = true; why = n + ' dòng / ' + allowed + ' khối'; } }
         } else if (chips < 2 && tooMany(n - brs, txt.length)) { bad = true; why = n + ' dòng'; }

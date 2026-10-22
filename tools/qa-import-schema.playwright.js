@@ -71,7 +71,7 @@ async (page) => {
       date: '2026-10-21', baseCommit: '70763e3', auditedState: 'working tree, including pre-existing uncommitted edits', status: 'NOT_MATCHED',
       sourceWorkbooksModified: false, appStorageWritten: false, files, observations,
       customerImportExists: !!TH.views['CUS-IMP'],
-      customerImportButtonExists: TH.views['CUS-01'].render().includes('Import Excel'),
+      customerImportButtonExists: TH.views['CUS-01'].render().includes('Nhập từ Excel'),
       scope: 'Mock UI and generated OOXML. No actual XLSX upload/parser exists in this flow.',
     };
   });

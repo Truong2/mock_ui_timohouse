@@ -32,14 +32,19 @@ var TH = window.TH = window.TH || {};
     return '<span class="badge badge-' + (tone || 'neutral') + '"' + (opts.tip ? ' data-tip="' + esc(opts.tip) + '"' : '') + '>' + (opts.dot ? '<span class="dot"></span>' : '') + (opts.icon ? I(opts.icon, 'ic-sm') : '') + esc(text) + '</span>';
   };
   TH.openBadge = function (code, text) {
+    var label = TH.uiLabel(text || 'Chờ duyệt');
+    if (!TH.isReview()) return '<span class="badge badge-open" data-tip="Chính sách chưa chốt — đang chờ khách duyệt; không hiển thị như số liệu chính thức.">' + esc(label) + '</span>';
     return '<span class="badge badge-open" data-tip="Chính sách chưa chốt — Decision Log ' + esc(code) + '. Không hiển thị như LIVE.">' + esc(text || 'DRAFT / CHỜ DUYỆT') + (code ? ' · ' + esc(code) : '') + '</span>';
   };
+  /* CR-UI-STD: nhãn trạng thái tiếng Anh/viết hoa còn sót → tiếng Việt (khi không ở chế độ review) */
+  var UI_LABELS = { 'DRAFT / CHỜ DUYỆT': 'Chờ duyệt', 'DRAFT': 'Nháp', 'PROPOSED': 'Đề xuất', 'PENDING_APPROVAL': 'Chờ duyệt', 'ĐỀ XUẤT': 'Đề xuất', 'CHỜ DUYỆT': 'Chờ duyệt', 'CHỜ KHÁCH DUYỆT': 'Chờ khách duyệt', 'đề xuất': 'Đề xuất', 'chờ duyệt rule': 'Chờ duyệt quy tắc' };
+  TH.uiLabel = function (t) { if (TH.isReview()) return t; var k = String(t || '').trim(); return UI_LABELS[k] || k.replace(/\bDRAFT\b/g, 'Nháp').replace(/\bPROPOSED\b/g, 'Đề xuất').replace(/\bPENDING_APPROVAL\b/g, 'Chờ duyệt'); };
   TH.simBadge = function (text) { return '<span class="badge badge-sim" data-tip="Dữ liệu/kết quả mô phỏng — không gọi provider thật.">' + I('beaker', 'ic-sm') + esc(text || 'Mô phỏng') + '</span>'; };
   var STATUS = {
     active: ['Đang hoạt động', 'success'], inactive: ['Ngừng hoạt động', 'neutral'],
     occupied: ['Đang thuê', 'teal'], vacant: ['Trống', 'info'], maintenance: ['Đang sửa', 'warning'], reserved: ['Đặt cọc', 'info'],
     draft: ['Nháp', 'draft'], pending: ['Chờ xác nhận', 'warning'], confirmed: ['Đã xác nhận', 'success'], approved: ['Đã duyệt', 'success'], rejected: ['Từ chối', 'danger'], cancelled: ['Đã hủy', 'neutral'],
-    missing: ['Thiếu số', 'danger'], paid: ['Đã thu đủ', 'success'], unpaid: ['Chưa thu', 'neutral'], partial: ['Thu một phần', 'info'], overdue: ['Quá hạn', 'danger'], partial_overdue: ['Quá hạn · thu một phần', 'danger'], reported: ['Đã báo thu · chờ xác nhận', 'warning'],
+    missing: ['Thiếu số', 'danger'], paid: ['Đã thu đủ', 'success'], unpaid: ['Chưa thu', 'warning'], partial: ['Thu một phần', 'info'], overdue: ['Quá hạn', 'danger'], partial_overdue: ['Quá hạn · thu một phần', 'danger'], reported: ['Đã báo thu · chờ xác nhận', 'warning'],
     sent: ['Đã gửi', 'success'], failed: ['Lỗi gửi', 'danger'], queued: ['Trong hàng đợi', 'info'], skipped: ['Bỏ qua', 'neutral'],
     expiring: ['Sắp hết hạn', 'warning'], ended: ['Đã kết thúc', 'neutral'], terminated: ['Phá hợp đồng', 'danger'],
     extend: ['Gia hạn', 'success'], move_out: ['Chuyển đi', 'danger'], no_answer: ['Chưa trả lời', 'neutral'],
@@ -50,6 +55,14 @@ var TH = window.TH = window.TH || {};
     return TH.badge(override || s[0], s[1], { dot: true });
   };
   TH.statusLabel = function (key) { return (STATUS[key] || [key])[0]; };
+  /* Registry trạng thái theo miền — một nguồn nhãn + tone; TH.status giữ tương thích (miền chung) */
+  TH.STATUS_REG = function () {
+    return { core: STATUS, bill: TH.BILL_STATES, deposit: TH.DEPOSIT_STATES, adjust: TH.ADJUST_STATES, vehicle: TH.VEHICLE_STATES, doc: TH.DOC_STATES };
+  };
+  TH.statusOf = function (domain, key, override) {
+    var m = (TH.STATUS_REG()[domain] || {})[key] || STATUS[key] || [key, 'neutral'];
+    return TH.badge(override || m[0], m[1], { dot: true });
+  };
 
   /* ---------- Package gate ---------- */
   TH.tierPill = function (tier, opts) {
@@ -64,15 +77,15 @@ var TH = window.TH = window.TH || {};
   TH.up = function (incId) {
     if (TH._rec) TH._rec(incId);
     var inc = TH.inc(incId);
-    if (inc.tier === 'A') return '';
+    if (inc.tier === 'A' || !TH.isReview()) return '';
     return '<span class="up-tag">' + TH.tierPill(inc.tier, { tip: inc.tier + ' · ' + inc.fid + ': ' + inc.text }) + '</span>';
   };
   function placeholder(inc, opts) {
     var lines = opts.lines || 3, out = '';
-    for (var i = 0; i < lines; i++) out += '<div style="height:10px;margin:10px 0;width:' + (90 - i * 17) + '%;background:#e2e8f0;border-radius:6px"></div>';
+    for (var i = 0; i < lines; i++) out += '<div class="gate-line" style="width:' + (90 - i * 17) + '%"></div>';
     return '<div class="card" style="box-shadow:none;background:transparent;border:0"><div class="card-bd">' +
       '<div class="card-title" style="margin-bottom:6px">' + esc(opts.title || inc.feature.name) + '</div>' +
-      '<div class="small muted" style="margin-bottom:8px">Placeholder — số liệu nâng cấp không hiển thị như dữ liệu đã duyệt ở gói thấp hơn.</div>' + out + '</div></div>';
+      '<div class="small muted u-mb-8">Placeholder — số liệu nâng cấp không hiển thị như dữ liệu đã duyệt ở gói thấp hơn.</div>' + out + '</div></div>';
   }
   /**
    * gate(incId, html, opts)
@@ -153,7 +166,7 @@ var TH = window.TH = window.TH || {};
         return '<tr role="row" ' + attrs + '>' + cols.map(function (c, j) {
           var locked = c.gate && !TH.has(c.gate);
           var cls = (c.num ? 'num ' : '') + (c.center ? 'center ' : '') + (c.tdCls || '') + (locked ? ' is-ghost' : '') + ' ' + fit[j];
-          var v = locked ? '<span aria-hidden="true" style="display:inline-block;width:56px;height:8px;border-radius:4px;background:#e2e8f0"></span>' : cells[i][j];
+          var v = locked ? '<span class="ghost-bar" aria-hidden="true"></span>' : cells[i][j];
           if (o.mobile) {
             var identity = c.key === o.mobile.identity;
             var secondary = o.mobile.visible.indexOf(c.key) === -1;
@@ -278,9 +291,9 @@ var TH = window.TH = window.TH || {};
     var crumbs = (o.crumbs || [[sc.module || 'Demo']]).map(function (c, i, arr) {
       return (c[1] ? '<a href="' + c[1] + '">' + esc(c[0]) + '</a>' : '<span>' + esc(c[0]) + '</span>') + (i < arr.length - 1 ? I('chevronRight') : '');
     }).join('');
-    return '<div class="page-hd"><div style="min-width:0"><nav class="crumbs" aria-label="Breadcrumb">' + crumbs + '</nav>' +
+    return '<div class="page-hd"><div class="u-minw-0"><nav class="crumbs" aria-label="Breadcrumb">' + crumbs + '</nav>' +
       '<h1 class="page-title">' + esc(o.title || sc.title) + ' <span class="screen-id" data-tip="Screen ID theo SRS §4' + (sc.no ? ' · Screen ' + sc.no : '') + ' · ' + esc(sc.kind || '') + '">' + esc(o.screen) + '</span>' + (o.status || '') + '</h1>' +
-      (o.desc ? '<p class="page-desc">' + o.desc + '</p>' : '') + '</div>' +
+      (o.desc ? '<p class="page-desc">' + o.desc + '</p>' : '') + (o.facts || '') + '</div>' +
       '<div class="page-actions">' + (o.actions || '') + '</div></div>';
   };
   /* ---------- Data states ---------- */
@@ -296,7 +309,7 @@ var TH = window.TH = window.TH || {};
   };
   TH.loadingSkeleton = function () {
     var row = function (w) { return '<div class="skel" style="height:14px;width:' + w + '%;margin:14px 0"></div>'; };
-    return '<div class="grid-4" style="margin-bottom:16px">' + [1, 2, 3, 4].map(function () { return '<div class="card kpi"><div class="skel" style="height:12px;width:50%"></div><div class="skel" style="height:26px;width:70%;margin-top:8px"></div></div>'; }).join('') + '</div>' +
+    return '<div class="grid-4 u-mb-16">' + [1, 2, 3, 4].map(function () { return '<div class="card kpi"><div class="skel" style="height:12px;width:50%"></div><div class="skel" style="height:26px;width:70%;margin-top:8px"></div></div>'; }).join('') + '</div>' +
       '<div class="card"><div class="card-bd" aria-busy="true" aria-label="Đang tải">' + row(92) + row(85) + row(88) + row(70) + row(80) + row(60) + '</div></div>';
   };
 
@@ -330,6 +343,7 @@ var TH = window.TH = window.TH || {};
     bd.scrollTop = st;
     ft.innerHTML = r.foot || '';
     ft.hidden = !r.foot;
+    TH.uiPolish(m.el);
   }
   TH.modal = {
     stack: stack,
@@ -343,7 +357,7 @@ var TH = window.TH = window.TH || {};
       el.className = 'overlay' + (drawer ? ' overlay-drawer' : '');
       el.style.zIndex = 400 + stack.length * 10 + (spec.z || 0);
       el.innerHTML = '<div class="overlay-bg" data-close></div><div class="' + (drawer ? 'drawer' : 'dialog dialog-' + (spec.size || 'md')) + '" role="dialog" aria-modal="true" aria-labelledby="' + id + '-t">' +
-        '<div class="dialog-hd"><div class="titles"></div><div class="hd-extra row" style="gap:8px"></div><button type="button" class="btn btn-ghost btn-icon btn-sm" data-close aria-label="Đóng">' + I('x') + '</button></div>' +
+        '<div class="dialog-hd"><div class="titles"></div><div class="hd-extra row u-gap-8"></div><button type="button" class="btn btn-ghost btn-icon btn-sm" data-close aria-label="Đóng">' + I('x') + '</button></div>' +
         '<div class="dialog-bd"></div><div class="dialog-ft"></div></div>';
       root.appendChild(el);
       var m = { key: spec.key, id: id, el: el, spec: spec, ret: document.activeElement };
@@ -413,6 +427,7 @@ var TH = window.TH = window.TH || {};
     tone = tone || 'success';
     t.className = 'toast toast-' + tone;
     t.innerHTML = I({ success: 'checkCircle', warning: 'alert', danger: 'xCircle', info: 'info' }[tone]) + '<div><div class="toast-title">' + esc(title) + '</div>' + (msg ? '<div class="toast-msg">' + msg + '</div>' : '') + '</div>';
+    TH.uiPolish(t);
     box.appendChild(t);
     setTimeout(function () { t.classList.add('is-out'); setTimeout(function () { t.remove(); }, 200); }, 4200);
   };
@@ -422,6 +437,7 @@ var TH = window.TH = window.TH || {};
   function showTip(target) {
     var text = target.getAttribute('data-tip');
     if (!text) return;
+    text = TH.cleanCodes(text);
     if (!tipEl) { tipEl = document.createElement('div'); tipEl.className = 'tip-pop'; tipEl.setAttribute('role', 'tooltip'); document.body.appendChild(tipEl); }
     tipEl.textContent = text;
     tipFor = target;
@@ -495,7 +511,7 @@ var TH = window.TH = window.TH || {};
         bars += '<text x="' + (pl + gw * ci + gw / 2) + '" y="' + (H - 10) + '" text-anchor="middle">' + esc(c) + '</text>';
       });
       var base = '<line class="axis-line" x1="' + pl + '" x2="' + (W - pr) + '" y1="' + y(0) + '" y2="' + y(0) + '"/>';
-      var legend = o.series.length > 1 ? '<div class="legend" style="margin-bottom:10px">' + o.series.map(function (s, si) { return '<span><i style="background:' + (s.color || COLORS[si]) + '"></i>' + esc(s.label) + '</span>'; }).join('') + '</div>' : '';
+      var legend = o.series.length > 1 ? '<div class="legend u-mb-12">' + o.series.map(function (s, si) { return '<span><i style="background:' + (s.color || COLORS[si]) + '"></i>' + esc(s.label) + '</span>'; }).join('') + '</div>' : '';
       return legend + '<svg class="chart' + (frame.compact ? ' chart-compact' : '') + '" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(o.label || 'Biểu đồ cột') + '">' + grid + base + bars + '</svg>';
     },
     lines: function (o) {
@@ -521,7 +537,7 @@ var TH = window.TH = window.TH || {};
         var showLabel = !frame.compact || i % Math.max(1, Math.ceil(n / 4)) === 0;
         return '<rect x="' + (x(i) - w / 2) + '" y="' + pt + '" width="' + w + '" height="' + ih + '" fill="transparent" data-tip="' + esc(tip) + '"/>' + (showLabel ? '<text x="' + x(i) + '" y="' + (H - 10) + '" text-anchor="' + (frame.compact && i === 0 ? 'start' : frame.compact && i === n - 1 ? 'end' : 'middle') + '">' + esc(c) + '</text>' : '');
       }).join('');
-      var legend = o.series.length > 1 ? '<div class="legend" style="margin-bottom:10px">' + o.series.map(function (s, si) { return '<span><i style="background:' + (s.color || COLORS[si]) + '"></i>' + esc(s.label) + '</span>'; }).join('') + '</div>' : '';
+      var legend = o.series.length > 1 ? '<div class="legend u-mb-12">' + o.series.map(function (s, si) { return '<span><i style="background:' + (s.color || COLORS[si]) + '"></i>' + esc(s.label) + '</span>'; }).join('') + '</div>' : '';
       return legend + '<svg class="chart' + (frame.compact ? ' chart-compact' : '') + '" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(o.label || 'Biểu đồ xu hướng') + '">' + grid + '<line class="axis-line" x1="' + pl + '" x2="' + (W - pr) + '" y1="' + y(0) + '" y2="' + y(0) + '"/>' + paths + hits + '</svg>';
     },
     /* Thanh chồng ngang cho mốc 5/10/15 — một hue theo thứ bậc, khe 2px giữa các đoạn. */
@@ -552,7 +568,7 @@ var TH = window.TH = window.TH || {};
     var body;
     if (on) {
       var err = TH.store.draft(form, '_err', '');
-      body = (err ? '<div class="alert alert-danger" style="margin-bottom:12px">' + I('xCircle', 'ic-sm') + '<div class="alert-body">' + esc(err) + '</div></div>' : '') +
+      body = (err ? '<div class="alert alert-danger u-mb-12">' + I('xCircle', 'ic-sm') + '<div class="alert-body">' + esc(err) + '</div></div>' : '') +
         '<div class="form-grid">' + def.fields(id).map(function (f) {
           if (f.html) return f.html;
           return TH.field(Object.assign({ form: form, def: vals[f.name] === null || vals[f.name] === undefined ? '' : vals[f.name] }, f));
@@ -560,7 +576,7 @@ var TH = window.TH = window.TH || {};
     } else body = def.view(id, vals);
     return '<div class="card sec-card' + (on ? ' is-editing' : '') + (opts.cls ? ' ' + opts.cls : '') + '" id="sec-' + key + '-' + esc(id) + '">' + TH.cardHd(title, sub, on ? TH.badge('Đang chỉnh sửa', 'draft', { dot: true }) : btnEdit) +
       '<div class="card-bd">' + body + '</div>' +
-      (on ? '<div class="card-ft sec-ft"><span class="small muted">' + I('info', 'ic-sm') + ' Lưu để cập nhật trang chi tiết và danh sách liên quan; Hủy giữ dữ liệu đã lưu.</span><span class="spacer"></span><div class="row" style="gap:8px">' + btnsOn + '</div></div>' : '') + '</div>';
+      (on ? '<div class="card-ft sec-ft"><span class="small muted">' + I('info', 'ic-sm') + ' Lưu để cập nhật trang chi tiết và danh sách liên quan; Hủy giữ dữ liệu đã lưu.</span><span class="spacer"></span><div class="row u-gap-8">' + btnsOn + '</div></div>' : '') + '</div>';
   };
   TH.editGuard = {
     dirty: function () {
@@ -628,24 +644,38 @@ var TH = window.TH = window.TH || {};
   TH.kv = function (pairs) {
     return '<dl class="kv">' + pairs.map(function (p) { return '<dt>' + esc(p[0]) + '</dt><dd>' + (p[1] === undefined || p[1] === null || p[1] === '' ? '—' : p[1]) + '</dd>'; }).join('') + '</dl>';
   };
+  /* CR-UI-STD: lỗi form hiển thị ngay tại field (thay toast). Lưu trong draft `_errors` của form. */
+  TH.formErrors = function (form, map) {
+    TH.store.setDraft(form, '_errors', map || {});
+    var keys = Object.keys(map || {});
+    return keys.length === 0;
+  };
+  TH.clearFormErrors = function (form) { TH.store.setDraft(form, '_errors', {}); };
+  TH.formErrorSummary = function (form) {
+    var e = TH.store.draft(form, '_errors', {}) || {}, ks = Object.keys(e);
+    if (ks.length < 2) return '';
+    return '<div class="alert alert-danger form-error-summary" role="alert">' + TH.icon('alertCircle', 'ic-sm') + '<div class="alert-body"><b>Cần sửa ' + ks.length + ' trường trước khi lưu</b><span>' + ks.map(function (k) { return esc(e[k]); }).join(' · ') + '</span></div></div>';
+  };
   TH.field = function (o) {
     var id = o.id || ('f-' + (o.form || 'x') + '-' + o.name);
+    if (o.error === undefined && o.form && o.name) { var fe = (TH.store.draft(o.form, '_errors', {}) || {})[o.name]; if (fe) { o = Object.assign({}, o, { error: fe, invalid: true }); } }
+    var aria = o.error ? ' aria-invalid="true" aria-describedby="' + id + '-err"' : '';
     var val = o.value !== undefined ? o.value : (o.form ? TH.store.draft(o.form, o.name, o.def !== undefined ? o.def : '') : '');
     var bind = (o.form ? ' data-draft="' + o.form + '.' + o.name + '"' : '') + (o.live ? ' data-live' : '');
     var req = o.required ? ' <span class="neg" aria-hidden="true">*</span>' : '';
     var ctl;
     if (o.type === 'select') {
-      ctl = '<select id="' + id + '" class="select' + (o.invalid ? ' is-invalid' : '') + '"' + bind + (o.disabled ? ' disabled' : '') + '>' + o.options.map(function (op) {
+      ctl = '<select id="' + id + '" class="select' + (o.invalid ? ' is-invalid' : '') + '"' + bind + aria + (o.disabled ? ' disabled' : '') + '>' + o.options.map(function (op) {
         var v = typeof op === 'object' ? op.id : op, l = typeof op === 'object' ? op.label : op;
         return '<option value="' + esc(v) + '"' + (String(v) === String(val) ? ' selected' : '') + '>' + esc(l) + '</option>';
       }).join('') + '</select>';
     } else if (o.type === 'textarea') {
-      ctl = '<textarea id="' + id + '" class="textarea"' + bind + ' rows="' + (o.rows || 3) + '" placeholder="' + esc(o.placeholder || '') + '">' + esc(val) + '</textarea>';
+      ctl = '<textarea id="' + id + '" class="textarea' + (o.invalid ? ' is-invalid' : '') + '"' + bind + aria + ' rows="' + (o.rows || 3) + '" placeholder="' + esc(o.placeholder || '') + '">' + esc(val) + '</textarea>';
     } else {
-      ctl = '<input id="' + id + '" class="input' + (o.num ? ' num' : '') + (o.invalid ? ' is-invalid' : '') + (o.warn ? ' is-warn' : '') + '" type="' + (o.type || 'text') + '"' + bind + ' value="' + esc(val) + '"' + (o.placeholder ? ' placeholder="' + esc(o.placeholder) + '"' : '') + (o.readonly ? ' readonly' : '') + (o.disabled ? ' disabled' : '') + (o.inputmode ? ' inputmode="' + o.inputmode + '"' : '') + ' autocomplete="off">';
+      ctl = '<input id="' + id + '" class="input' + (o.num ? ' num' : '') + (o.invalid ? ' is-invalid' : '') + (o.warn ? ' is-warn' : '') + '" type="' + (o.type || 'text') + '"' + bind + aria + ' value="' + esc(val) + '"' + (o.placeholder ? ' placeholder="' + esc(o.placeholder) + '"' : '') + (o.readonly ? ' readonly' : '') + (o.disabled ? ' disabled' : '') + (o.inputmode ? ' inputmode="' + o.inputmode + '"' : '') + ' autocomplete="off">';
     }
     return '<div class="field' + (o.span ? ' span-2' : '') + '"><label for="' + id + '">' + esc(o.label) + req + (o.labelExtra || '') + '</label>' + ctl +
-      (o.error ? '<div class="field-error">' + TH.icon('alertCircle', 'ic-sm') + esc(o.error) + '</div>' : o.hint ? '<div class="field-hint">' + o.hint + '</div>' : '') + '</div>';
+      (o.error ? '<div class="field-error" id="' + id + '-err">' + TH.icon('alertCircle', 'ic-sm') + esc(o.error) + '</div>' : o.hint ? '<div class="field-hint">' + o.hint + '</div>' : '') + '</div>';
   };
   TH.fileOf = function (name) {
     var ext = (name.split('.').pop() || '').toLowerCase();
@@ -654,7 +684,154 @@ var TH = window.TH = window.TH || {};
   };
   TH.personCell = function (name, sub) {
     var initials = (name || '?').split(' ').slice(-2).map(function (w) { return w[0]; }).join('').toUpperCase();
-    return '<div class="row" style="gap:10px;flex-wrap:nowrap"><span class="avatar avatar-sm">' + esc(initials) + '</span><div style="min-width:0"><div class="cell-main" style="white-space:nowrap">' + esc(name) + '</div>' + (sub ? '<div class="cell-sub" style="white-space:nowrap">' + sub + '</div>' : '') + '</div></div>';
+    return '<div class="row" style="gap:10px;flex-wrap:nowrap"><span class="avatar avatar-sm">' + esc(initials) + '</span><div class="u-minw-0"><div class="cell-main nowrap">' + esc(name) + '</div>' + (sub ? '<div class="cell-sub nowrap">' + sub + '</div>' : '') + '</div></div>';
   };
   TH.link = function (href, text) { return '<a href="' + href + '">' + esc(text) + '</a>'; };
+
+  /* =========================================================
+     CR-UI-STD — chế độ review nghiệm thu, thu gọn thao tác, a11y nút icon
+     ========================================================= */
+  TH.isReview = function () { return !!(TH.store && TH.store.state && TH.store.state.reviewMode); };
+  /* Mã nội bộ: tính năng (F023.B), quyết định (D-03, K-05, G-03, R-01), câu hỏi (BILL-Q1…Q8, PAY-Q3), CR (CR-RPT-02);
+     mã màn (METER-01, INV-PREV) chỉ khi có trong TH.SCREENS. Không chạm mã dữ liệu (INV-2610-CG302, PT-2610-003, TH-CG). */
+  var RE_CODE = /\b(?:F\d{3}(?:\.[A-D])?|[DKGR]-\d{2}|BILL-Q\d(?:[…-]Q\d)?|PAY-Q\d|CR-[A-Z]+-\d+|QA-[A-Z]+(?:-\d+)?)\b/g;
+  var RE_SCREEN_PAREN = /\(\s*([A-Z]{2,6}-(?:\d{2}[a-z]?|[A-Z]{3,}))\s*\)/g;
+  var RE_SCREEN = /\b([A-Z]{2,6}-(?:\d{2}[a-z]?|[A-Z]{3,}))\b/g;
+  var RE_HINT = /F\d{3}|[A-Z]-\d|[A-Z]{2,}-[A-Z]{3}|BILL-Q|PAY-Q|DRAFT|PROPOSED|PENDING_APPROVAL/;
+  function isScreen(id) { return !!(TH.screen && TH.screen(id)); }
+  TH.cleanCodes = function (s) {
+    if (!s || TH.isReview() || !RE_HINT.test(s)) return s;
+    var out = String(s)
+      .replace(RE_SCREEN_PAREN, function (m, id) { return isScreen(id) ? '' : m; })
+      .replace(RE_SCREEN, function (m, id) { return isScreen(id) ? (TH.navigation && TH.navigation.label ? TH.navigation.label(id) : TH.screen(id).title) : m; })
+      .replace(RE_CODE, '')
+      .replace(/\bDRAFT\b/g, 'Nháp').replace(/\bPROPOSED\b/g, 'Đề xuất').replace(/\bPENDING_APPROVAL\b/g, 'Chờ duyệt')
+      .replace(/\(\s*(?:[·,\/;:+&]\s*)+/g, '(').replace(/(?:\s*[·,\/;:+&])+\s*\)/g, ')')
+      .replace(/\(\s*\)/g, '').replace(/\[\s*\]/g, '')
+      .replace(/(?:\s*·){2,}/g, ' ·').replace(/\s*·\s*(?=[)\]])/g, '')
+      .replace(/(^|\s)[·\/,]\s*$/g, '$1').replace(/^\s*[·\/,]\s+/, '')
+      .replace(/ {2,}/g, ' ');
+    return out;
+  };
+  /* Duyệt text node của vùng vừa vẽ; badge/tag rỗng sau khi bỏ mã thì ẩn */
+  TH.reviewFilter = function (root) {
+    if (!root || TH.isReview()) return;
+    var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: function (n) {
+      var p = n.parentElement;
+      if (!p || p.closest('select, textarea, code, .mono, .doc-page, .print-doc, [data-raw]')) return NodeFilter.FILTER_REJECT;
+      return RE_HINT.test(n.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+    } });
+    var nodes = [];
+    while (w.nextNode()) nodes.push(w.currentNode);
+    nodes.forEach(function (n) {
+      var v = TH.cleanCodes(n.nodeValue);
+      if (v === n.nodeValue) return;
+      n.nodeValue = v;
+      var p = n.parentElement;
+      if (p && !p.textContent.trim() && p.matches('.badge, .tag, .tier, span, b, small')) p.classList.add('review-only');
+    });
+  };
+  /* Header trang: tối đa 1 nút chính + 2 nút phụ; phần còn lại vào menu "Thêm". Cột thao tác bảng: >2 nút → "⋯". */
+  function toMenuItem(el) {
+    el.classList.remove('btn', 'btn-sm', 'btn-xs', 'btn-lg', 'btn-ghost', 'btn-soft', 'btn-icon');
+    if (el.classList.contains('btn-danger')) { el.classList.remove('btn-danger'); el.classList.add('is-danger'); }
+    el.classList.add('menu-item');
+    el.setAttribute('role', 'menuitem');
+    return el;
+  }
+  function makeMenu(items, label, iconOnly) {
+    var wrap = document.createElement('div');
+    wrap.className = 'action-menu';
+    wrap.innerHTML = '<button type="button" class="btn' + (iconOnly ? ' btn-sm btn-ghost btn-icon' : '') + '" data-act="amenu.toggle" aria-haspopup="menu" aria-expanded="false"' + (iconOnly ? ' aria-label="' + esc(label) + '" data-tip="' + esc(label) + '"' : '') + '>' + (iconOnly ? I('more', 'ic-sm') : esc(label) + I('chevronDown', 'ic-sm')) + '</button><div class="action-pop" role="menu" hidden></div>';
+    var pop = wrap.querySelector('.action-pop');
+    items.forEach(function (el) { pop.appendChild(toMenuItem(el)); });
+    return wrap;
+  }
+  var ACT_SEL = '.btn, .gate-inline, .forbidden-chip';
+  TH.compactActions = function (root) {
+    if (!root) return;
+    root.querySelectorAll('.page-actions').forEach(function (box) {
+      var items = Array.prototype.filter.call(box.children, function (el) { return el.matches(ACT_SEL) && !el.closest('.action-menu'); });
+      if (items.length <= 3) return;
+      var prim = items.filter(function (el) { return el.classList.contains('btn-primary'); }).slice(0, 1);
+      var rest = items.filter(function (el) { return prim.indexOf(el) === -1; });
+      var keep = rest.slice(0, 2), more = rest.slice(2);
+      if (!more.length) return;
+      var menu = makeMenu(more, 'Thêm', false);
+      box.appendChild(menu);
+      prim.forEach(function (el) { box.appendChild(el); }); // nút chính luôn ở cuối bên phải
+    });
+    root.querySelectorAll('td.col-act, .table .row-actions').forEach(function (cell) {
+      var host = cell.querySelector('.row-actions, .row') || cell;
+      var items = Array.prototype.filter.call(host.children, function (el) { return el.matches(ACT_SEL); });
+      if (items.length <= 2) return;
+      host.appendChild(makeMenu(items.slice(1), 'Thao tác khác', true));
+    });
+  };
+  /* Nút chỉ có icon phải có tên truy cập */
+  TH.a11yIconButtons = function (root) {
+    if (!root) return;
+    root.querySelectorAll('button, a.btn').forEach(function (b) {
+      if (b.getAttribute('aria-label') || b.textContent.trim()) return;
+      var name = b.getAttribute('data-tip') || b.getAttribute('title') || '';
+      if (name) b.setAttribute('aria-label', TH.cleanCodes(name));
+    });
+  };
+  /* Dải thông tin chính ở đầu trang chi tiết: [[nhãn, html], …] */
+  TH.detailFacts = function (pairs) {
+    var list = (pairs || []).filter(function (p) { return p && p[1] !== undefined && p[1] !== null && p[1] !== ''; });
+    return list.length ? '<dl class="detail-facts">' + list.map(function (p) { return '<div><dt>' + esc(p[0]) + '</dt><dd>' + p[1] + '</dd></div>'; }).join('') + '</dl>' : '';
+  };
+  /* Gom ≥ 2 khối gate khóa gói liền nhau trong cùng cột dọc (.stack) thành 1 thẻ liệt kê ngắn —
+     tránh cột phụ toàn khung mờ. Lưới nhiều cột giữ nguyên để không để lại ô trống. Nút vẫn mang data-locked. */
+  TH.gateGroup = function (root) {
+    (root || document).querySelectorAll('.stack > .gate-locked').forEach(function (g) {
+      if (!g.isConnected) return;
+      var prev = g.previousElementSibling;
+      if (prev && prev.classList.contains('gate-locked')) return;
+      var run = [g], x = g.nextElementSibling;
+      while (x && x.classList.contains('gate-locked')) { run.push(x); x = x.nextElementSibling; }
+      if (run.length < 2) return;
+      var items = run.map(function (el) {
+        var c = el.querySelector('.gate-cover'), t = el.querySelector('.gate-label .t');
+        return c ? '<button type="button" class="menu-item gate-group-item" data-locked="' + esc(c.getAttribute('data-locked')) + '" data-tip="' + esc(c.getAttribute('aria-label') || '') + '">' +
+          I('lock', 'ic-sm') + '<span>' + esc(t ? t.textContent : '') + '</span>' + I('chevronRight', 'ic-sm') + '</button>' : '';
+      }).join('');
+      var box = document.createElement('div');
+      box.className = 'card gate-group';
+      box.innerHTML = '<div class="card-hd"><div><div class="card-title">' + I('lock', 'ic-sm') + 'Tính năng của gói cao hơn</div><div class="card-sub">' + run.length + ' mục · chọn để xem gói mở khóa</div></div></div><div class="gate-group-list">' + items + '</div>';
+      g.parentNode.insertBefore(box, g);
+      run.forEach(function (el) { el.remove(); });
+    });
+  };
+  TH.uiPolish = function (root) { TH.gateGroup(root); TH.reviewFilter(root); TH.compactActions(root); TH.a11yIconButtons(root); };
+  /* Menu thao tác: mở/đóng, phím Escape, click ngoài */
+  function closeMenus(except) {
+    document.querySelectorAll('.action-menu .action-pop:not([hidden])').forEach(function (p) {
+      if (except && except.contains(p)) return;
+      p.hidden = true; var b = p.parentNode.querySelector('[data-act="amenu.toggle"]'); if (b) b.setAttribute('aria-expanded', 'false');
+    });
+  }
+  TH.act = TH.act || {};
+  TH.act['amenu.toggle'] = function (el) {
+    var wrap = el.closest('.action-menu'), pop = wrap.querySelector('.action-pop'), open = pop.hidden;
+    closeMenus(open ? wrap : null);
+    pop.hidden = !open; el.setAttribute('aria-expanded', String(open));
+    if (open) { var first = pop.querySelector('.menu-item:not([disabled])'); if (first) first.focus(); }
+  };
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest ? e.target.closest('.action-menu') : null;
+    if (!t) closeMenus(null);
+    else if (e.target.closest('.action-pop .menu-item')) setTimeout(function () { closeMenus(null); }, 0);
+  });
+  document.addEventListener('keydown', function (e) {
+    var pop = e.target.closest ? e.target.closest('.action-pop') : null;
+    if (e.key === 'Escape' && document.querySelector('.action-pop:not([hidden])')) {
+      var openPop = document.querySelector('.action-pop:not([hidden])'), b = openPop.parentNode.querySelector('[data-act="amenu.toggle"]');
+      closeMenus(null); if (b) b.focus(); e.stopPropagation();
+    } else if (pop && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+      var list = Array.prototype.slice.call(pop.querySelectorAll('.menu-item:not([disabled])')), i = list.indexOf(document.activeElement);
+      var nx = list[(i + (e.key === 'ArrowDown' ? 1 : list.length - 1)) % list.length]; if (nx) { nx.focus(); e.preventDefault(); }
+    }
+  }, true);
 })();

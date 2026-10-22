@@ -92,10 +92,10 @@
       ['tab_count', c.tab + ' biến thể tab · ' + c.variant + ' biến thể render'],
       ['figma_frame_count', '<span class="muted">Ngoài phạm vi bản HTML — chưa có checklist 88 frame Figma (QA-B04)</span>'],
     ]);
-    var res = r ? '<div class="row" style="gap:8px;margin:8px 0">' + (r.fails.length ? TH.badge(r.fails.length + ' lỗi', 'danger', { icon: 'xCircle' }) : TH.badge('0 lỗi', 'success', { icon: 'checkCircle' })) + '<span class="small muted">' + r.total + ' lượt · ' + r.ms + ' ms · schema v' + r.schema + ' · ' + esc(r.at) + '</span></div>' + smokeTable(r) +
+    var res = r ? '<div class="row u-gap-8 u-my-8">' + (r.fails.length ? TH.badge(r.fails.length + ' lỗi', 'danger', { icon: 'xCircle' }) : TH.badge('0 lỗi', 'success', { icon: 'checkCircle' })) + '<span class="small muted">' + r.total + ' lượt · ' + r.ms + ' ms · schema v' + r.schema + ' · ' + esc(r.at) + '</span></div>' + smokeTable(r) +
       (r.fails.length ? '<ul class="small">' + r.fails.slice(0, 10).map(function (f) { return '<li>' + esc(f.join(' · ')) + '</li>'; }).join('') + '</ul>' : '')
       : '<p class="small muted">Chưa chạy trong phiên này. Bấm “Chạy smoke test” để render lại toàn bộ màn × tab × dialog × 4 gói × 2 kỳ.</p>';
-    return '<div class="grid-2" style="margin-bottom:16px"><div class="card">' + TH.cardHd(I('list', 'ic-sm') + 'Đếm phạm vi (tách riêng)', 'Trả lời QA-P05 — không gộp route, màn, dialog, tab, frame Figma') + '<div class="card-bd">' + counts + '</div></div>' +
+    return '<div class="grid-2 u-mb-16"><div class="card">' + TH.cardHd(I('list', 'ic-sm') + 'Đếm phạm vi (tách riêng)', 'Trả lời QA-P05 — không gộp route, màn, dialog, tab, frame Figma') + '<div class="card-bd">' + counts + '</div></div>' +
       '<div class="card">' + TH.cardHd(I('activity', 'ic-sm') + 'Smoke test trong trình duyệt', 'Tái lập được, không cần cài Playwright (QA-P04)', '<button type="button" class="btn btn-sm btn-primary" data-act="qa.smoke">' + I('play', 'ic-sm') + 'Chạy smoke test</button>' + (r ? '<button type="button" class="btn btn-sm" data-act="qa.log">' + I('download', 'ic-sm') + 'Log (.csv)</button>' : '')) + '<div class="card-bd">' + res + '<p class="small muted">Smoke test chỉ chứng minh render không lỗi; không thay thế nghiệm thu nghiệp vụ, kiểm tra in/PDF, bàn phím, Firefox/Safari.</p></div></div></div>';
   };
   TH.act['qa.smoke'] = function () {

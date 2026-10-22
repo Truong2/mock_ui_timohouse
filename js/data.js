@@ -111,7 +111,7 @@ TH.DEPOSIT_OPEN = ['reconciling', 'pending_approval', 'approved'];
 /* CR-PAY (Excel "Hoá đơn tiền nhà tháng 9 và dịch vụ tháng 9 năm 2026" › DS phòng phá hđ): lý do phá HĐ hay gặp */
 TH.BREAK_REASONS = { runaway: 'Bỏ trốn', hometown: 'Về quê / nghỉ học', job: 'Chuyển chỗ làm / chỗ học', money: 'Không đủ tài chính', price: 'Không đồng ý giá mới', other: 'Lý do khác' };
 /* Tình trạng thu theo phòng — đúng công thức cột "Tình trạng" của sheet hóa đơn/BÁO CÁO CHECK THU TIỀN; thêm "Chưa lập HĐ" cho phòng đang ở chưa có hóa đơn kỳ */
-TH.BILL_STATES = { unpaid: ['Chưa TT', 'danger'], short: ['Thiếu', 'warning'], full: ['Đủ', 'success'], over: ['Thừa', 'info'], deposit: ['Đóng cọc', 'teal'], empty: ['Trống', 'neutral'], nobill: ['Chưa lập HĐ', 'draft'] };
+TH.BILL_STATES = { unpaid: ['Chưa thanh toán', 'warning'], short: ['Thiếu', 'warning'], full: ['Đủ', 'success'], over: ['Thừa', 'info'], deposit: ['Đóng cọc', 'teal'], empty: ['Trống', 'neutral'], nobill: ['Chưa lập hóa đơn', 'draft'] };
 /* Mẫu phiếu hoàn cọc (sheet HĐ (HOÀN CỌC)): các khoản trừ vào tiền cọc */
 TH.REFUND_ITEMS = ['Tiền phòng lẻ ngày', 'Điện', 'Nước', 'Vệ sinh', 'Internet', 'Thang máy', 'Gửi xe', 'Máy giặt', 'Khấu hao', 'Sửa chữa', 'Dọn vệ sinh', 'Sơn phòng', 'DV khác'];
 /* CR-BILL (Excel tháng 9/2026: NHÀ T/G/S, PHÒNG MỚI THÁNG 9, "Điện vệ sinh chung", cột Kỳ TT / Ngày ở / Thu khác) —
@@ -129,7 +129,7 @@ TH.CYCLE_SCOPES = { rent: 'Chỉ tiền phòng', rent_svc: 'Tiền phòng + DV c
 TH.COMMON_METHODS = { per_person: 'Chia theo số người', per_room: 'Chia theo số phòng' };
 /* Giảm trừ / phụ thu (cột "Thu khác" và ghi chú hóa đơn trong file): hỗ trợ DV, CTV bù ngày, thêm người, phạt vi phạm… */
 TH.ADJUST_CATEGORIES = ['Hỗ trợ DV', 'CTV bù ngày', 'Thêm người', 'Phạt vi phạm', 'Khác'];
-TH.ADJUST_STATES = { pending: ['Chờ duyệt', 'warning'], approved: ['Đã duyệt', 'success'], rejected: ['Từ chối', 'neutral'] };
+TH.ADJUST_STATES = { pending: ['Chờ duyệt', 'warning'], approved: ['Đã duyệt', 'success'], rejected: ['Từ chối', 'danger'] };
 
 TH.EXPENSE_CATS = {
   owner_rent: 'Tiền thuê trả chủ nhà',

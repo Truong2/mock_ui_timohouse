@@ -49,7 +49,7 @@
         { name: 'deposit', label: 'Tiền đặt cọc (đ)', num: true, inputmode: 'numeric' },
         { name: 'handover', label: 'Ngày giao nhà', type: 'date' },
         { name: 'start', label: 'Thời hạn thuê từ ngày', type: 'date', required: true },
-        { name: 'end', label: 'Đến ngày (kết thúc HĐ)', type: 'date', required: true },
+        { name: 'end', label: 'Đến ngày (kết thúc hợp đồng)', type: 'date', required: true },
         { name: 'holdFrom', label: 'Giữ giá từ ngày', type: 'date' },
         { name: 'holdTo', label: 'Giữ giá đến ngày', type: 'date' },
         { name: 'payCycle', label: 'Chu kỳ thanh toán', type: 'select', options: [{ id: '1', label: 'Hằng tháng' }, { id: '3', label: '03 tháng/lần' }, { id: '6', label: '06 tháng/lần' }, { id: '12', label: '12 tháng/lần' }] },
@@ -99,7 +99,7 @@
   /* Card HĐ thuê + lịch sử phiên bản (F003.B) */
   TH.leaseBlock = function (l) {
     return TH.section('lease', l.id) +
-      TH.gate('F003.B', '<div class="card" style="margin-top:12px">' + TH.cardHd(I('history', 'ic-sm') + 'Lịch sử hợp đồng · ' + esc(l.id) + TH.up('F003.B'), 'Mỗi lần lưu thay đổi tạo một phiên bản; không sửa lịch sử') + '<div class="card-bd"><ul class="timeline">' +
+      TH.gate('F003.B', '<div class="card u-mt-12">' + TH.cardHd(I('history', 'ic-sm') + 'Lịch sử hợp đồng · ' + esc(l.id) + TH.up('F003.B'), 'Mỗi lần lưu thay đổi tạo một phiên bản; không sửa lịch sử') + '<div class="card-bd"><ul class="timeline">' +
         l.versions.slice().reverse().map(function (v) { return '<li><b>v' + v.v + '</b> — ' + esc(v.note) + '<div class="when">' + esc(C.staffName(v.by)) + ' · ' + F.date(v.at) + '</div></li>'; }).join('') + '</ul></div></div>', { label: 'Lịch sử hợp đồng/chủ nhà của tòa', lines: 2 });
   };
 
@@ -109,7 +109,7 @@
     opts = opts || {};
     var q = TH.has('F013.B') ? TH.store.ui(screen, 'dq', '') : '';
     var rows = docs.filter(function (d) { return TH.match(q, [d.kind, d.file, TH.buildingName(d.buildingId), d.leaseId || '']); });
-    var search = TH.gate('F013.B', '<div class="input-wrap">' + I('search') + '<label class="sr-only" for="dq-' + screen + '">Tìm tài liệu</label><input id="dq-' + screen + '" class="input input-sm" type="search" placeholder="Tìm theo loại, tên tệp, tòa, số HĐ…" value="' + esc(q) + '" data-ui="' + screen + '.dq" autocomplete="off"></div>' + TH.up('F013.B'), { mode: 'btn', label: 'Tìm tài liệu theo HĐ/tòa', size: 'btn-sm' });
+    var search = TH.gate('F013.B', '<div class="input-wrap">' + I('search') + '<label class="sr-only" for="dq-' + screen + '">Tìm tài liệu</label><input id="dq-' + screen + '" class="input input-sm" type="search" placeholder="Tìm theo loại, tên tệp, tòa, số HĐ…" value="' + esc(q) + '" data-ui="' + screen + '.dq" autocomplete="off"></div>' + TH.up('F013.B'), { mode: 'btn', label: 'Tìm tài liệu theo hợp đồng/tòa', size: 'btn-sm' });
     return '<div class="card card-flush">' + TH.cardHd(I('folder', 'ic-sm') + (opts.title || 'Tài liệu đính kèm'), opts.sub || 'Lưu file gắn hồ sơ (F013.A) · tệp minh họa, không tải thật',
         TH.permBtn('master.edit', '<button type="button" class="btn btn-sm" data-act="bdoc.upload" data-b="' + esc(opts.buildingId || '') + '" data-owner="' + esc(opts.ownerId || '') + '" data-kind="' + esc(opts.kind || '') + '">' + I('upload', 'ic-sm') + 'Tải lên</button>', 'Tải lên · 403')) +
       '<div class="toolbar">' + search + '<span class="small muted tnum">' + rows.length + ' tài liệu</span></div>' +
@@ -152,7 +152,7 @@
     var form = 'bdoc-up', kind = TH.store.draft(form, 'kind', TH.store.draft(form, '_kind', '') || 'Sổ đỏ');
     var bs = TH.store.draft(form, '_owner', '') ? buildingsOf(TH.store.draft(form, '_owner', '')) : TH.db.buildings;
     var bId = TH.store.draft(form, 'b', TH.store.draft(form, '_b', '') || (bs[0] && bs[0].id)), b = C.building(bId);
-    if (!b) { TH.toast('Chưa chọn tòa', 'Chọn tòa liên quan cho tài liệu.', 'danger'); return; }
+    if (!TH.formErrors(form, b ? {} : { b: 'Chọn tòa liên quan cho tài liệu.' })) { TH.modal.rerenderAll(); return; }
     var n = TH.db.bldDocs.length + 1;
     var slug = { 'Sổ đỏ': 'so_do', 'HĐ thuê tòa': 'HDT', PCCC: 'PCCC', 'ĐKKD': 'DKKD', 'Khác': 'tai_lieu' }[kind] || 'tai_lieu';
     var lease = TH.leaseOf(bId);
@@ -189,19 +189,19 @@
         empty: { title: 'Không có chủ nhà phù hợp', text: q ? 'Không có kết quả cho “' + esc(q) + '”.' : 'Thêm chủ nhà hoặc import từ Excel mẫu.' },
       });
       var counts = { all: all.length, active: all.filter(function (o) { return o.status === 'active'; }).length, inactive: all.filter(function (o) { return o.status === 'inactive'; }).length };
-      var actions = '<button type="button" class="btn" data-act="imp.open" data-screen="OWN-IMP">' + I('upload', 'ic-sm') + 'Import Excel</button>' +
+      var actions = '<button type="button" class="btn" data-act="imp.open" data-screen="OWN-IMP">' + I('upload', 'ic-sm') + 'Nhập từ Excel</button>' +
         TH.permBtn('master.edit', '<button type="button" class="btn btn-primary" data-act="own.add">' + I('plus', 'ic-sm') + 'Thêm chủ nhà</button>', 'Thêm · 403');
       var recon = TH.gate('F003.D', '<div class="card">' + TH.cardHd(I('compare', 'ic-sm') + 'Đối chiếu chủ nhà theo kỳ' + TH.up('F003.D'), 'Liên kết tòa hiệu lực ↔ chi phí trả chủ nhà kỳ ' + F.period(TH.store.state.period)) +
         TH.table({ compact: true, cols: [
           { key: 'b', label: 'Tòa', render: function (b) { return esc(b.short); } },
           { key: 'o', label: 'Chủ hiệu lực', render: function (b) { return esc(C.owner(b.ownerId).name); } },
-          { key: 'r', label: 'Giá thuê theo HĐ', num: true, render: function (b) { return F.money(b.ownerRent); } },
+          { key: 'r', label: 'Giá thuê theo hợp đồng', num: true, render: function (b) { return F.money(b.ownerRent); } },
           { key: 'e', label: 'Chi phí ghi nhận', num: true, render: function (b) { return F.money(C.sum(TH.db.expenses.filter(function (e) { return e.buildingId === b.id && e.period === TH.store.state.period && e.category === 'owner_rent'; }), function (e) { return e.amount; })); } },
           { key: 's', label: 'Khớp', render: function (b) { var e = TH.db.expenses.find(function (x) { return x.buildingId === b.id && x.period === TH.store.state.period && x.category === 'owner_rent'; }); return e ? (e.amount === b.ownerRent ? TH.badge('Khớp', 'success') : TH.badge('Lệch', 'danger')) + ' ' + TH.status(e.status) : TH.badge('Chưa ghi', 'warning'); } },
-        ], rows: TH.db.buildings.filter(function (b) { return TH.inScope(b.id); }) }) + '</div>', { label: 'Audit/đối chiếu theo kỳ', lines: 4 });
+        ], rows: TH.db.buildings.filter(function (b) { return TH.inScope(b.id); }) }) + '</div>', { label: 'Nhật ký/đối chiếu theo kỳ', lines: 4 });
 
       return TH.pageHeader({ screen: S, actions: actions, desc: 'Danh sách chỉ hiện thông tin chính để nhận diện và chọn hồ sơ. Nhấn tên hoặc “Xem chi tiết” để mở đầy đủ: thông tin chung, hợp đồng thuê, tòa liên quan, tài liệu.' }) +
-        '<div class="card card-flush" style="margin-bottom:16px"><div class="toolbar">' + TH.searchBox(S, 'Tìm mã, tên, liên hệ…') + TH.chips(S, 'status', [{ id: 'all', label: 'Tất cả', count: counts.all }, { id: 'active', label: 'Đang hoạt động', count: counts.active }, { id: 'inactive', label: 'Ngừng hoạt động', count: counts.inactive }], st) + '</div>' + table + TH.pager(S, pg) + '</div>' + recon;
+        '<div class="card card-flush u-mb-16"><div class="toolbar">' + TH.searchBox(S, 'Tìm mã, tên, liên hệ…') + TH.chips(S, 'status', [{ id: 'all', label: 'Tất cả', count: counts.all }, { id: 'active', label: 'Đang hoạt động', count: counts.active }, { id: 'inactive', label: 'Ngừng hoạt động', count: counts.inactive }], st) + '</div>' + table + TH.pager(S, pg) + '</div>' + recon;
     },
     dialogs: [function () { ownerForm('new'); }],
   };
@@ -338,7 +338,7 @@
             { key: 'go', label: '', render: function (b) { return '<a class="btn btn-sm btn-ghost" href="' + TH.router.href('BLD-02', b.id) + '">Mở tòa' + I('chevronRight', 'ic-sm') + '</a>'; } },
           ], rows: bs, rowAttrs: function (b) { return 'class="is-clickable" tabindex="0" data-href="' + TH.router.href('BLD-02', b.id) + '"'; }, empty: { title: 'Chưa gắn tòa', text: 'Dùng “Gắn tòa” để liên kết.' } }) + '</div>';
       } else if (tab === 'docs') {
-        body = '<div class="card" style="margin-bottom:16px">' + TH.cardHd(I('fileScan', 'ic-sm') + 'Hình ảnh sổ đỏ', 'Ảnh GCN quyền sở hữu nhà ở và QSDĐ — thể hiện tòa tương ứng') + '<div class="card-bd">' + TH.redBookGallery(docs) + '</div></div>' +
+        body = '<div class="card u-mb-16">' + TH.cardHd(I('fileScan', 'ic-sm') + 'Hình ảnh sổ đỏ', 'Ảnh GCN quyền sở hữu nhà ở và QSDĐ — thể hiện tòa tương ứng') + '<div class="card-bd">' + TH.redBookGallery(docs) + '</div></div>' +
           TH.docTable(S, docs, { ownerId: o.id, title: 'Tài liệu hồ sơ & hợp đồng', sub: 'Sổ đỏ, HĐ thuê tòa, PCCC, ĐKKD của các tòa liên quan' });
       } else if (tab === 'linkHist') {
         var links = TH.db.ownerLinks.filter(function (l) { return l.ownerId === o.id || bs.some(function (b) { return b.id === l.buildingId; }); });
@@ -361,8 +361,9 @@
       }
       var actions = TH.permBtn('master.edit', '<button type="button" class="btn" data-act="own.link" data-id="' + o.id + '">' + I('link', 'ic-sm') + 'Gắn tòa</button>', 'Gắn tòa · 403') +
         (o.status === 'active' ? TH.permBtn('master.edit', '<button type="button" class="btn btn-danger" data-act="own.disable" data-id="' + o.id + '">' + I('ban', 'ic-sm') + 'Vô hiệu</button>', 'Vô hiệu · 403') : '');
-      return TH.pageHeader({ screen: S, title: o.name, crumbs: [['Chủ nhà', TH.router.href('OWN-01')], [o.id]], status: TH.status(o.status), actions: actions }) +
-        '<div class="card tab-card" style="margin-bottom:16px">' + TH.tabs(S, tabs, tab) + '</div>' + body;
+      return TH.pageHeader({ screen: S, title: o.name, crumbs: [['Chủ nhà', TH.router.href('OWN-01')], [o.id]], status: TH.status(o.status), actions: actions,
+          facts: TH.detailFacts([['Mã chủ nhà', '<span class="mono">' + esc(o.id) + '</span>'], ['Loại', o.kind === 'org' ? 'Tổ chức' : 'Cá nhân'], ['Điện thoại', esc(o.phone || '—')], ['Số tòa', String(TH.db.buildings.filter(function (x) { return x.ownerId === o.id; }).length)]]) }) +
+        '<div class="card tab-card u-mb-16">' + TH.tabs(S, tabs, tab) + '</div>' + body;
     },
     dialogs: [function () { linkForm('CN-001'); }],
   };

@@ -526,3 +526,51 @@ Route cũ `RPT-04`/`RPT-05` mở form tạo đã điền sẵn loại, kỳ và 
 - Bản in PDF từ bản lưu.
 - Backend lưu trữ (demo vẫn dùng localStorage).
 - Dọn bớt bản lưu khi gần đầy quota.
+
+### 9.11 CR-UI-STD — Chuẩn hóa UI theo pattern back-office doanh nghiệp (22/10/2026)
+
+**Bối cảnh.** Audit (skill ui-ux-pro-max và 2 agent rà code) phát hiện các vấn đề sau:
+- Hai lớp CSS chồng nhau: `refinement.css` ghi đè token và component.
+- Hai màu chính: nút primary dùng slate, còn link/tab dùng teal.
+- Chữ 9–11px; chữ `--n-400` chỉ đạt khoảng 2.6:1.
+- 334 thuộc tính `style=` inline.
+- Header có tới 6 nút; mỗi danh sách đặt thao tác dòng một kiểu.
+- Lỗi form báo bằng toast.
+- Mã nội bộ (F0xx, D-0x, mã màn) lộ trên UI; nhãn Anh–Việt trộn lẫn.
+
+**Quyết định của người dùng:**
+- Teal thống nhất.
+- Mã nội bộ ẩn mặc định, bật lại bằng chế độ review.
+- Phạm vi gồm nền tảng và các pattern dùng chung.
+
+| # | Quyết định | Vị trí |
+|---|---|---|
+| UI-01 | Xóa `css/refinement.css`; nội dung gộp về nguồn gốc. Token sang `tokens.css`; rule component trộn vào rule gốc trong `components.css`; shell và khối overview/records/print sang **cuối** `navigation.css` để giữ thứ tự cascade | `index.html`, `css/*` |
+| UI-02 | **Màu primary là teal** (`--primary` = teal-700) cho nút primary, link, tab active, focus, pager, chip đang chọn. Slate chỉ dùng cho chữ và viền | `tokens.css`, `components.css` |
+| UI-03 | **Token ngữ nghĩa:** `--{success,warning,danger,info}-fg`, `--*-line-strong`, `--toast-*`, `--file-*`, `--frame`, `--sheet-edge`, `--panel-edge`, `--surface-tint*`. Không còn hex thô ngoài `tokens.css` | `tokens.css` |
+| UI-04 | **Chữ:** sàn 12px; weight chỉ 400/500/600; vai trò `--fs-caption/body/sub/title/kpi`. `--text-3` = `#5b6b80`, đạt ≥ 4.97:1 trên trắng, frame, n-50 và n-100. `.mono` tối thiểu 12px | `tokens.css`, `components.css` |
+| UI-05 | **Utility** `u-mt-*`, `u-mb-*`, `u-gap-*`, `u-nowrap`, `u-row-alert`, `u-row-muted`, `u-tint*`… thay inline style. Số `style=` giảm từ 334 xuống 98 | `components.css`, `js/views/*` |
+| UI-06 | **Nhóm nhãn:** `.badge` cho trạng thái; `.tag` (gộp `.tier`, `.rpt-tag`) cho phân loại; `.count` cho số đếm; `.eyebrow` cho nhãn section in hoa | `components.css` |
+| UI-07 | **Header trang** chỉ hiện tối đa 2 nút phụ và 1 nút primary (đặt cuối); phần dư vào menu **"Thêm"**. Menu dùng được bằng bàn phím (mũi tên, Esc), đóng khi click ra ngoài. Áp ở cấp DOM qua `TH.compactActions`, nên mọi màn đều nhận mà không phải sửa từng view | `js/components.js` |
+| UI-08 | **Cột thao tác** (`td.col-act`, `.row-actions`) có hơn 2 mục thì giữ mục đầu, phần còn lại vào menu **"⋯"**. Nút trong cột hiển thị dạng link teal, căn phải | `js/components.js`, `components.css` |
+| UI-09 | **Danh sách:** cột trạng thái luôn có tiêu đề. Thêm tìm kiếm cho PAY-01, EXP-01; phân trang cho BLD-01, CON-03 (danh sách không nhóm), SYS-01; empty state cho ROOM-01 | `js/views/*` |
+| UI-10 | **Chi tiết:** dải facts `TH.detailFacts` qua tham số `pageHeader({facts})`; tab nằm trong `card tab-card` và không có icon; breadcrumb 2 cấp. Áp cho CUS-02, CON-02, ROOM-02, BLD-02, OWN-02 | `js/components.js`, views |
+| UI-11 | **Lỗi form tại ô:** `TH.formErrors(form, map)` lưu `_errors` vào draft; `TH.field` gắn `aria-invalid`, `aria-describedby` và dòng lỗi; có banner tóm tắt khi có từ 2 lỗi. Trường bắt buộc có `*`. Áp cho form thêm tòa, tài sản, phòng, chi phí, nhân sự, điều chỉnh lương, hoàn cọc, phí chỉ số, giảm trừ/phụ thu | views |
+| UI-12 | **Registry trạng thái** `TH.STATUS_REG()` / `TH.statusOf()`. `unpaid` = "Chưa thu"/warning; bill `unpaid` = "Chưa thanh toán"/warning; `nobill` = "Chưa lập hóa đơn"/draft; adjust `rejected` = danger | `components.js`, `data.js` |
+| UI-13 | **Chế độ review nghiệm thu** (`state.reviewMode`, mặc định tắt, lưu local; class `body.is-review`). Khi tắt: <br>• ẩn `.screen-id`, pill gói (`TH.up`) và `.review-only`; <br>• `TH.openBadge` chỉ hiện nhãn; <br>• `TH.reviewFilter` lọc mã F/D/K/G/R/BILL-Q/PAY-Q/CR/QA khỏi text và tooltip, đổi mã màn trần thành tên màn, dịch DRAFT/PROPOSED/PENDING_APPROVAL. <br>Bỏ qua input, `.mono`, `code`, bản in và `[data-raw]`. Công tắc ở **Công cụ demo** | `components.js`, `app.js`, `store.js` |
+| UI-14 | **Ngôn ngữ:** theo `TIMEHOUSE_UI_GLOSSARY.md`; codemod Upload/Preview/Rollback/Batch/Snapshot/Retry/HĐơn…; 50 nhãn cột/form viết đầy đủ | views |
+| UI-15 | **Shell:** `app.js` không vẽ NAV cũ và không gắn handler tìm kiếm thứ hai khi `navigation.js` có mặt; `.workspace-item` cao 44px | `app.js`, `navigation.css` |
+| UI-16 | **Nút icon** tự nhận `aria-label` từ `data-tip` (`TH.a11yIconButtons`) | `components.js` |
+| UI-17 | **Gom gate khóa gói:** `TH.gateGroup` gom ≥ 2 khối gate liền nhau trong cột dọc (`.stack`) thành 1 thẻ "Tính năng của gói cao hơn" liệt kê ngắn (INV-01, INV-PREV, OA-01, RPT-03). Mỗi dòng vẫn mang `data-locked` để mở màn nâng gói. Lưới 2–3 cột giữ nguyên để không để lại ô trống | `components.js`, `components.css` |
+| UI-18 | **Lỗi tại ô cho form phụ:** kỳ trả chủ nhà (số tiền, khoảng tháng, trùng kỳ), ghi nhận trả chủ nhà, chọn phòng ở giảm trừ, chọn tòa khi tải tài liệu, ghi chú hậu kiểm và lý do từ chối báo thu. Lỗi nghiệp vụ không gắn với ô (tự duyệt, biển số trùng, quyền 403) vẫn báo bằng toast | views |
+| UI-19 | **Nhãn gate và mô tả Việt hóa:** audit → nhật ký, version → phiên bản, snapshot → bản chốt, batch → lô, commit → chốt, idempotent → không tạo trùng, queue retry → hàng đợi gửi lại. Lint bổ sung các từ này vào danh sách đen (bỏ qua tên class như `overview-snapshot`) | views, `tools/lint-ui.js` |
+
+**Giữ nguyên:**
+- Hướng "framed sheet" và font Inter.
+- Dữ liệu, nghiệp vụ, route; id và `data-act` mà QA dựa vào.
+
+**Chưa làm:**
+- Modifier bảng `--compact` / `--report`. Bảng báo cáo và bản in vẫn dùng class riêng, nhưng đã dùng token.
+- Gom gate trong lưới nhiều cột (EXP-01, RPT-01, RPT-02, AUTH-01); hiện vẫn là từng thẻ mờ cạnh nhau.
+- Tên bảng "Bảng chia CP" ở màn cổ đông giữ nguyên chữ viết tắt theo file khách, chờ xác nhận nghĩa.
+- 98 inline style còn lại là giá trị động (độ rộng thanh, màu biểu đồ) hoặc bố cục riêng từng chỗ.
