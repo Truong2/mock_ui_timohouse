@@ -50,17 +50,17 @@
     var agg = C.perfAgg(p, bs.map(function (b) { return b.id; })), at = { D: C.sum(rows, function (r) { return r.t.D; }), Dprov: C.sum(rows, function (r) { return r.t.Dprov; }) };
     var cols = [{ key: 'b', label: 'Tòa', render: function (r) { return '<div class="cell-main"><a href="' + TH.router.href('BLD-02', r.b.id) + '">' + esc(r.b.short) + '</a></div><div class="cell-sub">QL: ' + esc(C.staffName(r.b.managerId)) + '</div>'; } }];
     if (opts.buckets) cols = cols.concat([
-      { key: 'm5', label: '≤ ngày 5 · 100%', num: true, render: function (r) { return F.money(r.m5); } },
-      { key: 'm10', label: '≤ ngày 10 · 90%', num: true, render: function (r) { return F.money(r.m10); } },
-      { key: 'm15', label: '≤ ngày 15 · 70%', num: true, render: function (r) { return F.money(r.m15); } },
-      { key: 'late', label: 'Sau 15 · 0%', num: true, render: function (r) { return F.money(r.late); } },
+      { kind: 'money', key: 'm5', label: '≤ ngày 5 · 100%', num: true, render: function (r) { return F.money(r.m5); } },
+      { kind: 'money', key: 'm10', label: '≤ ngày 10 · 90%', num: true, render: function (r) { return F.money(r.m10); } },
+      { kind: 'money', key: 'm15', label: '≤ ngày 15 · 70%', num: true, render: function (r) { return F.money(r.m15); } },
+      { kind: 'money', key: 'late', label: 'Sau 15 · 0%', num: true, render: function (r) { return F.money(r.late); } },
     ]);
     cols = cols.concat([
-      { key: 'A', label: 'A · sau 3 mốc', num: true, render: function (r) { return F.money(Math.round(r.A)); } },
+      { kind: 'money', key: 'A', label: 'A · sau 3 mốc', num: true, render: function (r) { return F.money(Math.round(r.A)); } },
       { key: 'B', label: 'B · tỷ lệ dịch vụ', num: true, gate: 'F033.B', render: function (r) { return r.rev ? F.pct(r.B, 1) : '<span class="muted">—</span>'; } },
-      { key: 'C', label: 'C · thu thêm', num: true, gate: 'F033.C', render: function (r) { return r.C ? F.money(r.C) : '<span class="muted">0</span>'; } },
-      { key: 'D', label: 'D · quy đổi', num: true, render: function (r) { return '<b class="pos">' + F.money(Math.round(r.t.D)) + '</b>'; } },
-      { key: 'N', label: 'Giá niêm yết', num: true, render: function (r) { return F.money(r.listed); } },
+      { kind: 'money', key: 'C', label: 'C · thu thêm', num: true, gate: 'F033.C', render: function (r) { return r.C ? F.money(r.C) : '<span class="muted">0</span>'; } },
+      { kind: 'money', key: 'D', label: 'D · quy đổi', num: true, render: function (r) { return '<b class="pos">' + F.money(Math.round(r.t.D)) + '</b>'; } },
+      { kind: 'money', key: 'N', label: 'Giá niêm yết', num: true, render: function (r) { return F.money(r.listed); } },
       { key: 'hs', label: TH.has('F033.B') ? 'HS thực tế' : 'Chỉ số sơ bộ (chưa tách DV)', num: true, render: function (r) { return r.invoices ? (r.closed ? TH.hsCell(r.t.hs) : '<span class="muted small">chờ mốc 15</span>') : '<span class="muted small">chưa lập hóa đơn</span>'; } },
       { key: 'hp', label: TH.has('F033.B') ? 'HS tạm tính' : 'Sơ bộ tạm tính', num: true, render: function (r) { return r.invoices ? TH.hsCell(r.t.hsProv, true) : '<span class="muted">—</span>'; } },
       { key: 'o', label: 'Lấp đầy (riêng)', num: true, render: function (r) { return F.pct(r.occ, 0) + '<div class="cell-sub">' + r.occupied + '/' + r.rentable + ' phòng cho thuê được</div>'; } },

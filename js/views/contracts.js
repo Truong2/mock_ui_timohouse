@@ -23,11 +23,11 @@
           { key: 'id', label: 'Số hợp đồng', render: function (c) { return '<a class="mono" href="' + TH.router.href('CON-02', c.id) + '">' + esc(c.id) + '</a>'; } },
           { key: 'k', label: 'Khách', render: function (c) { return TH.personCell(custName(c), esc(c.customerId || 'Khách mới')); } },
           { key: 'r', label: 'Tòa / phòng', render: function (c) { return TH.roomLink(c.roomId) + '<div class="cell-sub">' + esc(C.building(c.buildingId).short) + '</div>'; } },
-          { key: 'rent', label: 'Giá thuê', num: true, render: function (c) { return F.money(c.rent); } },
+          { kind: 'money', key: 'rent', label: 'Giá thuê', num: true, render: function (c) { return F.money(c.rent); } },
           { key: 'ky', label: 'Kỳ thu', render: function (c) { return 'Ngày ' + String(c.billingDay).padStart(2, '0') + ' hằng tháng'; } },
-          { key: 'eff', label: 'Hiệu lực', render: function (c) { return F.date(c.start) + ' → ' + F.date(c.end); } },
+          { kind: 'date', key: 'eff', label: 'Hiệu lực', render: function (c) { return F.date(c.start) + ' → ' + F.date(c.end); } },
           { key: 'end', label: 'Hết hạn', render: function (c) { var d = C.daysTo(c.end); return c.status !== 'active' ? (c.endedAt ? '<span class="muted small">kết thúc ' + F.date(c.endedAt) + '</span>' : '—') : d <= TH.expiryDays() ? '<span class="warn-text strong">còn ' + d + ' ngày</span>' : '<span class="muted">còn ' + d + ' ngày</span>'; } },
-          { key: 'st', label: 'Trạng thái', render: function (c) { return TH.status(cStatus(c)); } },
+          { kind: 'status', key: 'st', label: 'Trạng thái', render: function (c) { return TH.status(cStatus(c)); } },
           { key: 'pl', label: 'Phụ lục', gate: 'F014.C', render: function (c) { return c.versions.length > 1 ? TH.badge((c.versions.length - 1) + ' phụ lục', 'info') : '<span class="muted">—</span>'; } },
           { key: 'v', label: 'Phiên bản', gate: 'F014.D', render: function (c) { return 'v' + c.versions.length; } },
         ],
@@ -71,10 +71,10 @@
       } else if (tab === 'fees') {
         var feeCols = [
           { key: 'n', label: 'Loại phí', render: function (f) { return esc(f.name); } },
-          { key: 'p', label: 'Đơn giá', num: true, render: function (f) { return F.money(f.price); } },
+          { kind: 'money', key: 'p', label: 'Đơn giá', num: true, render: function (f) { return F.money(f.price); } },
           { key: 'q', label: 'Số lượng', num: true, render: function (f) { return f.qty + ' ' + esc(f.unit); } },
-          { key: 'a', label: 'Thành tiền/tháng', num: true, render: function (f) { return '<b>' + F.money(f.price * f.qty) + '</b>'; } },
-          { key: 'eff', label: 'Hiệu lực từ kỳ', gate: 'F015.B', render: function () { return F.period(c.start.slice(0, 7)); } },
+          { kind: 'money', key: 'a', label: 'Thành tiền/tháng', num: true, render: function (f) { return '<b>' + F.money(f.price * f.qty) + '</b>'; } },
+          { kind: 'date', key: 'eff', label: 'Hiệu lực từ kỳ', gate: 'F015.B', render: function () { return F.period(c.start.slice(0, 7)); } },
         ];
         var total = C.sum(c.fees, function (f) { return f.price * f.qty; });
         body = '<div class="grid-main-side"><div class="card card-flush">' + TH.cardHd('Bộ phí cố định hiện hành', 'Gói A: một bộ phí; lập hóa đơn tự lấy đúng khoản đã xác nhận') + TH.table({ cols: feeCols, rows: c.fees, foot: { _label: 'Tổng phí cố định', a: '<b>' + F.money(total) + '</b>' } }) + '</div><div class="stack">' +
@@ -92,9 +92,9 @@
       return TH.pageHeader({ screen: S, title: 'Hợp đồng ' + c.id, crumbs: [['Hợp đồng', TH.router.href('CON-01')], [c.id]], status: TH.status(cStatus(c)),
         facts: TH.detailFacts([['Khách thuê', esc(custName(c))], ['Phòng', TH.roomLink(c.roomId) + ' <span class="small muted">' + esc(C.building(c.buildingId).short) + '</span>'], ['Thời hạn', F.date(c.start) + ' – ' + F.date(c.end)], ['Giá thuê', F.money(c.rent) + '/tháng'], ['Tiền cọc', F.money(c.deposit)]]),
         actions: '<a class="btn" href="' + TH.router.href('CUS-02', c.customerId) + '">' + I('user', 'ic-sm') + 'Hồ sơ khách</a>' + (c.status === 'active' ? '<a class="btn btn-primary" href="' + TH.router.href('CON-FOLLOW', c.id) + '">' + I('phone', 'ic-sm') + 'Ghi kết quả hỏi gia hạn</a>' : '') }) +
-        '<div class="card tab-card u-mb-16">' + TH.tabs(S, tabs, tab) + '</div>' + body;
+        '<div class="card tab-card u-mb-16">' + TH.tabs(S, tabs, tab) + '</div>' + TH.tabPanel(S, tab, body);
     },
-    dialogs: [function () { addendumForm('HĐ-CG201/25'); }],
+    dialogs: [function () { return addendumForm('HĐ-CG201/25'); }],
   };
 
   function ocrDone() { return TH.db.ocrJobs.find(function (j) { return j.kind === 'contract' && j.status === 'confirmed' && !j.used; }); }
@@ -221,7 +221,7 @@
         { key: 'p', label: 'Liên hệ', render: function (c) { var k = C.customer(c.customerId); return esc(k ? k.phone : '—'); } },
         { key: 'r', label: 'Phòng', render: function (c) { return TH.roomLink(c.roomId) + '<div class="cell-sub">' + esc(C.building(c.buildingId).short) + '</div>'; } },
         { key: 'm', label: 'Quản lý tòa', render: function (c) { return esc(C.staffName(C.building(c.buildingId).managerId)); } },
-        { key: 'res', label: 'Kết quả gọi', render: function (c) { var f = followOf(c.id); return f ? TH.status(f.result) + (f.callbackAt ? '<div class="cell-sub">Gọi lại ' + F.date(f.callbackAt) + '</div>' : '') : '<span class="muted">—</span>'; } },
+        { kind: 'status', key: 'res', label: 'Kết quả gọi', render: function (c) { var f = followOf(c.id); return f ? TH.status(f.result) + (f.callbackAt ? '<div class="cell-sub">Gọi lại ' + F.date(f.callbackAt) + '</div>' : '') : '<span class="muted">—</span>'; } },
         { key: 'asked', label: 'Nhắc / đã hỏi', gate: 'F016.C', render: function (c) { var n = TH.db.followUps.filter(function (f) { return f.contractId === c.id; }).length; return n ? TH.badge('Đã hỏi · ' + n + ' lần', 'success') : TH.badge('Chưa hỏi', 'warning'); } },
         { key: 'a', label: '', render: function (c) { return '<a class="btn btn-xs" href="' + TH.router.href('CON-FOLLOW', c.id) + '">' + I('phone', 'ic-sm') + 'Ghi khảo sát</a>'; } },
       ];

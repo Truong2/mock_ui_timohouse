@@ -1,5 +1,7 @@
 # TIMEHOUSE — Checklist QA bản mockup
 
+**Dataset hiện tại (23/10/2026):** `excel-demo-v1`, 3 tòa/18 phòng/6 kỳ. Xem [QA dataset](TIMEHOUSE_DATASET_QA.md) cho 3.556 kiểm tra cấu trúc, 3.718 phép tính độc lập, 236 assertion trình duyệt và smoke 1.088 lượt đạt. Số liệu schema trước ở các mục lịch sử dưới đây không phải tổng tiền của dataset mới; mỗi thay đổi có đối chiếu riêng.
+
 Ngày chạy: 20/10/2026 · Môi trường: Chromium (Playwright) 1440×900, 1280×800, 1024×768, 390×844 · Dataset gốc và dataset có nháp đang nhập.
 
 Ký hiệu: ✅ đạt · ⚠ đạt có lưu ý · ⏳ cần kiểm tra thủ công thêm.
@@ -454,3 +456,31 @@ Console không lỗi JS. `qa-navigation` ghi đè ảnh trong `docs/qa/navigatio
   - trạng thái dạng chấm;
   - modal bo 8.
 - Ảnh before/after lưu ngoài repo, trong scratchpad phiên làm việc.
+
+### 8.12 CR-UI-COMP — Chuẩn component và pattern toàn ứng dụng (23/10/2026)
+
+Chạy trên working tree schema 12, HTTP local 8779, Chromium/Playwright. [JSON kết quả](../qa/ui-enterprise/results.json), [chuẩn và cách chạy](TIMEHOUSE_UI_COMPONENT_STANDARD.md), [ảnh trước/sau](../qa/ui-enterprise/).
+
+| Bộ kiểm tra | Đạt |
+| --- | ---: |
+| Component enterprise mới | 21/21 |
+| Chuẩn UI / enterprise hiện có | 19/19 |
+| Điều hướng | 22/22 |
+| Danh sách và mobile | 80/80 |
+| OCR hợp đồng | 9/9 |
+| Lập hóa đơn | 8/8 |
+| Thu tiền / hậu kiểm | 12/12 |
+| Khách thuê / cọc | 23/23 |
+| Báo cáo / bản lưu / truy nguồn | 11/11 |
+| **Tổng assertion** | **205/205** |
+
+- Smoke: **1.088/1.088**, mapping **156/156**. Lint UI: **0 finding**, 97 inline style nằm trong ngưỡng hiện có; JavaScript syntax và git diff whitespace đạt.
+- Ma trận trình duyệt thực: **109 biến thể × 4 gói × 4 kích thước = 1.744**; **27 dialog × 4 gói × 4 kích thước = 432**. 375/768/1024/1440px: không tràn ngang trang, không thiếu panel, không duplicate input, không giấu primary ra ngoài khung.
+- Quét bảng riêng: **136 trạng thái, 0 ô gãy dòng bị cảnh báo** ở 1440px/gói D. Bảng tài chính rộng vẫn cuộn trong vùng riêng; không coi cuộn nội bộ là lỗi tràn trang. Header mobile: nút menu/gói/công cụ/tài khoản đều cao tối thiểu 44px, không gây tràn.
+- Kiểm bàn phím: roving tab, liên kết panel, Arrow/Home/End/Enter; guard nháp khi đổi tab; menu top layer, Escape, modal trap Shift+Tab và trả focus về nút mở menu.
+- Form: required/hint/aria-invalid/aria-describedby; textarea readonly, select readonly không sửa được; tóm tắt lỗi dẫn tới đúng ô và giữ dữ liệu nhập.
+- Tài liệu nguồn có data-document giữ nguyên nội dung; tên kỹ thuật không bị thay trong chứng từ/bản in.
+- Hồi quy seed: Kinh doanh 09 **16.682.599**, Tổng 09 **7.282.599**, Kinh doanh 10 **9.655.000**, Tổng 10 **53.155.000**; INV-2610-CG202 **6.069.800**. Đây là số schema 12 trước/sau lượt UI này.
+- Đã soát ảnh desktop/mobile cho danh sách, hồ sơ và tạo báo cáo. Reduced motion và reflow 720 CSS px (tương đương desktop 1440px ở zoom 200%) đạt.
+
+Không tuyên bố đã nghiệm thu Firefox/Safari, screen reader thật, zoom native hoặc PDF phân trang. Các chính sách DRAFT/SOURCE_REQUIRED và phân quyền backend vẫn ngoài phạm vi kiểm chứng của bản demo.

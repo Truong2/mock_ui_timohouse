@@ -1,5 +1,7 @@
 # TIMEHOUSE · Kiểm tra và tối ưu UI
 
+> **Cập nhật 23/10/2026 — CR-UI-COMP:** hướng “Framed sheet” và cách bố trí lịch sử bên dưới đã được thay thế bởi chuẩn Ant Design Pro và [ma trận component/pattern hiện tại](md/TIMEHOUSE_UI_COMPONENT_STANDARD.md). Đợt mới đã đồng bộ hành động theo nghiệp vụ, DOM/thứ tự đọc, tab/panel, form, menu và modal; xem [kết quả QA](qa/ui-enterprise/results.json) và [ảnh trước/sau](qa/ui-enterprise/). Các nội dung phía dưới được giữ làm lịch sử, không dùng để ghi đè chuẩn mới.
+
 Ngày: 22/10/2026. Skill: `design-taste-frontend` / tasteskill v2.
 
 ## Lần tối ưu tiếp theo: danh sách và mobile

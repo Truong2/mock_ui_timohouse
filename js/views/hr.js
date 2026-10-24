@@ -25,7 +25,7 @@
             { key: 'team', label: 'Đội', render: function (s) { return esc(teamOf(s.team).name); } },
             { key: 'ql', label: 'Quản lý', render: function (s) { var t = teamOf(s.team); return t.leaderId === s.id ? TH.badge('Trưởng nhóm', 'teal') : esc(C.staffName(t.leaderId)); } },
             { key: 'b', label: 'Tòa phụ trách', render: function (s) { var a = activeAsg(s.id); return a.length ? a.map(function (x) { return '<span class="badge badge-neutral" style="margin:1px 2px 1px 0">' + esc(C.building(x.buildingId).short) + (TH.has('F038.C') && a.length > 1 ? ' · ' + esc(x.main ? 'Chính' : (TH.BLD_ROLES.find(function (r) { return r.id === x.role; }) || { short: x.role }).short) : '') + '</span>'; }).join('') : '<span class="muted">—</span>'; } },
-            { key: 's', label: 'Trạng thái', render: function (s) { return TH.status(s.status, s.status === 'inactive' ? 'Đã nghỉ (xóa mềm)' : 'Đang làm việc'); } },
+            { kind: 'status', key: 's', label: 'Trạng thái', render: function (s) { return TH.status(s.status, s.status === 'inactive' ? 'Đã nghỉ (xóa mềm)' : 'Đang làm việc'); } },
             { key: 'route', label: 'Tuyến quản lý', gate: 'F037.D', render: function (s) { var t = teamOf(s.team); return '<span class="small">' + (t.parent ? esc(C.staffName(teamOf(t.parent === 'OPS' ? 'BO' : t.parent).leaderId)) + ' → ' : '') + esc(C.staffName(t.leaderId)) + '</span>'; } },
             { key: 'x', label: '', render: function (s) { return '<div class="row-actions">' + TH.permBtn('hr.edit', '<button type="button" class="btn btn-xs" data-act="hr.edit" data-id="' + s.id + '">' + I('edit', 'ic-sm') + 'Sửa</button>', '403') + '<a class="btn btn-xs" href="' + TH.router.href('HR-ASSIGN', s.id) + '">' + I('building', 'ic-sm') + 'Phân công</a></div>'; } },
           ], rows: pg.rows }) + TH.pager(S, pg);
@@ -46,9 +46,9 @@
           '<div><div class="section-title">Thay đổi chức vụ</div><ul class="timeline">' + TH.db.titleHistory.map(function (h) { return '<li><b>' + esc(C.staffName(h.staffId)) + '</b>: ' + esc(h.before) + ' → ' + esc(h.after) + '<div class="when">' + F.date(h.at) + '</div></li>'; }).join('') + '</ul></div></div>';
       }
       return TH.pageHeader({ screen: S, actions: TH.gate('F037.B', TH.permBtn('hr.edit', '<button type="button" class="btn" data-act="hr.import">' + I('upload', 'ic-sm') + 'Nhập từ Excel' + TH.up('F037.B') + '</button>', '403'), { mode: 'btn', label: 'Nhập từ Excel nhân viên' }) + '<a class="btn" href="' + TH.router.href('HR-ASSIGN') + '">' + I('building', 'ic-sm') + 'Phân công</a>' + TH.permBtn('hr.edit', '<button type="button" class="btn btn-primary" data-act="hr.add">' + I('userPlus', 'ic-sm') + 'Thêm nhân sự</button>', 'Thêm · 403') }) +
-        '<div class="card card-flush">' + TH.tabs(S, tabs, tab) + body + '</div>';
+        '<div class="card card-flush">' + TH.tabs(S, tabs, tab) + TH.tabPanel(S, tab, body) + '</div>';
     },
-    dialogs: [function () { staffForm('new'); }],
+    dialogs: [function () { return staffForm('new'); }],
   };
   function staffForm(id) {
     var s = id === 'new' ? null : C.staff(id), form = 'hr-' + id;

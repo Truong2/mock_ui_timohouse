@@ -1,4 +1,18 @@
-# Trạng thái phiên làm việc — CR-CUS-02: OCR hợp đồng theo mẫu đầy đủ (21/10/2026)
+# Trạng thái phiên — Dataset theo tài liệu khách hàng (23/10/2026)
+
+**Hiện tại:** đã triển khai `excel-demo-v1`: 3 tòa/18 phòng/6 kỳ, giữ schema 12 và dữ liệu người dùng đã lưu. 13 workbook/248 sheet/108.090 ô công thức có hồ sơ; 15 tình huống nghiệp vụ, 97 hóa đơn/98 phiếu thu, sổ dịch vụ/sửa chữa/hoa hồng và hai báo cáo lưu sẵn.
+
+**QA dataset:** 3.556 kiểm tra cấu trúc và giải thích chênh lệch; 3.718 phép đối chiếu Decimal; 236 assertion trình duyệt; smoke 1.088 lượt không lỗi. Số mới được đối chiếu độc lập; mốc dữ liệu cũ chạy trên bộ tính hiện tại giữ nguyên kết quả. [Bàn giao và giới hạn](TIMEHOUSE_DATASET_QA.md), [nguồn/công thức](TIMEHOUSE_DATASET_SOURCES.md), [ma trận](TIMEHOUSE_DATASET_MATRIX.md). Chưa commit đợt UI/dataset trong working tree.
+
+## Lịch sử — Chuẩn hóa component UI enterprise
+
+**Trạng thái hiện tại:** đã triển khai CR-UI-COMP trên toàn ứng dụng. Giữ HTML/CSS/JS thuần, Inter/teal và schema 12. Nhóm hành động được quyết định lúc render; tab/panel có điều khiển bàn phím; form giữ nháp, lỗi tại trường và liên kết lỗi; menu dùng lớp nổi và trả focus đúng khi đóng modal. Shell có cùng thứ tự DOM/hiển thị, CSS shell/responsive được gom về navigation.css.
+
+**QA:** 205 assertion đạt; 1.088 lượt smoke không lỗi; 1.744 biến thể màn/tab và 432 dialog qua A–D × 375/768/1024/1440px không tràn ngang. Đã chạy UI, điều hướng, OCR, hóa đơn, thu tiền, cọc, báo cáo và danh sách mobile; số tiền trước/sau giữ nguyên theo baseline schema 12.
+
+**Bàn giao:** [Chuẩn component/pattern](TIMEHOUSE_UI_COMPONENT_STANDARD.md), [JSON kết quả](../qa/ui-enterprise/results.json), [ảnh trước/sau](../qa/ui-enterprise/). Firefox/Safari, screen reader, zoom native và PDF phân trang chưa nghiệm thu; đã kiểm reflow tương đương 200% và reduced motion trên Chromium. Chưa tạo commit cho đợt UI này.
+
+## Lịch sử — CR-CUS-02: OCR hợp đồng (21/10/2026)
 
 **Yêu cầu:** phần khách thuê lấy thông tin bằng OCR hợp đồng theo `docs/tenplate/Hop_dong_thue_phong_demo_day_du.pdf`.
 **Đã chốt với user:** OCR toàn bộ hồ sơ thuê; đọc bảng tài sản Điều 2.2; chỉ dùng mẫu đầy đủ (bỏ P302); phạt/phí chỉ hiển thị.

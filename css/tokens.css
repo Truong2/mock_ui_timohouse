@@ -187,12 +187,22 @@
   --ctl-h-sm: 24px;
   --ctl-h-lg: 40px;
   --row-h: 40px;
+  --touch-h: 44px;
+  --page-gutter: 24px;
+  --card-padding: 24px;
+  --menu-width: 220px;
+  --dialog-sm: 440px;
+  --dialog-md: 560px;
+  --dialog-lg: 820px;
+  --dialog-xl: 1120px;
+  --overlay-bg: rgba(0, 0, 0, 0.45);
   --content-max: none;
   /* Lớp xếp chồng */
   --z-sticky: 2;
   --z-sticky-head: 3;
   --z-topbar: 50;
   --z-sidebar: 60;
+  --z-nav-scrim: 55;
   --z-overlay: 400;
   --z-popover: 500;
   --z-toast: 900;

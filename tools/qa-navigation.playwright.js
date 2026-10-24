@@ -1,4 +1,4 @@
-// CR-NAV-01 — điều hướng theo 9 khu vực; chạy trên server local 8780 bằng browser_run_code.
+// CR-NAV-01 — điều hướng theo 9 khu vực; chạy trên server local 8779 bằng browser_run_code.
 // Chỉ thay UI/vai trò và nháp kiểm thử; không xác nhận hóa đơn/báo cáo hoặc ghi thay đổi nghiệp vụ.
 async (page) => {
   const results = [];
@@ -6,7 +6,7 @@ async (page) => {
   const read = (fn, arg) => page.evaluate(fn, arg);
   await page.route('**/*', route => route.continue()); // Không dùng script/CSS cũ từ cache khi kiểm tra working tree.
   await page.setViewportSize({ width: 1440, height: 960 });
-  await page.goto('http://127.0.0.1:8780/index.html?previewPackage=D&navqa=' + Date.now() + '#/demo/bld-01');
+  await page.goto('http://127.0.0.1:8779/index.html?previewPackage=D&navqa=' + Date.now() + '#/demo/bld-01');
   await page.waitForFunction(() => window.TH && TH.navigation && TH.app.route);
   const saved = await read(() => ({ role: TH.store.state.role, ui: JSON.parse(JSON.stringify(TH.store.state.ui)), period: TH.store.state.period, building: TH.store.state.building }));
   const go = async (screen, param) => {
@@ -33,10 +33,10 @@ async (page) => {
     await page.reload(); await page.waitForFunction(() => TH.navigation && document.querySelector('#shell').classList.contains('nav-compact'));
     const kept = await read(() => TH.store.ui('navigation', 'collapsed', false));
     check('NAV-02', q2.width === 72 && q2.accessible && q2.count === 9 && kept, { ...q2, persistedAfterReload: kept });
-    await page.screenshot({ path: 'C:/Users/truon/Downloads/mockup/docs/qa/navigation/desktop-collapsed.png' });
+    await page.screenshot({ path: 'docs/qa/ui-enterprise/navigation-desktop-collapsed.png' });
     await page.locator('#nav-compact-toggle').click();
     await page.waitForFunction(() => Math.abs(document.querySelector('#sidebar').getBoundingClientRect().width - 232) < 1);
-    await page.screenshot({ path: 'C:/Users/truon/Downloads/mockup/docs/qa/navigation/desktop-expanded.png' });
+    await page.screenshot({ path: 'docs/qa/ui-enterprise/navigation-desktop-expanded.png' });
 
     const routes = [
       ['ROOM-02', 'CG-101', 'properties', 'Phòng'], ['OWN-02', 'CN-001', 'properties', 'Chủ nhà'],
@@ -101,7 +101,7 @@ async (page) => {
     const lastMenuLink = page.locator('#sidebar a[href]').last();
     await lastMenuLink.focus(); await page.keyboard.press('Tab');
     const focusTrapped = await read(() => document.activeElement === document.querySelector('#sidebar a[href]'));
-    await page.screenshot({ path: 'C:/Users/truon/Downloads/mockup/docs/qa/navigation/mobile-menu.png' });
+    await page.screenshot({ path: 'docs/qa/ui-enterprise/navigation-mobile-menu.png' });
     await page.keyboard.press('Escape');
     const escClosed = await read(() => document.querySelector('#sidebar').inert && document.activeElement.classList.contains('menu-toggle'));
     check('NAV-08-DRAWER', closed.inert && closed.overflow <= 0 && !opened.inert && opened.expanded === 'true' && opened.focusInNav && opened.scrollLocked && focusTrapped && escClosed, { closed, opened, focusTrapped, escClosed });
@@ -110,7 +110,7 @@ async (page) => {
     await page.waitForFunction(() => TH.app.route.screen === 'BLD-01' && document.querySelector('#sidebar').inert);
     const mobileResult = await read(() => ({ overflow: document.documentElement.scrollWidth - innerWidth, active: document.querySelector('#nav [aria-current="page"]').dataset.workspace }));
     check('NAV-08-NAVIGATE', mobileResult.overflow <= 0 && mobileResult.active === 'properties', mobileResult);
-    await page.screenshot({ path: 'C:/Users/truon/Downloads/mockup/docs/qa/navigation/mobile-content.png' });
+    await page.screenshot({ path: 'docs/qa/ui-enterprise/navigation-mobile-content.png' });
     await page.locator('.menu-toggle').click();
     await page.locator('#sidebar .brand').click();
     await page.waitForFunction(() => TH.app.route.landing);

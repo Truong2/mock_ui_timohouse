@@ -10,14 +10,16 @@ async (page) => {
   const reset = role => read(r => { TH.modal.stack.slice().forEach(m => TH.modal.close(m.key, { silent: true })); TH.db = TH.seed(); Object.assign(TH.store.state, { building: 'ALL', period: '2026-10', ui: {}, drafts: {}, editing: null, role: r }); TH.app.guard = null; TH.app.refresh(); }, role);
   await reset('admin');
 
-  // QA-BILL-01 — tính lẻ ngày (÷30): TX-202 vào ở 20/10 → 12/30 ngày; hóa đơn cũ (trước kỳ 09) đều tròn tháng
+  // QA-BILL-01 — TX-202 vào ở 20/10 → 12/30 ngày; lịch sử TX-202 kết thúc 15/07 → 15/30.
   const q1 = await read(() => {
     const C = TH.calc, ct = C.contractOfRoom('TX-202');
     TH.act['inv.gen']({ dataset: {} });
     const inv = TH.db.invoices.find(i => i.roomId === 'TX-202' && i.period === '2026-10'), rl = inv.lines.find(l => l.type === 'rent');
-    const old = TH.db.invoices.filter(i => i.period < '2026-09').every(i => i.lines.filter(l => l.type === 'rent').every(l => l.k === 1 && l.months === 1 && l.amount === l.price));
+    const old = TH.db.invoices.filter(i => i.period < '2026-09' && i.sourceBasis?.scenarioId !== 'DS-15').every(i => i.lines.filter(l => l.type === 'rent').every(l => l.k === 1 && l.months === 1 && l.amount === l.price));
+    const history = TH.db.invoices.find(i => i.id === 'INV-2607-TX202')?.lines.find(l => l.type === 'rent');
+    const historyOK = !TH.db.dataset || (history.days === 15 && history.base === 30 && history.amount === 2000000);
     const row0 = TH.billRows(inv).rows[0];
-    return { status: inv.status, days: rl.days, base: rl.base, k: rl.k, amount: rl.amount, expect: Math.round(ct.rent * 12 / 30 / 1000) * 1000, fixedFull: inv.lines.filter(l => l.type === 'fixed').every(l => l.amount === l.qty * l.price), old, rowK: row0.k };
+    return { status: inv.status, days: rl.days, base: rl.base, k: rl.k, amount: rl.amount, expect: Math.round(ct.rent * 12 / 30 / 1000) * 1000, fixedFull: inv.lines.filter(l => l.type === 'fixed').every(l => l.amount === l.qty * l.price), old: old && historyOK, rowK: row0.k };
   });
   check('QA-BILL-01', q1.status === 'draft' && q1.days === 12 && q1.base === 30 && q1.k === 0.4 && q1.amount === q1.expect && q1.amount === 1520000 && q1.fixedFull && q1.old && q1.rowK === 0.4, q1);
 

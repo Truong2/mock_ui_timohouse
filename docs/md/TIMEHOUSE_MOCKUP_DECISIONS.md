@@ -1,5 +1,7 @@
 # TIMEHOUSE — Decision log của bản mockup
 
+**CR-DATA-01 (23/10/2026):** theo lựa chọn người dùng, tạo dữ liệu tương tự tài liệu khách hàng và nạp sẵn; giữ 3 tòa/18 phòng, kỳ 05–10/2026, schema 12. `excel-demo-v1` bổ sung căn cứ công thức, nước theo người, thu dư, hóa đơn lịch sử hợp đồng kết thúc, dịch vụ đầu vào, sửa chữa, hoa hồng, pool 18 phòng, dự kiến nháp và hai bản báo cáo mô phỏng. Không tự thay dữ liệu đã lưu, không mở rộng import Excel thật. Chi tiết và khác biệt: [nguồn](TIMEHOUSE_DATASET_SOURCES.md), [ma trận](TIMEHOUSE_DATASET_MATRIX.md), [QA](TIMEHOUSE_DATASET_QA.md). Quy tắc `/90`, TH1, phân chia phí và vốn cổ phần tiếp tục giữ nháp/đề xuất.
+
 Ngày lập: 20/10/2026. Nguồn đối chiếu: `TIMEHOUSE_SRS_GOI_D_v1_1_CAU_HINH_XEM_GOI_A_B_C_D.md` (§4, §5A, §7) và handoff. **Excel báo giá, SRS v2.3, mẫu chứng từ chưa có trong workspace** — các mục đánh dấu ⚠ chưa thể xác minh với Excel.
 
 > **Cập nhật 20/10/2026:** câu trả lời cho mọi mã trong log nằm ở `TIMEHOUSE_MOCKUP_DECISIONS_ANSWERS.md` (đề xuất, **chưa phải phê duyệt của khách**) và phản hồi QA ở `TIMEHOUSE_MOCKUP_QA_ANSWERS.md`. Phần đã áp vào mockup và trạng thái từng mã: **§8**. Mọi mục chưa ký vẫn hiển thị `DRAFT / PROPOSED / SIMULATED`.
@@ -611,3 +613,17 @@ Route cũ `RPT-04`/`RPT-05` mở form tạo đã điền sẵn loại, kỳ và 
 - Hàng bảng thực tế cao khoảng 50px vì gần như mọi danh sách có dòng phụ (tên + mã). Hàng 1 dòng cao 40px.
 - `btn-sm` để 28px thay vì 24px của Ant, cho dễ bấm ở toolbar và pager.
 - Biến thể dark header/sidebar chưa làm.
+
+### 9.13 CR-UI-COMP — Component enterprise và pattern nghiệp vụ (23/10/2026)
+
+Áp dụng [chuẩn component/pattern](TIMEHOUSE_UI_COMPONENT_STANDARD.md) trên toàn ứng dụng; giữ schema 12, tính toán và phân quyền hiện có. Phần này bổ sung §9.12 và thay cơ chế gom hành động trên DOM đang hiển thị ở §9.11.
+
+- Nhóm hành động khai báo qua TH.actionGroup; TH.pageHeader nhận mảng item hoặc chuỗi HTML tương thích. Ưu tiên nghiệp vụ quyết định duyệt/thực chi luôn trực tiếp; không dựa vào vị trí nút. Tất cả bảng dùng cùng renderer cho cột thao tác; khóa gói/quyền/disabled tách biệt.
+- Hợp nhất CSS base/responsive/print shell vào navigation.css; dùng token chung cho padding card, modal, menu và lớp nổi. Thứ tự DOM trùng thứ tự hiển thị của header/navigation/object tabs; bỏ CSS order ở các khối trang.
+- Tab/panel có liên kết ARIA và roving tabindex; Arrow/Home/End chỉ đổi focus, Enter/Space kích hoạt qua guard nháp. Form thêm required, readonly/disabled đầy đủ, hint và lỗi có ID, summary lỗi có liên kết focus.
+- Menu dùng top layer, đóng ngay khi chọn item; modal giữ focus và trả về nút menu thay vì item đã ẩn. Nếu nguồn bị xóa thì về tiêu đề trang.
+- Registry trạng thái bổ sung các miền receipt/expense/room/message. Phiếu thu vẫn quản lý tòa xác nhận, kế toán hậu kiểm; cọc chỉ ghi sổ sau thực chi. Không sửa công thức hay chính sách.
+- Danh sách mobile giữ input từ bảng gốc; nút primary luôn ở trong khung, thao tác xuống hàng theo DOM. Thẻ cọc dùng danh sách khấu trừ kèm nguồn để tránh bảng rộng trong cột phụ.
+- Bộ lọc nhãn UI bỏ qua chứng từ/bản in/sheet báo cáo có data-document; nhãn nguồn không bị thay bằng thuật ngữ UI chung.
+
+Bằng chứng: QA §8.12, 205 assertion từ 9 bộ, smoke 1.088/0 lỗi; quét 1.744 biến thể và 432 dialog. [JSON](../qa/ui-enterprise/results.json), [ảnh](../qa/ui-enterprise/). Giới hạn Chromium/reflow và phần chưa nghiệm thu nêu trong chuẩn component; không coi là xác nhận nghiệp vụ production.

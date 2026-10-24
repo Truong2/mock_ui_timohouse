@@ -147,7 +147,7 @@
       return TH.pageHeader({ screen: 'RPT-04', status: TH.periodBadge(TH.store.state.period) + templateBadge('Mẫu G1 · T8/2026') + crBadge(), desc: 'Mẫu <b>“BÁO CÁO KINH DOANH G1 THÁNG 8/2026”</b>: tạo bản báo cáo theo tòa qua luồng xem trước → xác nhận; xem lại và tải Excel từ bản đã tạo.' }) +
         TH.reportLegacy('RPT-04', { b: sel.cur });
     },
-    dialogs: [function () { drill4Render('TH-CG', TH.CURRENT_PERIOD, 'rent'); }, function () { poolRender(TH.CURRENT_PERIOD); }],
+    dialogs: [function () { return drill4Render('TH-CG', TH.CURRENT_PERIOD, 'rent'); }, function () { return poolRender(TH.CURRENT_PERIOD); }],
   };
 
   var KIND = { invoice: ['Hóa đơn', 'teal'], arising: ['Tiền phòng phát sinh', 'teal'], deposit: ['Cọc', 'info'], expense: ['Chi phí', 'warning'], pool: ['Phân bổ', 'neutral'], payroll: ['Lương', 'draft'], contract: ['Hợp đồng', 'teal'], room: ['Phòng', 'neutral'], break: ['Phá HĐ', 'danger'] };
@@ -171,7 +171,7 @@
         { key: 'id', label: 'Chứng từ', render: srcLink },
         { key: 'r', label: 'Phòng', render: function (s) { return s.room ? esc(s.room) : '<span class="muted">—</span>'; } },
         { key: 't', label: 'Diễn giải', render: function (s) { return '<span class="small">' + esc(s.text || '') + '</span>'; } },
-        { key: 'a', label: 'Số tiền', num: true, render: function (s) { return s.amount !== undefined ? F.money(s.amount) : '<span class="muted">—</span>'; } },
+        { kind: 'money', key: 'a', label: 'Số tiền', num: true, render: function (s) { return s.amount !== undefined ? F.money(s.amount) : '<span class="muted">—</span>'; } },
       ], rows: src, empty: { title: 'Không có chứng từ', text: 'Dòng này bằng 0 trong kỳ đang xem.' } }), { label: 'Drill-down từng dòng về chứng từ nguồn' }),
       foot: '<span class="small muted">' + src.length + ' bản ghi nguồn</span><span class="spacer"></span><button type="button" class="btn" data-close>Đóng</button>',
     };

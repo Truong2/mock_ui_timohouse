@@ -112,8 +112,10 @@
       '<div class="workspace-row"><nav class="workspace-tabs" aria-label="Danh sách trong ' + esc(found.group.label) + '">' + sections.map(function (s) {
         return '<a href="' + TH.router.href(screenOf(s)) + '"' + (s.id === found.section.id ? ' aria-current="page"' : '') + '>' + esc(s.label) + '</a>';
       }).join('') + '</nav>' + (actions ? '<div class="workspace-actions">' + actions + '</div>' : '') + '</div>';
-    var view = document.getElementById('view'), returning = view.querySelector('.rptf-return');
-    if (returning) returning.insertAdjacentElement('afterend', box); else view.insertBefore(box, view.firstChild);
+    var view = document.getElementById('view'), heading = view.querySelector(':scope > .page-hd');
+    var returning = view.querySelector('.rptf-return');
+    if (heading && !heading.querySelector('.detail-facts')) heading.insertAdjacentElement('afterend', box);
+    else if (returning) returning.insertAdjacentElement('afterend', box); else view.insertBefore(box, view.firstChild);
   }
   function syncShell() {
     var shell = document.getElementById('shell'), sidebar = document.getElementById('sidebar'); if (!shell || !sidebar) return;
@@ -154,6 +156,14 @@
       settings.innerHTML = I('settings') + '<span class="nav-text">Cài đặt</span>';
     }
     renderWorkspace(route, found); syncShell();
+    var view = document.getElementById('view');
+    if (view) {
+      var header = view.querySelector(':scope > .page-hd'), detail = header && header.querySelector('.detail-facts');
+      var objectTabs = view.querySelector(':scope > .tab-card');
+      if (detail && objectTabs) header.insertAdjacentElement('afterend', objectTabs);
+      view.dataset.pattern = detail ? 'detail' : route.page === 'REPORTS' || route.base ? 'workflow' : 'list';
+      if (TH.pageCrumbs) TH.pageCrumbs(view);
+    }
     if (!route.extra && !route.notFound) {
       var heading = document.querySelector('#view h1');
       if (heading) {

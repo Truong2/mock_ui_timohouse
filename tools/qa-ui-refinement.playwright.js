@@ -4,7 +4,7 @@ async (page) => {
   const check = (id, pass, evidence) => results.push({ id, pass: !!pass, evidence });
   const screens = ['BLD-01', 'CUS-01', 'ROOM-01', 'INV-02', 'PAY-01'];
   await page.route('**/*', route => route.continue());
-  await page.goto('http://127.0.0.1:8080/?previewPackage=D&uiqa=records#/demo/cus-01');
+  await page.goto('http://127.0.0.1:8779/?previewPackage=D&uiqa=records#/demo/cus-01');
   const saved = await page.evaluate(() => JSON.parse(JSON.stringify({ pkg: TH.store.state.pkg, role: TH.store.state.role, ui: TH.store.state.ui, building: TH.store.state.building, period: TH.store.state.period, showLocked: TH.store.state.showLocked })));
   const errors = [];
   const onError = error => errors.push(error.message);

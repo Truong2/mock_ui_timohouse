@@ -131,7 +131,7 @@ var TH = window.TH = window.TH || {};
     }
     /* CR-RPT-02: đang mở dữ liệu nguồn từ báo cáo → thanh quay về preview / bản lưu */
     if (!r.notFound && !r.extra && r.page !== 'REPORTS' && TH.reportReturnBanner) html = TH.reportReturnBanner(r) + html;
-    view.innerHTML = html;
+    view.innerHTML = TH.prepareView(html);
     document.body.classList.toggle('is-review', TH.isReview());
     if (!r.extra) TH.uiPolish(view);
     /* navigation.js gắn thanh mục sau lượt render này → breadcrumb nhóm/mục chạy ở microtask kế tiếp */
@@ -237,9 +237,10 @@ var TH = window.TH = window.TH || {};
       TH.store.setUi(el.dataset.screen, el.dataset.key, el.dataset.val);
       if (el.dataset.resetPage) TH.store.setUi(el.dataset.screen, 'page', 1);
       app.refresh();
+      if (el.getAttribute('role') === 'tab' && el.id) { var tab = document.getElementById(el.id); if (tab) tab.focus({ preventScroll: true }); }
     };
     /* Đổi tab khi đang sửa một nhóm thông tin → hỏi lưu/bỏ/tiếp tục (note.md §7.1) */
-    if (el.dataset.key === 'tab' && TH.editing()) { TH.editGuard.run(apply); return; }
+    if ((el.dataset.key === 'tab' || el.getAttribute('role') === 'tab') && TH.editing()) { TH.editGuard.run(apply); return; }
     apply();
   };
   /* Sửa inline theo nhóm: Chỉnh sửa / Lưu thay đổi / Hủy */
@@ -312,14 +313,15 @@ var TH = window.TH = window.TH || {};
           body: '<div class="stack">' +
             '<div><div class="section-title">Vai trò giả lập</div><div class="radio-row">' + Object.keys(TH.ROLES).map(function (k) {
               return '<label class="radio-chip"><input type="radio" name="t-role" value="' + k + '"' + (k === s.role ? ' checked' : '') + ' data-act-change="role.pick"><span>' + esc(TH.ROLES[k].label) + '</span></label>';
-            }).join('') + '</div><div class="field-hint u-mt-8">Quản lý tòa chỉ thấy tòa Cầu Giấy, không được tự duyệt thu (403). Nhân sự chỉ mở HR/Lương.</div></div>' +
+            }).join('') + '</div><div class="field-hint u-mt-8">Quản lý tòa chỉ thấy Cầu Giấy và xác nhận thu tại tòa mình; kế toán hậu kiểm. Nhân sự chỉ mở HR/Lương.</div></div>' +
             (screen ? '<div><div class="section-title">Trạng thái dữ liệu · ' + esc(screen) + '</div><div class="seg" role="group">' + [['normal', 'Dữ liệu mẫu'], ['loading', 'Đang tải'], ['empty', 'Không có dữ liệu'], ['error', 'Lỗi API']].map(function (o) {
               return '<button type="button" aria-pressed="' + (ds === o[0]) + '" data-act="state.set" data-screen="' + screen + '" data-val="' + o[0] + '">' + o[1] + '</button>';
             }).join('') + '</div><div class="field-hint u-mt-8">Forbidden (403) xem bằng cách đổi vai trò. Draft / Chờ xác nhận / Đã xác nhận / Success có trong luồng nghiệp vụ.</div></div>' : '') +
             '<div class="row"><a class="btn btn-sm" href="#/demo/screens" data-close>' + I('grid', 'ic-sm') + 'Mục lục 39 màn</a><a class="btn btn-sm" href="#/demo/mapping" data-close>' + I('list', 'ic-sm') + 'Kiểm đếm mapping 52 chức năng</a></div>' +
             '<div class="divider"></div><div class="row-between"><div><b>Chế độ review nghiệm thu</b><div class="small muted">Hiện mã màn, mã chức năng/quyết định trong SRS và nhãn gói B/C/D để đối chiếu. Tắt: giao diện như sản phẩm thật.</div></div>' +
             '<label class="switch" data-raw><input type="checkbox" id="tool-review" data-act-change="review.toggle"' + (s.reviewMode ? ' checked' : '') + '><span class="switch-track"></span><span class="sr-only">Chế độ review nghiệm thu</span></label></div>' +
-            '<div class="divider"></div><div class="row-between"><div><b>Khôi phục dữ liệu demo</b><div class="small muted">Xóa thao tác demo, bản nháp, bộ lọc. Giữ gói đang xem.</div></div><button type="button" class="btn btn-danger btn-sm" data-act="data.reset">' + I('rotateCcw', 'ic-sm') + 'Khôi phục</button></div>' +
+            (TH.dataset ? '<div class="divider"></div><div><b>Bộ dữ liệu mô phỏng theo tài liệu</b><div class="small muted">' + esc(TH.db.dataset ? TH.db.dataset.version : 'Đang giữ bộ dữ liệu đã lưu trước đây') + ' · 3 tòa · 18 phòng · 05–10/2026</div>' + (TH.can('view.all') ? '<button type="button" class="btn btn-sm u-mt-8" data-act="dataset.review">Nguồn và tình huống dữ liệu</button>' : '') + '</div>' : '') +
+            '<div class="divider"></div><div class="row-between"><div><b>Khôi phục dữ liệu demo</b><div class="small muted">Nạp bộ dữ liệu mới theo tài liệu. Xóa thao tác demo, bản nháp và bộ lọc; giữ gói đang xem.</div></div><button type="button" class="btn btn-danger btn-sm" data-act="data.reset">' + I('rotateCcw', 'ic-sm') + 'Khôi phục</button></div>' +
             (TH.store.storageOk ? '' : '<div class="alert alert-warning">' + I('alert', 'ic-sm') + '<div class="alert-body">Trình duyệt chặn localStorage (file://). Trạng thái chỉ giữ trong phiên hiện tại.</div></div>') +
             '</div>',
           foot: '<button type="button" class="btn" data-close>Đóng</button>',
@@ -330,12 +332,15 @@ var TH = window.TH = window.TH || {};
   TH.onChange['review.toggle'] = function (el) { TH.store.set('reviewMode', el.checked); app.render(); TH.modal.rerenderAll(); };
   A['state.set'] = function (el) { TH.store.state.dataState[el.dataset.screen] = el.dataset.val; app.refresh(); };
   A['data.reset'] = function () {
-    TH.confirm({ title: 'Khôi phục dữ liệu demo?', body: '<p>Toàn bộ thao tác demo (xác nhận, nháp, bộ lọc) sẽ quay về dataset gốc. Gói đang xem được giữ.</p>', ok: 'Khôi phục', danger: true }).then(function (ok) {
-      if (!ok) return;
-      TH.store.reset();
-      TH.modal.stack.slice().forEach(function (m) { if (m.key.indexOf('route:') !== 0) TH.modal.close(m.key, { silent: true }); });
-      app.refresh();
-      TH.toast('Đã khôi phục dữ liệu demo', 'Dataset, bản nháp và bộ lọc về trạng thái ban đầu.');
+    return TH.editGuard.run(function () {
+      TH.confirm({ title: 'Khôi phục dữ liệu demo?', body: '<p>Nạp bộ dữ liệu mô phỏng theo tài liệu khách hàng (' + esc(TH.dataset ? TH.dataset.version : 'dataset gốc') + '). Toàn bộ thao tác demo, báo cáo đã tạo, bản nháp và bộ lọc sẽ được thay thế. Gói đang xem được giữ.</p>', ok: 'Khôi phục', danger: true }).then(function (ok) {
+        if (!ok) return;
+        TH.store.reset();
+        app.guard = null;
+        TH.modal.stack.slice().forEach(function (m) { if (m.key.indexOf('route:') !== 0) TH.modal.close(m.key, { silent: true }); });
+        app.refresh();
+        TH.toast('Đã khôi phục dữ liệu demo', 'Dataset, bản nháp và bộ lọc về trạng thái ban đầu.');
+      });
     });
   };
   var CHANGE = TH.onChange;

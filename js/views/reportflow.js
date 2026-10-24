@@ -91,6 +91,11 @@
     if (s.kind === 'arising') { var a = (TH.db.arisingRent || []).find(function (x) { return x.id === s.id; }); if (a) Object.assign(o, { date: a.date, paidFull: a.paidFull }); }
     if (s.kind === 'break') { var bc = (TH.db.breakCases || []).find(function (x) { return x.id === s.id; }); if (bc) Object.assign(o, { contractId: bc.contractId, at: bc.at, reason: TH.BREAK_REASONS[bc.reason] || bc.reason }); }
     if (s.kind === 'payroll') o.restricted = 'salary';
+    var sourceRecord = s.kind === 'invoice' || s.kind === 'prepaid' ? C.invoice(s.id) : s.kind === 'expense' ? e : s.kind === 'deposit' ? d : s.kind === 'arising' ? a : null;
+    if (sourceRecord && sourceRecord.sourceBasis) {
+      o.sourceBasis = deep(sourceRecord.sourceBasis);
+      if (TH.dataset) o.sourceRule = deep(TH.dataset.rule(sourceRecord.sourceBasis.ruleId));
+    }
     return o;
   }
   function srcCopy(v) { var out = {}; Object.keys(v.src).forEach(function (k) { out[k] = v.src[k].map(function (s) { return enrich(s, k); }); }); return out; }
@@ -111,6 +116,7 @@
     var tpl = TH.db.reportTemplates.find(function (t) { return t.id === tplId && t.report === 'RPT-05'; });
     var snap = { type: type, period: p, buildingIds: ids, engine: ENGINE, schema: TH.DATA_SCHEMA, template: type === 'RPT-04' ? TYPES[type].tpl : (tpl ? tpl.id + ' · v' + tpl.version : 'MAU-BCKD · v1'), compact: !!(tpl && tpl.compact),
       labels: {}, groups: {}, cols: {}, vals: {}, meta: {}, src: {}, notes: {}, sheets: [], share: null, pool: null, rules: deep(TH.billRules()), locked: TH.periodLocked(p) };
+    if (TH.db.dataset && TH.dataset) { snap.datasetVersion = TH.db.dataset.version; snap.datasetRules = deep(TH.dataset.rules); }
     ids.forEach(function (b) { var bb = C.building(b), g = groupOf(b); snap.labels[b] = { short: bb.short, name: bb.name, group: g ? g.id : null }; if (g) snap.groups[g.id] = { short: g.short, name: g.name }; });
     var modes = type === 'RPT-04' ? ['tong'] : ['kd', 'tong'];
     var addCol = function (mode, set, label) {
@@ -382,6 +388,7 @@
         return { name: sh.name, title: sh.title, note: stamp + ' · nguồn tại thời điểm tạo báo cáo', columns: [{ label: 'Dòng báo cáo', width: 30 }, { label: 'Tòa', width: 12 }, { label: 'Loại', width: 14 }, { label: 'Chứng từ', width: 20 }, { label: 'Phòng', width: 10 }, { label: 'Diễn giải / căn cứ', width: 60 }, { label: 'Số tiền', type: 'money' }], rows: rows2 };
       }
       var rows3 = [];
+      (snap.datasetRules || []).forEach(function (r) { rows3.push(['Mô phỏng · ' + r.title, r.formula, r.source.file + (r.source.sheet ? ' · ' + r.source.sheet : '') + (r.source.cell ? ' · ' + r.source.cell : '') + ' · ' + r.status + ' · ' + r.difference]); });
       Object.keys(DEF).forEach(function (k) { rows3.push([labelOf(k, 'tong'), DEF[k].text, '']); });
       Object.keys(RATIO).forEach(function (k) { var r = TH.PNL_RATIOS.find(function (x) { return x.k === k; }); rows3.push([r.label, labelOf(RATIO[k][0], 'tong') + ' ÷ ' + labelOf(RATIO[k][1], 'tong'), 'Mẫu số 0 → không áp dụng']); });
       Object.keys(FILTER).forEach(function (k) { rows3.push([labelOf(k, 'tong'), 'Chỉ tiêu nguồn', FILTER[k]]); });
@@ -447,7 +454,7 @@
       cols: [
         { key: 'id', label: 'Mã báo cáo', render: function (r) { return '<a class="mono" href="' + href('view/' + r.id) + '">' + esc(r.id) + '</a>' + (r.storage === 'session' ? '<div class="cell-sub warn-text">chỉ lưu trong phiên</div>' : ''); } },
         { key: 't', label: 'Loại', render: function (r) { return '<span data-tip="' + esc(TYPES[r.type].label) + '">' + typeBadge(r.type) + '</span>'; } },
-        { key: 'p', label: 'Kỳ', render: function (r) { return F.period(r.period); } },
+        { kind: 'date', key: 'p', label: 'Kỳ', render: function (r) { return F.period(r.period); } },
         { key: 'b', label: 'Phạm vi tòa', wrap: true, render: function (r) { return esc(scopeLabel(r.buildingIds)); } },
         { key: 'v', label: 'Phiên bản', num: true, render: function (r) { return '<b>v' + r.version + '</b>' + (r.prevId ? '<div class="cell-sub">trước: v' + (r.version - 1) + '</div>' : ''); } },
         { key: 'c', label: 'Người tạo', render: function (r) { return esc(C.staffName(r.createdBy)) + '<div class="cell-sub">' + esc(r.createdAt) + '</div>'; } },
@@ -533,7 +540,7 @@
         { key: 'k', label: 'Loại', render: function (r) { var m = KIND[r.x.kind] || [r.x.kind, 'neutral']; return TH.badge(m[0], m[1]); } },
         { key: 'id', label: 'Chứng từ', render: function (r) { return '<span class="mono small">' + esc(r.x.id || '') + '</span>'; } },
         { key: 't', label: 'Diễn giải / căn cứ', wrap: true, render: function (r) { return '<span class="small">' + esc(r.x.kind === 'payroll' && !canPayroll() ? 'Chi tiết lương bị hạn chế theo quyền' : srcText(r.x)) + '</span>'; } },
-        { key: 'a', label: 'Số tiền', num: true, render: function (r) { return r.l.count ? '<span class="muted">1 phòng</span>' : F.money(r.x.amount || 0); } },
+        { kind: 'money', key: 'a', label: 'Số tiền', num: true, render: function (r) { return r.l.count ? '<span class="muted">1 phòng</span>' : F.money(r.x.amount || 0); } },
       ], rows: rows, empty: { title: 'Không có nguồn' } });
     }
     var rr = Object.keys(DEF).map(function (k) { return { a: labelOf(k, 'tong'), b: DEF[k].text, c: '' }; }).concat(Object.keys(RATIO).map(function (k) { var r = TH.PNL_RATIOS.find(function (x) { return x.k === k; }); return { a: r.label, b: labelOf(RATIO[k][0], 'tong') + ' ÷ ' + labelOf(RATIO[k][1], 'tong'), c: 'Mẫu số 0 → Không áp dụng' }; })).concat(Object.keys(FILTER).map(function (k) { return { a: labelOf(k, 'tong'), b: 'Chỉ tiêu nguồn', c: FILTER[k] }; }));
@@ -544,9 +551,9 @@
     var cur = TH.store.ui(S, key, snap.sheets[0].id);
     if (!snap.sheets.some(function (s) { return s.id === cur; })) cur = snap.sheets[0].id;
     var sh = snap.sheets.find(function (s) { return s.id === cur; });
-    var tabs = '<div class="tabs" role="tablist" aria-label="Sheet sẽ xuất">' + snap.sheets.map(function (s) { return '<button type="button" class="tab" role="tab" aria-selected="' + (s.id === cur) + '" data-act="ui.set" data-screen="' + S + '" data-key="' + key + '" data-val="' + esc(s.id) + '">' + I(s.kind === 'stmt' ? 'sheet' : s.kind === 'share' ? 'pie' : s.kind === 'src' ? 'list' : 'calculator', 'ic-sm') + esc(s.name) + '</button>'; }).join('') + '</div>';
+    var tabs = TH.tabs(S, snap.sheets.map(function (s) { return { id: s.id, label: s.name, icon: s.kind === 'stmt' ? 'sheet' : s.kind === 'share' ? 'pie' : s.kind === 'src' ? 'list' : 'calculator' }; }), cur, key);
     return '<div class="card card-flush u-mb-16">' + TH.cardHd(I('sheet', 'ic-sm') + esc(sh.title), (sh.kind === 'stmt' ? 'Bấm số để xem nguồn và cách tính · ' + (sh.mode === 'kd' ? 'chế độ Kinh doanh' : 'chế độ Tổng theo mẫu') : 'Sheet ' + esc(sh.name)) + ' · ' + snap.sheets.length + ' sheet sẽ xuất') +
-      '<div style="padding:0 12px">' + tabs + '</div>' + sheetHtml(where, id, item, snap, sh) + '</div>';
+      '<div style="padding:0 12px">' + tabs + '</div>' + TH.tabPanel(S, cur, '<div data-document>' + sheetHtml(where, id, item, snap, sh) + '</div>', key) + '</div>';
   }
   function itemPicker(d, cur) {
     if (d.items.length < 2) return '';
@@ -595,8 +602,8 @@
 
   TH.views[S] = {
     scan: function () { return [{ param: null }, { param: 'new' }, { param: 'new', ui: { req: { type: 'RPT-05', period: '2026-09', buildingIds: ['TH-CG', 'TH-DD', 'TH-TX'] } } }]; },
-    dialogs: [function () { var r = TH.reports.preview({ type: 'RPT-05', period: TH.store.state.period, buildingIds: allowedIds() }, { transient: true }); if (r.ok) { TH._transientDraft = r.draft; traceRender({ where: 'draft', id: r.draft.id, item: 0, mode: 'kd', col: keyOf(r.draft.items[0].buildingIds), metric: 'rent' }); } },
-      function () { var r = TH.reports.preview({ type: 'RPT-04', period: TH.store.state.period, buildingIds: [allowedIds()[0]] }, { transient: true }); if (r.ok) { TH._transientDraft = r.draft; sheetsBlock('draft', r.draft.id, 0, r.draft.items[0], 'sheet'); traceRender({ where: 'draft', id: r.draft.id, item: 0, mode: 'tong', col: '', metric: 'share:0:total' }); } }],
+    dialogs: [function () { var r = TH.reports.preview({ type: 'RPT-05', period: TH.store.state.period, buildingIds: allowedIds() }, { transient: true }); if (r.ok) { TH._transientDraft = r.draft; return traceRender({ where: 'draft', id: r.draft.id, item: 0, mode: 'kd', col: keyOf(r.draft.items[0].buildingIds), metric: 'rent' }); } },
+      function () { var r = TH.reports.preview({ type: 'RPT-04', period: TH.store.state.period, buildingIds: [allowedIds()[0]] }, { transient: true }); if (r.ok) { TH._transientDraft = r.draft; sheetsBlock('draft', r.draft.id, 0, r.draft.items[0], 'sheet'); return traceRender({ where: 'draft', id: r.draft.id, item: 0, mode: 'tong', col: '', metric: 'share:0:total' }); } }],
     render: function (rt) {
       var p = rt.param || '';
       if (!Object.keys(TYPES).some(canType)) return forbidden('Vai trò hiện tại không được mở báo cáo theo mẫu (RPT-04/RPT-05).');
@@ -628,6 +635,7 @@
     var det = '';
     if (x.kind === 'invoice' && x.lines) det = '<ul class="rptf-lines">' + x.lines.map(function (l) { return '<li>' + esc(l.name) + ' · <b>' + F.money(l.contrib) + '</b>' + (l.contrib !== l.amount ? ' <span class="muted">(dòng ' + F.money(l.amount) + ')</span>' : '') + '<span class="muted">' + esc(basisText(l)) + '</span>' + (l.missingBasis ? ' ' + TH.badge('Thiếu căn cứ lịch sử', 'warning') : '') + (l.type === 'adjust' && l.basis ? ' <span class="muted">· lý do: ' + esc(l.basis.reason || '') + ' · kỳ hiệu lực ' + F.period(l.basis.period) + '</span>' : '') + (l.type === 'common' && l.basis ? ' <span class="muted">· phần phòng trống ' + l.basis.vacant + ' (quy tắc ' + esc(l.basis.rule) + ', thất thoát ' + F.money(l.basis.loss) + ')</span>' : '') + '</li>'; }).join('') + '</ul>';
     else if (!restricted) det = '<div class="small muted">' + esc(srcText(x)) + '</div>';
+    if (!restricted && x.sourceRule) det += '<div class="small muted">Dữ liệu mô phỏng · ' + esc(x.sourceRule.title + ' · ' + x.sourceRule.source.file + (x.sourceRule.source.cell ? ' · ' + x.sourceRule.source.cell : '')) + '</div>';
     return '<tr><td>' + TH.badge(m[0], m[1]) + '</td><td><span class="mono small">' + esc(x.id || '—') + '</span>' + (x.kind === 'invoice' && x.invPeriod ? '<div class="cell-sub">kỳ ' + F.period(x.invPeriod) + '</div>' : '') + '</td><td>' + esc(x.room || '—') + '</td><td>' + (restricted ? '<span class="small muted">Chi tiết lương bị hạn chế theo quyền</span>' : det) + '</td><td class="num">' + (x.amount !== undefined ? F.money(x.amount) : '—') + '</td><td>' +
       (x.id ? '<button type="button" class="btn btn-xs btn-ghost" data-act="rptf.open" data-kind="' + esc(x.kind) + '" data-id="' + esc(x.id) + '" data-room="' + esc(x.room || '') + '" data-b="' + esc(x.buildingId || '') + '" data-p="' + esc(snap.period) + '" data-c="' + esc(x.contractId || x.customerId || '') + '">Mở dữ liệu hiện tại</button>' : '') + '</td></tr>';
   }

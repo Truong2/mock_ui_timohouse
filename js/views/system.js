@@ -61,7 +61,7 @@
           { key: 's', label: 'Tòa được xem/sửa', render: function (x) { return x.scope.length === TH.db.buildings.length ? '<span class="small">Tất cả tòa</span>' : x.scope.length ? x.scope.map(function (b) { return '<span class="badge badge-neutral">' + esc(C.building(b).short) + '</span> '; }).join('') : '<span class="muted small">Không gắn tòa</span>'; } },
           { key: 'sep', label: 'Tách báo thu / duyệt', gate: 'F050.C', render: function (x) { return x.role === 'manager' ? TH.badge('Chỉ báo thu', 'info') : x.role === 'accountant' || x.role === 'admin' ? TH.badge('Duyệt thu & chi', 'success') : '<span class="muted small">—</span>'; } },
           { key: 'eff', label: 'Đội · ca · hiệu lực', gate: 'F050.D', render: function (x) { var s = C.staff(x.staffId); return '<span class="small">' + esc(TH.db.teams.find(function (t) { return t.id === s.team; }).name.split(' ·')[0]) + ' · ca hành chính · từ ' + F.date(s.joinedAt) + '</span>'; } },
-          { key: 'st', label: 'Trạng thái', render: function (x) { return TH.status(x.status); } },
+          { kind: 'status', key: 'st', label: 'Trạng thái', render: function (x) { return TH.status(x.status); } },
         ], rows: TH.paginate(S, TH.db.users, 10).rows, rowAttrs: function (x) { return 'class="is-clickable' + (x.id === u.id ? ' is-selected' : '') + '" tabindex="0" data-act="ui.set" data-screen="SYS-01" data-key="user" data-val="' + x.id + '"'; } }) + TH.pager(S, TH.paginate(S, TH.db.users, 10)) + '</div>' +
           '<div class="stack"><div class="card">' + TH.cardHd(I('key', 'ic-sm') + esc(C.staffName(u.staffId)), esc(TH.ROLES[u.role].label) + ' · ' + esc(u.username)) + '<div class="card-bd stack-sm">' +
           '<div class="section-title">Phạm vi tòa</div><div class="row u-gap-6">' + TH.db.buildings.map(function (b) { var on = u.scope.indexOf(b.id) > -1; return '<label class="check"><input type="checkbox"' + (on ? ' checked' : '') + ' data-act-change="sys.scope" data-u="' + u.id + '" data-b="' + b.id + '"' + (u.role === 'admin' ? ' disabled' : '') + '><span>' + esc(b.short) + '</span></label>'; }).join('') + '</div>' +
@@ -74,7 +74,7 @@
         var rows = TH.db.audit.filter(function (a) { return (fb === 'ALL' || a.buildingId === fb || a.buildingId === 'ALL') && (fk === 'all' || a.kind === fk); });
         body = '<div class="toolbar">' + (TH.has('F051.B') ? TH.uiSelect(S, 'ab', [{ id: 'ALL', label: 'Mọi tòa' }].concat(TH.db.buildings.map(function (b) { return { id: b.id, label: b.short }; })), fb, 'Tòa') + TH.uiSelect(S, 'ak', [{ id: 'all', label: 'Mọi loại chứng từ' }, { id: 'receipt', label: 'Phiếu thu' }, { id: 'invoice', label: 'Hóa đơn' }, { id: 'expense', label: 'Chi phí' }, { id: 'period', label: 'Kỳ' }, { id: 'meter', label: 'Chỉ số' }], fk, 'Loại') + TH.up('F051.B') : TH.gate('F051.B', '', { mode: 'btn', label: 'Bộ lọc theo tòa và loại chứng từ', size: 'btn-sm' })) + '<span class="grow"></span>' + TH.exportBtn('sys.auditCsv', 'Tải CSV') + '</div>' +
           TH.table({ label: 'Nhật ký', cols: [
-            { key: 't', label: 'Thời điểm', render: function (a) { return F.date(a.at); } },
+            { kind: 'date', key: 't', label: 'Thời điểm', render: function (a) { return F.date(a.at); } },
             { key: 'w', label: 'Người thực hiện', render: function (a) { return esc(C.staffName(a.by)); } },
             { key: 'a', label: 'Hành động', render: function (a) { return '<b>' + esc(a.action) + '</b>' + (a.demo ? ' ' + TH.badge('demo', 'neutral') : ''); } },
             { key: 'e', label: 'Đối tượng', render: function (a) { return esc(a.entity) + '<div class="cell-sub">' + esc(a.detail) + '</div>'; } },
@@ -92,7 +92,7 @@
           TH.gate('F052.D', '<div class="card"><div class="card-bd small"><b>' + TH.tierPill('D') + ' Giám sát lô & cảnh báo OA</b><br>Lô hóa đơn kỳ 10: thành công · Gửi OA: ' + TH.db.messages.filter(function (m) { return m.status === 'failed'; }).length + ' tin lỗi → cảnh báo kế toán.</div></div>', { label: 'Giám sát lô gửi và cảnh báo lỗi gửi OA', lines: 2 }) + '</div></div>';
       }
       return TH.pageHeader({ screen: S, desc: 'Admin phân vai trò, chọn tòa được quản lý. API trả 403 khi gọi vượt scope.', actions: TH.permBtn('*', '<button type="button" class="btn btn-primary" data-act="sys.newUser">' + I('userPlus', 'ic-sm') + 'Tạo tài khoản</button>', 'Tạo · 403') }) +
-        '<div class="card card-flush">' + TH.tabs(S, tabs, tab) + body + '</div>';
+        '<div class="card card-flush">' + TH.tabs(S, tabs, tab) + TH.tabPanel(S, tab, body) + '</div>';
     },
   };
   TH.onChange['sys.scope'] = function (el) {

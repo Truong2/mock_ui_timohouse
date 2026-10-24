@@ -102,7 +102,7 @@
           var ct = C.contract(x.contractId), changed = (ct.peopleLog || []).some(function (l) { return l.from === p; });
           return '<label class="sr-only" for="pp-' + x.roomId + '">Số người ' + x.roomId + '</label><input id="pp-' + x.roomId + '" class="input-cell" style="width:64px" inputmode="numeric" value="' + x.units + '" data-act-change="mtr.people" data-id="' + x.contractId + '">' + (changed ? '<div class="cell-sub">HĐ ghi ' + ct.people + '</div>' : '');
         } },
-        { key: 'a', label: 'Tiền điện chung', num: true, render: function (x) { return x.amount ? '<b>' + F.money(x.amount) + '</b>' : '<span class="muted">0</span>'; } },
+        { kind: 'money', key: 'a', label: 'Tiền điện chung', num: true, render: function (x) { return x.amount ? '<b>' + F.money(x.amount) + '</b>' : '<span class="muted">0</span>'; } },
       ], rows: sh.rows, foot: { _label: '<b>Tổng</b>', u: '<b>' + sh.units + '</b>', a: '<b>' + F.money(sh.amount - sh.loss) + '</b>' } });
       return '<div class="card card-flush">' + TH.cardHd(I('split', 'ic-sm') + 'Công tơ điện chung · ' + esc(m.name), '<span class="mono">' + esc(m.code) + '</span> · ' + esc(TH.COMMON_METHODS[m.method]) + ' · ' + F.money(m.price) + '/kWh · áp dụng từ ' + F.period(m.from), TH.openBadge('D-03', 'ĐỀ XUẤT')) +
         '<div class="card-bd"><div class="row" style="gap:16px;flex-wrap:wrap;align-items:flex-end"><div class="field" style="max-width:160px"><label>Số cũ</label><div class="tnum"><b>' + F.num(prev) + '</b></div></div><div class="field" style="max-width:160px"><label for="cm-' + m.id + '">Số mới kỳ ' + F.period(p) + '</label>' + curIn + '</div>' +
@@ -160,7 +160,7 @@
         { key: 'wn', label: 'Nước mới', num: true, render: function (r) { return !r.view ? '—' : bulk && !r.locked ? numIn(r, 'w') : (r.view.waterCur === null ? '<span class="neg">—</span>' : F.num(r.view.waterCur)); } },
         { key: 'wk', label: 'm³', num: true, render: function (r) { return r.view && r.view.waterCur !== null ? '<b class="' + (r.view.waterCur < r.view.waterPrev ? 'neg' : '') + '">' + F.num(r.view.waterCur - r.view.waterPrev) + '</b>' : '—'; } },
         { key: 'pr', label: 'Đơn giá Đ / N', num: true, render: function (r) { return '<span class="small">' + F.num(r.b.elecPrice) + ' / ' + F.num(r.b.waterPrice) + '</span>'; } },
-        { key: 'am', label: 'Thành tiền', num: true, render: function (r) { var v = r.view; if (!v || v.elecCur === null || v.waterCur === null || (r.issue && r.issue.level === 'error')) return '<span class="muted">—</span>'; return F.money((v.elecCur - v.elecPrev) * r.b.elecPrice + (v.waterCur - v.waterPrev) * r.b.waterPrice); } },
+        { kind: 'money', key: 'am', label: 'Thành tiền', num: true, render: function (r) { var v = r.view; if (!v || v.elecCur === null || v.waterCur === null || (r.issue && r.issue.level === 'error')) return '<span class="muted">—</span>'; return F.money((v.elecCur - v.elecPrev) * r.b.elecPrice + (v.waterCur - v.waterPrev) * r.b.waterPrice); } },
         { key: 'st', label: 'Trạng thái', render: function (r) { return stBadge(r) + (r.locked ? '<div class="cell-sub">' + I('lock', 'ic-sm') + ' đã dùng ở hóa đơn</div>' : ''); } },
         { key: 'mon', label: 'Giám sát', gate: 'F019.C', render: function (r) { return r.issue ? '<span class="row-flag ' + (r.issue.level === 'spike' ? 'warn-text' : 'neg') + '" data-tip="' + esc(r.issue.text) + '">' + I('activity', 'ic-sm') + esc(r.issue.level === 'spike' ? 'Đột biến' : r.issue.level === 'missing' ? 'Thiếu số' : 'Số lùi') + '</span>' + (r.rd && r.rd.approvedBy ? '<div class="cell-sub">Duyệt: ' + esc(C.staffName(r.rd.approvedBy)) + '</div>' : '') : '<span class="muted small">Bình thường</span>'; } },
         { key: 'act', label: '', render: function (r) {
@@ -183,8 +183,8 @@
         TH.table({ compact: true, cols: [
           { key: 'r', label: 'Phòng', render: function (e) { return TH.roomLink(e.roomId); } },
           { key: 'n', label: 'Mô tả', render: function (e) { return esc(e.name) + '<div class="cell-sub">' + esc(e.source) + '</div>'; } },
-          { key: 'a', label: 'Thành tiền', num: true, render: function (e) { return F.money(e.qty * e.price); } },
-          { key: 's', label: 'Trạng thái', render: function (e) { return TH.status(e.status); } },
+          { kind: 'money', key: 'a', label: 'Thành tiền', num: true, render: function (e) { return F.money(e.qty * e.price); } },
+          { kind: 'status', key: 's', label: 'Trạng thái', render: function (e) { return TH.status(e.status); } },
           { key: 'ap', label: 'Duyệt', gate: 'F021.C', render: function (e) { return e.status === 'draft' ? TH.permBtn('meter.approve', '<button type="button" class="btn btn-xs btn-soft" data-act="mtr.feeOk" data-id="' + e.id + '">Duyệt</button>', '403') : '<span class="small muted">' + esc(C.staffName('NV-002')) + '</span>'; } },
           { key: 'x', label: '', render: function (e) { return e.status === 'draft' ? '<button type="button" class="btn btn-xs btn-ghost" data-act="mtr.feeDel" data-id="' + e.id + '" aria-label="Xóa nháp">' + I('trash', 'ic-sm') + '</button>' : ''; } },
         ], rows: extras, empty: { title: 'Chưa có phí phát sinh', text: 'Không phát sinh phí tự động nếu chưa có nguồn.' } }) +
@@ -216,7 +216,7 @@
           '<div class="grid-3">' + meterCard + recon + snap + '</div>'
         : buildingList(p));
     },
-    dialogs: [function () { editForm('TX-102'); }, function () { feeForm(); }],
+    dialogs: [function () { return editForm('TX-102'); }, function () { return feeForm(); }],
   };
 
   /* Dialog nhập chỉ số 1 phòng (A) */

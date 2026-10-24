@@ -48,7 +48,7 @@
       return TH.pageHeader({ screen: S, desc: 'Thông tin tòa, công suất phòng và tình trạng vận hành.', actions: '<button type="button" class="btn" data-act="imp.open" data-screen="BLD-IMP">' + I('upload', 'ic-sm') + 'Nhập từ Excel</button>' + TH.permBtn('master.edit', '<button type="button" class="btn btn-primary" data-act="bld.add">' + I('plus', 'ic-sm') + 'Thêm tòa</button>', 'Thêm · 403') }) +
         '<div class="card card-flush"><div class="toolbar">' + TH.searchBox(S, 'Tìm mã, tên, địa chỉ, chủ nhà…') + TH.uiSelect(S, 'area', areas, area, 'Khu vực') + '</div>' + table + TH.pager(S, pg) + '</div>' + roomBoard;
     },
-    dialogs: [function () { bldForm(); }],
+    dialogs: [function () { return bldForm(); }],
   };
   function bldForm() {
     var form = 'bld-new';
@@ -349,7 +349,7 @@
       { key: 'h', label: TH.hsName() + ' thực tế', num: true, render: function (x) { return x.r.invoices ? TH.hsCell(x.t.hs) : '<span class="muted small">chưa lập hóa đơn</span>'; } },
       { key: 'hp', label: TH.hsName() + ' tạm tính', num: true, render: function (x) { return x.r.invoices ? TH.hsCell(x.t.hsProv, true) : '—'; } },
       { key: 'o', label: 'Lấp đầy', num: true, render: function (x) { return F.pct(x.r.occ, 0); } },
-      { key: 'l', label: 'LNR', num: true, render: function (x) { return '<span class="' + (x.v.lnr < 0 ? 'neg' : '') + '">' + F.money(x.v.lnr) + '</span>'; } },
+      { kind: 'money', key: 'l', label: 'LNR', num: true, render: function (x) { return '<span class="' + (x.v.lnr < 0 ? 'neg' : '') + '">' + F.money(x.v.lnr) + '</span>'; } },
     ], rows: ps.slice().reverse().map(function (x) { var rr = C.perfBuilding(x, b.id); return { p: x, r: rr, t: TH.perfTier(rr), v: C.pnl(x, b.id, 'tong') }; }) }) + '</div>', { label: 'Bản chốt dữ liệu tòa theo kỳ báo cáo', lines: 4 });
     return kpis + '<div class="grid-main-side u-mb-16">' + steps + '<div class="stack">' + TH.section('bldOps', b.id) + profit + '</div></div>' + hist;
   }
@@ -378,13 +378,13 @@
         TH.gate('F036.B', TH.permBtn('lease.edit', '<button type="button" class="btn btn-sm btn-soft" data-act="lpay.gen" data-b="' + b.id + '">' + I('wand', 'ic-sm') + 'Sinh lịch từ HĐ' + TH.up('F036.B') + '</button>', '403'), { mode: 'btn', label: 'Tự sinh lịch phải trả từ điều khoản thuê tòa', size: 'btn-sm' })) +
       TH.table({ compact: true, label: 'Lịch thanh toán cho chủ nhà', cols: [
         { key: 'k', label: 'Kỳ thanh toán', render: function (x) { return '<b>' + F.period(x.from) + ' → ' + F.period(x.to) + '</b><div class="cell-sub mono">' + esc(x.id) + (x.source === 'auto' ? ' · tự sinh' : '') + '</div>'; } },
-        { key: 'd', label: 'Hạn trả', render: function (x) { return F.date(x.dueAt); } },
-        { key: 'a', label: 'Phải trả', num: true, render: function (x) { return F.money(x.amount); } },
-        { key: 'p', label: 'Đã trả', num: true, gate: 'F036.C', render: function (x) { return x.paid ? F.money(x.paid) + '<div class="cell-sub">' + F.date(x.paidAt) + (x.docNo ? ' · ' + esc(x.docNo) : '') + '</div>' : '<span class="muted">0</span>'; } },
-        { key: 'r', label: 'Còn lại', num: true, gate: 'F036.C', render: function (x) { var r = x.amount - x.paid; return r > 0 ? '<b class="' + (x.dueAt < TH.TODAY ? 'neg' : '') + '">' + F.money(r) + '</b>' : '<span class="muted">0</span>'; } },
+        { kind: 'date', key: 'd', label: 'Hạn trả', render: function (x) { return F.date(x.dueAt); } },
+        { kind: 'money', key: 'a', label: 'Phải trả', num: true, render: function (x) { return F.money(x.amount); } },
+        { kind: 'money', key: 'p', label: 'Đã trả', num: true, gate: 'F036.C', render: function (x) { return x.paid ? F.money(x.paid) + '<div class="cell-sub">' + F.date(x.paidAt) + (x.docNo ? ' · ' + esc(x.docNo) : '') + '</div>' : '<span class="muted">0</span>'; } },
+        { kind: 'money', key: 'r', label: 'Còn lại', num: true, gate: 'F036.C', render: function (x) { var r = x.amount - x.paid; return r > 0 ? '<b class="' + (x.dueAt < TH.TODAY ? 'neg' : '') + '">' + F.money(r) + '</b>' : '<span class="muted">0</span>'; } },
         { key: 's', label: 'Trạng thái', gate: 'F036.C', render: function (x) { return payState(x).b; } },
         { key: 'ap', label: 'Duyệt chi', gate: 'F036.C', render: function (x) { return x.approval === 'approved' ? TH.badge('Đã duyệt', 'success') : x.approval === 'pending' ? TH.badge('Chờ duyệt', 'warning') : '<span class="muted small">—</span>'; } },
-        { key: 'e', label: 'Chi phí đã ghi', num: true, gate: 'F036.D', render: function (x) { var e = expRent(x); return F.money(e) + '<div class="cell-sub">' + (e === x.amount ? TH.badge('Khớp', 'success') : TH.badge('Lệch ' + F.short(x.amount - e), 'warning')) + '</div>'; } },
+        { kind: 'money', key: 'e', label: 'Chi phí đã ghi', num: true, gate: 'F036.D', render: function (x) { var e = expRent(x); return F.money(e) + '<div class="cell-sub">' + (e === x.amount ? TH.badge('Khớp', 'success') : TH.badge('Lệch ' + F.short(x.amount - e), 'warning')) + '</div>'; } },
         { key: 'n', label: 'Ghi chú / chứng từ', render: function (x) { return '<span class="small">' + esc(x.note || '') + '</span>'; } },
         { key: 'x', label: '', render: function (x) { return x.amount > x.paid ? TH.gate('F036.C', TH.permBtn('lease.edit', '<button type="button" class="btn btn-sm" data-act="lpay.pay" data-id="' + x.id + '">' + I('check', 'ic-sm') + 'Ghi nhận trả</button>', ''), { mode: 'btn', label: 'Ghi nhận đã trả', size: 'btn-sm' }) : ''; } },
       ], rows: rows, empty: { title: 'Chưa có lịch thanh toán', text: 'Thêm kỳ trả thủ công' + (TH.has('F036.B') ? ' hoặc sinh lịch từ hợp đồng.' : '.') } }) +
@@ -507,7 +507,7 @@
       } else if (tab === 'rooms') {
         body = '<div class="card card-flush">' + TH.table({ cols: [
           { key: 'c', label: 'Phòng', render: function (x) { return TH.roomLink(x.id); } }, { key: 'f', label: 'Tầng', num: true, render: function (x) { return x.floor; } }, { key: 'a', label: 'Diện tích', num: true, render: function (x) { return x.area + ' m²'; } },
-          { key: 'p', label: 'Giá niêm yết', num: true, render: function (x) { return F.money(x.rent); } }, { key: 's', label: 'Trạng thái', render: function (x) { return TH.status(x.status); } },
+          { kind: 'money', key: 'p', label: 'Giá niêm yết', num: true, render: function (x) { return F.money(x.rent); } }, { key: 's', label: 'Trạng thái', render: function (x) { return TH.status(x.status); } },
           { key: 'k', label: 'Khách', render: function (x) { var c = C.contractOfRoom(x.id); return c ? esc(C.customer(c.customerId).name) : '<span class="muted">—</span>'; } },
         ], rows: rooms, rowAttrs: function (x) { return 'class="is-clickable" data-href="' + TH.router.href('ROOM-02', x.id) + '"'; }, foot: { _label: '<b>' + rooms.length + ' phòng</b>', p: '<b>' + F.money(C.sum(rooms, function (x) { return x.rent; })) + '</b>' } }) + '<div class="card-ft"><span class="small muted">Tổng giá niêm yết là mẫu số tính hiệu suất (tab Vận hành & kết quả).</span></div></div>';
       } else if (tab === 'assets') {
@@ -526,9 +526,9 @@
       return TH.pageHeader({ screen: 'BLD-02', title: b.name, crumbs: [['Tòa nhà', TH.router.href('BLD-01')], [b.id]], status: opStatus(b),
           facts: TH.detailFacts([['Mã tòa', '<span class="mono">' + esc(b.id) + '</span>'], ['Chủ nhà', '<a href="' + TH.router.href('OWN-02', b.ownerId) + '">' + esc(C.owner(b.ownerId).name) + '</a>'], ['Số phòng', String(roomsOf(b.id).length)], ['Quản lý tòa', esc(C.staffName(b.managerId))], ['Địa chỉ', esc(shortAddr(b.address))]]),
           actions: '<a class="btn" href="' + TH.router.href('RPT-04') + '" data-act="bld.rpt" data-id="' + b.id + '">' + I('chart', 'ic-sm') + 'Báo cáo tòa</a>' }) +
-        alerts + '<div class="card tab-card u-mb-16">' + TH.tabs(S, tabs, tab) + '</div>' + body;
+        alerts + '<div class="card tab-card u-mb-16">' + TH.tabs(S, tabs, tab) + '</div>' + TH.tabPanel(S, tab, body);
     },
-    dialogs: [function () { assignForm('TH-CG'); }, function () { assetForm('TS-CG-01'); }, function () { lpayForm('TH-CG'); }],
+    dialogs: [function () { return assignForm('TH-CG'); }, function () { return assetForm('TS-CG-01'); }, function () { return lpayForm('TH-CG'); }],
   };
   TH.act['bld.rpt'] = function (el) { TH.store.setUi('RPT-04', 'b', el.dataset.id); TH.go('RPT-04'); };
 

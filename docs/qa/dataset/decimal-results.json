@@ -1,0 +1,7 @@
+{
+  "passed": 3718,
+  "failed": 0,
+  "method": "Python Decimal; direct input ledger aggregation, no JS calculation calls",
+  "toleranceVND": 1e-06,
+  "rounding": "floor(value / step + 0.5) * step; line shares preserve remainder"
+}

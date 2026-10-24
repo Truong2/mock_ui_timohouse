@@ -64,11 +64,11 @@
         label: 'Báo cáo theo tòa',
         cols: [
           { key: 'b', label: 'Tòa', render: function (r) { return '<div class="cell-main">' + esc(r.b.name) + '</div><div class="cell-sub">' + r.occupied + '/' + r.rooms + ' phòng đang thuê · ' + F.pct(r.occupancy, 0) + '</div>'; } },
-          { key: 'billed', label: 'Doanh thu', num: true, render: function (r) { return r.invoices ? F.money(r.billed) : '<span class="muted small">Chưa lập hóa đơn</span>'; } },
-          { key: 'collected', label: 'Thu thực', num: true, render: function (r) { return F.money(r.collected); } },
-          { key: 'debt', label: 'Công nợ', num: true, render: function (r) { return r.debt ? '<span class="neg">' + F.money(r.debt) + '</span>' : F.money(0); } },
-          { key: 'expenses', label: 'Chi đã duyệt', num: true, render: function (r) { return F.money(r.expenses); } },
-          { key: 'profit', label: 'Lãi tạm tính', num: true, render: function (r) { return '<b class="' + (r.profit < 0 ? 'neg' : '') + '">' + F.money(r.profit) + '</b>'; } },
+          { kind: 'money', key: 'billed', label: 'Doanh thu', num: true, render: function (r) { return r.invoices ? F.money(r.billed) : '<span class="muted small">Chưa lập hóa đơn</span>'; } },
+          { kind: 'money', key: 'collected', label: 'Thu thực', num: true, render: function (r) { return F.money(r.collected); } },
+          { kind: 'money', key: 'debt', label: 'Công nợ', num: true, render: function (r) { return r.debt ? '<span class="neg">' + F.money(r.debt) + '</span>' : F.money(0); } },
+          { kind: 'money', key: 'expenses', label: 'Chi đã duyệt', num: true, render: function (r) { return F.money(r.expenses); } },
+          { kind: 'money', key: 'profit', label: 'Lãi tạm tính', num: true, render: function (r) { return '<b class="' + (r.profit < 0 ? 'neg' : '') + '">' + F.money(r.profit) + '</b>'; } },
           { key: 'snap', label: 'Lệch bản chốt', num: true, gate: 'F045.C', render: function (r) { var sn = snap && snap.data[r.b.id]; return sn ? delta(r.profit, sn.profit) : '<span class="muted small">Chưa duyệt kỳ</span>'; } },
           { key: 'dd', label: '', gate: 'F045.B', render: function (r) { return '<button type="button" class="btn btn-xs" data-act="rpt.drill" data-id="' + r.b.id + '">' + I('chevronRight', 'ic-sm') + 'Chi tiết</button>'; } },
         ],
@@ -129,7 +129,7 @@
         '<div class="overview-snapshot">' + snapCard + '</div>' +
         net;
     },
-    dialogs: [function () { drillRender('TH-CG'); }],
+    dialogs: [function () { return drillRender('TH-CG'); }],
   };
   function drillRender(bId) {
     var p = TH.store.state.period, b = C.building(bId);
@@ -141,10 +141,10 @@
         cols: [
           { key: 'room', label: 'Phòng', render: function (i) { return TH.roomLink(i.roomId); } },
           { key: 'id', label: 'Hóa đơn', render: function (i) { return '<a href="' + TH.router.href('INV-03', i.id) + '" data-close>' + i.id + '</a>'; } },
-          { key: 'total', label: 'Tổng', num: true, render: function (i) { return F.money(i.total); } },
-          { key: 'paid', label: 'Đã thu', num: true, render: function (i) { return F.money(C.paid(i.id)); } },
-          { key: 'debt', label: 'Còn nợ', num: true, render: function (i) { var d = C.debt(i); return d ? '<span class="neg">' + F.money(d) + '</span>' : '0'; } },
-          { key: 'st', label: 'Trạng thái', render: function (i) { return TH.status(C.payState(i)); } },
+          { kind: 'money', key: 'total', label: 'Tổng', num: true, render: function (i) { return F.money(i.total); } },
+          { kind: 'money', key: 'paid', label: 'Đã thu', num: true, render: function (i) { return F.money(C.paid(i.id)); } },
+          { kind: 'money', key: 'debt', label: 'Còn nợ', num: true, render: function (i) { var d = C.debt(i); return d ? '<span class="neg">' + F.money(d) + '</span>' : '0'; } },
+          { kind: 'status', key: 'st', label: 'Trạng thái', render: function (i) { return TH.status(C.payState(i)); } },
         ], rows: invs, empty: { title: 'Chưa có hóa đơn kỳ này', text: 'Tòa chưa lập hóa đơn cho kỳ đang xem.' },
       }), { label: 'Drill-down hóa đơn/phòng' }),
       foot: '<button type="button" class="btn" data-close>Đóng</button>',
@@ -225,8 +225,8 @@
 
       var byMgr = TH.gate('F047.B', '<div class="card card-flush">' + TH.cardHd(I('users', 'ic-sm') + 'Theo người phụ trách' + TH.up('F047.B')) + TH.table({ compact: true, cols: [
         { key: 'n', label: 'Người phụ trách', render: function (r) { return TH.personCell(C.staffName(r.managerId), esc(C.building(r.buildingId).short)); } },
-        { key: 'c', label: 'Thu thực', num: true, render: function (r) { return F.money(r.ms.m5 + r.ms.m10 + r.ms.m15 + r.ms.late); } },
-        { key: 'w', label: 'D · quy đổi', num: true, render: function (r) { return F.money(Math.round(TH.perfTier(C.perfBuilding(p, r.buildingId)).D)); } },
+        { kind: 'money', key: 'c', label: 'Thu thực', num: true, render: function (r) { return F.money(r.ms.m5 + r.ms.m10 + r.ms.m15 + r.ms.late); } },
+        { kind: 'money', key: 'w', label: 'D · quy đổi', num: true, render: function (r) { return F.money(Math.round(TH.perfTier(C.perfBuilding(p, r.buildingId)).D)); } },
         { key: 'r', label: 'HS thực tế', num: true, render: function (r) { var h = C.perfBuilding(p, r.buildingId); return h.invoices ? TH.hsCell(TH.perfTier(h).hs) : '—'; } },
       ], rows: C.performance(p).filter(function (r) { return TH.inScope(r.buildingId) && (scope === 'ALL' || r.buildingId === scope); }) }) + '</div>', { label: 'Báo cáo theo người phụ trách', lines: 4 });
 
@@ -283,13 +283,13 @@
       if (tab === 'salary') {
         content = TH.table({ cols: [
           { key: 'n', label: 'Nhân viên', render: function (r) { return TH.personCell(r.staff.name, esc(r.staff.title)); } },
-          { key: 'b', label: 'Lương cố định', num: true, render: function (r) { return F.money(r.base); } },
-          { key: 'a', label: 'Phụ cấp', num: true, render: function (r) { return F.money(r.allowance); } },
+          { kind: 'money', key: 'b', label: 'Lương cố định', num: true, render: function (r) { return F.money(r.base); } },
+          { kind: 'money', key: 'a', label: 'Phụ cấp', num: true, render: function (r) { return F.money(r.allowance); } },
           { key: 'hs', label: 'Hiệu suất', num: true, render: function (r) { return r.buildings.length ? F.pct(r.hs / 100, 1) + '<div class="cell-sub">' + r.rooms + ' phòng</div>' : '<span class="muted">—</span>'; } },
-          { key: 'p', label: 'Lương HS', num: true, render: function (r) { return r.perf ? F.money(r.perf) : '<span class="muted">0</span>'; } },
-          { key: 'l', label: 'Trưởng nhóm', num: true, render: function (r) { return r.lead ? F.money(r.lead) : '<span class="muted">0</span>'; } },
-          { key: 'd', label: 'Điều chỉnh', num: true, render: function (r) { return r.adj ? '<span class="' + (r.adj < 0 ? 'neg' : 'pos') + '">' + F.money(r.adj) + '</span>' : '<span class="muted">0</span>'; } },
-          { key: 't', label: 'Tổng nháp', num: true, render: function (r) { return '<b>' + F.money(r.total) + '</b>'; } },
+          { kind: 'money', key: 'p', label: 'Lương HS', num: true, render: function (r) { return r.perf ? F.money(r.perf) : '<span class="muted">0</span>'; } },
+          { kind: 'money', key: 'l', label: 'Trưởng nhóm', num: true, render: function (r) { return r.lead ? F.money(r.lead) : '<span class="muted">0</span>'; } },
+          { kind: 'money', key: 'd', label: 'Điều chỉnh', num: true, render: function (r) { return r.adj ? '<span class="' + (r.adj < 0 ? 'neg' : 'pos') + '">' + F.money(r.adj) + '</span>' : '<span class="muted">0</span>'; } },
+          { kind: 'money', key: 't', label: 'Tổng nháp', num: true, render: function (r) { return '<b>' + F.money(r.total) + '</b>'; } },
         ], rows: pay, foot: { _label: '<b>Tổng (' + pay.length + ' NV)</b>', t: '<b>' + F.money(C.sum(pay, function (r) { return r.total; })) + '</b>' } });
       } else {
         var bs = scopeBuildings(), rows = [];
@@ -298,8 +298,8 @@
           { key: 'b', label: 'Tòa', render: function (x) { return esc(x.b.short); } },
           { key: 'h', label: 'Cổ đông', render: function (x) { return esc(x.r.holder.name); } },
           { key: 'ra', label: 'Tỷ lệ', num: true, render: function (x) { return x.r.share.ratio + '%'; } },
-          { key: 'base', label: 'Lãi tạm tính tòa', num: true, render: function (x) { return F.money(x.base); } },
-          { key: 'a', label: 'Lợi nhuận chia (nháp)', num: true, render: function (x) { return x.base > 0 ? '<b>' + F.money(x.r.amount) + '</b>' : '<span class="muted small">Không chia (lãi ≤ 0)</span>'; } },
+          { kind: 'money', key: 'base', label: 'Lãi tạm tính tòa', num: true, render: function (x) { return F.money(x.base); } },
+          { kind: 'money', key: 'a', label: 'Lợi nhuận chia (nháp)', num: true, render: function (x) { return x.base > 0 ? '<b>' + F.money(x.r.amount) + '</b>' : '<span class="muted small">Không chia (lãi ≤ 0)</span>'; } },
         ], rows: rows });
       }
       var src = TH.gate('F049.B', '<div class="card">' + TH.cardHd(I('database', 'ic-sm') + 'Nguồn tự động' + TH.up('F049.B'), 'Kéo từ bảng phiếu thu/chi phí/đội nhóm/cổ phần') + '<div class="card-bd">' +
@@ -310,7 +310,7 @@
       var tpl = TH.gate('F049.D', '<div class="card">' + TH.cardHd(I('sheet', 'ic-sm') + 'Mẫu kết quả gần nguồn T8' + TH.up('F049.D')) + '<div class="card-bd"><p class="small">Bố cục xuất theo mẫu kết quả tháng 08/2026 đã được khách xác nhận (cột, thứ tự, làm tròn).</p><div class="row u-mt-8">' + TH.badge('Mẫu T8/2026 · đã xác nhận', 'success') + TH.openBadge('D-06') + '</div></div></div>', { label: 'Mẫu kết quả gần nguồn tháng 8', lines: 3 });
 
       return TH.pageHeader({ screen: 'RPT-03', status: TH.badge('Nháp — đối chiếu bằng Excel', 'draft', { dot: true }), desc: esc(TH.scopeLabel()) + ' · ' + 'Hai biểu báo cáo nháp: lương theo nhân viên/kỳ và lợi nhuận chia theo cổ đông/tòa. Lương và phân bổ cổ phần không tự tạo chi tiền.', actions: '<button type="button" class="btn" data-act="rpt3.preview">' + I('eye', 'ic-sm') + 'Xem trước</button>' + TH.exportBtn('rpt3.xlsx', 'Xuất Excel 2 biểu (.xlsx)') }) +
-        '<div class="grid-main-side"><div class="card card-flush">' + TH.tabs('RPT-03', tabs, tab) + content + '</div><div class="stack">' + src + flow + tpl + '</div></div>';
+        '<div class="grid-main-side"><div class="card card-flush">' + TH.tabs('RPT-03', tabs, tab) + TH.tabPanel('RPT-03', tab, content) + '</div><div class="stack">' + src + flow + tpl + '</div></div>';
     },
   };
   TH.act['rpt3.xlsx'] = function () {

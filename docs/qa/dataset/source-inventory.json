@@ -1,0 +1,5659 @@
+{
+  "version": 1,
+  "method": "OOXML sparse cells; no workbook recalculation",
+  "totals": {
+    "literalCells": 188509,
+    "formulaCells": 108090,
+    "sharedCells": 75804,
+    "sheets": 248,
+    "error:#DIV/0!": 2481,
+    "workbooks": 13,
+    "error:#REF!": 21,
+    "error:#VALUE!": 21642,
+    "emptyCaches": 68
+  },
+  "workbooks": [
+    {
+      "file": "docs/bao_cao/BÁO CÁO KINH DOANH THÁNG 8.xlsx",
+      "sha256": "a8f416f9e73d5ce835643650586b70b2ad49e7530bcf61e5aa1168ac69f3c823",
+      "sheets": [
+        {
+          "name": "BÁO CÁO TỔNG THÁNG 1  ",
+          "state": "hidden",
+          "dimension": "A1:Y67",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "summary",
+          "periodCandidates": [
+            "2026-01"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 183,
+            "formulaCells": 94,
+            "sharedCells": 34
+          },
+          "families": 21,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "93e1ec7c24dfabc725b4bfaa52b59ce474fcacdc6638d0c3fe6f5115666f0150"
+        },
+        {
+          "name": "BC DT THÁNG 1 NHÀ T ",
+          "state": "hidden",
+          "dimension": "A1:AP68",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-12"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "T"
+          ],
+          "stats": {
+            "literalCells": 1129,
+            "formulaCells": 696,
+            "sharedCells": 668
+          },
+          "families": 27,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "e41c5f75bdd81aa9e28531c7bf537ac61865f20803744819eaf897281709d1ea"
+        },
+        {
+          "name": "BCDT THÁNG 2 NHÀ S ",
+          "state": "hidden",
+          "dimension": "A1:BF69",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-02"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "S"
+          ],
+          "stats": {
+            "literalCells": 1682,
+            "formulaCells": 1010,
+            "sharedCells": 980
+          },
+          "families": 20,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "199d674606ab0f4c6e09fb7060b5036471eebcbc15a610b69b7b83cdaa62fcb0"
+        },
+        {
+          "name": "BC DT THÁNG 2 NHÀ G",
+          "state": "hidden",
+          "dimension": "A1:AP69",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-02"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "G"
+          ],
+          "stats": {
+            "literalCells": 94,
+            "formulaCells": 689,
+            "sharedCells": 669,
+            "error:#DIV/0!": 374
+          },
+          "families": 19,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "8e2fb147f2e7fbe6f158f36f3ee137e73b3334bb9d0b080a0f93cf405dde1fa3"
+        },
+        {
+          "name": "BC DT THÁNG 2 NHÀ T ",
+          "state": "hidden",
+          "dimension": "A1:AP69",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-02"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "T"
+          ],
+          "stats": {
+            "literalCells": 1141,
+            "formulaCells": 689,
+            "sharedCells": 667
+          },
+          "families": 19,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "94746181f8d18850fea93e553b74ad15b1dcb57eb9498c1dfb5fd248f8295220"
+        },
+        {
+          "name": "BÁO CÁO TỔNG THÁNG 2",
+          "state": "hidden",
+          "dimension": "A1:Z68",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "summary",
+          "periodCandidates": [
+            "2026-02"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 223,
+            "formulaCells": 114,
+            "sharedCells": 35
+          },
+          "families": 21,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "6193636b46e4254217494e9dbc02dee2d2b5d6fa14eebacc6206cdb6b8703f61"
+        },
+        {
+          "name": "BÁO CÁO KINH DOANH THÁNG 2 ",
+          "state": "hidden",
+          "dimension": "A1:Z68",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "summary",
+          "periodCandidates": [
+            "2026-02"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 218,
+            "formulaCells": 117,
+            "sharedCells": 35
+          },
+          "families": 24,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "0292019f84077bc6563c8fa34e93e5b8a6a7e0aaf6d85cfb8838dad21c7eb1f4"
+        },
+        {
+          "name": "BCDT THÁNG 3 NHÀ S ",
+          "state": "hidden",
+          "dimension": "A1:BE69",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-03"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "S"
+          ],
+          "stats": {
+            "literalCells": 1713,
+            "formulaCells": 993,
+            "sharedCells": 961
+          },
+          "families": 22,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "b264dd304722c4f08649fb2fff1a47db4eaacf2c6d0be17936775fd870c759d3"
+        },
+        {
+          "name": "BC DT THÁNG 3 NHÀ T ",
+          "state": "hidden",
+          "dimension": "A1:AP69",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-03"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "T"
+          ],
+          "stats": {
+            "literalCells": 1171,
+            "formulaCells": 689,
+            "sharedCells": 665
+          },
+          "families": 19,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "f55d9cacc4dba68640a8bdfc5c6d81f8a34b6c7afbe34ce76e17dc834e8d6b9f"
+        },
+        {
+          "name": "BC DT THÁNG 4 NHÀ T  ",
+          "state": "hidden",
+          "dimension": "A1:AP69",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-03"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "T"
+          ],
+          "stats": {
+            "literalCells": 1196,
+            "formulaCells": 689,
+            "sharedCells": 665
+          },
+          "families": 19,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "e0ca8996011b2b1b782153ba9474b2e74d649deea27ee618768b04055b167878"
+        },
+        {
+          "name": "BC DT THÁNG 3 NHÀ G ",
+          "state": "hidden",
+          "dimension": "A1:AP69",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-03"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "G"
+          ],
+          "stats": {
+            "literalCells": 126,
+            "formulaCells": 689,
+            "sharedCells": 667,
+            "error:#DIV/0!": 363
+          },
+          "families": 19,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "b5ad9d5054942c847f5e5aa923438aa6d2cd7c889f797cde008cc067bc7793b7"
+        },
+        {
+          "name": "BÁO CÁO TỔNG THÁNG 3",
+          "state": "hidden",
+          "dimension": "A1:Z68",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "summary",
+          "periodCandidates": [
+            "2026-03"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 224,
+            "formulaCells": 114,
+            "sharedCells": 35
+          },
+          "families": 21,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "38ad1ff6355e841b502c12b11b1c65d5a9e629877afabd32baddf33f7cc09681"
+        },
+        {
+          "name": "BÁO CÁO  KINH DOANH THÁNG 3 ",
+          "state": "hidden",
+          "dimension": "A1:Z68",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "summary",
+          "periodCandidates": [
+            "2026-03"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 218,
+            "formulaCells": 117,
+            "sharedCells": 35
+          },
+          "families": 24,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "20c5ddd0f21615918bbee89c2fb776159882cba8dc11bfd141421e987f7ff4c7"
+        },
+        {
+          "name": "BCDT THÁNG 4 NHÀ S ",
+          "state": "hidden",
+          "dimension": "A1:BE69",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-04"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "S"
+          ],
+          "stats": {
+            "literalCells": 1715,
+            "formulaCells": 992,
+            "sharedCells": 960
+          },
+          "families": 21,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "45c49021e34bcb7d012cc0bb76ddab6ec966d439eb8a9808cdb52c4ce583c45c"
+        },
+        {
+          "name": "BC DT THÁNG 4 NHÀ G ",
+          "state": "hidden",
+          "dimension": "A1:AP69",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-04"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "G"
+          ],
+          "stats": {
+            "literalCells": 186,
+            "formulaCells": 689,
+            "sharedCells": 664,
+            "error:#DIV/0!": 341
+          },
+          "families": 19,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "82962c658c618cc5e8cded2f39dda46a32895a5d3ffd7613dd81ca9ebf1aca2d"
+        },
+        {
+          "name": "BÁO CÁO TỔNG THÁNG 4 ",
+          "state": "hidden",
+          "dimension": "A1:Z68",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "summary",
+          "periodCandidates": [
+            "2026-04"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 224,
+            "formulaCells": 114,
+            "sharedCells": 35
+          },
+          "families": 21,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "97b16e0afa350d5528c4508fbd612020b4d973429dadc2ecd38992a9198f5a5e"
+        },
+        {
+          "name": "BÁO CÁO KINH DOANH THÁNG 4",
+          "state": "hidden",
+          "dimension": "A1:Z68",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "summary",
+          "periodCandidates": [
+            "2026-04"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 218,
+            "formulaCells": 117,
+            "sharedCells": 35
+          },
+          "families": 24,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "91c16c577ff90631af1267a4924697e422b8814d0d816c91864c352df365a247"
+        },
+        {
+          "name": "BCDT THÁNG 5 NHÀ S  ",
+          "state": "hidden",
+          "dimension": "A1:BE69",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-05"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "S"
+          ],
+          "stats": {
+            "literalCells": 1677,
+            "formulaCells": 992,
+            "sharedCells": 959
+          },
+          "families": 20,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "9ee7b4d38d653c934f5082f95ebc59fc96dd100eb6060423cccb2102fecd5ca8"
+        },
+        {
+          "name": "BC DT THÁNG 5 NHÀ G  ",
+          "state": "hidden",
+          "dimension": "A1:AS69",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-05"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "G"
+          ],
+          "stats": {
+            "literalCells": 273,
+            "formulaCells": 743,
+            "sharedCells": 670,
+            "error:#DIV/0!": 341
+          },
+          "families": 19,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "2e8ec9f4d40890f4756be4bdad9be3aacb17909225941933e1a07e4f25dd0846"
+        },
+        {
+          "name": "BC DT THÁNG 5 NHÀ T  ",
+          "state": "hidden",
+          "dimension": "A1:AP69",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-05"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "T"
+          ],
+          "stats": {
+            "literalCells": 1158,
+            "formulaCells": 689,
+            "sharedCells": 665
+          },
+          "families": 19,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "51b74198dbe15f2d68b2da70f47ad2c60559ae5aeb53ebb9e862d3b24a1c9510"
+        },
+        {
+          "name": "BÁO CÁO TỔNG THÁNG 5",
+          "state": "hidden",
+          "dimension": "A1:Z68",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "summary",
+          "periodCandidates": [
+            "2026-05"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 224,
+            "formulaCells": 114,
+            "sharedCells": 35
+          },
+          "families": 21,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "556ae85e327b66234a09c4182a0229cfd8c8cc22a5a8887425f128486b9bd07e"
+        },
+        {
+          "name": "BÁO CÁO KINH DOANH THÁNG 5",
+          "state": "hidden",
+          "dimension": "A1:Z68",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "summary",
+          "periodCandidates": [
+            "2026-05"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 218,
+            "formulaCells": 117,
+            "sharedCells": 35
+          },
+          "families": 24,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "eeae3bd63040502c1c014ad5c163fbfc7935f1342ac66b52c0501ce41b801e21"
+        },
+        {
+          "name": "BCDT THÁNG 6 NHÀ S   ",
+          "state": "hidden",
+          "dimension": "A1:BE69",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-06"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "S"
+          ],
+          "stats": {
+            "literalCells": 1593,
+            "formulaCells": 1074,
+            "sharedCells": 957
+          },
+          "families": 54,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "5a81f0dc1028f436e458d1746932426fdaa4d6d04d16dc3615f425c9dec70a30"
+        },
+        {
+          "name": "BC DT THÁNG 6 NHÀ T  ",
+          "state": "hidden",
+          "dimension": "A1:AP69",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-06"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "T"
+          ],
+          "stats": {
+            "literalCells": 1105,
+            "formulaCells": 759,
+            "sharedCells": 664
+          },
+          "families": 55,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "993104985256a2da1370f3f08ed0c72f5ffbb810b03ac3bd4cf66402f047289a"
+        },
+        {
+          "name": "BC DT THÁNG 6 NHÀ G  ",
+          "state": "hidden",
+          "dimension": "A1:AS69",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-06"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "G"
+          ],
+          "stats": {
+            "literalCells": 267,
+            "formulaCells": 754,
+            "sharedCells": 718,
+            "error:#DIV/0!": 341
+          },
+          "families": 29,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "6cf56d8b2af00ba80957a4820f7c10c68192bc7b9d9d72a2b2bb35f8a0e75579"
+        },
+        {
+          "name": "BÁO CÁO TỔNG THÁNG 6",
+          "state": "hidden",
+          "dimension": "A1:Z68",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "summary",
+          "periodCandidates": [
+            "2026-06"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 223,
+            "formulaCells": 114,
+            "sharedCells": 34
+          },
+          "families": 21,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "77b463b0c17ba33c5e7b5b2a4b1229f1b54929cf39f97144519d8bb924b28f36"
+        },
+        {
+          "name": "BÁO CÁO KINH DOANH THÁNG 6 ",
+          "state": "hidden",
+          "dimension": "A1:Z68",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "summary",
+          "periodCandidates": [
+            "2026-06"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 217,
+            "formulaCells": 117,
+            "sharedCells": 34
+          },
+          "families": 24,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "ac1afbed49ce2a75b75d8e3fe46466771a8b7e0034976d3bdf2a2dc4a11113bc"
+        },
+        {
+          "name": "BC DT THÁNG 7 NHÀ G  ",
+          "state": "hidden",
+          "dimension": "A1:AS69",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-07"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "G"
+          ],
+          "stats": {
+            "literalCells": 270,
+            "formulaCells": 743,
+            "sharedCells": 718,
+            "error:#DIV/0!": 341
+          },
+          "families": 19,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "9f062f38740bacade337355590030d8bfddf9420c2ce77562bc132f89455777c"
+        },
+        {
+          "name": "BC DT THÁNG 8 NHÀ G  ",
+          "state": "visible",
+          "dimension": "A1:AU71",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-08"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "G"
+          ],
+          "stats": {
+            "literalCells": 404,
+            "formulaCells": 861,
+            "sharedCells": 800,
+            "error:#DIV/0!": 377
+          },
+          "families": 21,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "9a4bb730ba181850adab8601b825fe60d24eaad25d434bb73d73448c336e8476"
+        },
+        {
+          "name": "BCDT THÁNG 7 NHÀ S  ",
+          "state": "hidden",
+          "dimension": "A1:BE69",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-07"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "S"
+          ],
+          "stats": {
+            "literalCells": 1633,
+            "formulaCells": 991,
+            "sharedCells": 957
+          },
+          "families": 19,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "f214d892861a92dce7ef5caece06261a82ab46a3307077db8fc7993c8c498be2"
+        },
+        {
+          "name": "BCDT THÁNG 8 NHÀ S  ",
+          "state": "visible",
+          "dimension": "A1:BE71",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-08"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "S"
+          ],
+          "stats": {
+            "literalCells": 1724,
+            "formulaCells": 1097,
+            "sharedCells": 1060
+          },
+          "families": 21,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "6da16126af6f853b31552ab0541386e1cb36b08a13b3d9cc58a8ea7d9ce12468"
+        },
+        {
+          "name": "BC DT THÁNG 7 NHÀ T  ",
+          "state": "hidden",
+          "dimension": "A1:AP69",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-07"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "T"
+          ],
+          "stats": {
+            "literalCells": 1143,
+            "formulaCells": 689,
+            "sharedCells": 664
+          },
+          "families": 19,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "c29fcfc603750ab7d987fff264b527e361823ee3247513c18bd03a317ebbc66c"
+        },
+        {
+          "name": "BC DT THÁNG 8 NHÀ T  ",
+          "state": "visible",
+          "dimension": "A1:AP71",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-08"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "T"
+          ],
+          "stats": {
+            "literalCells": 1202,
+            "formulaCells": 761,
+            "sharedCells": 734
+          },
+          "families": 21,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "2400e613a33ef78921dbc7dd9977bcb9fb45cf60bb16a22c35b0d4373cd51bee"
+        },
+        {
+          "name": "BÁO CÁO TỔNG THÁNG 7",
+          "state": "hidden",
+          "dimension": "A1:Z68",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "summary",
+          "periodCandidates": [
+            "2026-07"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 224,
+            "formulaCells": 114,
+            "sharedCells": 34
+          },
+          "families": 21,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "33ddb94f3088891b04cea58bd22b88e973ad50352a1fff4e27b349f3e9e332c0"
+        },
+        {
+          "name": "BÁO CÁO TỔNG THÁNG 8",
+          "state": "visible",
+          "dimension": "A1:Z70",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "summary",
+          "periodCandidates": [
+            "2026-08"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 226,
+            "formulaCells": 122,
+            "sharedCells": 39
+          },
+          "families": 23,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "6e91a01d665d50290b43eba2a14a3eab3f9e6ce62b5f460ced26499c8d47066d"
+        },
+        {
+          "name": "BÁO CÁO KINH DOANH THÁNG 8",
+          "state": "visible",
+          "dimension": "A1:Z70",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "summary",
+          "periodCandidates": [
+            "2026-08"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 220,
+            "formulaCells": 125,
+            "sharedCells": 40
+          },
+          "families": 26,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "f3cece2c05c99d28e381f81f21f2cc19390c4aa390b3a2ea6bb3ee96d34fab4a"
+        },
+        {
+          "name": "BÁO CÁO KINH DOANH THÁNG 7 ",
+          "state": "hidden",
+          "dimension": "A1:Z68",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "summary",
+          "periodCandidates": [
+            "2026-07"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 218,
+            "formulaCells": 117,
+            "sharedCells": 34
+          },
+          "families": 24,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "13c340c47724a03130f04209906b3bbc67795c6d7c93444aa055153a5434e375"
+        },
+        {
+          "name": "BCDT THÁNG 1 NHÀ S ",
+          "state": "hidden",
+          "dimension": "A1:BF68",
+          "domain": "portfolio_report",
+          "rule": "F-PNL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-01"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "S"
+          ],
+          "stats": {
+            "literalCells": 1646,
+            "formulaCells": 1010,
+            "sharedCells": 980
+          },
+          "families": 21,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "02dd6302a8e0a0f170f4d5f8dcb771ac3d12d3d2943ff5d887c0d3884f110741"
+        }
+      ],
+      "externalLinkParts": [
+        "xl/externalLinks/externalLink4.xml",
+        "xl/externalLinks/externalLink5.xml",
+        "xl/externalLinks/externalLink6.xml",
+        "xl/externalLinks/externalLink1.xml",
+        "xl/externalLinks/externalLink2.xml",
+        "xl/externalLinks/externalLink3.xml"
+      ],
+      "tables": 0,
+      "definedNames": 7
+    },
+    {
+      "file": "docs/bao_cao/báo cáo.xlsx",
+      "sha256": "f12b65708dc01cffd9717525638ab7eeff3095523a0eb0da709ea156523dd06c",
+      "sheets": [
+        {
+          "name": "BÁO CÁO",
+          "state": "visible",
+          "dimension": "A1:F23",
+          "domain": "report_requirements",
+          "rule": "F-REPORT",
+          "role": "summary",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 55
+          },
+          "families": 0,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "877e519cb0a556c99ceb99fb2f51a1a2affe8dfb95a282ef13032dd5831e831f"
+        }
+      ],
+      "externalLinkParts": [],
+      "tables": 0,
+      "definedNames": 0
+    },
+    {
+      "file": "docs/bao_cao/BẢNG DỰ KIẾN LỢI NHUẬN CÁC THÁNG.xlsx",
+      "sha256": "81a459f5476bb76ed7545669a0ab3fab01eac5f2aa9a72b3efb1f4ff57a8a4e5",
+      "sheets": [
+        {
+          "name": "Tháng 4",
+          "state": "visible",
+          "dimension": "A1:B27",
+          "domain": "forecast",
+          "rule": "F-FORECAST",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-04"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 47,
+            "formulaCells": 5
+          },
+          "families": 5,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "735d0707fe92981466d4cbab4e10e3069cfb9c657ae57fc0fdc82341471ec817"
+        },
+        {
+          "name": "Tháng 3",
+          "state": "visible",
+          "dimension": "A1:D27",
+          "domain": "forecast",
+          "rule": "F-FORECAST",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-03"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 73,
+            "formulaCells": 31,
+            "sharedCells": 22
+          },
+          "families": 5,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "d9cb50baa263a3607f4cbec4794cc22ee8be6f2a05c23f0a4747f1c8403edf58"
+        },
+        {
+          "name": "Tháng 5 ",
+          "state": "visible",
+          "dimension": "A1:E27",
+          "domain": "forecast",
+          "rule": "F-FORECAST",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-05"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 48,
+            "formulaCells": 4
+          },
+          "families": 4,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "c1ff1d1bdc590a4867b0a4c3d63efe1d330f1b1adab34b3d3be63185c604f82d"
+        },
+        {
+          "name": "Tháng 6",
+          "state": "visible",
+          "dimension": "A1:K30",
+          "domain": "forecast",
+          "rule": "F-FORECAST",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-06"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 103,
+            "formulaCells": 14
+          },
+          "families": 14,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "cfd7829ab5491438baec46de18044b5b1171811d2a3123297fbfff123ff2203b"
+        },
+        {
+          "name": "Tháng 7 ",
+          "state": "visible",
+          "dimension": "A1:K31",
+          "domain": "forecast",
+          "rule": "F-FORECAST",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-06",
+            "2025-08"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 104,
+            "formulaCells": 13
+          },
+          "families": 13,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "00e2404d0792c6e073bcd808e5dd2977e4a2b38c77858ba9c252cbb601ea4808"
+        },
+        {
+          "name": "Tháng 8  ",
+          "state": "visible",
+          "dimension": "A1:K32",
+          "domain": "forecast",
+          "rule": "F-FORECAST",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-06",
+            "2025-09"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 118,
+            "formulaCells": 22
+          },
+          "families": 22,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "76d5b2797d65d9c45af230fed9212be54e3eca6d79fb7ab80999ba65fbbba002"
+        },
+        {
+          "name": "Tháng 8 .",
+          "state": "visible",
+          "dimension": "A1:K32",
+          "domain": "forecast",
+          "rule": "F-FORECAST",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-06",
+            "2025-08"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 109,
+            "formulaCells": 13
+          },
+          "families": 13,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "0d0859710129501a47983221cd57d679e9ce009f0d12cde6a677ad377f1b6d3d"
+        },
+        {
+          "name": "Tháng 9",
+          "state": "visible",
+          "dimension": "A1:K32",
+          "domain": "forecast",
+          "rule": "F-FORECAST",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-06",
+            "2025-09"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 109,
+            "formulaCells": 13
+          },
+          "families": 13,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "99279dff7cc2d26d6c64dd973acfb317d849d1ac930c48f7900f8c1ed67c641e"
+        },
+        {
+          "name": "Tháng 10",
+          "state": "visible",
+          "dimension": "A1:K31",
+          "domain": "forecast",
+          "rule": "F-FORECAST",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-06",
+            "2025-10"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 106,
+            "formulaCells": 14
+          },
+          "families": 14,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "19d49c2e175697f23009643146be7bd35cf6f5f2df04db7f92ad808260083c88"
+        },
+        {
+          "name": "Tháng 11",
+          "state": "visible",
+          "dimension": "A1:K31",
+          "domain": "forecast",
+          "rule": "F-FORECAST",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-06",
+            "2025-11"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 106,
+            "formulaCells": 14
+          },
+          "families": 14,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "7394a67f4119e7f7f3a1333dec7fac6d8e14739fb75bb501cfec02bcd1e3d9cd"
+        },
+        {
+          "name": "Tháng 12",
+          "state": "visible",
+          "dimension": "A1:K31",
+          "domain": "forecast",
+          "rule": "F-FORECAST",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-06",
+            "2025-12"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 105,
+            "formulaCells": 15
+          },
+          "families": 15,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "a1e8f279a79c1f801b6993cf5a3d5cd3bad6d6a08f5f327db20f923b40730ece"
+        },
+        {
+          "name": "Tháng 1.2026",
+          "state": "visible",
+          "dimension": "A1:K31",
+          "domain": "forecast",
+          "rule": "F-FORECAST",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-06",
+            "2026-01"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 105,
+            "formulaCells": 15
+          },
+          "families": 15,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "2e7dc4a7c92dbcbb92c6ac6d3957c7c916c81305a24c91799073db98eccda6da"
+        },
+        {
+          "name": "Tháng 2.2026 ",
+          "state": "visible",
+          "dimension": "A1:K31",
+          "domain": "forecast",
+          "rule": "F-FORECAST",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-06",
+            "2026-02"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 103,
+            "formulaCells": 16
+          },
+          "families": 16,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "357d5e53d19a54e6e8dfe741cd3611be92188f4400392e376f9dc8380c3e1545"
+        },
+        {
+          "name": "Tháng 3.2026 ",
+          "state": "visible",
+          "dimension": "A1:K31",
+          "domain": "forecast",
+          "rule": "F-FORECAST",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-06",
+            "2026-03"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 103,
+            "formulaCells": 14
+          },
+          "families": 14,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "4d1ced7c69d3b9a991d3e725a0ad4d4f2127482f17fb5e7ac0f15de454dd0079"
+        },
+        {
+          "name": "Sheet1",
+          "state": "hidden",
+          "dimension": "A1:G11",
+          "domain": "forecast",
+          "rule": "F-FORECAST",
+          "role": "unlabelled_reference",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 43,
+            "formulaCells": 17,
+            "sharedCells": 13
+          },
+          "families": 3,
+          "duplicateOf": null,
+          "disposition": "reference_only",
+          "sha256SheetData": "908417e1142b10e10a9fcacc42a1ca67fa0f3dffa3758f59fe3dcc41987ff90b"
+        },
+        {
+          "name": "Tháng 4.2026  ",
+          "state": "visible",
+          "dimension": "A1:K31",
+          "domain": "forecast",
+          "rule": "F-FORECAST",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-06",
+            "2026-04"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 104,
+            "formulaCells": 14
+          },
+          "families": 14,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "327370a7e7101352f7d9e7256c5ac8781b0eaf0c43d82d11dc1b27090dc091a7"
+        },
+        {
+          "name": "Tháng 5.2026 ",
+          "state": "visible",
+          "dimension": "A1:K32",
+          "domain": "forecast",
+          "rule": "F-FORECAST",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-06",
+            "2026-05"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 105,
+            "formulaCells": 13
+          },
+          "families": 13,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "656e3e4c27bfd74119566cb5f9a485ee8b049f0ea1cd9044fee7cc22db31a5ea"
+        },
+        {
+          "name": "Tháng 6.2026 ",
+          "state": "visible",
+          "dimension": "A1:K32",
+          "domain": "forecast",
+          "rule": "F-FORECAST",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-06",
+            "2026-06"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 107,
+            "formulaCells": 13
+          },
+          "families": 13,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "bfd46c4b15de32c2dec25f59211af4b6fa2693688293980139d603138b193d01"
+        },
+        {
+          "name": "Tháng 7.2026  ",
+          "state": "visible",
+          "dimension": "A1:K32",
+          "domain": "forecast",
+          "rule": "F-FORECAST",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-06",
+            "2026-07"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 105,
+            "formulaCells": 12
+          },
+          "families": 12,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "4f7d6bff1e65dcdf100443c8a1ea3dc19ea89350aed98b8db0e5839effd9daa1"
+        },
+        {
+          "name": "Tháng 8.2026  ",
+          "state": "visible",
+          "dimension": "A1:K32",
+          "domain": "forecast",
+          "rule": "F-FORECAST",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-06",
+            "2026-08"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 107,
+            "formulaCells": 12
+          },
+          "families": 12,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "f85e581bc3183ea4f65aa8d7c4c5c9388934a99e01fd7173e24a58b74e1abca0"
+        },
+        {
+          "name": "Tháng 9.2026 ",
+          "state": "visible",
+          "dimension": "A1:K33",
+          "domain": "forecast",
+          "rule": "F-FORECAST",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-06",
+            "2026-09"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 109,
+            "formulaCells": 12
+          },
+          "families": 12,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "3b57f87df819ed3d607871d1517229962da0a08336bc847ba17bcd5286b817b0"
+        }
+      ],
+      "externalLinkParts": [],
+      "tables": 0,
+      "definedNames": 0
+    },
+    {
+      "file": "docs/bao_cao/bảng lương tháng 8.xlsx",
+      "sha256": "21e3abd88aa805c41f7fcd7900dfbcf42fb694837cf917627c4651309283981c",
+      "sheets": [
+        {
+          "name": "THÁNG 1",
+          "state": "hidden",
+          "dimension": "A1:Y1107",
+          "domain": "payroll",
+          "rule": "F-PAYROLL",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 897,
+            "formulaCells": 820,
+            "sharedCells": 447,
+            "error:#REF!": 1
+          },
+          "families": 114,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "88d71f009a4b88df08fb609b04333981af8c1f4eeaf1dfb221a7fbdf0e8160db"
+        },
+        {
+          "name": "THÁNG 2 ",
+          "state": "hidden",
+          "dimension": "A1:Y1101",
+          "domain": "payroll",
+          "rule": "F-PAYROLL",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 885,
+            "formulaCells": 785,
+            "sharedCells": 440,
+            "error:#REF!": 1
+          },
+          "families": 99,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "b7a8bc550eb9cd92961550f1f5b0ab637a479b4a55616a95ca604ee301b216fb"
+        },
+        {
+          "name": "THÁNG 3",
+          "state": "hidden",
+          "dimension": "A1:Y1103",
+          "domain": "payroll",
+          "rule": "F-PAYROLL",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 884,
+            "formulaCells": 828,
+            "sharedCells": 456,
+            "error:#REF!": 1
+          },
+          "families": 141,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "c26508a662d693711a0f58a18c10a5fd24552f13d05b57167a4eb3d35d32f181"
+        },
+        {
+          "name": "THÁNG 4 ",
+          "state": "hidden",
+          "dimension": "A1:Y1107",
+          "domain": "payroll",
+          "rule": "F-PAYROLL",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 887,
+            "formulaCells": 839,
+            "sharedCells": 478,
+            "error:#REF!": 5
+          },
+          "families": 148,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "99c1fc8e64b13328ff413490610941385f7307aceb6f3de24307fce63dd3c263"
+        },
+        {
+          "name": "THÁNG 5 ",
+          "state": "hidden",
+          "dimension": "A1:Y1109",
+          "domain": "payroll",
+          "rule": "F-PAYROLL",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 914,
+            "formulaCells": 852,
+            "sharedCells": 471,
+            "error:#REF!": 5
+          },
+          "families": 141,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "5c260c0db629bcdb6f796c10569ef8f195e9f9f529b3574493b542c37c1ca92a"
+        },
+        {
+          "name": "THÁNG 6",
+          "state": "hidden",
+          "dimension": "A1:Y1114",
+          "domain": "payroll",
+          "rule": "F-PAYROLL",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 931,
+            "formulaCells": 871,
+            "sharedCells": 492,
+            "error:#REF!": 3
+          },
+          "families": 147,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "4f999d507e9634e0913ee2d58cb2635e2b8abf24d105152e0c5c027d34faa46e"
+        },
+        {
+          "name": "THÁNG 7",
+          "state": "hidden",
+          "dimension": "A1:Y1121",
+          "domain": "payroll",
+          "rule": "F-PAYROLL",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 971,
+            "formulaCells": 857,
+            "sharedCells": 502,
+            "error:#REF!": 2
+          },
+          "families": 122,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "7658d97d2a1d9e77ff9689c218c58b98202dd73128ed0758ca72fd101ca27e31"
+        },
+        {
+          "name": "THÁNG 8",
+          "state": "visible",
+          "dimension": "A1:Y1127",
+          "domain": "payroll",
+          "rule": "F-PAYROLL",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 968,
+            "formulaCells": 952,
+            "sharedCells": 541,
+            "error:#REF!": 3
+          },
+          "families": 168,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "d6f1a29928ce52a0f39adc7ce0723f4598eab91f652fa5331c8eac1c8da67c36"
+        }
+      ],
+      "externalLinkParts": [],
+      "tables": 0,
+      "definedNames": 8
+    },
+    {
+      "file": "docs/bao_cao/sổ sửa chữa tháng 8(AutoRecovered).xlsx",
+      "sha256": "3a80e7fe3a56adcac722eafeb9e4ff33825710e9a0d4aaec2a31993ff104154b",
+      "sheets": [
+        {
+          "name": "LƯƠNG THÁNG 2",
+          "state": "hidden",
+          "dimension": "A1:L47",
+          "domain": "repair",
+          "rule": "F-REPAIR",
+          "role": "summary",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 64,
+            "formulaCells": 23,
+            "sharedCells": 11
+          },
+          "families": 7,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "3cf87740890d6a054a5bf6f7e9eb45ab680dbf15e69708ec197f0ab15b9eba3c"
+        },
+        {
+          "name": "A Điệp T1.26",
+          "state": "hidden",
+          "dimension": "A1:G196",
+          "domain": "repair",
+          "rule": "F-REPAIR",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-01"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 295,
+            "formulaCells": 5
+          },
+          "families": 4,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "2f3ce2140561146822ac03216450cfbea2fa4e2abfb8ffa390158170375df670"
+        },
+        {
+          "name": "A Ước T1.26",
+          "state": "hidden",
+          "dimension": "A1:G51",
+          "domain": "repair",
+          "rule": "F-REPAIR",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-01"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 210,
+            "formulaCells": 2
+          },
+          "families": 2,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "05d43f93e6419ea0ce1ff3d7f61a1ef4e5bb8034b618167e09744795d2f13cb5"
+        },
+        {
+          "name": "Trường",
+          "state": "hidden",
+          "dimension": "A1:M23",
+          "domain": "repair",
+          "rule": "F-REPAIR",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 110,
+            "formulaCells": 2
+          },
+          "families": 1,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "d66e7b93ec556caaae4d90d4d2d58d60778ac448755ec9f3431bacf77bfb286d"
+        },
+        {
+          "name": "a Điệp T2.26",
+          "state": "hidden",
+          "dimension": "A1:G49",
+          "domain": "repair",
+          "rule": "F-REPAIR",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-02"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 193,
+            "formulaCells": 3
+          },
+          "families": 2,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "26ec145d2063551a12e0e1c9c1c6cfe9b00a2f1daf1c126e8c19500ad10f33cd"
+        },
+        {
+          "name": "A Ước T2.26",
+          "state": "hidden",
+          "dimension": "A1:G53",
+          "domain": "repair",
+          "rule": "F-REPAIR",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-02"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 133,
+            "formulaCells": 2
+          },
+          "families": 1,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "720bec5a4200c36b8d99357313d2b0afe0b97d2bfa4f3909af0fc910d7750051"
+        },
+        {
+          "name": "trường.2.26",
+          "state": "hidden",
+          "dimension": "A1:H22",
+          "domain": "repair",
+          "rule": "F-REPAIR",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-02"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 73,
+            "formulaCells": 2
+          },
+          "families": 1,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "6385d1567ff2116fb43c51df91e002a2d17c67fba404b72bc52ec6b40becbc6b"
+        },
+        {
+          "name": "trường tháng 3",
+          "state": "hidden",
+          "dimension": "A1:H38",
+          "domain": "repair",
+          "rule": "F-REPAIR",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 180,
+            "formulaCells": 2
+          },
+          "families": 1,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "c44df6c7aedaa1561e8e5d0d80a452b734e4f2de704e5fc93b52cb65a1913e78"
+        },
+        {
+          "name": "A Điệp T3.26",
+          "state": "hidden",
+          "dimension": "A1:G97",
+          "domain": "repair",
+          "rule": "F-REPAIR",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-03"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 427,
+            "formulaCells": 2
+          },
+          "families": 1,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "ca6ab266ec7da07872494c3bc04bf7316ae40a7f600faf87687efc8923b85fbc"
+        },
+        {
+          "name": "A Ước T3.26",
+          "state": "hidden",
+          "dimension": "A1:G84",
+          "domain": "repair",
+          "rule": "F-REPAIR",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-03"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 350,
+            "formulaCells": 2
+          },
+          "families": 1,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "7084f23912b7ef23b00c6496ff85aeef1ea9d91e9331005a28ced6807e0a072d"
+        },
+        {
+          "name": "LƯƠNG THÁNG 3 ",
+          "state": "hidden",
+          "dimension": "A1:L47",
+          "domain": "repair",
+          "rule": "F-REPAIR",
+          "role": "summary",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 64,
+            "formulaCells": 23,
+            "sharedCells": 11
+          },
+          "families": 7,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "0c9253e61b476aa1c51e4e213e32f098201695505a399c26dc0f4018c4639c22"
+        },
+        {
+          "name": "Trường T4.26",
+          "state": "hidden",
+          "dimension": "A1:H52",
+          "domain": "repair",
+          "rule": "F-REPAIR",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-04"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 257,
+            "formulaCells": 2
+          },
+          "families": 1,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "6ad4f655a4b2bc94dec66f41a66bba4dbf982cbd00e374bee5279976152d6a78"
+        },
+        {
+          "name": "A Điệp T4.26",
+          "state": "hidden",
+          "dimension": "A1:I109",
+          "domain": "repair",
+          "rule": "F-REPAIR",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-04"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 566,
+            "formulaCells": 4
+          },
+          "families": 4,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "e5ef836459b379918acfab1a51d6e3084bc222521303d677a82a344e2adc4489"
+        },
+        {
+          "name": "A Ước T4.26",
+          "state": "hidden",
+          "dimension": "A1:I92",
+          "domain": "repair",
+          "rule": "F-REPAIR",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-04"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 491,
+            "formulaCells": 4
+          },
+          "families": 4,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "9e45261f382d3d09512dc074de8c585c3de92dec07fa387f71e8a51f35388802"
+        },
+        {
+          "name": "A Điệp 5.26",
+          "state": "hidden",
+          "dimension": "A1:G194",
+          "domain": "repair",
+          "rule": "F-REPAIR",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-05"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 331,
+            "formulaCells": 2
+          },
+          "families": 1,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "1a52a92a1fa7f718ffd4499dd4a1421e783eff50e2b9141f5824a5d21bad77a1"
+        },
+        {
+          "name": "A Ước 5.26 ",
+          "state": "hidden",
+          "dimension": "A1:G72",
+          "domain": "repair",
+          "rule": "F-REPAIR",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-05"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 296,
+            "formulaCells": 2
+          },
+          "families": 1,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "c8876b9c71b162c486574b31b70778b9b907a0feede4fb2852eba834b5f0b428"
+        },
+        {
+          "name": "trường t5.2026",
+          "state": "hidden",
+          "dimension": "A1:H66",
+          "domain": "repair",
+          "rule": "F-REPAIR",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-05"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 328,
+            "formulaCells": 2
+          },
+          "families": 1,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "f572082f469b573400b53c6f40284bcd625e5d0e0c8cdab116a2f12f8fd66a63"
+        },
+        {
+          "name": "Sheet4",
+          "state": "hidden",
+          "dimension": "A1:J23",
+          "domain": "repair",
+          "rule": "F-REPAIR",
+          "role": "unlabelled_reference",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 72
+          },
+          "families": 0,
+          "duplicateOf": null,
+          "disposition": "reference_only",
+          "sha256SheetData": "05cff7fd5f03924f1ad3612a8e4bdc337ee72d12c526c3e71b307a506abf1eac"
+        },
+        {
+          "name": "A Điệp 6.26",
+          "state": "visible",
+          "dimension": "A1:G193",
+          "domain": "repair",
+          "rule": "F-REPAIR",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-06"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 391,
+            "formulaCells": 6
+          },
+          "families": 4,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "0d915d9cf9ef2ca9d803eca3c7b12257cad488bc168627cedcde3a967c81569a"
+        },
+        {
+          "name": "A Ước 6.26",
+          "state": "visible",
+          "dimension": "A1:G87",
+          "domain": "repair",
+          "rule": "F-REPAIR",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-06"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 328,
+            "formulaCells": 2
+          },
+          "families": 1,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "e8e00c9e07f95e5e0abe8a3050d605150a653cf7a3fa78d90c9ffcd893f9d6f5"
+        },
+        {
+          "name": "Trường 6.2026",
+          "state": "hidden",
+          "dimension": "A1:H66",
+          "domain": "repair",
+          "rule": "F-REPAIR",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-06"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 188,
+            "formulaCells": 2
+          },
+          "families": 1,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "feeffe659f73430aa8648a143d066e3ac045c4eb251130fd354914ab9e0e4207"
+        },
+        {
+          "name": "A Điệp 7.26",
+          "state": "visible",
+          "dimension": "A1:G193",
+          "domain": "repair",
+          "rule": "F-REPAIR",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-07"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 490,
+            "formulaCells": 2
+          },
+          "families": 1,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "a7ad9a21e1b867dd3d75975fb56352dd2c3682e8decdea4c6a7ea2728643ca18"
+        },
+        {
+          "name": "A Ước 7.26",
+          "state": "visible",
+          "dimension": "A1:G88",
+          "domain": "repair",
+          "rule": "F-REPAIR",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-07"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 286,
+            "formulaCells": 2
+          },
+          "families": 1,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "e9f4f9e91c79d100ae6becb5a3281f0933f257f6a4e132d45859907796497cd7"
+        },
+        {
+          "name": "LƯƠNG THÁNG 5",
+          "state": "hidden",
+          "dimension": "A1:L47",
+          "domain": "repair",
+          "rule": "F-REPAIR",
+          "role": "summary",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 62,
+            "formulaCells": 25,
+            "sharedCells": 11
+          },
+          "families": 9,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "7a0d25205cd9598ccff60c11b4f4dc5fcd00977f70c2f469792ccf826af37220"
+        },
+        {
+          "name": "LƯƠNG THÁNG 6",
+          "state": "hidden",
+          "dimension": "A1:L47",
+          "domain": "repair",
+          "rule": "F-REPAIR",
+          "role": "summary",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 63,
+            "formulaCells": 24,
+            "sharedCells": 11
+          },
+          "families": 8,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "da8a3c2f45dc6ff1cf5bccda36fb33dab43c7b522e12a0a9f287fc7b3888c634"
+        },
+        {
+          "name": "LƯƠNG THÁNG 7",
+          "state": "hidden",
+          "dimension": "A1:L47",
+          "domain": "repair",
+          "rule": "F-REPAIR",
+          "role": "summary",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 62,
+            "formulaCells": 25,
+            "sharedCells": 11
+          },
+          "families": 9,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "9ff9e8fdd056d4be9fd3ee2a87cd4dac062c8242452482e54ef67656a05e6330"
+        },
+        {
+          "name": "A Điệp 8.26",
+          "state": "visible",
+          "dimension": "A1:I180",
+          "domain": "repair",
+          "rule": "F-REPAIR",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-08"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 577,
+            "formulaCells": 2
+          },
+          "families": 1,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "ee1af99a8491591feb9d5baa98ac3b617997bf2fb603039f70b00e45c32d9b9a"
+        },
+        {
+          "name": "A Ước 8.26",
+          "state": "visible",
+          "dimension": "A1:I138",
+          "domain": "repair",
+          "rule": "F-REPAIR",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-08"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 723,
+            "formulaCells": 2
+          },
+          "families": 1,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "119e3b93313caf32e3022cf31921328572a7195e0651ad5a5097bd19287797a4"
+        },
+        {
+          "name": "LƯƠNG THÁNG 8",
+          "state": "visible",
+          "dimension": "A1:L47",
+          "domain": "repair",
+          "rule": "F-REPAIR",
+          "role": "summary",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 61,
+            "formulaCells": 26,
+            "sharedCells": 11
+          },
+          "families": 10,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "43965901f224eb473959261656b55de47faade7269ca26f9d8666cd461917194"
+        }
+      ],
+      "externalLinkParts": [],
+      "tables": 6,
+      "definedNames": 17
+    },
+    {
+      "file": "docs/bao_cao/âm dương điện nước tháng 6.xlsx",
+      "sha256": "a1315dc08843a4c0e4ff6774a8194ac6f49a36a7f0fbb38102a4a505060b47f4",
+      "sheets": [
+        {
+          "name": "THÁNG 5.2025( dv)",
+          "state": "hidden",
+          "dimension": "A1:H82",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-05"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 154,
+            "formulaCells": 376,
+            "error:#VALUE!": 300,
+            "sharedCells": 152
+          },
+          "families": 34,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "50e25e0a3e49d4bf611b88edbd9b18dadaf898af3b2cf8b49db375067162ec7c"
+        },
+        {
+          "name": "THÁNG 5.2025",
+          "state": "hidden",
+          "dimension": "A1:J82",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-05"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 219,
+            "formulaCells": 465,
+            "error:#VALUE!": 450,
+            "sharedCells": 156
+          },
+          "families": 25,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "20f12aa6a078b4dfba3f38425903c1b071232d357d547ccb9b49cf5614d7a3c0"
+        },
+        {
+          "name": "THÁNG 2.2026 Công thức ",
+          "state": "hidden",
+          "dimension": "A1:W96",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "formula_reference",
+          "periodCandidates": [
+            "2026-02"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 634,
+            "formulaCells": 1078,
+            "error:#VALUE!": 1045,
+            "sharedCells": 712
+          },
+          "families": 25,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "615530f5a90f6f3c7b03acec92ebad0c08c544e4c99e668a69be3d121c9e89e9"
+        },
+        {
+          "name": "THÁNG 2.2026",
+          "state": "hidden",
+          "dimension": "A1:W96",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-02"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 1693,
+            "formulaCells": 18,
+            "sharedCells": 17
+          },
+          "families": 1,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "0e5a04e1e1f5630e65dc6be26e66328073753cd3793cc84823e63c0800e0cf77"
+        },
+        {
+          "name": "THÁNG 4.2026",
+          "state": "hidden",
+          "dimension": "A1:W100",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-02",
+            "2026-04"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 659,
+            "formulaCells": 1127,
+            "error:#VALUE!": 1116,
+            "sharedCells": 746
+          },
+          "families": 22,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "e1258c99f53468920b8c53ce9a8aab684d138cdd4da502cc3953a220f65cab5e"
+        },
+        {
+          "name": "THÁNG 5.2026 nước ",
+          "state": "hidden",
+          "dimension": "A1:W101",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-05"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 841,
+            "formulaCells": 958,
+            "error:#VALUE!": 563,
+            "sharedCells": 733
+          },
+          "families": 52,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "084c0f7feab32ca5991f7b6d7531de676ec601e05f4cee636b841af49793718e"
+        },
+        {
+          "name": "Sản lượng điện tháng 5 và 6 CT",
+          "state": "hidden",
+          "dimension": "A1:I96",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "formula_reference",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 286,
+            "formulaCells": 380,
+            "error:#VALUE!": 108,
+            "sharedCells": 189
+          },
+          "families": 16,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "589f79dbb7dfff44addbe10be46a565fe7194ee5983e8fc312289e91ec96a604"
+        },
+        {
+          "name": "Sản lượng điện thấng 5 và 6",
+          "state": "hidden",
+          "dimension": "A1:I96",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 660,
+            "formulaCells": 6,
+            "sharedCells": 5
+          },
+          "families": 1,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "83f0536349b005543cbf78403b385875b782fd16730999d731ae6f295fcb1974"
+        },
+        {
+          "name": "THÁNG 6.2026 điện công thức",
+          "state": "hidden",
+          "dimension": "A1:W101",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "formula_reference",
+          "periodCandidates": [
+            "2026-06"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 669,
+            "formulaCells": 1130,
+            "error:#VALUE!": 1020,
+            "sharedCells": 746
+          },
+          "families": 21,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "d269b5b9a5a3afa870eccebde10be516a348824b797fe7ed395f04a9aa551b1e"
+        },
+        {
+          "name": "THÁNG 6.2026 điện",
+          "state": "hidden",
+          "dimension": "A1:W101",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-06"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 1423,
+            "formulaCells": 376,
+            "error:#VALUE!": 372,
+            "sharedCells": 279
+          },
+          "families": 9,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "59193421ea367a8856789eb2b887a6e6484d695511bc36a06703c4ee81a7b3c7"
+        },
+        {
+          "name": "THÁNG 6.2026 nước",
+          "state": "visible",
+          "dimension": "A1:S101",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-06"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 1137,
+            "formulaCells": 99,
+            "sharedCells": 92
+          },
+          "families": 2,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "5e8013f1db5237942f19f2428a20204adc57c4a2afd45534fac35fbfe23b2a12"
+        },
+        {
+          "name": "THÁNG 5.2026  chuẩn",
+          "state": "hidden",
+          "dimension": "A1:W101",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-05"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 1500,
+            "formulaCells": 578,
+            "error:#VALUE!": 368,
+            "sharedCells": 468
+          },
+          "families": 12,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "113940693867557828d745253019648f5a573a4c377e6d869bb528d4fd582dd0"
+        },
+        {
+          "name": "THÁNG 4.2026. chuẩn ",
+          "state": "hidden",
+          "dimension": "A1:W100",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-04"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 1786
+          },
+          "families": 0,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "afd4765afe6f0c223c13436aa4323adf2513d4b5040f1a1aede6fbda58d36a5e"
+        },
+        {
+          "name": "THÁNG 8.2025 chuẩn ",
+          "state": "hidden",
+          "dimension": "A1:T91",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-08"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 1586,
+            "formulaCells": 18,
+            "sharedCells": 8
+          },
+          "families": 1,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "42b3d41ed385cbcbcdf0d3e2432ec75a3f8e25aa8838da96dfe87db604756e65"
+        },
+        {
+          "name": "THÁNG 8.2025 ",
+          "state": "hidden",
+          "dimension": "A1:T91",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-08"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 588,
+            "formulaCells": 1016,
+            "error:#VALUE!": 1008,
+            "sharedCells": 661
+          },
+          "families": 15,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "50c83a29c2ff8b29ccb202e36e66d5ca801c2e9c0ce4b086cd8dd556776e2be5"
+        },
+        {
+          "name": "THÁNG 7.2025 chuẩn",
+          "state": "hidden",
+          "dimension": "A1:T86",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-07"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 897,
+            "formulaCells": 494,
+            "sharedCells": 469
+          },
+          "families": 15,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "6b8e285ecdcef5b03c28cecf7acce50a95cab2520c6d100fa6079a51472e954b"
+        },
+        {
+          "name": "THÁNG 7.2025",
+          "state": "hidden",
+          "dimension": "A1:T86",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-07"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 320,
+            "formulaCells": 1071,
+            "error:#VALUE!": 1058,
+            "sharedCells": 548
+          },
+          "families": 29,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "cf66050734fd32cd0e0d3dfea826a8e0103880edb8545d9998ce99d92f666447"
+        },
+        {
+          "name": "THÁNG 6.2025",
+          "state": "hidden",
+          "dimension": "A1:T85",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-06"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 466,
+            "formulaCells": 1024,
+            "error:#VALUE!": 1012,
+            "sharedCells": 474
+          },
+          "families": 22,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "15508ed572da7bf5bab271e72af4ea6138af8da472ae154b2cd04b10ccfa343f"
+        },
+        {
+          "name": "THÁNG 2.2025 ",
+          "state": "hidden",
+          "dimension": "A1:J79",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-02"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 201,
+            "formulaCells": 451,
+            "error:#VALUE!": 431,
+            "sharedCells": 142
+          },
+          "families": 28,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "64f408ec574a94f1b53a7a78d3b2da07ef52a088cdea3279489712b6ce5397e3"
+        },
+        {
+          "name": "THÁNG 1.2025",
+          "state": "hidden",
+          "dimension": "A1:J78",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-01"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 208,
+            "formulaCells": 435,
+            "error:#VALUE!": 426,
+            "sharedCells": 135
+          },
+          "families": 17,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "633a3019a6139b40a79dc797ef16ec255f42263be8dab1fc568c0206ff0a0495"
+        },
+        {
+          "name": "THÁNG 11",
+          "state": "hidden",
+          "dimension": "A1:I76",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 197,
+            "formulaCells": 427,
+            "error:#VALUE!": 414,
+            "sharedCells": 128
+          },
+          "families": 37,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "5c06fb05f5566ae58ca8063ae432d97620328801155be2f5ce22ac048d5bb56d"
+        },
+        {
+          "name": "Sheet1",
+          "state": "hidden",
+          "dimension": "A1:Z995",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "unlabelled_reference",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 106,
+            "formulaCells": 7
+          },
+          "families": 7,
+          "duplicateOf": null,
+          "disposition": "reference_only",
+          "sha256SheetData": "fb6ac9f424257e8f342e4aa16c7c77f8c87dccd56bbc3dfc27aa502ac574f8fd"
+        },
+        {
+          "name": "THÁNG 6",
+          "state": "hidden",
+          "dimension": "A1:G1001",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 141,
+            "formulaCells": 246,
+            "sharedCells": 106
+          },
+          "families": 135,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "338a21e0994eac4b93edaae7c869ae899d2971604d884b8fd0f4f81011c04b2b"
+        },
+        {
+          "name": "THÁNG 7",
+          "state": "hidden",
+          "dimension": "A1:G59",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 147,
+            "formulaCells": 243,
+            "sharedCells": 104
+          },
+          "families": 131,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "5229cd35c90e3c9c0642e76a84716c6746cdefaaf9de88ddde8c9963b47f71bc"
+        },
+        {
+          "name": "THÁNG 8",
+          "state": "hidden",
+          "dimension": "A1:I62",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 166,
+            "formulaCells": 328,
+            "sharedCells": 106
+          },
+          "families": 211,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "ecbb8d4b5b8e4cb30357daea2e1714f0018f2810e5ab148cb1af78875d43acfb"
+        },
+        {
+          "name": "THÁNG 8 (2)",
+          "state": "hidden",
+          "dimension": "A1:K66",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 283,
+            "formulaCells": 333,
+            "sharedCells": 226
+          },
+          "families": 95,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "060fe8c17d4b5610e0aa200cdf8584a628df5246b98537823bd810260810f3a8"
+        },
+        {
+          "name": "THÁNG 9",
+          "state": "hidden",
+          "dimension": "A1:I67",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 164,
+            "formulaCells": 381,
+            "error:#VALUE!": 359,
+            "sharedCells": 118
+          },
+          "families": 30,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "1221506cec045c896456e5021ce8fe6c98328275cff3a02b6a97a34346b48a41"
+        },
+        {
+          "name": "THÁNG 10",
+          "state": "hidden",
+          "dimension": "A1:I74",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 189,
+            "formulaCells": 414,
+            "error:#VALUE!": 399,
+            "sharedCells": 130
+          },
+          "families": 25,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "1d4b0bc6302cdb1e34c5cf0deaa3366fa5c9b6da55015649eb07f600e1cdcccc"
+        }
+      ],
+      "externalLinkParts": [
+        "xl/externalLinks/externalLink1.xml",
+        "xl/externalLinks/externalLink2.xml",
+        "xl/externalLinks/externalLink3.xml",
+        "xl/externalLinks/externalLink4.xml",
+        "xl/externalLinks/externalLink5.xml",
+        "xl/externalLinks/externalLink6.xml",
+        "xl/externalLinks/externalLink7.xml",
+        "xl/externalLinks/externalLink8.xml",
+        "xl/externalLinks/externalLink9.xml",
+        "xl/externalLinks/externalLink10.xml",
+        "xl/externalLinks/externalLink11.xml",
+        "xl/externalLinks/externalLink12.xml",
+        "xl/externalLinks/externalLink13.xml",
+        "xl/externalLinks/externalLink14.xml",
+        "xl/externalLinks/externalLink15.xml",
+        "xl/externalLinks/externalLink16.xml",
+        "xl/externalLinks/externalLink17.xml",
+        "xl/externalLinks/externalLink18.xml",
+        "xl/externalLinks/externalLink19.xml",
+        "xl/externalLinks/externalLink20.xml",
+        "xl/externalLinks/externalLink21.xml",
+        "xl/externalLinks/externalLink22.xml",
+        "xl/externalLinks/externalLink23.xml",
+        "xl/externalLinks/externalLink24.xml",
+        "xl/externalLinks/externalLink26.xml",
+        "xl/externalLinks/externalLink27.xml",
+        "xl/externalLinks/externalLink28.xml",
+        "xl/externalLinks/externalLink25.xml"
+      ],
+      "tables": 0,
+      "definedNames": 17
+    },
+    {
+      "file": "docs/bao_cao/âm dương điện nước tháng 7.xlsx",
+      "sha256": "9599cb8555874d47eda15a02144eac69e7d64fda22970798d08df2b0177aa0f2",
+      "sheets": [
+        {
+          "name": "THÁNG 5.2025( dv)",
+          "state": "hidden",
+          "dimension": "A1:H82",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-05"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 154,
+            "formulaCells": 376,
+            "error:#VALUE!": 300,
+            "sharedCells": 152
+          },
+          "families": 34,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "6f9d24dfb63a74678d237199480a33026f229ce4281a36813a5a5c43804c5024"
+        },
+        {
+          "name": "THÁNG 5.2025",
+          "state": "hidden",
+          "dimension": "A1:J82",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-05"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 219,
+            "formulaCells": 465,
+            "error:#VALUE!": 450,
+            "sharedCells": 156
+          },
+          "families": 25,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "a06a60b50adce1ff44603786ba5f7649fbe199da320ca1703a170603cca3e622"
+        },
+        {
+          "name": "THÁNG 2.2026 Công thức ",
+          "state": "hidden",
+          "dimension": "A1:W96",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "formula_reference",
+          "periodCandidates": [
+            "2026-02"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 634,
+            "formulaCells": 1078,
+            "error:#VALUE!": 1045,
+            "sharedCells": 712
+          },
+          "families": 25,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "c8e34eb8921d9acca89f463b5bc356c37732bef21593382eb99881f3834a915c"
+        },
+        {
+          "name": "THÁNG 2.2026",
+          "state": "hidden",
+          "dimension": "A1:W96",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-02"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 1693,
+            "formulaCells": 18,
+            "sharedCells": 17
+          },
+          "families": 1,
+          "duplicateOf": "docs/bao_cao/âm dương điện nước tháng 6.xlsx#THÁNG 2.2026",
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "0e5a04e1e1f5630e65dc6be26e66328073753cd3793cc84823e63c0800e0cf77"
+        },
+        {
+          "name": "THÁNG 4.2026",
+          "state": "hidden",
+          "dimension": "A1:W100",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-02",
+            "2026-04"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 659,
+            "formulaCells": 1127,
+            "error:#VALUE!": 1116,
+            "sharedCells": 746
+          },
+          "families": 22,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "436f8c578e7dd2201df0e10587a4a35f95d24cff6dffd7e75d6b41648629b98c"
+        },
+        {
+          "name": "THÁNG 5.2026 nước ",
+          "state": "hidden",
+          "dimension": "A1:W101",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-05"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 841,
+            "formulaCells": 958,
+            "error:#VALUE!": 563,
+            "sharedCells": 733
+          },
+          "families": 52,
+          "duplicateOf": "docs/bao_cao/âm dương điện nước tháng 6.xlsx#THÁNG 5.2026 nước ",
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "084c0f7feab32ca5991f7b6d7531de676ec601e05f4cee636b841af49793718e"
+        },
+        {
+          "name": "Sản lượng điện tháng 5 và 6 CT",
+          "state": "hidden",
+          "dimension": "A1:I96",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "formula_reference",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 286,
+            "formulaCells": 380,
+            "error:#VALUE!": 108,
+            "sharedCells": 189
+          },
+          "families": 16,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "b549d988a4901cd8cb17ba11a67c52de21ef3cc864a64879d36f2e6c92fb9795"
+        },
+        {
+          "name": "Sản lượng điện thấng 5 và 6",
+          "state": "hidden",
+          "dimension": "A1:I96",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 660,
+            "formulaCells": 6,
+            "sharedCells": 5
+          },
+          "families": 1,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "c1ae6079f79adbaa5e44dfa159f16dc2f848945ed00f85f6eb6456b1959d1202"
+        },
+        {
+          "name": "THÁNG 6.2026 điện công thức",
+          "state": "hidden",
+          "dimension": "A1:W101",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "formula_reference",
+          "periodCandidates": [
+            "2026-06"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 669,
+            "formulaCells": 1130,
+            "error:#VALUE!": 1020,
+            "sharedCells": 746
+          },
+          "families": 21,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "194684e134e749b5f79519044853ef104407ba4fae542aee9dd43c77f03b6ba2"
+        },
+        {
+          "name": "THÁNG 7.2026 điện công thức",
+          "state": "hidden",
+          "dimension": "A1:W105",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "formula_reference",
+          "periodCandidates": [
+            "2026-07"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 685,
+            "formulaCells": 1157,
+            "error:#VALUE!": 372,
+            "sharedCells": 750
+          },
+          "families": 24,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "02f6438735c8653c2fb67f983396e116a4b034e2ed75e89112078dcdaedffcfd"
+        },
+        {
+          "name": "THÁNG 7.2026 điện ",
+          "state": "visible",
+          "dimension": "A1:W105",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-07"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 1454,
+            "formulaCells": 388,
+            "error:#VALUE!": 372,
+            "sharedCells": 281
+          },
+          "families": 11,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "331b8f37bdad46c06c0962414ddeb2e397c529881e79dd2eb719e73131af0681"
+        },
+        {
+          "name": "THÁNG 6.2026 điện",
+          "state": "hidden",
+          "dimension": "A1:W101",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-06"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 1423,
+            "formulaCells": 376,
+            "error:#VALUE!": 372,
+            "sharedCells": 279
+          },
+          "families": 9,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "c89a49eb32bc8bae51cd95a36dea73a35abeb559b52224611410ccf68ddec4b7"
+        },
+        {
+          "name": "THÁNG 6.2026 nước",
+          "state": "hidden",
+          "dimension": "A1:Q101",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-06"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 1137,
+            "formulaCells": 99,
+            "sharedCells": 98
+          },
+          "families": 2,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "bb4085f51d3d38221032c8b19c08272bf3046283fbc7fc83f8c3c19894f3a895"
+        },
+        {
+          "name": "THÁNG 5.2026  chuẩn",
+          "state": "hidden",
+          "dimension": "A1:W101",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-05"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 1500,
+            "formulaCells": 578,
+            "error:#VALUE!": 368,
+            "sharedCells": 468
+          },
+          "families": 12,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "c8ad9e4ae314a9a6c993f06ac103c6bb31bf4d9e25fad81210e3564f46981f23"
+        },
+        {
+          "name": "THÁNG 4.2026. chuẩn ",
+          "state": "hidden",
+          "dimension": "A1:W100",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-04"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 1786
+          },
+          "families": 0,
+          "duplicateOf": "docs/bao_cao/âm dương điện nước tháng 6.xlsx#THÁNG 4.2026. chuẩn ",
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "afd4765afe6f0c223c13436aa4323adf2513d4b5040f1a1aede6fbda58d36a5e"
+        },
+        {
+          "name": "THÁNG 8.2025 chuẩn ",
+          "state": "hidden",
+          "dimension": "A1:T91",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-08"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 1586,
+            "formulaCells": 18,
+            "sharedCells": 8
+          },
+          "families": 1,
+          "duplicateOf": "docs/bao_cao/âm dương điện nước tháng 6.xlsx#THÁNG 8.2025 chuẩn ",
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "42b3d41ed385cbcbcdf0d3e2432ec75a3f8e25aa8838da96dfe87db604756e65"
+        },
+        {
+          "name": "THÁNG 8.2025 ",
+          "state": "hidden",
+          "dimension": "A1:T91",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-08"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 588,
+            "formulaCells": 1016,
+            "error:#VALUE!": 1008,
+            "sharedCells": 661
+          },
+          "families": 15,
+          "duplicateOf": "docs/bao_cao/âm dương điện nước tháng 6.xlsx#THÁNG 8.2025 ",
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "50c83a29c2ff8b29ccb202e36e66d5ca801c2e9c0ce4b086cd8dd556776e2be5"
+        },
+        {
+          "name": "THÁNG 7.2025 chuẩn",
+          "state": "hidden",
+          "dimension": "A1:T86",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-07"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 897,
+            "formulaCells": 494,
+            "sharedCells": 469
+          },
+          "families": 15,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "8a1c24b83b514dcf8e747355e9d5d9f1abd76d33ffb0cab155be51515b14d79a"
+        },
+        {
+          "name": "THÁNG 7.2025",
+          "state": "hidden",
+          "dimension": "A1:T86",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-07"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 320,
+            "formulaCells": 1071,
+            "error:#VALUE!": 1058,
+            "sharedCells": 548
+          },
+          "families": 29,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "ff889aa4b360e67ea59e38b149acca57a8e142410d91bbcc699c6d5d0532f7be"
+        },
+        {
+          "name": "THÁNG 6.2025",
+          "state": "hidden",
+          "dimension": "A1:T85",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-06"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 466,
+            "formulaCells": 1024,
+            "error:#VALUE!": 1012,
+            "sharedCells": 474
+          },
+          "families": 22,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "023d165cdf1b5f6ff64144c785b185d396ed07bd755418f0261952d15036c644"
+        },
+        {
+          "name": "THÁNG 2.2025 ",
+          "state": "hidden",
+          "dimension": "A1:J79",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-02"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 201,
+            "formulaCells": 451,
+            "error:#VALUE!": 431,
+            "sharedCells": 142
+          },
+          "families": 28,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "cdec42b9d83adf0251489480f51dbe473210eb338ad6f0568a4a9fb8c23ae33b"
+        },
+        {
+          "name": "THÁNG 1.2025",
+          "state": "hidden",
+          "dimension": "A1:J78",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-01"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 208,
+            "formulaCells": 435,
+            "error:#VALUE!": 426,
+            "sharedCells": 135
+          },
+          "families": 17,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "f86c458a874fe9f6d4f48b4298863abd8a8560873ee39b1365d825033619f783"
+        },
+        {
+          "name": "THÁNG 11",
+          "state": "hidden",
+          "dimension": "A1:I76",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 197,
+            "formulaCells": 427,
+            "error:#VALUE!": 414,
+            "sharedCells": 128
+          },
+          "families": 37,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "d7d8abf4e76c0232c0493de3b7b73fdfdf937dd83b1829a847c8f7b0e909a5d6"
+        },
+        {
+          "name": "Sheet1",
+          "state": "hidden",
+          "dimension": "A1:Z995",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "unlabelled_reference",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 106,
+            "formulaCells": 7
+          },
+          "families": 7,
+          "duplicateOf": null,
+          "disposition": "reference_only",
+          "sha256SheetData": "e051480d0b9fef504391a01200271238e90641737cc5d93c2609a20d42a79997"
+        },
+        {
+          "name": "THÁNG 6",
+          "state": "hidden",
+          "dimension": "A1:G1001",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 141,
+            "formulaCells": 246,
+            "sharedCells": 106
+          },
+          "families": 135,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "8f815eac5908e4a2b4c7a09e3111aba6e5e6f6ba05aa1fd35428139ee126acdb"
+        },
+        {
+          "name": "THÁNG 7",
+          "state": "hidden",
+          "dimension": "A1:G59",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 147,
+            "formulaCells": 243,
+            "sharedCells": 104
+          },
+          "families": 131,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "f554ffaf7f202e72184e7e47e868950e27e2225419b3db53a25e1aee0e9990a5"
+        },
+        {
+          "name": "THÁNG 8",
+          "state": "hidden",
+          "dimension": "A1:I62",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 166,
+            "formulaCells": 328,
+            "sharedCells": 106
+          },
+          "families": 211,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "805e29360f5e94776e0b7dc288a64c93ae08942a143600feb237bd57c8bb5466"
+        },
+        {
+          "name": "THÁNG 8 (2)",
+          "state": "hidden",
+          "dimension": "A1:K66",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 283,
+            "formulaCells": 333,
+            "sharedCells": 226
+          },
+          "families": 95,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "2eebe8d3260250098859748713396658798aeb5a095b7f8ef564327b3da3068b"
+        },
+        {
+          "name": "THÁNG 9",
+          "state": "hidden",
+          "dimension": "A1:I67",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 164,
+            "formulaCells": 381,
+            "error:#VALUE!": 359,
+            "sharedCells": 118
+          },
+          "families": 30,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "ff9933c2d900192f4be06e498767f06b97e9ccfa8ddf47a22c579b8fa0028cca"
+        },
+        {
+          "name": "THÁNG 10",
+          "state": "hidden",
+          "dimension": "A1:I74",
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 189,
+            "formulaCells": 414,
+            "error:#VALUE!": 399,
+            "sharedCells": 130
+          },
+          "families": 25,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "c6613b0411abfd8acd4461ef0a2307e8ee8d5055a24ae36131f15dc5edb5b188"
+        }
+      ],
+      "externalLinkParts": [
+        "xl/externalLinks/externalLink1.xml",
+        "xl/externalLinks/externalLink2.xml",
+        "xl/externalLinks/externalLink3.xml",
+        "xl/externalLinks/externalLink4.xml",
+        "xl/externalLinks/externalLink5.xml",
+        "xl/externalLinks/externalLink6.xml",
+        "xl/externalLinks/externalLink7.xml",
+        "xl/externalLinks/externalLink8.xml",
+        "xl/externalLinks/externalLink9.xml",
+        "xl/externalLinks/externalLink10.xml",
+        "xl/externalLinks/externalLink11.xml",
+        "xl/externalLinks/externalLink12.xml",
+        "xl/externalLinks/externalLink13.xml",
+        "xl/externalLinks/externalLink14.xml",
+        "xl/externalLinks/externalLink15.xml",
+        "xl/externalLinks/externalLink16.xml",
+        "xl/externalLinks/externalLink17.xml",
+        "xl/externalLinks/externalLink18.xml",
+        "xl/externalLinks/externalLink19.xml",
+        "xl/externalLinks/externalLink20.xml",
+        "xl/externalLinks/externalLink21.xml",
+        "xl/externalLinks/externalLink22.xml",
+        "xl/externalLinks/externalLink23.xml",
+        "xl/externalLinks/externalLink24.xml",
+        "xl/externalLinks/externalLink25.xml",
+        "xl/externalLinks/externalLink27.xml",
+        "xl/externalLinks/externalLink28.xml",
+        "xl/externalLinks/externalLink29.xml",
+        "xl/externalLinks/externalLink26.xml"
+      ],
+      "tables": 0,
+      "definedNames": 19
+    },
+    {
+      "file": "docs/Bảng chia cp tháng 8 (1).xlsx",
+      "sha256": "8af2895b04d81f78faac99f9aca18663c0db0396d69eee2485648e44d1b87976",
+      "sheets": [
+        {
+          "name": "LNR THÁNG  1",
+          "state": "hidden",
+          "dimension": "A1:J37",
+          "domain": "shares",
+          "rule": "F-SHARE",
+          "role": "summary",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 32,
+            "formulaCells": 125,
+            "sharedCells": 25
+          },
+          "families": 24,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "4fd1d6242b440c2070a10e3264f8a5dd43bfbf0e43df6dd714d9f1faa45e541f"
+        },
+        {
+          "name": "Tháng 1 nhà T  ",
+          "state": "hidden",
+          "dimension": "A1:O161",
+          "domain": "shares",
+          "rule": "F-SHARE",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-01"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "T"
+          ],
+          "stats": {
+            "literalCells": 934,
+            "formulaCells": 214,
+            "sharedCells": 14
+          },
+          "families": 11,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "576e72b78d0966c1103c2fd08060cf3f7f843976dbaf506c3a7e1ff712090741"
+        },
+        {
+          "name": "Tháng 3 nhà T  ",
+          "state": "hidden",
+          "dimension": "A1:O161",
+          "domain": "shares",
+          "rule": "F-SHARE",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-03"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "T"
+          ],
+          "stats": {
+            "literalCells": 934,
+            "formulaCells": 214,
+            "sharedCells": 14
+          },
+          "families": 11,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "46e5448bdeb51a287b93f8a6ee2881c1c9db92ee141ad1b5fd6e2d1ad6cfc940"
+        },
+        {
+          "name": "Tháng 2 nhà T   ",
+          "state": "hidden",
+          "dimension": "A1:O161",
+          "domain": "shares",
+          "rule": "F-SHARE",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-02"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "T"
+          ],
+          "stats": {
+            "literalCells": 934,
+            "formulaCells": 214,
+            "sharedCells": 14
+          },
+          "families": 11,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "8616707f230a87a5b19fc08ac060add408e2ab78750948f37d0b996e53dd77f1"
+        },
+        {
+          "name": "Tháng 2 nhà S ",
+          "state": "hidden",
+          "dimension": "A1:O433",
+          "domain": "shares",
+          "rule": "F-SHARE",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-02"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "S"
+          ],
+          "stats": {
+            "literalCells": 2555,
+            "formulaCells": 510
+          },
+          "families": 13,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "5fe8a4ce45301cf8b915eccb314bc9c7066c74dfb193dd24022737d88183a488"
+        },
+        {
+          "name": "Tháng 2 nhà G ",
+          "state": "hidden",
+          "dimension": "A1:O427",
+          "domain": "shares",
+          "rule": "F-SHARE",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-02"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "G"
+          ],
+          "stats": {
+            "literalCells": 124,
+            "formulaCells": 502
+          },
+          "families": 12,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "41541371c73da17e25f292bbf78ce7f3b279e8aae094516137a9531b2ffd1a8e"
+        },
+        {
+          "name": "LNR THÁNG  2 ",
+          "state": "hidden",
+          "dimension": "A1:J37",
+          "domain": "shares",
+          "rule": "F-SHARE",
+          "role": "summary",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 32,
+            "formulaCells": 125,
+            "sharedCells": 25
+          },
+          "families": 31,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "b6025a636260657d431c7f95377c48a46b9c585c49d1c7df197f36c03dc2fd37"
+        },
+        {
+          "name": "Tháng 3 nhà S ",
+          "state": "hidden",
+          "dimension": "A1:O427",
+          "domain": "shares",
+          "rule": "F-SHARE",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-03"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "S"
+          ],
+          "stats": {
+            "literalCells": 2509,
+            "formulaCells": 499
+          },
+          "families": 13,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "f1023eb79ef142ff8a973e5071eefc3a49b59a30316f45f90931ab921c992c97"
+        },
+        {
+          "name": "Tháng 3 nhà G  ",
+          "state": "hidden",
+          "dimension": "A1:O427",
+          "domain": "shares",
+          "rule": "F-SHARE",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-03"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "G"
+          ],
+          "stats": {
+            "literalCells": 212,
+            "formulaCells": 493
+          },
+          "families": 12,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "6cbd8bf6d7ac168616ed3004f8fecbd1137ca24b0cb4163b358c1510fc1cc7b5"
+        },
+        {
+          "name": "LNR THÁNG  3",
+          "state": "hidden",
+          "dimension": "A1:J37",
+          "domain": "shares",
+          "rule": "F-SHARE",
+          "role": "summary",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 32,
+            "formulaCells": 125,
+            "sharedCells": 25
+          },
+          "families": 31,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "f3d850b2bce1ce4b1a9dbc4e9e1a4cc6ed60e445b4900c6d5d683146581001b9"
+        },
+        {
+          "name": "Tháng 4 nhà T  ",
+          "state": "hidden",
+          "dimension": "A1:O161",
+          "domain": "shares",
+          "rule": "F-SHARE",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-04"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "T"
+          ],
+          "stats": {
+            "literalCells": 934,
+            "formulaCells": 214,
+            "sharedCells": 14
+          },
+          "families": 11,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "78e568709d6d8bfca4571b6dc24193d580c75aefe50802d31ad414e15ff23f32"
+        },
+        {
+          "name": "Tháng 4 nhà S ",
+          "state": "hidden",
+          "dimension": "A1:O416",
+          "domain": "shares",
+          "rule": "F-SHARE",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-04"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "S"
+          ],
+          "stats": {
+            "literalCells": 2466,
+            "formulaCells": 499
+          },
+          "families": 13,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "cde28b13c18b4b5b6475ecbf3da53d9b93d75901f5d382b733402fbf6eeb19e3"
+        },
+        {
+          "name": "Tháng 4 nhà G  ",
+          "state": "hidden",
+          "dimension": "A1:O427",
+          "domain": "shares",
+          "rule": "F-SHARE",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-04"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "G"
+          ],
+          "stats": {
+            "literalCells": 368,
+            "formulaCells": 483
+          },
+          "families": 12,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "1e1fe8b783e93cfbe60b065e507d22ed897585ce5cce7b5232877ff5c6bbf010"
+        },
+        {
+          "name": "LNR THÁNG  4",
+          "state": "hidden",
+          "dimension": "A1:J37",
+          "domain": "shares",
+          "rule": "F-SHARE",
+          "role": "summary",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 32,
+            "formulaCells": 125,
+            "sharedCells": 25
+          },
+          "families": 26,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "5892ee90c6e80c139587dae0b3f250f769498565dce2c50f6fd97ca6bfbf26a6"
+        },
+        {
+          "name": "Tháng 5 nhà T ",
+          "state": "hidden",
+          "dimension": "A1:O161",
+          "domain": "shares",
+          "rule": "F-SHARE",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-05"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "T"
+          ],
+          "stats": {
+            "literalCells": 934,
+            "formulaCells": 214,
+            "sharedCells": 14
+          },
+          "families": 11,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "8da31106730edcb0385f7d1699ea9030ff2f9d864d7a9705c28c5d13a2354694"
+        },
+        {
+          "name": "Tháng 5 nhà S  ",
+          "state": "hidden",
+          "dimension": "A1:O416",
+          "domain": "shares",
+          "rule": "F-SHARE",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-05"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "S"
+          ],
+          "stats": {
+            "literalCells": 2466,
+            "formulaCells": 499
+          },
+          "families": 13,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "826659cedf239cadb315db1164c4fd86fc5f59aa90b8280221e2ba63723b5647"
+        },
+        {
+          "name": "Tháng 5 nhà G  ",
+          "state": "hidden",
+          "dimension": "A1:O427",
+          "domain": "shares",
+          "rule": "F-SHARE",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-05"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "G"
+          ],
+          "stats": {
+            "literalCells": 428,
+            "formulaCells": 513
+          },
+          "families": 12,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "f169dc849bd646c6fdd402e81c104ffb67fbdb6e3def8354e1caa419d2b0982e"
+        },
+        {
+          "name": "LNR THÁNG  5",
+          "state": "hidden",
+          "dimension": "A1:J37",
+          "domain": "shares",
+          "rule": "F-SHARE",
+          "role": "summary",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 32,
+            "formulaCells": 125,
+            "sharedCells": 25
+          },
+          "families": 27,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "13d6a6d60085da7e0c51d943bc79ac589a3a3b3d46fbab0ee7cab733200c3111"
+        },
+        {
+          "name": "Tháng 6 nhà T  ",
+          "state": "hidden",
+          "dimension": "A1:O161",
+          "domain": "shares",
+          "rule": "F-SHARE",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-05"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "T"
+          ],
+          "stats": {
+            "literalCells": 934,
+            "formulaCells": 214,
+            "sharedCells": 14
+          },
+          "families": 11,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "c17e76e66107443e4fbfb4608abd20443afb24fa8170d59c0d908dba08fadd3a"
+        },
+        {
+          "name": "Tháng 6 nhà S   ",
+          "state": "hidden",
+          "dimension": "A1:O416",
+          "domain": "shares",
+          "rule": "F-SHARE",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-05"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "S"
+          ],
+          "stats": {
+            "literalCells": 2466,
+            "formulaCells": 499
+          },
+          "families": 13,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "5c817b5103484c99b467038f692cee608c95247e5c4da8adf8bc1f4670ebad67"
+        },
+        {
+          "name": "Tháng 6 nhà G   ",
+          "state": "hidden",
+          "dimension": "A1:O427",
+          "domain": "shares",
+          "rule": "F-SHARE",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-05"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "G"
+          ],
+          "stats": {
+            "literalCells": 428,
+            "formulaCells": 513
+          },
+          "families": 12,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "c3845b028f1fb99f3cd4f3b94f7e504c75fd8a2d8a6ede5ec81664298b4bb4f4"
+        },
+        {
+          "name": "LNR THÁNG  6",
+          "state": "hidden",
+          "dimension": "A1:J37",
+          "domain": "shares",
+          "rule": "F-SHARE",
+          "role": "summary",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 32,
+            "formulaCells": 125,
+            "sharedCells": 25
+          },
+          "families": 30,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "e693ff1e2aba686306baf9d520b7829c72efebef7dac063f320f7bf02a04b8db"
+        },
+        {
+          "name": "Tháng 7 nhà T ",
+          "state": "hidden",
+          "dimension": "A1:O161",
+          "domain": "shares",
+          "rule": "F-SHARE",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-07"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "T"
+          ],
+          "stats": {
+            "literalCells": 934,
+            "formulaCells": 215,
+            "sharedCells": 14
+          },
+          "families": 11,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "11cb4798be4a094c52408617ebe623f712ac975c07d69976fd6dd9eabe3b2e82"
+        },
+        {
+          "name": "Tháng 8 nhà T ",
+          "state": "visible",
+          "dimension": "A1:O161",
+          "domain": "shares",
+          "rule": "F-SHARE",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-08"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "T"
+          ],
+          "stats": {
+            "literalCells": 930,
+            "formulaCells": 215,
+            "sharedCells": 14
+          },
+          "families": 11,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "4ce5bd582481726be65f183c8fa6392e9ba9253d7ad8e588abaef2aa21d04b36"
+        },
+        {
+          "name": "Tháng 7 nhà S   ",
+          "state": "hidden",
+          "dimension": "A1:O416",
+          "domain": "shares",
+          "rule": "F-SHARE",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-07"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "S"
+          ],
+          "stats": {
+            "literalCells": 2466,
+            "formulaCells": 499
+          },
+          "families": 13,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "05d05e527908dca3c9960b304244dae48ce494912eadf6417a0f8b4989387c74"
+        },
+        {
+          "name": "Tháng 7 nhà G   ",
+          "state": "hidden",
+          "dimension": "A1:O427",
+          "domain": "shares",
+          "rule": "F-SHARE",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-07"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "G"
+          ],
+          "stats": {
+            "literalCells": 576,
+            "formulaCells": 477
+          },
+          "families": 12,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "92b27c7e9c4320ef41ecc5915e5f352e2a9de63707c96c803c2b7a018c75463d"
+        },
+        {
+          "name": "LNR THÁNG  7",
+          "state": "hidden",
+          "dimension": "A1:J39",
+          "domain": "shares",
+          "rule": "F-SHARE",
+          "role": "summary",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 34,
+            "formulaCells": 135,
+            "sharedCells": 26,
+            "error:#DIV/0!": 2
+          },
+          "families": 32,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "e819506a7c7398c8e55bcbab72f241b25d6c45ec54ebfafd6118ec73296cb77c"
+        },
+        {
+          "name": "Tháng 8 nhà S ",
+          "state": "visible",
+          "dimension": "A1:O416",
+          "domain": "shares",
+          "rule": "F-SHARE",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-08"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "S"
+          ],
+          "stats": {
+            "literalCells": 2414,
+            "formulaCells": 495
+          },
+          "families": 13,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "8257853f0d7bd135d3b28e19a00df5cfcfdc8737e2b4fe48588421b54fcdada9"
+        },
+        {
+          "name": "Tháng 8 nhà G  ",
+          "state": "visible",
+          "dimension": "A1:O427",
+          "domain": "shares",
+          "rule": "F-SHARE",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-08"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "G"
+          ],
+          "stats": {
+            "literalCells": 758,
+            "formulaCells": 487
+          },
+          "families": 12,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "c3b306c08ffb48d994f100125648af66fc778822560234b89bcc7370b7e5990b"
+        },
+        {
+          "name": "LNR THÁNG  8",
+          "state": "visible",
+          "dimension": "A1:J39",
+          "domain": "shares",
+          "rule": "F-SHARE",
+          "role": "summary",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 34,
+            "formulaCells": 135,
+            "sharedCells": 26,
+            "error:#DIV/0!": 1
+          },
+          "families": 33,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "2793db386f6c7b4b25b3f0d543b1fd2beff8be98ec8107030a6a92c9dded532a"
+        },
+        {
+          "name": "Tháng 1 nhà S",
+          "state": "hidden",
+          "dimension": "A1:O427",
+          "domain": "shares",
+          "rule": "F-SHARE",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-01"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "S"
+          ],
+          "stats": {
+            "literalCells": 2531,
+            "formulaCells": 510
+          },
+          "families": 13,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "f19b76006a65df8121552a49adb551781fdee4f6c9bd4019517f9370abb4439c"
+        }
+      ],
+      "externalLinkParts": [
+        "xl/externalLinks/externalLink1.xml"
+      ],
+      "tables": 54,
+      "definedNames": 8
+    },
+    {
+      "file": "docs/Danh sách mã HĐ điện nước mạng.xlsx",
+      "sha256": "bb02d614c9d642ff18e5cdbe07f73b5857cc17c13624ebef2513a62a973c9eef",
+      "sheets": [
+        {
+          "name": "Sheet1",
+          "state": "hidden",
+          "dimension": null,
+          "domain": "supplier",
+          "rule": "F-SUPPLIER",
+          "role": "unlabelled_reference",
+          "periodCandidates": [
+            "2025-04",
+            "2025-05",
+            "2025-06",
+            "2025-08",
+            "2026-01"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 5115,
+            "formulaCells": 450,
+            "sharedCells": 181
+          },
+          "families": 269,
+          "duplicateOf": null,
+          "disposition": "reference_only",
+          "sha256SheetData": "1a77b9955992d975598acafebb44ee535377c77bb0f6dd2d0cfc1d6ac3bf0d00"
+        },
+        {
+          "name": "năm 2026",
+          "state": "visible",
+          "dimension": null,
+          "domain": "supplier",
+          "rule": "F-SUPPLIER",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-01"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 2316,
+            "formulaCells": 179,
+            "sharedCells": 38
+          },
+          "families": 149,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "a8e7576737c28d4225d926c71bc67a1b51f87bcda5b806eded36dd200b1030e4"
+        }
+      ],
+      "externalLinkParts": [],
+      "tables": 0,
+      "definedNames": 1
+    },
+    {
+      "file": "docs/G1.31.8.26.xlsx",
+      "sha256": "9d2f5446822aac116b965cb955397e3a4252cf1beaaaf834e74733c23587f690",
+      "sheets": [
+        {
+          "name": "ĐẦU TƯ BAN ĐẦU",
+          "state": "visible",
+          "dimension": "A1:H46",
+          "domain": "investment",
+          "rule": "F-ASSET",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-10",
+            "2025-11"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 26,
+            "formulaCells": 1
+          },
+          "families": 1,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "0c55f80c39087d073a1a44ed8a759620b1baa745f357407348e320153f7a365f"
+        },
+        {
+          "name": "THU CHI BAN ĐẦU",
+          "state": "visible",
+          "dimension": "A1:W152",
+          "domain": "investment",
+          "rule": "F-ASSET",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-01"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 126,
+            "formulaCells": 39,
+            "sharedCells": 6
+          },
+          "families": 29,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "749b2accaa58b8de66ed4061eec4963776513cce952a2caa808db6de36ce3fa8"
+        },
+        {
+          "name": "HD T1.26",
+          "state": "visible",
+          "dimension": "A1:CC406",
+          "domain": "billing",
+          "rule": "F-BILL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-01"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 1305,
+            "formulaCells": 1564,
+            "sharedCells": 1400
+          },
+          "families": 56,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "7da713857733656fd8c446d726bd3c63d1b454b8d13b8f726c03db6cf124fc59"
+        },
+        {
+          "name": "BÁO CÁO THÁNG 2",
+          "state": "visible",
+          "dimension": "A1:N84",
+          "domain": "building_report",
+          "rule": "F-PNL",
+          "role": "summary",
+          "periodCandidates": [
+            "2026-02"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 106,
+            "formulaCells": 82,
+            "sharedCells": 32
+          },
+          "families": 46,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "188a09230b0835e5a5125030dca3743a073e577de466b975f67e8a75b7d0a636"
+        },
+        {
+          "name": "HĐ T2.26",
+          "state": "visible",
+          "dimension": "A1:CG19",
+          "domain": "billing",
+          "rule": "F-BILL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-02"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 450,
+            "formulaCells": 245,
+            "sharedCells": 230
+          },
+          "families": 16,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "0c56c2cee21ea2a1bf90f56d11165ef3637eac795d7985952404d43acdd5f39f"
+        },
+        {
+          "name": "BÁO CÁO THÁNG 3",
+          "state": "visible",
+          "dimension": "A1:N84",
+          "domain": "building_report",
+          "rule": "F-PNL",
+          "role": "summary",
+          "periodCandidates": [
+            "2026-03"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 112,
+            "formulaCells": 82,
+            "sharedCells": 32
+          },
+          "families": 46,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "a16544fd437e61b3c5fe6e0d57146ca3bca3a380a7a830989d62536df38cbaa8"
+        },
+        {
+          "name": "HĐ T3.26 ",
+          "state": "visible",
+          "dimension": "A1:CG19",
+          "domain": "billing",
+          "rule": "F-BILL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-03"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 447,
+            "formulaCells": 244,
+            "sharedCells": 230
+          },
+          "families": 15,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "ee2945bcdedf57d8f1e08d74861a143808c5a908480ac5efd2614624588a3c02"
+        },
+        {
+          "name": "BÁO CÁO THÁNG 4",
+          "state": "visible",
+          "dimension": "A1:N84",
+          "domain": "building_report",
+          "rule": "F-PNL",
+          "role": "summary",
+          "periodCandidates": [
+            "2026-04"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 112,
+            "formulaCells": 82,
+            "sharedCells": 32
+          },
+          "families": 46,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "8f6c676551ab8bf81baa918d57fb1f0934c3e446266a0ab5ef91d4db31b6e8b3"
+        },
+        {
+          "name": "HĐ T4.26 ",
+          "state": "visible",
+          "dimension": "A1:CG19",
+          "domain": "billing",
+          "rule": "F-BILL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-04"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 446,
+            "formulaCells": 244,
+            "sharedCells": 210
+          },
+          "families": 15,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "989da79a073f3c8694ccda8849742686fa0dfb22ff6dc91a2e0891636872b490"
+        },
+        {
+          "name": "BÁO CÁO THÁNG 5",
+          "state": "visible",
+          "dimension": "A1:N86",
+          "domain": "building_report",
+          "rule": "F-PNL",
+          "role": "summary",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 112,
+            "formulaCells": 83,
+            "sharedCells": 32
+          },
+          "families": 47,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "b2b253e4bfc9b97e5c4cc146c886f49c068cc6983bd2243e3aed0fccc0a3ed6d"
+        },
+        {
+          "name": "HĐ T5.26 ",
+          "state": "visible",
+          "dimension": "A1:CG19",
+          "domain": "billing",
+          "rule": "F-BILL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-05"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 450,
+            "formulaCells": 245,
+            "sharedCells": 210
+          },
+          "families": 15,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "e003d410611a1a62654ff618d75a365ff5f32a3c4053705830861fa04528616f"
+        },
+        {
+          "name": "BÁO CÁO THÁNG 6",
+          "state": "visible",
+          "dimension": "A1:N86",
+          "domain": "building_report",
+          "rule": "F-PNL",
+          "role": "summary",
+          "periodCandidates": [
+            "2026-06"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 124,
+            "formulaCells": 80,
+            "sharedCells": 32
+          },
+          "families": 44,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "5f09722b421a355db1a63061b76b2876068cf4b4257d11b532d6dc78d5a2e4fe"
+        },
+        {
+          "name": "HĐ T6.26 ",
+          "state": "visible",
+          "dimension": "A1:CG19",
+          "domain": "billing",
+          "rule": "F-BILL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-06"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 452,
+            "formulaCells": 246,
+            "sharedCells": 231
+          },
+          "families": 16,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "2622250fc79b3201a27a09ce51588bd70dc83800dac18b73d572aa4e8dc4a91e"
+        },
+        {
+          "name": "BÁO CÁO THÁNG 7",
+          "state": "visible",
+          "dimension": "A1:N86",
+          "domain": "building_report",
+          "rule": "F-PNL",
+          "role": "summary",
+          "periodCandidates": [
+            "2026-07"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 105,
+            "formulaCells": 81,
+            "sharedCells": 32
+          },
+          "families": 45,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "f024549b5fb4077ee65b2504906dc5956e1339338be16f5d54bb02f6c733f831"
+        },
+        {
+          "name": "HĐ T7.26  ",
+          "state": "visible",
+          "dimension": "A1:CG19",
+          "domain": "billing",
+          "rule": "F-BILL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-07"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 444,
+            "formulaCells": 246,
+            "sharedCells": 210
+          },
+          "families": 16,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "e33f7924a7ccb39f5f6a75c870ba156c15014307e47a92dff32a5b87ddc479f8"
+        },
+        {
+          "name": "BÁO CÁO THÁNG 8",
+          "state": "visible",
+          "dimension": "A1:N86",
+          "domain": "building_report",
+          "rule": "F-PNL",
+          "role": "summary",
+          "periodCandidates": [
+            "2026-08"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 111,
+            "formulaCells": 81,
+            "sharedCells": 32
+          },
+          "families": 45,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "fdf5486df2668dbb0ae6c1b1deefd17a6d31c0940d66eac94342e0aa5ea6f42a"
+        },
+        {
+          "name": "HĐ T8.26  ",
+          "state": "visible",
+          "dimension": "A1:CG19",
+          "domain": "billing",
+          "rule": "F-BILL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-08"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 452,
+            "formulaCells": 247,
+            "sharedCells": 231
+          },
+          "families": 17,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "befc6e4cd7c647658d129943076fa61136eae7b522d8b7267fb3633d1958a7af"
+        }
+      ],
+      "externalLinkParts": [
+        "xl/externalLinks/externalLink11.xml",
+        "xl/externalLinks/externalLink12.xml",
+        "xl/externalLinks/externalLink13.xml",
+        "xl/externalLinks/externalLink14.xml",
+        "xl/externalLinks/externalLink15.xml",
+        "xl/externalLinks/externalLink16.xml",
+        "xl/externalLinks/externalLink17.xml",
+        "xl/externalLinks/externalLink18.xml",
+        "xl/externalLinks/externalLink19.xml",
+        "xl/externalLinks/externalLink1.xml",
+        "xl/externalLinks/externalLink2.xml",
+        "xl/externalLinks/externalLink3.xml",
+        "xl/externalLinks/externalLink4.xml",
+        "xl/externalLinks/externalLink5.xml",
+        "xl/externalLinks/externalLink6.xml",
+        "xl/externalLinks/externalLink7.xml",
+        "xl/externalLinks/externalLink8.xml",
+        "xl/externalLinks/externalLink9.xml",
+        "xl/externalLinks/externalLink10.xml"
+      ],
+      "tables": 0,
+      "definedNames": 2
+    },
+    {
+      "file": "docs/Hoa hồng năm 2025-2026 (1).xlsx",
+      "sha256": "bdbe6e220556a5a2d3a47d857e93a29b7b7c851d46a1e2c4a5ae1759968706e1",
+      "sheets": [
+        {
+          "name": "HOA HỒNG THÁNG 1.25",
+          "state": "hidden",
+          "dimension": null,
+          "domain": "commission",
+          "rule": "F-COMMISSION",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-01"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 253,
+            "formulaCells": 74,
+            "sharedCells": 58
+          },
+          "families": 14,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "828f1161e9b9548418673c3027d5fca3439aee5c3abc098e572b5c16b0584393"
+        },
+        {
+          "name": "HOA HỒNG THÁNG 2.25",
+          "state": "hidden",
+          "dimension": null,
+          "domain": "commission",
+          "rule": "F-COMMISSION",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-02"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 155,
+            "formulaCells": 49,
+            "sharedCells": 30
+          },
+          "families": 15,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "62dc88485f87c66493c14623114f943ab1703e8fcc23c9acf00074379850209f"
+        },
+        {
+          "name": "HOA HỒNG THÁNG 3.25",
+          "state": "hidden",
+          "dimension": null,
+          "domain": "commission",
+          "rule": "F-COMMISSION",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-03"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 490,
+            "formulaCells": 133,
+            "sharedCells": 99
+          },
+          "families": 24,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "87e188713edfdd1942b184a3b44a0abdfc3ac1534d6f87161eac7eb381585ba8"
+        },
+        {
+          "name": "HOA HỒNG THÁNG 4.25",
+          "state": "hidden",
+          "dimension": null,
+          "domain": "commission",
+          "rule": "F-COMMISSION",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-04"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 487,
+            "formulaCells": 132,
+            "sharedCells": 100
+          },
+          "families": 21,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "8756a8e60a3efab81da253f718fa799bac36ba9f840d40b20b02e381dca51fe0"
+        },
+        {
+          "name": "HOA HỒNG THÁNG 5.2025",
+          "state": "hidden",
+          "dimension": null,
+          "domain": "commission",
+          "rule": "F-COMMISSION",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-05"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 443,
+            "formulaCells": 123,
+            "sharedCells": 88
+          },
+          "families": 24,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "950ce470327ea5e0bd68ecce626c5f25e5a5df3555cb2c8296ef7963744aae43"
+        },
+        {
+          "name": " HOA HỒNG THÁNG 6.2025",
+          "state": "hidden",
+          "dimension": null,
+          "domain": "commission",
+          "rule": "F-COMMISSION",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-06"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 654,
+            "formulaCells": 162,
+            "sharedCells": 122
+          },
+          "families": 24,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "33dd596534586a45e250351d78f8fc9d04ae9cdaa7dff104c73a316cd9513587"
+        },
+        {
+          "name": " HOA HỒNG THÁNG 8.2025",
+          "state": "hidden",
+          "dimension": null,
+          "domain": "commission",
+          "rule": "F-COMMISSION",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-08"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 920,
+            "formulaCells": 219,
+            "sharedCells": 165
+          },
+          "families": 29,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "f51cadd3d1a965c6de5e5d76f639bab3c00cb229684888ef470e90d411d2439d"
+        },
+        {
+          "name": "HOA HỒNG THÁNG 7.2025",
+          "state": "hidden",
+          "dimension": null,
+          "domain": "commission",
+          "rule": "F-COMMISSION",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-07"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 478,
+            "formulaCells": 133,
+            "sharedCells": 98
+          },
+          "families": 20,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "607af9ac83d91d28919394efa9d5d13c9f25bad27a17748bebad83344505743d"
+        },
+        {
+          "name": "HOA HỒNG THÁNG 9.2025",
+          "state": "hidden",
+          "dimension": null,
+          "domain": "commission",
+          "rule": "F-COMMISSION",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-09"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 1465,
+            "formulaCells": 556,
+            "sharedCells": 496
+          },
+          "families": 35,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "7a05534cbb9c37fa71c10769b2b3d7d56d88756f21a498636158877ad4b7771e"
+        },
+        {
+          "name": " HOA HỒNG THÁNG 10.2025",
+          "state": "hidden",
+          "dimension": null,
+          "domain": "commission",
+          "rule": "F-COMMISSION",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-10"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 549,
+            "formulaCells": 388,
+            "sharedCells": 327
+          },
+          "families": 33,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "bcd4466115e9d5599a5f8ead6085fdfa342942b851e9419a2da3ece737d78926"
+        },
+        {
+          "name": "HOA HỒNG THÁNG 11.2025",
+          "state": "hidden",
+          "dimension": null,
+          "domain": "commission",
+          "rule": "F-COMMISSION",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-11"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 548,
+            "formulaCells": 259,
+            "sharedCells": 214
+          },
+          "families": 26,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "c2d5e89bdf5ce9af5dcd8d93d40f5abc46783102d942a0428b0cd826aaa94a48"
+        },
+        {
+          "name": "HOA HỒNG THÁNG 12.2025",
+          "state": "hidden",
+          "dimension": null,
+          "domain": "commission",
+          "rule": "F-COMMISSION",
+          "role": "detail",
+          "periodCandidates": [
+            "2025-12"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 546,
+            "formulaCells": 310,
+            "sharedCells": 278
+          },
+          "families": 24,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "8c846ee59265a62e03360ab8fe7dd4f7f8985fab81d5814185275ac2f0d566fd"
+        },
+        {
+          "name": "HOA HỒNG THÁNG 1.2026",
+          "state": "hidden",
+          "dimension": null,
+          "domain": "commission",
+          "rule": "F-COMMISSION",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-01"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 451,
+            "formulaCells": 273,
+            "sharedCells": 248
+          },
+          "families": 19,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "ddea34a846affc5ce4f0bcf50cf05826f45168069a201a73050cbcd8ab77411c"
+        },
+        {
+          "name": "HOA HỒNG THÁNG 2.26",
+          "state": "hidden",
+          "dimension": null,
+          "domain": "commission",
+          "rule": "F-COMMISSION",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-02"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 341,
+            "formulaCells": 235,
+            "sharedCells": 208
+          },
+          "families": 19,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "3cddc050b265c875fc638f0bd488bd7a1dd82c12e9a67aeca5ec6fcc07cd8376"
+        },
+        {
+          "name": "HOA HỒNG THÁNG 3.26",
+          "state": "hidden",
+          "dimension": null,
+          "domain": "commission",
+          "rule": "F-COMMISSION",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-03"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 470,
+            "formulaCells": 277,
+            "sharedCells": 250
+          },
+          "families": 23,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "4a8ab206fc54ac1ced7ae8e61c9546adb20da6448ba05fb3e4250a8edc3ac4b7"
+        },
+        {
+          "name": "HOA HỒNG THÁNG 4.26",
+          "state": "visible",
+          "dimension": null,
+          "domain": "commission",
+          "rule": "F-COMMISSION",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-04"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 763,
+            "formulaCells": 369,
+            "sharedCells": 319
+          },
+          "families": 29,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "d52016e8dc056e4502407838ff7e6407af51d904913bb3e113c55a90290458f0"
+        },
+        {
+          "name": "HOA HỒNG THÁNG 5.26",
+          "state": "visible",
+          "dimension": null,
+          "domain": "commission",
+          "rule": "F-COMMISSION",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-05"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 690,
+            "formulaCells": 303,
+            "sharedCells": 258
+          },
+          "families": 31,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "ec1df32802463924d757707aee1fdad65d33f02e9d12facf5e22ca15371fd69e"
+        },
+        {
+          "name": "HOA HỒNG THÁNG 6.26",
+          "state": "visible",
+          "dimension": null,
+          "domain": "commission",
+          "rule": "F-COMMISSION",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-06"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 812,
+            "formulaCells": 359,
+            "sharedCells": 310
+          },
+          "families": 31,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "c025f26a52515bcd67de106db2f15668f5d72267779ec2f9ce72c1b401fd132e"
+        },
+        {
+          "name": "HOA HỒNG THÁNG 7.26",
+          "state": "visible",
+          "dimension": null,
+          "domain": "commission",
+          "rule": "F-COMMISSION",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-07"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 790,
+            "formulaCells": 327,
+            "sharedCells": 293
+          },
+          "families": 25,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "3af42c429cefc6d33dff1cc08668421dfdeae02732489dd68b240b89ca24f9a7"
+        },
+        {
+          "name": "HOA HỒNG THÁNG 8.26",
+          "state": "visible",
+          "dimension": null,
+          "domain": "commission",
+          "rule": "F-COMMISSION",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-08"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 1017,
+            "formulaCells": 397,
+            "sharedCells": 358
+          },
+          "families": 27,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "5de9ca4919ce789dd6d6dd8b95eea194c7fd2bf415579c5e191b8bc2e77c73a0"
+        },
+        {
+          "name": "HOA HỒNG THÁNG 9.26",
+          "state": "visible",
+          "dimension": null,
+          "domain": "commission",
+          "rule": "F-COMMISSION",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-09"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 1964,
+            "formulaCells": 579,
+            "sharedCells": 525
+          },
+          "families": 33,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "86e1f38d1aa48628cb2f254b3b35b48e94661119dd95f2e175279c426f288ac0"
+        }
+      ],
+      "externalLinkParts": [],
+      "tables": 0,
+      "definedNames": 14
+    },
+    {
+      "file": "docs/Hoá đơn tiền nhà tháng 9 và dịch vụ tháng 9 năm 2026.xlsx",
+      "sha256": "ca62c0c229e236b6b88e4fe003ae3b4d783cac5e742924a7e6e5b17386a88b63",
+      "sheets": [
+        {
+          "name": "NHÀ T",
+          "state": "visible",
+          "dimension": null,
+          "domain": "billing",
+          "rule": "F-BILL",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "T"
+          ],
+          "stats": {
+            "literalCells": 12348,
+            "formulaCells": 6909,
+            "sharedCells": 6594
+          },
+          "families": 188,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "40d94ebe795511eab6938f75231e60eb4347bbd6f52d5343e988871c35448164"
+        },
+        {
+          "name": "NHÀ G",
+          "state": "visible",
+          "dimension": null,
+          "domain": "billing",
+          "rule": "F-BILL",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "G"
+          ],
+          "stats": {
+            "literalCells": 5648,
+            "formulaCells": 2782,
+            "sharedCells": 2655
+          },
+          "families": 81,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "e5ded54277cce49cdf5df198a580f1437582d81e53911451581823096a540ecc"
+        },
+        {
+          "name": "NHÀ S",
+          "state": "visible",
+          "dimension": null,
+          "domain": "billing",
+          "rule": "F-BILL",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [
+            "S"
+          ],
+          "stats": {
+            "literalCells": 16424,
+            "formulaCells": 8287,
+            "sharedCells": 7894
+          },
+          "families": 224,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "81a3f17e04995497265fcb43820fb9cadc125eefc042d27400617d6d34d9c737"
+        },
+        {
+          "name": "PHÒNG MỚI THÁNG 9",
+          "state": "visible",
+          "dimension": null,
+          "domain": "billing",
+          "rule": "F-BILL",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 1362,
+            "formulaCells": 1558,
+            "sharedCells": 1425
+          },
+          "families": 80,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "5ea58b754d886f559c3973485ecadcac08fb9d5b690bfe50f7c09f68b291ac9c"
+        },
+        {
+          "name": "PHÒNG MỚI THÁNG 10",
+          "state": "visible",
+          "dimension": null,
+          "domain": "billing",
+          "rule": "F-BILL",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 1315,
+            "formulaCells": 1502,
+            "sharedCells": 1400
+          },
+          "families": 50,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "a65b96250874cbb5d4ac61c55e1cf9652724cb7f6b0040ebedc8dd274ae4ad4c"
+        },
+        {
+          "name": "cập nhật thu tiền",
+          "state": "visible",
+          "dimension": null,
+          "domain": "billing",
+          "rule": "F-BILL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-09"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 551,
+            "formulaCells": 768,
+            "sharedCells": 454,
+            "emptyCaches": 10
+          },
+          "families": 95,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "44c46ee9324f1c77c85215fe7726bba94b0ac55f0b809449352c7038f08e0604"
+        },
+        {
+          "name": "BÁO CÁO CHECK THU TIỀN",
+          "state": "visible",
+          "dimension": null,
+          "domain": "billing",
+          "rule": "F-BILL",
+          "role": "summary",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 781,
+            "formulaCells": 1228,
+            "sharedCells": 620
+          },
+          "families": 9,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "d966001fa7b689c14b35d978292236fa0e746fcfc8cca58aa66590b2e493d16b"
+        },
+        {
+          "name": "G16",
+          "state": "visible",
+          "dimension": null,
+          "domain": "billing",
+          "rule": "F-BILL",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 1174,
+            "formulaCells": 1533,
+            "sharedCells": 1456
+          },
+          "families": 47,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "6ef85ad3c11733f7ae2a584f1f6456959ab7a3aba7fcc60b82afcf2ad9393ef5"
+        },
+        {
+          "name": "G17",
+          "state": "visible",
+          "dimension": null,
+          "domain": "billing",
+          "rule": "F-BILL",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 1239,
+            "formulaCells": 1544,
+            "sharedCells": 1464
+          },
+          "families": 46,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "af1872b3c969bdaf6dd81c0164ed837cbd24357eb2c7a9f421802f002fb3bb10"
+        },
+        {
+          "name": "G18",
+          "state": "visible",
+          "dimension": null,
+          "domain": "billing",
+          "rule": "F-BILL",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 1239,
+            "formulaCells": 1530,
+            "sharedCells": 1451
+          },
+          "families": 41,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "8b2c3c1429d8b59f51f064b2701205da03637a47ed9d73d00a3c85761033c465"
+        },
+        {
+          "name": "PHÒNG MỚI THÁNG 7",
+          "state": "hidden",
+          "dimension": null,
+          "domain": "billing",
+          "rule": "F-BILL",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 1497,
+            "formulaCells": 1554,
+            "sharedCells": 1387
+          },
+          "families": 112,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "c4c493c7c550e95c92d4e4e663d39621ea971d13917fde05f36fde7f7715af03"
+        },
+        {
+          "name": "DS phòng phá hđ",
+          "state": "visible",
+          "dimension": null,
+          "domain": "deposit",
+          "rule": "F-DEPOSIT",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 120,
+            "formulaCells": 99,
+            "sharedCells": 2
+          },
+          "families": 3,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "af4aa838be989d652616763e6b35248e3aaae374553e0d3916899c5933523c87"
+        },
+        {
+          "name": "HĐ (VP-HẰNG)",
+          "state": "visible",
+          "dimension": null,
+          "domain": "billing",
+          "rule": "F-BILL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-09"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 50,
+            "formulaCells": 53,
+            "sharedCells": 12,
+            "emptyCaches": 10
+          },
+          "families": 31,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "b5d822967625ba6efaf3f510339539870f385edfe4825f5d2ae3bbfe03c8cb4e"
+        },
+        {
+          "name": "HĐ (VP)",
+          "state": "visible",
+          "dimension": null,
+          "domain": "billing",
+          "rule": "F-BILL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-09"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 49,
+            "formulaCells": 54,
+            "sharedCells": 12,
+            "emptyCaches": 12
+          },
+          "families": 32,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "a5471e085a5972bce3bae63715973834568dccba4f1e9c5dd0605b88239e034e"
+        },
+        {
+          "name": "HĐ (TECH)",
+          "state": "visible",
+          "dimension": null,
+          "domain": "billing",
+          "rule": "F-BILL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-09"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 52,
+            "formulaCells": 51,
+            "sharedCells": 12,
+            "emptyCaches": 9
+          },
+          "families": 32,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "b0e4042321c86dcf66a5408c413df62dee470bb4f370a97efc8116450dde169b"
+        },
+        {
+          "name": "HĐ G1 (TECH) ",
+          "state": "visible",
+          "dimension": null,
+          "domain": "billing",
+          "rule": "F-BILL",
+          "role": "detail",
+          "periodCandidates": [
+            "2026-09"
+          ],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 49,
+            "formulaCells": 54,
+            "sharedCells": 12,
+            "emptyCaches": 10
+          },
+          "families": 32,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "5474a84b42bc5b832e488c62abb8cbccb37e6101964420547017ec351046c8d7"
+        },
+        {
+          "name": "ĐIỆN NƯỚC PHÒNG TRỐNG",
+          "state": "visible",
+          "dimension": null,
+          "domain": "utilities",
+          "rule": "F-UTILITY",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 127,
+            "formulaCells": 12,
+            "sharedCells": 10
+          },
+          "families": 3,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "9374a9a6c579cdbd3d6fb4295489fdd48166cdc5239f0c33f5581f986a076a32"
+        },
+        {
+          "name": "HOÀN CỌC",
+          "state": "visible",
+          "dimension": null,
+          "domain": "deposit",
+          "rule": "F-DEPOSIT",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 2798,
+            "formulaCells": 1296,
+            "sharedCells": 1178
+          },
+          "families": 20,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "3d1a7f414471d3a70294babe441434554fc325135398b68427af21ed215e512d"
+        },
+        {
+          "name": "HĐ (HOÀN CỌC)",
+          "state": "visible",
+          "dimension": null,
+          "domain": "deposit",
+          "rule": "F-DEPOSIT",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 55,
+            "formulaCells": 52,
+            "sharedCells": 14,
+            "emptyCaches": 17
+          },
+          "families": 40,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "fe9c7451b9a1eedd39ebc0c3ddc139ab51671a8bc9f8a9440b27cd5b9fdbbd71"
+        }
+      ],
+      "externalLinkParts": [],
+      "tables": 0,
+      "definedNames": 21
+    },
+    {
+      "file": "docs/Thông tin nhà.xlsx",
+      "sha256": "08aa9654be1f0f1ecd2584b74b2e41d3045087590b5d45366f6baaf6f6ff4be6",
+      "sheets": [
+        {
+          "name": "NVVH",
+          "state": "visible",
+          "dimension": null,
+          "domain": "master",
+          "rule": "F-MASTER",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 1687,
+            "formulaCells": 309,
+            "sharedCells": 287
+          },
+          "families": 27,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "113946bebbd5ad9dd22b49fd05a61a97fddb9ce6ec360624a77b037e4673faf6"
+        },
+        {
+          "name": "NVKT",
+          "state": "visible",
+          "dimension": null,
+          "domain": "master",
+          "rule": "F-MASTER",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 485,
+            "formulaCells": 4
+          },
+          "families": 3,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "46d6047ef7e2543df5dd8c69aea132a4ae54e12de04bcb770fb0cf0eb7b87cf4"
+        },
+        {
+          "name": "Địa chỉ chi tiết",
+          "state": "visible",
+          "dimension": null,
+          "domain": "master",
+          "rule": "F-MASTER",
+          "role": "detail",
+          "periodCandidates": [],
+          "periodPolicy": "Keep candidates; do not merge periods from filenames alone.",
+          "groups": [],
+          "stats": {
+            "literalCells": 480,
+            "formulaCells": 1
+          },
+          "families": 1,
+          "duplicateOf": null,
+          "disposition": "mapped_to_synthetic_domain",
+          "sha256SheetData": "ce639f8592de323aa023bdd8ac8113efb8ec5b92b62fff5bc23c325b985bb7f3"
+        }
+      ],
+      "externalLinkParts": [],
+      "tables": 0,
+      "definedNames": 1
+    }
+  ]
+}

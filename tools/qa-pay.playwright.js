@@ -31,8 +31,8 @@ async (page) => {
   check('QA-PAY-02', q2.n === 3 && q2.due === q2.sysDue && q2.paid === q2.sysPaid, q2);
 
   // QA-PAY-03 — tình trạng theo công thức Excel; nợ cũ CG-302 (thiếu kỳ 09); TX-202 giữ chỗ = Đóng cọc; TX kỳ 10 chưa lập HĐ
-  const q3 = await read(() => { const C = TH.calc, b = id => C.roomBill(id, '2026-10'); return { cg101: b('CG-101').state, cg302: [b('CG-302').state, b('CG-302').oldDebt > 0, b('CG-302').due === b('CG-302').invTotal + b('CG-302').oldDebt], dd201: b('DD-201').state, tx202: b('TX-202').state, tx101: b('TX-101').state, cg401: b('CG-401').state }; });
-  check('QA-PAY-03', q3.cg101 === 'full' && q3.cg302[0] === 'unpaid' && q3.cg302[1] && q3.cg302[2] && q3.dd201 === 'short' && q3.tx202 === 'deposit' && q3.tx101 === 'nobill' && q3.cg401 === 'empty', q3);
+  const q3 = await read(() => { const C = TH.calc, b = id => C.roomBill(id, '2026-10'); return { cg101: b('CG-101').state, creditOK: TH.db.dataset ? b('CG-101').balance === 100000 && b('CG-101').oldDebt === -100000 : b('CG-101').balance === 0, expected: TH.db.dataset ? 'over' : 'full', cg302: [b('CG-302').state, b('CG-302').oldDebt > 0, b('CG-302').due === b('CG-302').invTotal + b('CG-302').oldDebt], dd201: b('DD-201').state, tx202: b('TX-202').state, tx101: b('TX-101').state, cg401: b('CG-401').state }; });
+  check('QA-PAY-03', q3.cg101 === q3.expected && q3.creditOK && q3.cg302[0] === 'unpaid' && q3.cg302[1] && q3.cg302[2] && q3.dd201 === 'short' && q3.tx202 === 'deposit' && q3.tx101 === 'nobill' && q3.cg401 === 'empty', q3);
 
   // QA-PAY-04 — DS phòng phá HĐ: phải thu = tiền điện kỳ, đã thu = đã đóng, SĐT che; hồ sơ cọc chờ duyệt, không ghi mất cọc
   const q4 = await read(() => { const x = TH.calc.breakList('2026-10')[0], inv = TH.calc.invoice('INV-2610-DD201'); return { room: x.bc.roomId, chase: x.chase, elec: inv.lines.find(l => l.type === 'elec').amount, paid: x.paid, masked: /•/.test(x.phone), dep: x.deposit.state, ledger: TH.db.deposits.filter(d => d.roomId === 'DD-201').length, months: x.months }; });

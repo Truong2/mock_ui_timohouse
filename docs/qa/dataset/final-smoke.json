@@ -1,0 +1,22 @@
+{
+  "version": "excel-demo-v1",
+  "counts": {
+    "route": 45,
+    "screenSrs": 39,
+    "screenCr": 3,
+    "popup": 11,
+    "dialog": 27,
+    "tab": 55,
+    "variant": 109,
+    "figma": null
+  },
+  "smoke": {
+    "total": 1088,
+    "fails": 0
+  },
+  "kd09": 23643400,
+  "total09": 14243400,
+  "kd10": 11430000,
+  "total10": 54930000,
+  "reports": 2
+}

@@ -29,8 +29,8 @@
           label: 'Bảng lương nháp',
           cols: [
             { key: 'n', label: 'Nhân viên', render: function (r) { return TH.personCell(r.staff.name, esc(r.staff.id + ' · ' + r.staff.title)); } },
-            { key: 'b', label: 'Lương cố định', num: true, render: function (r) { return F.money(r.base); } },
-            { key: 'a', label: 'Phụ cấp (ăn trưa, xăng xe)', num: true, render: function (r) { return F.money(r.allowance); } },
+            { kind: 'money', key: 'b', label: 'Lương cố định', num: true, render: function (r) { return F.money(r.base); } },
+            { kind: 'money', key: 'a', label: 'Phụ cấp (ăn trưa, xăng xe)', num: true, render: function (r) { return F.money(r.allowance); } },
             { key: 'rooms', label: 'Số phòng · DT niêm yết', num: true, render: function (r) { return r.buildings.length ? '<b>' + r.rooms + '</b> · <span class="small">' + F.short(r.listed) + '</span>' : '<span class="muted small">Không phụ trách tòa</span>'; } },
             { key: 'dt', label: auto ? 'DT tiền phòng sau 3 mốc (tự kéo)' : 'DT tiền phòng sau 3 mốc (nhập tay)', labelHtml: auto ? 'DT tiền phòng sau 3 mốc ' + TH.badge('Tự kéo 5/10/15', 'teal') : 'DT tiền phòng sau 3 mốc <span class="small muted">(nhập tay)</span>', num: true, render: function (r) {
               if (!r.buildings.length) return '<span class="muted">—</span>';
@@ -38,12 +38,12 @@
               return editable ? '<label class="sr-only" for="dt-' + r.staff.id + '">DT tiền phòng ' + esc(r.staff.name) + '</label><input id="dt-' + r.staff.id + '" class="input-cell" inputmode="numeric" value="' + r.dt + '" data-draft="' + form + '.' + r.staff.id + '.dt" data-live>' : F.money(r.dt);
             } },
             { key: 'hs', label: 'Hiệu suất %', num: true, render: function (r) { return r.buildings.length ? '<b class="' + (r.hs >= 90 ? 'pos' : r.hs < 70 ? 'warn-text' : '') + '">' + F.pct(r.hs / 100, 1) + '</b>' : '<span class="muted">—</span>'; } },
-            { key: 'pr', label: 'Mức lương / phòng', num: true, render: function (r) { return r.buildings.length ? F.money(r.perRoom) + '<div class="cell-sub">' + (r.senior ? 'thâm niên ≥ 1 năm' : 'dưới 1 năm') + ' · ' + F.short(r.rate) + '@90%</div>' : '<span class="muted">—</span>'; } },
-            { key: 'p', label: 'Lương HS', num: true, render: function (r) { return r.perf ? F.money(r.perf) : '<span class="muted">0</span>'; } },
-            { key: 'lead', label: 'Lương trưởng nhóm', num: true, render: function (r) { return r.lead ? F.money(r.lead) + '<div class="cell-sub">' + r.teamRooms + ' phòng × 10.000</div>' : '<span class="muted">0</span>'; } },
+            { kind: 'money', key: 'pr', label: 'Mức lương / phòng', num: true, render: function (r) { return r.buildings.length ? F.money(r.perRoom) + '<div class="cell-sub">' + (r.senior ? 'thâm niên ≥ 1 năm' : 'dưới 1 năm') + ' · ' + F.short(r.rate) + '@90%</div>' : '<span class="muted">—</span>'; } },
+            { kind: 'money', key: 'p', label: 'Lương HS', num: true, render: function (r) { return r.perf ? F.money(r.perf) : '<span class="muted">0</span>'; } },
+            { kind: 'money', key: 'lead', label: 'Lương trưởng nhóm', num: true, render: function (r) { return r.lead ? F.money(r.lead) + '<div class="cell-sub">' + r.teamRooms + ' phòng × 10.000</div>' : '<span class="muted">0</span>'; } },
             { key: 'tier', label: 'Bậc HS', gate: 'F040.C', render: function (r) { return r.buildings.length ? TH.badge(r.hs >= 90 ? 'Bậc ≥ 90%' : r.hs >= 80 ? 'Bậc 80–90%' : 'Dưới 80%', 'info') : '—'; } },
-            { key: 'd', label: 'Điều chỉnh', num: true, render: function (r) { return r.adj ? '<a href="' + TH.router.href('SAL-ADJ', r.staff.id) + '" class="' + (r.adj < 0 ? 'neg' : 'pos') + '">' + F.money(r.adj) + '</a>' : '<span class="muted">0</span>'; } },
-            { key: 't', label: 'Tổng nháp', num: true, render: function (r) { return '<b>' + F.money(r.total) + '</b>'; } },
+            { kind: 'money', key: 'd', label: 'Điều chỉnh', num: true, render: function (r) { return r.adj ? '<a href="' + TH.router.href('SAL-ADJ', r.staff.id) + '" class="' + (r.adj < 0 ? 'neg' : 'pos') + '">' + F.money(r.adj) + '</a>' : '<span class="muted">0</span>'; } },
+            { kind: 'money', key: 't', label: 'Tổng nháp', num: true, render: function (r) { return '<b>' + F.money(r.total) + '</b>'; } },
             { key: 'tr', label: 'Truy vết', gate: 'F040.D', render: function (r) { return '<span class="small muted">' + (r.buildings.length ? 'HS-01 v0.3 · ' + r.buildings.join(',') : 'Cố định') + '</span>'; } },
           ],
           rows: list,
@@ -54,9 +54,9 @@
           label: 'Thiết lập mức lương',
           cols: [
             { key: 'n', label: 'Nhân viên', render: function (r) { return TH.personCell(r.staff.name, esc(r.staff.title)); } },
-            { key: 'b', label: 'Lương tháng', num: true, render: function (r) { return editable ? '<label class="sr-only" for="sb-' + r.staff.id + '">Lương ' + esc(r.staff.name) + '</label><input id="sb-' + r.staff.id + '" class="input-cell" inputmode="numeric" value="' + r.base + '" data-draft="' + form + '.' + r.staff.id + '.base" data-live>' : F.money(r.base); } },
-            { key: 'a', label: 'Phụ cấp cố định', num: true, render: function (r) { return editable ? '<label class="sr-only" for="sa-' + r.staff.id + '">Phụ cấp ' + esc(r.staff.name) + '</label><input id="sa-' + r.staff.id + '" class="input-cell" inputmode="numeric" value="' + r.allowance + '" data-draft="' + form + '.' + r.staff.id + '.allow" data-live>' : F.money(r.allowance); } },
-            { key: 'e', label: 'Hiệu lực từ', render: function () { return F.period(TH.store.state.period); } },
+            { kind: 'money', key: 'b', label: 'Lương tháng', num: true, render: function (r) { return editable ? '<label class="sr-only" for="sb-' + r.staff.id + '">Lương ' + esc(r.staff.name) + '</label><input id="sb-' + r.staff.id + '" class="input-cell" inputmode="numeric" value="' + r.base + '" data-draft="' + form + '.' + r.staff.id + '.base" data-live>' : F.money(r.base); } },
+            { kind: 'money', key: 'a', label: 'Phụ cấp cố định', num: true, render: function (r) { return editable ? '<label class="sr-only" for="sa-' + r.staff.id + '">Phụ cấp ' + esc(r.staff.name) + '</label><input id="sa-' + r.staff.id + '" class="input-cell" inputmode="numeric" value="' + r.allowance + '" data-draft="' + form + '.' + r.staff.id + '.allow" data-live>' : F.money(r.allowance); } },
+            { kind: 'date', key: 'e', label: 'Hiệu lực từ', render: function () { return F.period(TH.store.state.period); } },
             { key: 'v', label: 'Phiên bản', gate: 'F039.C', render: function (r) { return r.dirty ? TH.badge('v2 · chờ kế toán', 'draft') : 'v1'; } },
             { key: 'pol', label: 'Bộ chính sách', gate: 'F039.D', render: function (r) { return '<span class="small">' + esc({ admin: 'CS-Quản lý', accountant: 'CS-Văn phòng', manager: 'CS-Vận hành', staff: 'CS-Vận hành', hr: 'CS-Văn phòng' }[r.staff.role] || '—') + '</span>'; } },
           ],
@@ -85,7 +85,7 @@
         '<a class="btn" href="' + TH.router.href('SAL-ADJ') + '">' + I('edit', 'ic-sm') + 'Điều chỉnh</a>' + TH.exportBtn('sal.xlsx', 'Xuất Excel (.xlsx)');
       return TH.pageHeader({ screen: S, status: TH.badge('Bảng lương ' + { draft: 'nháp', confirmed: 'đã xác nhận (Excel)', preview: 'đã duyệt preview', locked: 'đã khóa' }[st.status], st.status === 'locked' ? 'neutral' : 'draft', { dot: true }), desc: 'Lương cơ bản + phụ cấp + lương hiệu suất (HS% = [A − A × B + C] ÷ tổng giá niêm yết) + lương trưởng nhóm + điều chỉnh kế toán. Bảng lương nháp không tạo chi tiền.', actions: actions }) +
         '<div class="grid-4 u-mb-16">' + TH.kpi({ label: 'Tổng lương nháp', icon: 'calculator', value: F.short(C.sum(list, function (r) { return r.total; })), accent: true }) + TH.kpi({ label: 'Cơ bản + phụ cấp', value: F.short(C.sum(list, function (r) { return r.base + r.allowance; })) }) + TH.kpi({ label: 'Lương HS + trưởng nhóm', value: F.short(C.sum(list, function (r) { return r.perf + r.lead; })), href: TH.router.href('PAY-02'), foot: 'Nguồn: mốc 5/10/15 · HS% = D ÷ giá niêm yết' }) + TH.kpi({ label: 'Điều chỉnh', value: F.short(C.sum(list, function (r) { return r.adj; })), href: TH.router.href('SAL-ADJ') }) + '</div>' +
-        '<div class="card card-flush u-mb-16">' + TH.tabs(S, tabs, tab) + content + '</div><div class="grid-2">' + approve + policy + '</div>';
+        '<div class="card card-flush u-mb-16">' + TH.tabs(S, tabs, tab) + TH.tabPanel(S, tab, content) + '</div><div class="grid-2">' + approve + policy + '</div>';
     },
   };
   TH.act['sal.xlsx'] = function () {
@@ -119,9 +119,9 @@
         body: '<div class="stack">' + TH.table({ compact: true, cols: [
           { key: 'n', label: 'Nhân viên', render: function (a) { return esc(C.staffName(a.staffId)); } },
           { key: 't', label: 'Loại', render: function (a) { return TH.badge(a.type === 'bonus' ? 'Thưởng' : a.type === 'penalty' ? 'Trừ' : 'Khác', a.amount < 0 ? 'danger' : 'success'); } },
-          { key: 'a', label: 'Số tiền', num: true, render: function (a) { return '<b class="' + (a.amount < 0 ? 'neg' : 'pos') + '">' + F.money(a.amount) + '</b>'; } },
+          { kind: 'money', key: 'a', label: 'Số tiền', num: true, render: function (a) { return '<b class="' + (a.amount < 0 ? 'neg' : 'pos') + '">' + F.money(a.amount) + '</b>'; } },
           { key: 'r', label: 'Lý do', render: function (a) { return esc(a.reason); } },
-          { key: 's', label: 'Trạng thái', render: function (a) { return TH.status(a.status); } },
+          { kind: 'status', key: 's', label: 'Trạng thái', render: function (a) { return TH.status(a.status); } },
           { key: 'tr', label: 'Truy vết', gate: 'F040.D', render: function (a) { return '<span class="small">' + esc(C.staffName(a.createdBy)) + ' · ' + F.date(a.createdAt) + '</span>'; } },
         ], rows: list, empty: { title: 'Chưa có điều chỉnh', text: 'Thêm khoản điều chỉnh bên dưới.' } }) +
           (locked ? '<div class="alert alert-neutral">' + I('lock', 'ic-sm') + '<div class="alert-body">Kỳ lương đã khóa — điều chỉnh phát sinh tạo bản điều chỉnh mới.</div></div>' : '') +

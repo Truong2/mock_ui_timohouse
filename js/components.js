@@ -57,7 +57,13 @@ var TH = window.TH = window.TH || {};
   TH.statusLabel = function (key) { return (STATUS[key] || [key])[0]; };
   /* Registry trạng thái theo miền — một nguồn nhãn + tone; TH.status giữ tương thích (miền chung) */
   TH.STATUS_REG = function () {
-    return { core: STATUS, bill: TH.BILL_STATES, deposit: TH.DEPOSIT_STATES, adjust: TH.ADJUST_STATES, vehicle: TH.VEHICLE_STATES, doc: TH.DOC_STATES };
+    return {
+      core: STATUS, bill: TH.BILL_STATES, deposit: TH.DEPOSIT_STATES, adjust: TH.ADJUST_STATES, vehicle: TH.VEHICLE_STATES, doc: TH.DOC_STATES,
+      receipt: { pending: ['Chờ xác nhận thu', 'warning'], confirmed: ['Đã xác nhận thu', 'success'], rejected: ['Từ chối', 'danger'] },
+      expense: { draft: ['Nháp', 'draft'], pending: ['Chờ duyệt', 'warning'], approved: ['Đã duyệt', 'success'], rejected: ['Từ chối', 'danger'] },
+      room: { occupied: STATUS.occupied, vacant: STATUS.vacant, maintenance: STATUS.maintenance, reserved: STATUS.reserved },
+      message: { sent: STATUS.sent, failed: STATUS.failed, queued: STATUS.queued, skipped: STATUS.skipped }
+    };
   };
   TH.statusOf = function (domain, key, override) {
     var m = (TH.STATUS_REG()[domain] || {})[key] || STATUS[key] || [key, 'neutral'];
@@ -118,6 +124,76 @@ var TH = window.TH = window.TH || {};
     return '<span class="forbidden-chip" data-tip="403 · Vai trò ' + esc(role) + ' không có quyền thực hiện thao tác này. Không liên quan đến gói demo.">' + I('ban', 'ic-sm') + esc(label || 'Không có quyền') + '</span>';
   };
 
+  /* Render-time action contract. Legacy HTML remains supported; priority is semantic,
+     never the position of a control in a rendered page. No business handler is replaced. */
+  var ACTION_PRIORITY = {
+    'dep.approve': 100, 'dep.pay': 100, 'dep.paid': 100, 'dep.submit': 100,
+    'app.confirm': 100, 'app.audit': 100, 'inv.confirm': 100, 'rptf.confirm': 100,
+    'sec.save': 100, 'veh.confirm': 90, 'dep.handover': 90, 'dep.review': 90,
+    'exp.approve': 90, 'rptf.new': 80, 'pay.report': 80,
+    'go': 10, 'cus.open': 10, 'veh.edit': 10, 'sec.edit': 10
+  };
+  var menuSequence = 0;
+  function actionScore(el) {
+    if (el.matches('.forbidden-chip, [data-locked]')) return -1;
+    var declared = el.getAttribute('data-priority');
+    if (declared) return declared === 'primary' ? 100 : declared === 'secondary' ? 20 : +declared || 0;
+    return ACTION_PRIORITY[el.getAttribute('data-act')] || (el.classList.contains('btn-primary') ? 80 : 0);
+  }
+  function menuHtml(nodes, context) {
+    var id = 'action-menu-' + (++menuSequence);
+    var items = nodes.map(function (node) {
+      var el = node.cloneNode(true), interactive = el.matches('button,a');
+      var danger = el.classList.contains('btn-danger') || el.classList.contains('btn-danger-solid');
+      ['btn', 'btn-primary', 'btn-soft', 'btn-sm', 'btn-xs', 'btn-lg', 'btn-ghost', 'btn-icon', 'btn-danger', 'btn-danger-solid'].forEach(function (c) { el.classList.remove(c); });
+      el.classList.add('menu-item');
+      if (danger) el.classList.add('is-danger');
+      if (interactive) el.setAttribute('role', 'menuitem');
+      return el.outerHTML;
+    }).join('');
+    var label = context === 'row' ? 'Thao tác khác' : 'Thêm';
+    return '<div class="action-menu"><button type="button" class="btn' + (context === 'row' ? ' btn-sm btn-ghost btn-icon' : '') + '" data-act="amenu.toggle" aria-haspopup="menu" aria-expanded="false" aria-controls="' + id + '" aria-label="' + label + '">' +
+      (context === 'row' ? I('more', 'ic-sm') : label + I('chevronDown', 'ic-sm')) + '</button><div id="' + id + '" class="action-pop" role="menu" aria-label="' + label + '" popover="manual" hidden>' + items + '</div></div>';
+  }
+  TH.actionGroup = function (options) {
+    options = options || {};
+    var context = options.context || 'page', holder = document.createElement('template');
+    if (options.items) {
+      holder.innerHTML = options.items.map(function (a) {
+        if (a.visible === false) return '';
+        var attrs = Object.keys(a.dataset || {}).map(function (k) { return ' data-' + k.replace(/[A-Z]/g, function (c) { return '-' + c.toLowerCase(); }) + '="' + esc(a.dataset[k]) + '"'; }).join('');
+        var cls = 'btn' + (a.primary ? ' btn-primary' : '') + (a.danger ? ' btn-danger' : '');
+        var tag = a.href && !a.disabled ? 'a' : 'button';
+        var html = '<' + tag + ' class="' + cls + '"' + (tag === 'a' ? ' href="' + esc(a.href) + '"' : ' type="button"') +
+          (a.act ? ' data-act="' + esc(a.act) + '"' : '') + attrs + (a.priority !== undefined || a.primary ? ' data-priority="' + esc(a.priority !== undefined ? a.priority : 'primary') + '"' : '') +
+          (a.disabled ? ' disabled aria-disabled="true"' : '') + (a.disabledReason ? ' aria-description="' + esc(a.disabledReason) + '" title="' + esc(a.disabledReason) + '" data-tip="' + esc(a.disabledReason) + '"' : '') + '>' +
+          (a.icon ? I(a.icon, 'ic-sm') : '') + esc(a.label) + '</' + tag + '>';
+        if (a.permission) html = TH.permBtn(a.permission, html, a.label);
+        return a.gate ? TH.gate(a.gate, html, { mode: 'btn', label: a.label }) : html;
+      }).join('');
+    } else holder.innerHTML = options.html || '';
+    var box = holder.content;
+    // The compatibility adapter unwraps layout-only rows, preserving controls and gates.
+    Array.prototype.slice.call(box.children).forEach(function (el) {
+      if (el.matches('.row,.row-actions') && !el.hasAttribute('data-act')) el.replaceWith.apply(el, Array.prototype.slice.call(el.childNodes));
+    });
+    var controls = Array.prototype.filter.call(box.children, function (el) { return el.matches('.btn,.gate-inline,.forbidden-chip'); });
+    var max = context === 'row' ? 1 : 3;
+    var ranked = controls.slice().sort(function (a, b) { return actionScore(b) - actionScore(a); });
+    var main = ranked[0], primary = main && actionScore(main) > 0 ? main : null;
+    controls.forEach(function (el) { if (el !== primary) el.classList.remove('btn-primary'); });
+    var keep = primary ? [primary] : [];
+    controls.forEach(function (el) { if (keep.length < max && keep.indexOf(el) < 0) keep.push(el); });
+    var more = controls.filter(function (el) { return keep.indexOf(el) < 0; });
+    if (more.length) {
+      var menu = document.createElement('template'); menu.innerHTML = menuHtml(more, context);
+      more.forEach(function (el) { el.remove(); }); box.appendChild(menu.content);
+    }
+    if (primary && context === 'page') box.appendChild(primary);
+    var out = document.createElement('div'); out.appendChild(box);
+    return context === 'row' ? '<div class="row-actions" data-action-group="row">' + out.innerHTML + '</div>' : out.innerHTML;
+  };
+
   /* ---------- Table ---------- */
   /* Độ dài khối chữ dài nhất trong 1 ô (mỗi <div>/<br> là 1 dòng riêng) — dùng để quyết định cột có được xuống dòng hay không */
   var NOWRAP_MAX = 24, LONG_MIN = 70;
@@ -138,8 +214,8 @@ var TH = window.TH = window.TH || {};
     // Cột chữ vừa: độ rộng tối thiểu ≈ nửa dòng dài nhất (+ phần dư chỗ ngắt từ) để gói trong ~2 dòng; cột văn bản dài (≥ 70 ký tự) tối thiểu 240px
     var minW = [];
     var fit = cols.map(function (c, j) {
-      if (j === cols.length - 1 && !c.label && !c.labelHtml) return 'nw col-act';
-      if (c.nowrap) return 'nw';
+      if (c.kind === 'actions' || (j === cols.length - 1 && !c.label && !c.labelHtml)) return 'nw col-act';
+      if (c.nowrap || ['money', 'date', 'identity', 'status'].indexOf(c.kind) > -1) return 'nw';
       var m = cells.reduce(function (mx, row) { return row[j] == null ? mx : Math.max(mx, longestLine(row[j])); }, 0);
       if (!c.wrap && m <= NOWRAP_MAX) return 'nw';
       minW[j] = m >= LONG_MIN ? 240 : Math.min(260, Math.max(180, Math.round((m / 2 + 4) * 6.8) + 24));
@@ -167,6 +243,7 @@ var TH = window.TH = window.TH || {};
           var locked = c.gate && !TH.has(c.gate);
           var cls = (c.num ? 'num ' : '') + (c.center ? 'center ' : '') + (c.tdCls || '') + (locked ? ' is-ghost' : '') + ' ' + fit[j];
           var v = locked ? '<span class="ghost-bar" aria-hidden="true"></span>' : cells[i][j];
+          if (!locked && /col-act/.test(fit[j]) && /class="[^"]*\bbtn\b/.test(v)) v = TH.actionGroup({ context: 'row', html: v });
           if (o.mobile) {
             var identity = c.key === o.mobile.identity;
             var secondary = o.mobile.visible.indexOf(c.key) === -1;
@@ -252,11 +329,16 @@ var TH = window.TH = window.TH || {};
   TH.tabs = function (screen, tabs, cur, key) {
     key = key || 'tab';
     if (TH._rec) tabs.forEach(function (t) { if (t.gate) TH._rec(t.gate); });
-    return '<div class="tabs" role="tablist">' + tabs.filter(function (t) { return !t.gate || TH.has(t.gate) || TH.store.state.showLocked; }).map(function (t) {
+    return '<div class="tabs" role="tablist" aria-label="' + esc((TH.screen(screen) || {}).title || 'Nội dung') + '">' + tabs.filter(function (t) { return !t.gate || TH.has(t.gate) || TH.store.state.showLocked; }).map(function (t) {
       var locked = t.gate && !TH.has(t.gate);
-      if (locked) return '<button type="button" class="tab is-locked" role="tab" aria-selected="false" data-locked="' + t.gate + '" data-tip="' + esc(lockTip(TH.inc(t.gate))) + '">' + I('lock', 'ic-sm') + esc(t.label) + TH.tierPill(TH.tierOf(t.gate)) + '</button>';
-      return '<button type="button" class="tab" role="tab" aria-selected="' + (t.id === cur) + '" data-act="ui.set" data-screen="' + screen + '" data-key="' + key + '" data-val="' + t.id + '">' + (t.icon ? I(t.icon, 'ic-sm') : '') + esc(t.label) + (t.count !== undefined ? '<span class="count">' + t.count + '</span>' : '') + (t.gate ? TH.up(t.gate) : '') + '</button>';
+      var id = TH.tabId(screen, key, t.id), panel = TH.tabId(screen, key, 'panel');
+      if (locked) return '<button type="button" class="tab is-locked" role="tab" tabindex="-1" aria-selected="false" aria-disabled="true" data-locked="' + t.gate + '" data-tip="' + esc(lockTip(TH.inc(t.gate))) + '">' + I('lock', 'ic-sm') + esc(t.label) + TH.tierPill(TH.tierOf(t.gate)) + '</button>';
+      return '<button type="button" id="' + id + '" class="tab" role="tab" tabindex="' + (t.id === cur ? '0' : '-1') + '" aria-controls="' + panel + '" aria-selected="' + (t.id === cur) + '" data-act="ui.set" data-screen="' + screen + '" data-key="' + key + '" data-val="' + t.id + '">' + (t.icon ? I(t.icon, 'ic-sm') : '') + esc(t.label) + (t.count !== undefined ? '<span class="count">' + t.count + '</span>' : '') + (t.gate ? TH.up(t.gate) : '') + '</button>';
     }).join('') + '</div>';
+  };
+  TH.tabId = function (screen, key, value) { return 'tab-' + encodeURIComponent(screen + '-' + (key || 'tab') + '-' + value).replace(/%/g, '_'); };
+  TH.tabPanel = function (screen, cur, html, key) {
+    return '<div class="tab-panel" id="' + TH.tabId(screen, key, 'panel') + '" role="tabpanel" aria-labelledby="' + TH.tabId(screen, key || 'tab', cur) + '" tabindex="0">' + html + '</div>';
   };
   TH.chips = function (screen, key, opts, cur) {
     return opts.map(function (o) {
@@ -292,19 +374,20 @@ var TH = window.TH = window.TH || {};
       return (c[1] ? '<a href="' + c[1] + '">' + esc(c[0]) + '</a>' : '<span>' + esc(c[0]) + '</span>') + (i < arr.length - 1 ? I('chevronRight') : '');
     }).join('');
     return '<div class="page-hd"><div class="u-minw-0"><nav class="crumbs" aria-label="Breadcrumb">' + crumbs + '</nav>' +
-      '<h1 class="page-title">' + esc(o.title || sc.title) + ' <span class="screen-id" data-tip="Screen ID theo SRS §4' + (sc.no ? ' · Screen ' + sc.no : '') + ' · ' + esc(sc.kind || '') + '">' + esc(o.screen) + '</span>' + (o.status || '') + '</h1>' +
+      '<h1 class="page-title" id="page-title" tabindex="-1">' + esc(o.title || sc.title) + ' <span class="screen-id" data-tip="Screen ID theo SRS §4' + (sc.no ? ' · Screen ' + sc.no : '') + ' · ' + esc(sc.kind || '') + '">' + esc(o.screen) + '</span>' + (o.status || '') + '</h1>' +
       (o.desc ? '<p class="page-desc">' + o.desc + '</p>' : '') + (o.facts || '') + '</div>' +
-      '<div class="page-actions">' + (o.actions || '') + '</div></div>';
+      '<div class="page-actions" data-action-group="page">' + TH.actionGroup(Array.isArray(o.actions) ? { items: o.actions } : { html: o.actions || '' }) + '</div></div>';
   };
   /* ---------- Data states ---------- */
   TH.state = function (kind, o) {
     o = o || {};
     var map = {
       empty: ['inbox', 'state-empty', 'Chưa có dữ liệu', 'Không có bản ghi trong phạm vi đang xem.'],
+      filtered: ['search', 'state-empty', 'Không có kết quả phù hợp', 'Thử đổi từ khóa hoặc bỏ bớt bộ lọc.'],
       error: ['alert', 'state-error', 'Không tải được dữ liệu', 'Lỗi API (mô phỏng). Dữ liệu chưa thay đổi; thử lại sau.'],
       forbidden: ['shieldAlert', 'state-forbidden', 'Không có quyền truy cập (403)', 'Vai trò hiện tại không được cấp quyền xem màn này. Đây là phân quyền vai trò — khác với khóa theo gói.'],
     };
-    var m = map[kind];
+    var m = map[kind] || map.empty;
     return '<div class="state ' + m[1] + '"><div class="state-ic">' + I(m[0]) + '</div><h3>' + esc(o.title || m[2]) + '</h3><p>' + (o.text || m[3]) + '</p>' + (o.action || '') + '</div>';
   };
   TH.loadingSkeleton = function () {
@@ -323,7 +406,7 @@ var TH = window.TH = window.TH || {};
   };
 
   /* ---------- Overlay: dialog / drawer ---------- */
-  var stack = [];
+  var stack = [], actionReturn = null;
   var root = null;
   function ensureRoot() {
     if (!root) { root = document.createElement('div'); root.id = 'overlays'; document.body.appendChild(root); }
@@ -339,7 +422,8 @@ var TH = window.TH = window.TH || {};
     m.el.querySelector('.hd-extra').innerHTML = r.headExtra || '';
     var st = bd.scrollTop;
     bd.className = 'dialog-bd' + (r.flush ? ' flush' : '');
-    bd.innerHTML = r.body;
+    bd.innerHTML = TH.prepareView(r.body);
+    TH.formSummaries(bd);
     bd.scrollTop = st;
     ft.innerHTML = r.foot || '';
     ft.hidden = !r.foot;
@@ -355,12 +439,13 @@ var TH = window.TH = window.TH || {};
       var el = document.createElement('div');
       var drawer = spec.kind === 'drawer';
       el.className = 'overlay' + (drawer ? ' overlay-drawer' : '');
-      el.style.zIndex = 400 + stack.length * 10 + (spec.z || 0);
+      el.style.zIndex = (parseInt(getComputedStyle(document.documentElement).getPropertyValue('--z-overlay'), 10) || 400) + stack.length * 10 + (spec.z || 0);
       el.innerHTML = '<div class="overlay-bg" data-close></div><div class="' + (drawer ? 'drawer' : 'dialog dialog-' + (spec.size || 'md')) + '" role="dialog" aria-modal="true" aria-labelledby="' + id + '-t">' +
         '<div class="dialog-hd"><div class="titles"></div><div class="hd-extra row u-gap-8"></div><button type="button" class="btn btn-ghost btn-icon btn-sm" data-close aria-label="Đóng">' + I('x') + '</button></div>' +
         '<div class="dialog-bd"></div><div class="dialog-ft"></div></div>';
       root.appendChild(el);
-      var m = { key: spec.key, id: id, el: el, spec: spec, ret: document.activeElement };
+      var active = document.activeElement, menu = active && active.closest('.action-menu');
+      var m = { key: spec.key, id: id, el: el, spec: spec, ret: actionReturn || (menu ? menu.querySelector('[data-act="amenu.toggle"]') : active) };
       stack.push(m);
       paint(m);
       document.body.style.overflow = 'hidden';
@@ -379,7 +464,10 @@ var TH = window.TH = window.TH || {};
       m.el.classList.add('is-closing');
       setTimeout(function () { m.el.remove(); }, 170);
       if (!stack.length) document.body.style.overflow = '';
-      if (m.ret && m.ret.isConnected && !opts.noFocus) { try { m.ret.focus({ preventScroll: true }); } catch (e) { /* noop */ } }
+      if (!opts.noFocus) {
+        var back = m.ret && m.ret.isConnected && m.ret.offsetParent !== null ? m.ret : document.getElementById('page-title');
+        if (back) { try { back.focus({ preventScroll: true }); } catch (e) { /* noop */ } }
+      }
       if (m.spec.onClose && !opts.silent) m.spec.onClose();
     },
     isOpen: function (key) { return stack.some(function (m) { return m.key === key; }); },
@@ -396,6 +484,7 @@ var TH = window.TH = window.TH || {};
       if (!m || ev.key !== 'Tab') return;
       var f = focusables(m.el);
       if (!f.length) return;
+      if (!m.el.contains(document.activeElement)) { ev.preventDefault(); f[0].focus(); return; }
       if (ev.shiftKey && document.activeElement === f[0]) { ev.preventDefault(); f[f.length - 1].focus(); }
       else if (!ev.shiftKey && document.activeElement === f[f.length - 1]) { ev.preventDefault(); f[0].focus(); }
     },
@@ -568,7 +657,7 @@ var TH = window.TH = window.TH || {};
     var body;
     if (on) {
       var err = TH.store.draft(form, '_err', '');
-      body = (err ? '<div class="alert alert-danger u-mb-12">' + I('xCircle', 'ic-sm') + '<div class="alert-body">' + esc(err) + '</div></div>' : '') +
+      body = (err ? '<div class="alert alert-danger u-mb-12" role="alert" tabindex="-1" id="' + esc(form) + '-error">' + I('xCircle', 'ic-sm') + '<div class="alert-body">' + esc(err) + '</div></div>' : '') +
         '<div class="form-grid">' + def.fields(id).map(function (f) {
           if (f.html) return f.html;
           return TH.field(Object.assign({ form: form, def: vals[f.name] === null || vals[f.name] === undefined ? '' : vals[f.name] }, f));
@@ -608,8 +697,15 @@ var TH = window.TH = window.TH || {};
     var def = TH.SECTIONS[ed.key], form = TH.secForm(ed.key, ed.id), d = TH.store.draft(form);
     var before = def.values(ed.id), vals = Object.assign({}, before);
     Object.keys(d).forEach(function (k) { if (k.charAt(0) !== '_') vals[k] = typeof d[k] === 'string' ? d[k].trim() : d[k]; });
+    var required = {};
+    def.fields(ed.id).forEach(function (field) { if (field.required && field.name && !String(vals[field.name] || '').trim()) required[field.name] = 'Nhập ' + field.label.toLowerCase() + '.'; });
     var err = def.validate ? def.validate(vals, ed.id) : null;
-    if (err) { TH.store.setDraft(form, '_err', err); TH.app.refresh(); return false; }
+    if (!TH.formErrors(form, required)) { TH.app.refresh(); return false; }
+    if (err) {
+      if (typeof err === 'object') { TH.formErrors(form, err); TH.app.refresh(); }
+      else { TH.store.setDraft(form, '_err', err); TH.app.refresh(); var alert = document.getElementById(form + '-error'); if (alert) alert.focus(); }
+      return false;
+    }
     var changed = Object.keys(vals).filter(function (k) { return String(vals[k]) !== String(before[k] === null || before[k] === undefined ? '' : before[k]); });
     def.save(ed.id, vals, changed);
     var title = typeof def.title === 'function' ? def.title(ed.id) : def.title;
@@ -648,34 +744,40 @@ var TH = window.TH = window.TH || {};
   TH.formErrors = function (form, map) {
     TH.store.setDraft(form, '_errors', map || {});
     var keys = Object.keys(map || {});
+    if (keys.length) Promise.resolve().then(function () {
+      var el = document.getElementById('f-' + form + '-' + keys[0]);
+      if (el) el.focus({ preventScroll: false });
+    });
     return keys.length === 0;
   };
   TH.clearFormErrors = function (form) { TH.store.setDraft(form, '_errors', {}); };
   TH.formErrorSummary = function (form) {
     var e = TH.store.draft(form, '_errors', {}) || {}, ks = Object.keys(e);
     if (ks.length < 2) return '';
-    return '<div class="alert alert-danger form-error-summary" role="alert">' + TH.icon('alertCircle', 'ic-sm') + '<div class="alert-body"><b>Cần sửa ' + ks.length + ' trường trước khi lưu</b><span>' + ks.map(function (k) { return esc(e[k]); }).join(' · ') + '</span></div></div>';
+    return '<div class="alert alert-danger form-error-summary" role="alert"><div class="alert-body"><b>Cần sửa ' + ks.length + ' trường trước khi lưu</b><ul>' + ks.map(function (k) { return '<li><a href="#f-' + esc(form + '-' + k) + '" data-act="field.focus" data-target="f-' + esc(form + '-' + k) + '">' + esc(e[k]) + '</a></li>'; }).join('') + '</ul></div></div>';
   };
   TH.field = function (o) {
     var id = o.id || ('f-' + (o.form || 'x') + '-' + o.name);
     if (o.error === undefined && o.form && o.name) { var fe = (TH.store.draft(o.form, '_errors', {}) || {})[o.name]; if (fe) { o = Object.assign({}, o, { error: fe, invalid: true }); } }
-    var aria = o.error ? ' aria-invalid="true" aria-describedby="' + id + '-err"' : '';
+    var description = (o.hint ? [id + '-hint'] : []).concat(o.error ? [id + '-err'] : []);
+    var aria = (o.error ? ' aria-invalid="true"' : '') + (description.length ? ' aria-describedby="' + description.join(' ') + '"' : '') + (o.required ? ' required aria-required="true"' : '') + (o.readonly ? ' aria-readonly="true"' : '');
     var val = o.value !== undefined ? o.value : (o.form ? TH.store.draft(o.form, o.name, o.def !== undefined ? o.def : '') : '');
     var bind = (o.form ? ' data-draft="' + o.form + '.' + o.name + '"' : '') + (o.live ? ' data-live' : '');
     var req = o.required ? ' <span class="neg" aria-hidden="true">*</span>' : '';
     var ctl;
     if (o.type === 'select') {
-      ctl = '<select id="' + id + '" class="select' + (o.invalid ? ' is-invalid' : '') + '"' + bind + aria + (o.disabled ? ' disabled' : '') + '>' + o.options.map(function (op) {
+      ctl = '<select id="' + id + '" class="select' + (o.invalid ? ' is-invalid' : '') + '"' + bind + aria + (o.disabled || o.readonly ? ' disabled' : '') + '>' + o.options.map(function (op) {
         var v = typeof op === 'object' ? op.id : op, l = typeof op === 'object' ? op.label : op;
         return '<option value="' + esc(v) + '"' + (String(v) === String(val) ? ' selected' : '') + '>' + esc(l) + '</option>';
       }).join('') + '</select>';
     } else if (o.type === 'textarea') {
-      ctl = '<textarea id="' + id + '" class="textarea' + (o.invalid ? ' is-invalid' : '') + '"' + bind + aria + ' rows="' + (o.rows || 3) + '" placeholder="' + esc(o.placeholder || '') + '">' + esc(val) + '</textarea>';
+      ctl = '<textarea id="' + id + '" class="textarea' + (o.invalid ? ' is-invalid' : '') + '"' + bind + aria + (o.readonly ? ' readonly' : '') + (o.disabled ? ' disabled' : '') + ' rows="' + (o.rows || 3) + '" placeholder="' + esc(o.placeholder || '') + '">' + esc(val) + '</textarea>';
     } else {
       ctl = '<input id="' + id + '" class="input' + (o.num ? ' num' : '') + (o.invalid ? ' is-invalid' : '') + (o.warn ? ' is-warn' : '') + '" type="' + (o.type || 'text') + '"' + bind + aria + ' value="' + esc(val) + '"' + (o.placeholder ? ' placeholder="' + esc(o.placeholder) + '"' : '') + (o.readonly ? ' readonly' : '') + (o.disabled ? ' disabled' : '') + (o.inputmode ? ' inputmode="' + o.inputmode + '"' : '') + ' autocomplete="off">';
     }
-    return '<div class="field' + (o.span ? ' span-2' : '') + '"><label for="' + id + '">' + esc(o.label) + req + (o.labelExtra || '') + '</label>' + ctl +
-      (o.error ? '<div class="field-error" id="' + id + '-err">' + TH.icon('alertCircle', 'ic-sm') + esc(o.error) + '</div>' : o.hint ? '<div class="field-hint">' + o.hint + '</div>' : '') + '</div>';
+    return '<div class="field' + (o.span ? ' span-2' : '') + '"><label for="' + id + '">' + req + esc(o.label) + (o.labelExtra || '') + '</label>' + ctl +
+      (o.hint ? '<div class="field-hint" id="' + id + '-hint">' + o.hint + '</div>' : '') +
+      (o.error ? '<div class="field-error" id="' + id + '-err">' + TH.icon('alertCircle', 'ic-sm') + esc(o.error) + '</div>' : '') + '</div>';
   };
   TH.fileOf = function (name) {
     var ext = (name.split('.').pop() || '').toLowerCase();
@@ -697,7 +799,7 @@ var TH = window.TH = window.TH || {};
   var RE_CODE = /\b(?:F\d{3}(?:\.[A-D])?|[DKGR]-\d{2}|BILL-Q\d(?:[…-]Q\d)?|PAY-Q\d|CR-[A-Z]+-\d+|QA-[A-Z]+(?:-\d+)?)\b/g;
   var RE_SCREEN_PAREN = /\(\s*([A-Z]{2,6}-(?:\d{2}[a-z]?|[A-Z]{3,}))\s*\)/g;
   var RE_SCREEN = /\b([A-Z]{2,6}-(?:\d{2}[a-z]?|[A-Z]{3,}))\b/g;
-  var RE_HINT = /F\d{3}|[A-Z]-\d|[A-Z]{2,}-[A-Z]{3}|BILL-Q|PAY-Q|DRAFT|PROPOSED|PENDING_APPROVAL/;
+  var RE_HINT = /F\d{3}|[A-Z]-\d|[A-Z]{2,}-[A-Z]{3}|BILL-Q|PAY-Q|DRAFT|PROPOSED|PENDING_APPROVAL|BLOCKED_BY_REQUIREMENT|SOURCE_REQUIRED/;
   function isScreen(id) { return !!(TH.screen && TH.screen(id)); }
   TH.cleanCodes = function (s) {
     if (!s || TH.isReview() || !RE_HINT.test(s)) return s;
@@ -706,6 +808,7 @@ var TH = window.TH = window.TH || {};
       .replace(RE_SCREEN, function (m, id) { return isScreen(id) ? (TH.navigation && TH.navigation.label ? TH.navigation.label(id) : TH.screen(id).title) : m; })
       .replace(RE_CODE, '')
       .replace(/\bDRAFT\b/g, 'Nháp').replace(/\bPROPOSED\b/g, 'Đề xuất').replace(/\bPENDING_APPROVAL\b/g, 'Chờ duyệt')
+      .replace(/\bBLOCKED_BY_REQUIREMENT\b/g, 'Cần làm rõ yêu cầu').replace(/\bSOURCE_REQUIRED\b/g, 'Cần xác nhận nguồn')
       .replace(/\(\s*(?:[·,\/;:+&]\s*)+/g, '(').replace(/(?:\s*[·,\/;:+&])+\s*\)/g, ')')
       .replace(/\(\s*\)/g, '').replace(/\[\s*\]/g, '')
       .replace(/(?:\s*·){2,}/g, ' ·').replace(/\s*·\s*(?=[)\]])/g, '')
@@ -718,7 +821,7 @@ var TH = window.TH = window.TH || {};
     if (!root || TH.isReview()) return;
     var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: function (n) {
       var p = n.parentElement;
-      if (!p || p.closest('select, textarea, code, .mono, .doc-page, .print-doc, [data-raw]')) return NodeFilter.FILTER_REJECT;
+      if (!p || p.closest('select, textarea, code, .mono, .doc-page, .print-doc, [data-raw], [data-document]')) return NodeFilter.FILTER_REJECT;
       return RE_HINT.test(n.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
     } });
     var nodes = [];
@@ -732,40 +835,28 @@ var TH = window.TH = window.TH || {};
     });
   };
   /* Header trang: tối đa 1 nút chính + 2 nút phụ; phần còn lại vào menu "Thêm". Cột thao tác bảng: >2 nút → "⋯". */
-  function toMenuItem(el) {
-    el.classList.remove('btn', 'btn-sm', 'btn-xs', 'btn-lg', 'btn-ghost', 'btn-soft', 'btn-icon');
-    if (el.classList.contains('btn-danger')) { el.classList.remove('btn-danger'); el.classList.add('is-danger'); }
-    el.classList.add('menu-item');
-    el.setAttribute('role', 'menuitem');
-    return el;
-  }
-  function makeMenu(items, label, iconOnly) {
-    var wrap = document.createElement('div');
-    wrap.className = 'action-menu';
-    wrap.innerHTML = '<button type="button" class="btn' + (iconOnly ? ' btn-sm btn-ghost btn-icon' : '') + '" data-act="amenu.toggle" aria-haspopup="menu" aria-expanded="false"' + (iconOnly ? ' aria-label="' + esc(label) + '" data-tip="' + esc(label) + '"' : '') + '>' + (iconOnly ? I('more', 'ic-sm') : esc(label) + I('chevronDown', 'ic-sm')) + '</button><div class="action-pop" role="menu" hidden></div>';
-    var pop = wrap.querySelector('.action-pop');
-    items.forEach(function (el) { pop.appendChild(toMenuItem(el)); });
-    return wrap;
-  }
-  var ACT_SEL = '.btn, .gate-inline, .forbidden-chip';
-  TH.compactActions = function (root) {
-    if (!root) return;
-    root.querySelectorAll('.page-actions').forEach(function (box) {
-      var items = Array.prototype.filter.call(box.children, function (el) { return el.matches(ACT_SEL) && !el.closest('.action-menu'); });
-      if (items.length <= 3) return;
-      var prim = items.filter(function (el) { return el.classList.contains('btn-primary'); }).slice(0, 1);
-      var rest = items.filter(function (el) { return prim.indexOf(el) === -1; });
-      var keep = rest.slice(0, 2), more = rest.slice(2);
-      if (!more.length) return;
-      var menu = makeMenu(more, 'Thêm', false);
-      box.appendChild(menu);
-      prim.forEach(function (el) { box.appendChild(el); }); // nút chính luôn ở cuối bên phải
+  TH.prepareView = function (html) {
+    var t = document.createElement('template'); t.innerHTML = html || '';
+    t.content.querySelectorAll('.table .row-actions:not([data-action-group])').forEach(function (host) {
+      host.outerHTML = TH.actionGroup({ context: 'row', html: host.innerHTML });
     });
-    root.querySelectorAll('td.col-act, .table .row-actions').forEach(function (cell) {
-      var host = cell.querySelector('.row-actions, .row') || cell;
-      var items = Array.prototype.filter.call(host.children, function (el) { return el.matches(ACT_SEL); });
-      if (items.length <= 2) return;
-      host.appendChild(makeMenu(items.slice(1), 'Thao tác khác', true));
+    return t.innerHTML;
+  };
+  TH.formSummaries = function (root) {
+    var forms = {};
+    root.querySelectorAll('[data-draft]').forEach(function (el) {
+      var field = el.closest('.field'), binding = el.getAttribute('data-draft'), at = binding.indexOf('.');
+      if (field && at > 0) forms[binding.slice(0, at)] = field;
+    });
+    Object.keys(forms).forEach(function (form) {
+      var summary = TH.formErrorSummary(form);
+      if (!summary) return;
+      var first = Array.prototype.find.call(root.querySelectorAll('[data-draft]'), function (el) { return el.getAttribute('data-draft').indexOf(form + '.') === 0; });
+      var field = first && first.closest('.field'), grid = field && field.closest('.form-grid');
+      if (field && !root.querySelector('[data-error-summary="' + CSS.escape(form) + '"]')) {
+        var holder = document.createElement('div'); holder.setAttribute('data-error-summary', form); holder.innerHTML = summary;
+        (grid || field).insertAdjacentElement('beforebegin', holder);
+      }
     });
   };
   /* Nút chỉ có icon phải có tên truy cập */
@@ -815,11 +906,12 @@ var TH = window.TH = window.TH || {};
     cr.innerHTML = (home ? '<a href="' + esc(home.getAttribute('href')) + '">' + esc(cap.textContent) + '</a>' : '<span>' + esc(cap.textContent) + '</span>') +
       (cur ? I('chevronRight') + '<span>' + esc(cur.textContent) + '</span>' : '');
   };
-  TH.uiPolish = function (root) { TH.gateGroup(root); TH.pageCrumbs(root); TH.reviewFilter(root); TH.compactActions(root); TH.a11yIconButtons(root); };
+  TH.uiPolish = function (root) { TH.gateGroup(root); TH.pageCrumbs(root); TH.reviewFilter(root); TH.formSummaries(root); TH.a11yIconButtons(root); };
   /* Menu thao tác: mở/đóng, phím Escape, click ngoài */
   function closeMenus(except) {
     document.querySelectorAll('.action-menu .action-pop:not([hidden])').forEach(function (p) {
       if (except && except.contains(p)) return;
+      if (p.hidePopover && p.matches(':popover-open')) p.hidePopover();
       p.hidden = true; var b = p.parentNode.querySelector('[data-act="amenu.toggle"]'); if (b) b.setAttribute('aria-expanded', 'false');
     });
   }
@@ -828,21 +920,43 @@ var TH = window.TH = window.TH || {};
     var wrap = el.closest('.action-menu'), pop = wrap.querySelector('.action-pop'), open = pop.hidden;
     closeMenus(open ? wrap : null);
     pop.hidden = !open; el.setAttribute('aria-expanded', String(open));
-    if (open) { var first = pop.querySelector('.menu-item:not([disabled])'); if (first) first.focus(); }
+    if (open) {
+      // The top layer keeps a table or card's overflow from clipping its menu.
+      if (pop.showPopover) pop.showPopover();
+      var r = el.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
+      pop.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.right - w)) + 'px';
+      pop.style.top = Math.max(8, Math.min(innerHeight - h - 8, r.bottom + 4)) + 'px';
+      var first = pop.querySelector('button.menu-item:not([disabled]):not([aria-disabled="true"]),a.menu-item[href]'); if (first) first.focus();
+    }
   };
+  TH.act['field.focus'] = function (el) { var field = document.getElementById(el.dataset.target); if (field) field.focus(); };
+  window.addEventListener('resize', function () { closeMenus(null); });
+  document.addEventListener('scroll', function (e) { if (!e.target.closest || !e.target.closest('.action-pop')) closeMenus(null); }, true);
   document.addEventListener('click', function (e) {
     var t = e.target.closest ? e.target.closest('.action-menu') : null;
     if (!t) closeMenus(null);
-    else if (e.target.closest('.action-pop .menu-item')) setTimeout(function () { closeMenus(null); }, 0);
+    else if (e.target.closest('.action-pop .menu-item')) {
+      actionReturn = t.querySelector('[data-act="amenu.toggle"]');
+      closeMenus(null);
+      Promise.resolve().then(function () { actionReturn = null; });
+    }
   });
   document.addEventListener('keydown', function (e) {
     var pop = e.target.closest ? e.target.closest('.action-pop') : null;
     if (e.key === 'Escape' && document.querySelector('.action-pop:not([hidden])')) {
       var openPop = document.querySelector('.action-pop:not([hidden])'), b = openPop.parentNode.querySelector('[data-act="amenu.toggle"]');
-      closeMenus(null); if (b) b.focus(); e.stopPropagation();
-    } else if (pop && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
-      var list = Array.prototype.slice.call(pop.querySelectorAll('.menu-item:not([disabled])')), i = list.indexOf(document.activeElement);
-      var nx = list[(i + (e.key === 'ArrowDown' ? 1 : list.length - 1)) % list.length]; if (nx) { nx.focus(); e.preventDefault(); }
+      closeMenus(null); if (b) b.focus(); e.preventDefault(); e.stopImmediatePropagation();
+    } else if (pop && ['ArrowDown', 'ArrowUp', 'Home', 'End'].indexOf(e.key) > -1) {
+      var list = Array.prototype.slice.call(pop.querySelectorAll('button.menu-item:not([disabled]):not([aria-disabled="true"]),a.menu-item[href]')), i = list.indexOf(document.activeElement);
+      var index = e.key === 'Home' ? 0 : e.key === 'End' ? list.length - 1 : (i + (e.key === 'ArrowDown' ? 1 : list.length - 1)) % list.length;
+      if (list[index]) { list[index].focus(); e.preventDefault(); }
+    } else if (pop && e.key === 'Tab') {
+      var trigger = pop.parentNode.querySelector('[data-act="amenu.toggle"]'); closeMenus(null); if (trigger) trigger.focus();
+    } else if (e.target.matches('[role="tab"]') && ['ArrowRight', 'ArrowLeft', 'Home', 'End'].indexOf(e.key) > -1) {
+      var tabs = Array.prototype.slice.call(e.target.closest('[role="tablist"]').querySelectorAll('[role="tab"]:not([aria-disabled="true"])'));
+      var at = tabs.indexOf(e.target), next = e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : (at + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length;
+      tabs.forEach(function (tab, i) { tab.tabIndex = i === next ? 0 : -1; });
+      if (tabs[next]) tabs[next].focus(); e.preventDefault();
     }
   }, true);
 })();

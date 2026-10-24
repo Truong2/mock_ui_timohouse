@@ -77,7 +77,7 @@
     return '<div class="card"><div class="card-hd"><div class="card-title">' + I('history', 'ic-sm') + 'Lịch sử batch import ' + TH.up(cfg.inc.history) + '</div></div>' +
       TH.table({ compact: true, cols: [
         { key: 'id', label: 'Lô', render: function (b) { return '<span class="mono">' + b.id + '</span><div class="cell-sub">' + esc(b.file) + '</div>'; } },
-        { key: 'at', label: 'Thời điểm', render: function (b) { return F.date(b.at) + '<div class="cell-sub">' + esc(TH.calc.staffName(b.by)) + '</div>'; } },
+        { kind: 'date', key: 'at', label: 'Thời điểm', render: function (b) { return F.date(b.at) + '<div class="cell-sub">' + esc(TH.calc.staffName(b.by)) + '</div>'; } },
         { key: 'ok', label: 'Ghi/Lỗi', num: true, render: function (b) { return '<span class="pos">' + b.ok + '</span> / <span class="' + (b.errors ? 'neg' : 'muted') + '">' + b.errors + '</span>'; } },
         { key: 'rb', label: '', render: function (b) { return b.status === 'rolledback' ? TH.badge('Đã rollback', 'neutral') : '<button type="button" class="btn btn-xs" data-act="imp.rollback" data-id="' + b.id + '">' + I('rotateCcw', 'ic-sm') + 'Hoàn tác</button>'; } },
       ], rows: list, empty: { title: 'Chưa có lô', text: 'Lô sẽ xuất hiện sau lần nhập đầu tiên.' } }) + '</div>';

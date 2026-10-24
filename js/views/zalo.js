@@ -41,9 +41,9 @@
           { key: 'ck', label: '', labelHtml: '<span class="sr-only">Chọn</span>', cls: 'cell-check', tdCls: 'cell-check', render: function (i) { return eligible(i) ? '' : '<input type="checkbox" aria-label="Chọn ' + i.roomId + '" data-act="oa.sel" data-id="' + i.id + '"' + (sel.indexOf(i.id) > -1 ? ' checked' : '') + '>'; } },
           { key: 'r', label: 'Phòng', render: function (i) { return '<b>' + i.roomId + '</b>'; } },
           { key: 'k', label: 'Khách', render: function (i) { return esc(C.customer(i.customerId).name); } },
-          { key: 'd', label: 'Còn nợ', num: true, render: function (i) { return F.money(C.debt(i)); } },
+          { kind: 'money', key: 'd', label: 'Còn nợ', num: true, render: function (i) { return F.money(C.debt(i)); } },
           { key: 'e', label: 'Điều kiện gửi', render: function (i) { var e = eligible(i); return e ? TH.badge(e, 'neutral', { icon: 'ban' }) : TH.badge('Đủ điều kiện', 'success', { icon: 'check' }); } },
-          { key: 'last', label: 'Đã gửi', render: function (i) { var m = TH.db.messages.filter(function (x) { return x.invoiceId === i.id && x.template === tpl.id; }).pop(); return m ? TH.status(m.status) + '<div class="cell-sub">' + F.date(m.at) + '</div>' : '<span class="muted small">—</span>'; } },
+          { kind: 'status', key: 'last', label: 'Đã gửi', render: function (i) { var m = TH.db.messages.filter(function (x) { return x.invoiceId === i.id && x.template === tpl.id; }).pop(); return m ? TH.statusOf('message', m.status) + '<div class="cell-sub">' + F.date(m.at) + '</div>' : '<span class="muted small">—</span>'; } },
         ], rows: invs, empty: { title: 'Không có hóa đơn đã xác nhận', text: 'Chỉ gửi hóa đơn đã xác nhận.' },
       });
       var tplRows = tpls.map(function (t) {
@@ -91,15 +91,15 @@
       var table = TH.table({ label: 'Lịch sử Zalo', cols: [
         { key: 'i', label: 'Hóa đơn', render: function (m) { return '<a class="mono small" href="' + TH.router.href('INV-03', m.invoiceId) + '">' + m.invoiceId + '</a><div class="cell-sub">' + esc(tplName(m.template)) + '</div>'; } },
         { key: 'k', label: 'Người nhận', render: function (m) { return esc(C.customer(m.customerId).name); } },
-        { key: 't', label: 'Thời gian', render: function (m) { return F.date(m.at); } },
-        { key: 's', label: 'Kết quả gửi', render: function (m) { return TH.status(m.status); } },
+        { kind: 'date', key: 't', label: 'Thời gian', render: function (m) { return F.date(m.at); } },
+        { kind: 'status', key: 's', label: 'Kết quả gửi', render: function (m) { return TH.statusOf('message', m.status); } },
         { key: 'e', label: 'Lỗi / lý do', render: function (m) { return m.reason ? '<span class="small ' + (m.status === 'failed' ? 'neg' : 'muted') + '">' + esc(m.reason) + '</span>' : '<span class="muted">—</span>'; } },
         { key: 'r', label: 'Gửi lại', gate: 'F028.C', render: function (m) { return m.status === 'failed' ? (m.retries >= 2 ? TH.badge('Cần xử lý', 'danger') : TH.permBtn('oa.send', '<button type="button" class="btn btn-xs" data-act="oa.retry" data-id="' + m.id + '">' + I('refresh', 'ic-sm') + 'Thử gửi lại (' + m.retries + '/2)</button>', '403')) : '<span class="muted small">—</span>'; } },
       ], rows: pg.rows, empty: { title: 'Không có tin', text: 'Không có tin nhắn khớp bộ lọc.' } });
       var dash = TH.gate('F028.D', '<div class="grid-4 u-mb-16">' + ['sent', 'failed', 'skipped'].map(function (k) { return TH.kpi({ label: TH.statusLabel(k), value: String(all.filter(function (m) { return m.status === k; }).length) }); }).join('') + TH.kpi({ label: 'Tỷ lệ gửi thành công', value: F.pct(all.length ? all.filter(function (m) { return m.status === 'sent'; }).length / all.length : 0, 0), accent: true, foot: 'Dashboard hiệu quả theo kỳ ' + TH.up('F028.D') }) + '</div>', { label: 'Dashboard hiệu quả gửi theo kỳ', lines: 2 });
       return TH.pageHeader({ screen: S, status: TH.simBadge('Dữ liệu gửi mô phỏng'), actions: TH.exportBtn('oa2.csv', 'Tải nhật ký (.csv)') }) + dash +
-        '<div class="card card-flush">' + TH.tabs(S, tabs, tab) + '<div class="toolbar">' + (TH.has('F028.B') ? TH.searchBox(S, 'Tìm theo hóa đơn, phòng, khách…') + TH.up('F028.B') : TH.gate('F028.B', '', { mode: 'btn', label: 'Tra cứu theo tòa/kỳ/khách', size: 'btn-sm' })) +
-        TH.chips(S, 'st', [{ id: 'all', label: 'Tất cả', count: all.length }, { id: 'sent', label: 'Đã gửi' }, { id: 'failed', label: 'Lỗi gửi' }, { id: 'skipped', label: 'Bỏ qua' }], st) + '</div>' + table + TH.pager(S, pg) + '</div>';
+        '<div class="card card-flush">' + TH.tabs(S, tabs, tab) + TH.tabPanel(S, tab, '<div class="toolbar">' + (TH.has('F028.B') ? TH.searchBox(S, 'Tìm theo hóa đơn, phòng, khách…') + TH.up('F028.B') : TH.gate('F028.B', '', { mode: 'btn', label: 'Tra cứu theo tòa/kỳ/khách', size: 'btn-sm' })) +
+        TH.chips(S, 'st', [{ id: 'all', label: 'Tất cả', count: all.length }, { id: 'sent', label: 'Đã gửi' }, { id: 'failed', label: 'Lỗi gửi' }, { id: 'skipped', label: 'Bỏ qua' }], st) + '</div>' + table + TH.pager(S, pg)) + '</div>';
     },
   };
   TH.act['oa.retry'] = function (el) {

@@ -1,0 +1,421 @@
+[
+  {
+    "id": "F-MASTER",
+    "title": "Lịch trả chủ nhà",
+    "source": {
+      "file": "docs/Thông tin nhà.xlsx",
+      "sheet": "NVVH",
+      "cell": "Q3"
+    },
+    "formula": "Tiền thuê tháng × số tháng trong kỳ trả",
+    "inputs": [
+      "rent",
+      "payCycle"
+    ],
+    "unit": "VND",
+    "period": "Theo kỳ chứng từ; demo 05–10/2026",
+    "filter": "Theo tòa/kỳ; chỉ chứng từ đủ điều kiện của từng nghiệp vụ",
+    "rounding": "Đồng nguyên",
+    "example": "18.000.000 × 3 = 54.000.000",
+    "status": "verified_pattern",
+    "difference": "Giá trị đầu vào mô phỏng, không sao chép số tiền khách hàng."
+  },
+  {
+    "id": "F-SUPPLIER",
+    "title": "Chi phí đầu vào dịch vụ",
+    "source": {
+      "file": "docs/Danh sách mã HĐ điện nước mạng.xlsx",
+      "sheet": "năm 2026",
+      "cell": "G4"
+    },
+    "formula": "Tổng hóa đơn nguồn theo nhà cung cấp/tòa/kỳ",
+    "inputs": [
+      "supplierBills",
+      "expenseId"
+    ],
+    "unit": "VND",
+    "period": "Theo kỳ chứng từ; demo 05–10/2026",
+    "filter": "Theo tòa/kỳ; chỉ chứng từ đủ điều kiện của từng nghiệp vụ",
+    "rounding": "Đồng nguyên",
+    "example": "Điện 2.880.000 + nước 720.000 = 3.600.000",
+    "status": "verified_pattern",
+    "difference": "Giá trị đầu vào mô phỏng, không sao chép số tiền khách hàng."
+  },
+  {
+    "id": "F-BILL",
+    "title": "Hóa đơn phòng",
+    "source": {
+      "file": "docs/Hoá đơn tiền nhà tháng 9 và dịch vụ tháng 9 năm 2026.xlsx",
+      "sheet": "NHÀ T",
+      "cell": "AV5"
+    },
+    "formula": "Tiền phòng × kỳ TT + dịch vụ + cọc mới + nợ cũ + thu khác",
+    "inputs": [
+      "rent",
+      "cycle",
+      "services",
+      "deposit",
+      "openingDebt",
+      "adjustment"
+    ],
+    "unit": "VND",
+    "period": "Theo kỳ chứng từ; demo 05–10/2026",
+    "filter": "Theo tòa/kỳ; chỉ chứng từ đủ điều kiện của từng nghiệp vụ",
+    "rounding": "Tiền thuê lẻ theo cấu hình; mặc định 1.000đ, dòng phí theo đồng",
+    "example": "3.800.000 × 12/30 → 1.520.000",
+    "status": "verified_pattern",
+    "difference": "Hóa đơn lưu tiền thuê/phí; cọc và nợ kỳ trước được roomBill cộng từ sổ riêng, không ghi trùng vào doanh thu."
+  },
+  {
+    "id": "F-METER",
+    "title": "Điện và nước theo công tơ",
+    "source": {
+      "file": "docs/Hoá đơn tiền nhà tháng 9 và dịch vụ tháng 9 năm 2026.xlsx",
+      "sheet": "NHÀ T",
+      "cell": "T5"
+    },
+    "formula": "(Chỉ số cuối − chỉ số đầu) × đơn giá",
+    "inputs": [
+      "prev",
+      "cur",
+      "price"
+    ],
+    "unit": "kWh hoặc m³ → VND",
+    "period": "Theo kỳ chứng từ; demo 05–10/2026",
+    "filter": "Theo tòa/kỳ; chỉ chứng từ đủ điều kiện của từng nghiệp vụ",
+    "rounding": "Đồng nguyên",
+    "example": "(1.416 − 1.100) × 4.000 = 1.264.000",
+    "status": "verified_pattern",
+    "difference": "Giá trị đầu vào mô phỏng, không sao chép số tiền khách hàng."
+  },
+  {
+    "id": "F-PERSON",
+    "title": "Nước theo người",
+    "source": {
+      "file": "docs/Hoá đơn tiền nhà tháng 9 và dịch vụ tháng 9 năm 2026.xlsx",
+      "sheet": "NHÀ T",
+      "cell": "Y5"
+    },
+    "formula": "Số người hiệu lực trong kỳ × đơn giá",
+    "inputs": [
+      "peopleLog",
+      "priceList"
+    ],
+    "unit": "người/tháng → VND",
+    "period": "Theo kỳ chứng từ; demo 05–10/2026",
+    "filter": "Theo tòa/kỳ; chỉ chứng từ đủ điều kiện của từng nghiệp vụ",
+    "rounding": "Đồng nguyên",
+    "example": "2 × 120.000 = 240.000",
+    "status": "verified_pattern",
+    "difference": "Giá trị đầu vào mô phỏng, không sao chép số tiền khách hàng."
+  },
+  {
+    "id": "F-COMMON",
+    "title": "Phân bổ điện chung",
+    "source": {
+      "file": "docs/Hoá đơn tiền nhà tháng 9 và dịch vụ tháng 9 năm 2026.xlsx",
+      "sheet": "NHÀ T",
+      "cell": "CB4:CH4"
+    },
+    "formula": "(Chỉ số cuối − đầu) × giá; chia theo người/phòng",
+    "inputs": [
+      "commonReading",
+      "units",
+      "vacantRule"
+    ],
+    "unit": "VND",
+    "period": "Theo kỳ chứng từ; demo 05–10/2026",
+    "filter": "Theo tòa/kỳ; chỉ chứng từ đủ điều kiện của từng nghiệp vụ",
+    "rounding": "Làm tròn từng phần; phần dư vào dòng cuối",
+    "example": "126 × 4.000 = 504.000; tổng phân bổ + thất thoát = 504.000",
+    "status": "proposed",
+    "difference": "Cách tính phần phòng trống vẫn là cấu hình đề xuất."
+  },
+  {
+    "id": "F-DEBT",
+    "title": "Đối chiếu công nợ",
+    "source": {
+      "file": "docs/Hoá đơn tiền nhà tháng 9 và dịch vụ tháng 9 năm 2026.xlsx",
+      "sheet": "NHÀ T",
+      "cell": "AZ5"
+    },
+    "formula": "Excel: đã thu − phải thu; còn nợ = max(0, phải thu − đã thu)",
+    "inputs": [
+      "confirmedReceipts",
+      "invoice",
+      "openingDebt",
+      "deposit"
+    ],
+    "unit": "VND",
+    "period": "Theo kỳ chứng từ; demo 05–10/2026",
+    "filter": "Theo tòa/kỳ; chỉ chứng từ đủ điều kiện của từng nghiệp vụ",
+    "rounding": "Đồng nguyên",
+    "example": "Phải thu 5.000.000, thu 5.100.000: Excel +100.000, dư 100.000",
+    "status": "verified_pattern",
+    "difference": "Chờ xác nhận không giảm nợ; thu sau 15 vẫn giảm nợ. Không suy trạng thái phòng từ AY."
+  },
+  {
+    "id": "F-DEPOSIT",
+    "title": "Đối chiếu hoàn cọc",
+    "source": {
+      "file": "docs/Hoá đơn tiền nhà tháng 9 và dịch vụ tháng 9 năm 2026.xlsx",
+      "sheet": "HOÀN CỌC",
+      "cell": "A1"
+    },
+    "formula": "Cọc giữ − khấu trừ − phần giữ cọc = dự kiến hoàn",
+    "inputs": [
+      "depositCase",
+      "deductions",
+      "payment"
+    ],
+    "unit": "VND",
+    "period": "Theo kỳ chứng từ; demo 05–10/2026",
+    "filter": "Theo tòa/kỳ; chỉ chứng từ đủ điều kiện của từng nghiệp vụ",
+    "rounding": "Đồng nguyên",
+    "example": "6.500.000 − 300.000 = 6.200.000",
+    "status": "proposed",
+    "difference": "Chỉ ghi hoàn sau thực chi; không tự áp phạt hay mất cọc. Bảng nguồn không thay quyết định phê duyệt."
+  },
+  {
+    "id": "F-COMMISSION",
+    "title": "Hoa hồng môi giới",
+    "source": {
+      "file": "docs/Hoa hồng năm 2025-2026 (1).xlsx",
+      "sheet": "HOA HỒNG THÁNG 9.26",
+      "cell": "I4"
+    },
+    "formula": "Giá chốt × tỷ lệ hoa hồng",
+    "inputs": [
+      "rent",
+      "rate",
+      "expenseId"
+    ],
+    "unit": "VND",
+    "period": "Theo kỳ chứng từ; demo 05–10/2026",
+    "filter": "Theo tòa/kỳ; chỉ chứng từ đủ điều kiện của từng nghiệp vụ",
+    "rounding": "Đồng nguyên",
+    "example": "3.800.000 × 35% = 1.330.000",
+    "status": "verified_pattern",
+    "difference": "Giá trị đầu vào mô phỏng, không sao chép số tiền khách hàng."
+  },
+  {
+    "id": "F-REPAIR",
+    "title": "Sổ sửa chữa",
+    "source": {
+      "file": "docs/bao_cao/sổ sửa chữa tháng 8(AutoRecovered).xlsx",
+      "sheet": "LƯƠNG THÁNG 8",
+      "cell": "A12"
+    },
+    "formula": "Tổng vật tư + tổng nhân công",
+    "inputs": [
+      "repair.lines",
+      "expenseId"
+    ],
+    "unit": "VND",
+    "period": "Theo kỳ chứng từ; demo 05–10/2026",
+    "filter": "Theo tòa/kỳ; chỉ chứng từ đủ điều kiện của từng nghiệp vụ",
+    "rounding": "Đồng nguyên",
+    "example": "2 × 250.000 + 1 × 300.000 = 800.000",
+    "status": "synthetic_assumption",
+    "difference": "Cấu trúc sổ được tái hiện; chi tiết vật tư/nhân công demo được tạo mới, không suy ngược thành dữ liệu thực."
+  },
+  {
+    "id": "F-PERF",
+    "title": "Hiệu suất vận hành",
+    "source": {
+      "file": "docs/CÁCH TÍNH LƯƠNG PHÒNG VẬN HÀNH.docx",
+      "sheet": "Bước 1–5",
+      "cell": null
+    },
+    "formula": "A = M5 + (M10−M5)×0,9 + (M15−M10)×0,7; B = DV/PT; D = A×(1−B)+C; HS = D/niêm yết",
+    "inputs": [
+      "confirmedReceipts",
+      "invoiceServices",
+      "arisingRent",
+      "forfeit",
+      "listedRent"
+    ],
+    "unit": "VND; tỷ lệ 0–1",
+    "period": "Theo kỳ chứng từ; demo 05–10/2026",
+    "filter": "Theo tòa/kỳ; chỉ chứng từ đủ điều kiện của từng nghiệp vụ",
+    "rounding": "Giữ độ chính xác đến bước lương",
+    "example": "M5=10tr, M10=15tr, M15=20tr → A=18tr",
+    "status": "proposed",
+    "difference": "Thu sau 15 không vào A. TH1 cọc/thu ba tháng chỉ hiển thị cảnh báo và phần cần chuẩn hóa, chưa áp thuật toán chưa duyệt."
+  },
+  {
+    "id": "F-PAYROLL",
+    "title": "Lương nháp",
+    "source": {
+      "file": "docs/bao_cao/bảng lương tháng 8.xlsx",
+      "sheet": "THÁNG 8",
+      "cell": "V9"
+    },
+    "formula": "HS% × đơn giá/phòng ÷ 90; nhân số phòng; cộng lương cứng/phụ cấp/điều chỉnh",
+    "inputs": [
+      "performance",
+      "referenceRate",
+      "rooms",
+      "salaryAdjustments"
+    ],
+    "unit": "VND",
+    "period": "Theo kỳ chứng từ; demo 05–10/2026",
+    "filter": "Theo tòa/kỳ; chỉ chứng từ đủ điều kiện của từng nghiệp vụ",
+    "rounding": "Lương/phòng đến đồng; lương HS đến 1.000đ",
+    "example": "91 × 110.000 / 90 → 111.222đ/phòng",
+    "status": "pending_approval",
+    "difference": "DOCX ghi /100 nhưng ví dụ và Excel dùng /90. Giữ /90 cho demo; bảng hệ số đầy đủ chưa có."
+  },
+  {
+    "id": "F-POOL",
+    "title": "Phân bổ chi phí chung",
+    "source": {
+      "file": "docs/G1.31.8.26.xlsx",
+      "sheet": "BÁO CÁO THÁNG 8",
+      "cell": "C36"
+    },
+    "formula": "Chi phí chung × phòng tòa / tổng phòng thuộc phạm vi phân bổ",
+    "inputs": [
+      "pool.lines",
+      "portfolioRooms",
+      "roomCount"
+    ],
+    "unit": "VND",
+    "period": "Theo kỳ chứng từ; demo 05–10/2026",
+    "filter": "Theo tòa/kỳ; chỉ chứng từ đủ điều kiện của từng nghiệp vụ",
+    "rounding": "Đồng nguyên từng tòa; công bố phần dư",
+    "example": "180.000 × 7/18 = 70.000",
+    "status": "proposed",
+    "difference": "Mẫu có nhiều mẫu số 1.382/1.343; demo dùng đúng 18 phòng thuộc bộ dữ liệu, không giữ mẫu số doanh nghiệp thật."
+  },
+  {
+    "id": "F-PNL",
+    "title": "Kinh doanh và Tổng",
+    "source": {
+      "file": "docs/bao_cao/BÁO CÁO KINH DOANH THÁNG 8.xlsx",
+      "sheet": "BÁO CÁO KINH DOANH THÁNG 8",
+      "cell": "C43:C48"
+    },
+    "formula": "GV = thuê + thiết bị + DV đầu vào; CPBH = lương + vận hành; TCP = GV + CPBH; LNG = DT−GV; LNR = DT−TCP",
+    "inputs": [
+      "invoices",
+      "deposits",
+      "expenses",
+      "payroll",
+      "pools"
+    ],
+    "unit": "VND",
+    "period": "Theo kỳ chứng từ; demo 05–10/2026",
+    "filter": "Theo tòa/kỳ; chỉ chứng từ đủ điều kiện của từng nghiệp vụ",
+    "rounding": "Tổng từ thành phần đã làm tròn",
+    "example": "DT 100tr, GV 60tr, CPBH 10tr → LNG 40tr, LNR 30tr",
+    "status": "proposed",
+    "difference": "KD loại cọc mới/hoàn cọc/thiết bị, tính thuê theo kỳ; Tổng theo mẫu quản trị. Không đồng nhất Tổng với sao kê dòng tiền."
+  },
+  {
+    "id": "F-UTILITY",
+    "title": "Đối chiếu thu/chi điện nước",
+    "source": {
+      "file": "docs/bao_cao/âm dương điện nước tháng 7.xlsx",
+      "sheet": "THÁNG 7.2026 điện công thức",
+      "cell": "K3:S3"
+    },
+    "formula": "Điện: H+B/2+E−L; nước: N+B/2−R",
+    "inputs": [
+      "collectedElectricity",
+      "washing",
+      "otherFees",
+      "supplierCost"
+    ],
+    "unit": "VND",
+    "period": "Theo kỳ chứng từ; demo 05–10/2026",
+    "filter": "Theo tòa/kỳ; chỉ chứng từ đủ điều kiện của từng nghiệp vụ",
+    "rounding": "Giữ công thức gốc trong hồ sơ",
+    "example": "H=7tr, B=440k, E=1,32tr, L=8.135.381 → 404.619",
+    "status": "reference_only",
+    "difference": "Nguồn có #VALUE!, liên kết ngoài và tên “thực thu” nhưng công thức cộng dòng hóa đơn. Chưa áp cơ chế chia phí này vào thu tiền; không suy thu theo dòng khi phiếu thu chưa phân bổ."
+  },
+  {
+    "id": "F-SHARE",
+    "title": "Chia cổ phần theo mẫu G1",
+    "source": {
+      "file": "docs/G1.31.8.26.xlsx",
+      "sheet": "BÁO CÁO THÁNG 8",
+      "cell": "H3:M3"
+    },
+    "formula": "Vốn mẫu = tỷ lệ × tiền thuê; LN phần = tỷ lệ × LN; tổng mẫu = vốn mẫu + LNR phần",
+    "inputs": [
+      "effectiveShares",
+      "pnl"
+    ],
+    "unit": "VND",
+    "period": "Theo kỳ chứng từ; demo 05–10/2026",
+    "filter": "Theo tòa/kỳ; chỉ chứng từ đủ điều kiện của từng nghiệp vụ",
+    "rounding": "Đồng nguyên từng cổ đông; ghi phần dư",
+    "example": "40% × LNR 10tr = 4tr",
+    "status": "pending_approval",
+    "difference": "Vốn mẫu không phải vốn góp và không tự sinh lệnh hoàn vốn/chi trả."
+  },
+  {
+    "id": "F-FORECAST",
+    "title": "Dự kiến lợi nhuận",
+    "source": {
+      "file": "docs/bao_cao/BẢNG DỰ KIẾN LỢI NHUẬN CÁC THÁNG.xlsx",
+      "sheet": "Tháng 9.2026 ",
+      "cell": "E3"
+    },
+    "formula": "Số cơ sở + các điều chỉnh dự kiến; LNR dự kiến = DT dự kiến − TCP dự kiến",
+    "inputs": [
+      "baselineReport",
+      "forecastAdjustments"
+    ],
+    "unit": "VND",
+    "period": "Theo kỳ chứng từ; demo 05–10/2026",
+    "filter": "Theo tòa/kỳ; chỉ chứng từ đủ điều kiện của từng nghiệp vụ",
+    "rounding": "Đồng nguyên",
+    "example": "DT cơ sở 30tr + dự kiến 1tr; TCP cơ sở 20tr + sửa chữa 0,5tr → LNR 10,5tr",
+    "status": "synthetic_assumption",
+    "difference": "Giữ dự kiến độc lập với chứng từ ghi nhận; không cộng vào báo cáo thực tế."
+  },
+  {
+    "id": "F-ASSET",
+    "title": "Đầu tư và tài sản",
+    "source": {
+      "file": "docs/G1.31.8.26.xlsx",
+      "sheet": "ĐẦU TƯ BAN ĐẦU",
+      "cell": "A1"
+    },
+    "formula": "Số lượng × nguyên giá; liên kết chứng từ đầu tư",
+    "inputs": [
+      "assets",
+      "equipmentExpense"
+    ],
+    "unit": "VND",
+    "period": "Theo kỳ chứng từ; demo 05–10/2026",
+    "filter": "Theo tòa/kỳ; chỉ chứng từ đủ điều kiện của từng nghiệp vụ",
+    "rounding": "Đồng nguyên",
+    "example": "2 bộ × 3.250.000 = 6.500.000",
+    "status": "proposed",
+    "difference": "Không tự tính khấu hao hoặc chuyển toàn bộ mua sắm thành chi phí KD."
+  },
+  {
+    "id": "F-REPORT",
+    "title": "Danh mục chỉ tiêu",
+    "source": {
+      "file": "docs/bao_cao/báo cáo.xlsx",
+      "sheet": "BÁO CÁO",
+      "cell": "A1:F12"
+    },
+    "formula": "Tỷ lệ = tổng tử / tổng mẫu; mẫu số 0 → không áp dụng",
+    "inputs": [
+      "reportMetrics"
+    ],
+    "unit": "tỷ lệ 0–1",
+    "period": "Theo kỳ chứng từ; demo 05–10/2026",
+    "filter": "Theo tòa/kỳ; chỉ chứng từ đủ điều kiện của từng nghiệp vụ",
+    "rounding": "Chỉ làm tròn khi hiển thị",
+    "example": "LNR 10tr / DT 100tr = 10%",
+    "status": "reference_only",
+    "difference": "Các báo cáo chưa có trong phạm vi hiện tại được ghi trong ma trận, không tạo số liệu giả đã xác nhận."
+  }
+]

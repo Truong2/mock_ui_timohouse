@@ -1,0 +1,812 @@
+[
+  {
+    "file": "docs/bao_cao/BÁO CÁO KINH DOANH THÁNG 8.xlsx",
+    "kind": "customer_reference",
+    "bytes": 736917,
+    "sha256": "a8f416f9e73d5ce835643650586b70b2ad49e7530bcf61e5aa1168ac69f3c823"
+  },
+  {
+    "file": "docs/bao_cao/báo cáo.xlsx",
+    "kind": "customer_reference",
+    "bytes": 10661,
+    "sha256": "f12b65708dc01cffd9717525638ab7eeff3095523a0eb0da709ea156523dd06c"
+  },
+  {
+    "file": "docs/bao_cao/BẢNG DỰ KIẾN LỢI NHUẬN CÁC THÁNG.xlsx",
+    "kind": "customer_reference",
+    "bytes": 73913,
+    "sha256": "81a459f5476bb76ed7545669a0ab3fab01eac5f2aa9a72b3efb1f4ff57a8a4e5"
+  },
+  {
+    "file": "docs/bao_cao/bảng lương tháng 8.xlsx",
+    "kind": "customer_reference",
+    "bytes": 869663,
+    "sha256": "21e3abd88aa805c41f7fcd7900dfbcf42fb694837cf917627c4651309283981c"
+  },
+  {
+    "file": "docs/bao_cao/sổ sửa chữa tháng 8(AutoRecovered).xlsx",
+    "kind": "customer_reference",
+    "bytes": 161281,
+    "sha256": "3a80e7fe3a56adcac722eafeb9e4ff33825710e9a0d4aaec2a31993ff104154b"
+  },
+  {
+    "file": "docs/bao_cao/âm dương điện nước tháng 6.xlsx",
+    "kind": "customer_reference",
+    "bytes": 975895,
+    "sha256": "a1315dc08843a4c0e4ff6774a8194ac6f49a36a7f0fbb38102a4a505060b47f4"
+  },
+  {
+    "file": "docs/bao_cao/âm dương điện nước tháng 7.xlsx",
+    "kind": "customer_reference",
+    "bytes": 1055202,
+    "sha256": "9599cb8555874d47eda15a02144eac69e7d64fda22970798d08df2b0177aa0f2"
+  },
+  {
+    "file": "docs/Bảng chia cp tháng 8 (1).xlsx",
+    "kind": "customer_reference",
+    "bytes": 613124,
+    "sha256": "8af2895b04d81f78faac99f9aca18663c0db0396d69eee2485648e44d1b87976"
+  },
+  {
+    "file": "docs/CÁCH TÍNH LƯƠNG PHÒNG VẬN HÀNH.docx",
+    "kind": "customer_reference",
+    "bytes": 430090,
+    "sha256": "392f3f2546b9639c109b00d07a954c9d4f1e2f7b1c16d0a6d0700579f5f00136",
+    "paragraphs": 25,
+    "tables": 0,
+    "domain": "payroll",
+    "review": "Read all six calculation steps; /100 body conflicts with /90 example."
+  },
+  {
+    "file": "docs/Danh sách mã HĐ điện nước mạng.xlsx",
+    "kind": "customer_reference",
+    "bytes": 456963,
+    "sha256": "bb02d614c9d642ff18e5cdbe07f73b5857cc17c13624ebef2513a62a973c9eef"
+  },
+  {
+    "file": "docs/G1.31.8.26.xlsx",
+    "kind": "customer_reference",
+    "bytes": 247461,
+    "sha256": "9d2f5446822aac116b965cb955397e3a4252cf1beaaaf834e74733c23587f690"
+  },
+  {
+    "file": "docs/Hoa hồng năm 2025-2026 (1).xlsx",
+    "kind": "customer_reference",
+    "bytes": 1619381,
+    "sha256": "bdbe6e220556a5a2d3a47d857e93a29b7b7c851d46a1e2c4a5ae1759968706e1"
+  },
+  {
+    "file": "docs/Hoá đơn tiền nhà tháng 9 và dịch vụ tháng 9 năm 2026.xlsx",
+    "kind": "customer_reference",
+    "bytes": 2925506,
+    "sha256": "ca62c0c229e236b6b88e4fe003ae3b4d783cac5e742924a7e6e5b17386a88b63"
+  },
+  {
+    "file": "docs/Hợp đồng thuê nhà 2026(Mẫu) tùng sói.doc",
+    "kind": "customer_reference",
+    "bytes": 98453,
+    "sha256": "d8403819975d9da4dfcd635b4f0239ab9be843cf0302d19b71ddbdb216ba59ae",
+    "review": "Legacy OLE Word: UTF-16 text extraction reviewed for lease/payment/deposit terms; layout and embedded fields not reconstructed."
+  },
+  {
+    "file": "docs/md/TIMEHOUSE_DATASET_MATRIX.md",
+    "kind": "implementation_document",
+    "bytes": 8499,
+    "sha256": "171d43ddcf82a3e98e7e8a4dc131460bfa14ceca48983e39e5123003fd43ff96",
+    "headings": [
+      "# TIMEHOUSE — Ma trận dữ liệu mô phỏng",
+      "## Tình huống và liên kết",
+      "## Tương thích và sử dụng"
+    ],
+    "policy": "Latest explicit decision supersedes historical prose; proposal does not mean approval."
+  },
+  {
+    "file": "docs/md/TIMEHOUSE_DATASET_QA.md",
+    "kind": "implementation_document",
+    "bytes": 6575,
+    "sha256": "195dbcfa8b742c5c55747e16f2af0ec440a495e1ecfcc3cea38c940d98a3b2c1",
+    "headings": [
+      "# TIMEHOUSE — Bàn giao excel-demo-v1",
+      "## 1. Kết quả",
+      "## 2. Kiểm thử",
+      "## 3. Hồi quy và chênh lệch có chủ đích",
+      "## 4. Cách tái lập",
+      "## 5. Giới hạn và quyết định còn mở"
+    ],
+    "policy": "Latest explicit decision supersedes historical prose; proposal does not mean approval."
+  },
+  {
+    "file": "docs/md/TIMEHOUSE_DATASET_SOURCES.md",
+    "kind": "implementation_document",
+    "bytes": 39471,
+    "sha256": "4dc3c45f403f281d4cd92e6844526055063c6b2ca674106e11e073e4a2f0cb22",
+    "headings": [
+      "# TIMEHOUSE — Nguồn tài liệu và công thức cho excel-demo-v1",
+      "## 1. Phương pháp và giới hạn",
+      "## 2. Danh mục workbook",
+      "## 3. Cách xử lý mọi nhóm công thức",
+      "## 4. Quy tắc dùng cho dataset",
+      "## 5. Ma trận đầy đủ 248 sheet",
+      "### docs/bao_cao/BÁO CÁO KINH DOANH THÁNG 8.xlsx",
+      "### docs/bao_cao/báo cáo.xlsx",
+      "### docs/bao_cao/BẢNG DỰ KIẾN LỢI NHUẬN CÁC THÁNG.xlsx",
+      "### docs/bao_cao/bảng lương tháng 8.xlsx",
+      "### docs/bao_cao/sổ sửa chữa tháng 8(AutoRecovered).xlsx",
+      "### docs/bao_cao/âm dương điện nước tháng 6.xlsx",
+      "### docs/bao_cao/âm dương điện nước tháng 7.xlsx",
+      "### docs/Bảng chia cp tháng 8 (1).xlsx",
+      "### docs/Danh sách mã HĐ điện nước mạng.xlsx",
+      "### docs/G1.31.8.26.xlsx",
+      "### docs/Hoa hồng năm 2025-2026 (1).xlsx",
+      "### docs/Hoá đơn tiền nhà tháng 9 và dịch vụ tháng 9 năm 2026.xlsx",
+      "### docs/Thông tin nhà.xlsx"
+    ],
+    "policy": "Latest explicit decision supersedes historical prose; proposal does not mean approval."
+  },
+  {
+    "file": "docs/md/TIMEHOUSE_HANDOFF_UI_MOCKUP_PREVIEW_4_GOI.md",
+    "kind": "implementation_document",
+    "bytes": 2840,
+    "sha256": "2b006b5d68e6ab2f59b2ff9199c71e5b98b74e81fd263b0867f12a19b03446bf",
+    "headings": [
+      "# TIMEHOUSE — HANDOFF MOCKUP CHUYỂN GÓI A/B/C/D",
+      "## Yêu cầu không được thay đổi",
+      "## Luồng demo mẫu",
+      "## Màn phải làm trước khi mở rộng",
+      "## Thiết kế",
+      "## Hình ảnh không thay được logic",
+      "## Nghiệm thu"
+    ],
+    "policy": "Latest explicit decision supersedes historical prose; proposal does not mean approval."
+  },
+  {
+    "file": "docs/md/TIMEHOUSE_IMPORT_SCHEMA_AUDIT.md",
+    "kind": "implementation_document",
+    "bytes": 20527,
+    "sha256": "5312cda8e810e88fcb4fa58c285c40a02ed512bcb845c458471e6b526a23642e",
+    "headings": [
+      "# Đối chiếu template import với tài liệu Excel",
+      "## 1. Kết quả theo đối tượng",
+      "## 2. Nguồn đã đối chiếu",
+      "## 3. Bảng đối chiếu trường hiện có",
+      "### Chủ nhà",
+      "### Tòa nhà",
+      "### Phòng và dữ liệu thuê đi kèm",
+      "### Khách hàng",
+      "## 4. Lỗi luồng import đã xác minh",
+      "## 5. Chuẩn kiểu dữ liệu cần áp dụng khi sửa",
+      "## 6. Bằng chứng và cách chạy lại"
+    ],
+    "policy": "Latest explicit decision supersedes historical prose; proposal does not mean approval."
+  },
+  {
+    "file": "docs/md/TIMEHOUSE_MOCKUP_CR_CUS_ANSWERS.md",
+    "kind": "implementation_document",
+    "bytes": 25234,
+    "sha256": "605d5afd4887fae3d88afa8663b9e6bed9df75bb28a797151735cae779990f84",
+    "headings": [
+      "# TIMEHOUSE — Trả lời CR-CUS-01 và rà soát cập nhật mockup schema 7–8",
+      "## I. Trả lời trực tiếp K-01 đến K-09",
+      "### K-01 — “Trưởng khu vực” có phải TPVH theo khu vực không?",
+      "### K-02 — Một trạng thái chính và nhiều nhãn phụ có đúng không?",
+      "### K-03 — Ai duyệt hoàn cọc, khấu trừ gì, thế nào là hoàn tất?",
+      "### K-04 — Phá HĐ có mất toàn bộ cọc, được hoàn một phần không?",
+      "### K-05 — Phí thang máy, sạc xe điện, xe máy 0 đồng và 7 loại phí",
+      "### K-06 — Thống nhất ngưỡng sắp hết hạn 35 ngày thay 45 ngày?",
+      "### K-07 — “Danh sách khách hoà” là gì?",
+      "### K-08 — Biển số có cần mask, có cần trường xe khác không?",
+      "### K-09 — Gia hạn giữ mã HĐ hay tạo HĐ mới?",
+      "## II. Kết luận về §8 — các quyết định đã áp vào mockup schema 7",
+      "## III. Yêu cầu triển khai CR-CUS-01 cho Codex (không tự suy đoán chính sách)",
+      "### 1. Data model tối thiểu",
+      "### 2. Phạm vi giao diện",
+      "### 3. Gói A/B/C/D",
+      "## IV. Checklist kiểm thử nghiệp vụ cần bổ sung",
+      "## V. Những quyết định bắt buộc còn cần khách hàng/PM xác nhận"
+    ],
+    "policy": "Latest explicit decision supersedes historical prose; proposal does not mean approval."
+  },
+  {
+    "file": "docs/md/TIMEHOUSE_MOCKUP_DECISIONS.md",
+    "kind": "implementation_document",
+    "bytes": 94063,
+    "sha256": "f1e4a3468678fc37e5a8bdcba43f879777543eecb3ec15808698c6d1a7467d1d",
+    "headings": [
+      "# TIMEHOUSE — Decision log của bản mockup",
+      "## 1. Các điểm OPEN của SRS và cách mockup thể hiện",
+      "## 2. Khác biệt giữa note cấp màn (§4) và increment cấp chức năng (§5A)",
+      "## 3. Quyết định kỹ thuật/UX của bản demo (ngoài SRS)",
+      "## 4. ⚠ Chưa thể xác minh (thiếu nguồn)",
+      "## 5. Đối chiếu tài liệu tham chiếu bổ sung (nhận ngày 20/10/2026, sau khi lập plan)",
+      "## 6. CR-RPT-01 — Bổ sung 2 báo cáo theo mẫu khách vào các gói (20/10/2026)",
+      "### 6.1 Màn bổ sung (ngoài 39 màn SRS, đánh dấu `cr`)",
+      "### 6.2 Phân gói (cộng dồn) — dùng lại increment §5A, không thêm mã mới",
+      "### 6.3 Quy tắc tính & giả định (DRAFT, cần khách xác nhận)",
+      "### 6.4 Thay đổi dữ liệu mẫu (schema 5 — trình duyệt tự nạp lại)",
+      "## 7. CR-BLD-01 — Cập nhật theo note.md: chủ nhà, tòa nhà, mốc thu 5/10/15 (20/10/2026)",
+      "### 7.1 Thay đổi giao diện",
+      "### 7.2 Xếp gói",
+      "### 7.3 Hiệu suất theo mốc 5/10/15 (thay thế cách tính cũ)",
+      "### 7.4 Giả định cần khách chốt (G-01…G-10)",
+      "### 7.5 Dữ liệu mẫu (schema 6 — trình duyệt tự nạp lại)",
+      "## 8. Áp dụng câu trả lời 20/10/2026 (DECISIONS_ANSWERS + QA_ANSWERS)",
+      "### 8.1 Trạng thái từng mã",
+      "### 8.2 Số liệu thay đổi (schema 7)",
+      "### 8.3 Chưa làm / ngoài phạm vi bản HTML",
+      "## 9. CR-CUS-01 — Thông tin khách hàng (khách thuê) theo note.md §8 (20/10/2026)",
+      "### 9.1 Thay đổi giao diện",
+      "### 9.2 Xếp gói (bám tầng SRS như CR-BLD-01)",
+      "### 9.3 Giả định cần khách chốt (K-01…K-09)",
+      "### 9.4 Dữ liệu mẫu (schema 8 — trình duyệt tự nạp lại)",
+      "### 9.5 Áp dụng CR_CUS_ANSWERS (20/10/2026, schema 9)",
+      "### 9.6 CR-CUS-02 — OCR hợp đồng khách thuê theo mẫu đầy đủ (21/10/2026, schema 10)",
+      "### 9.7 METER-01 — chọn tòa trước, nhập theo phòng đang ở (21/10/2026)",
+      "### 9.8 CR-PAY — Thu tiền, phá HĐ, điện nước không thu được, mẫu hóa đơn theo Excel tháng 9/2026 (21/10/2026, schema 11)",
+      "### 9.9 CR-BILL — Tính lẻ ngày, phòng mới tháng, kỳ TT nhiều tháng, điện chung, giảm trừ/phụ thu (21/10/2026, schema 12)",
+      "### 9.10 CR-RPT-02 — Luồng báo cáo theo mẫu Excel: xem trước, bản lưu, phiên bản, truy nguồn (21/10/2026, schema 12)",
+      "### 9.11 CR-UI-STD — Chuẩn hóa UI theo pattern back-office doanh nghiệp (22/10/2026)",
+      "### 9.12 CR-UI-ENT — Thiết kế lại theo chuẩn enterprise (Ant Design Pro) (22/10/2026)",
+      "### 9.13 CR-UI-COMP — Component enterprise và pattern nghiệp vụ (23/10/2026)"
+    ],
+    "policy": "Latest explicit decision supersedes historical prose; proposal does not mean approval."
+  },
+  {
+    "file": "docs/md/TIMEHOUSE_MOCKUP_DECISIONS_ANSWERS.md",
+    "kind": "implementation_document",
+    "bytes": 29495,
+    "sha256": "6b7cbf942f1f159a9b32e5197d5917aea838fcf51923a6042c609216f32ecae9",
+    "headings": [
+      "# TIMEHOUSE — Trả lời các vấn đề cần quyết định trong MOCKUP DECISIONS",
+      "## I. Trả lời G-01 đến G-10 — trang Chi tiết tòa nhà",
+      "### G-01 — DT M5/M10/M15 là gì?",
+      "### G-02 — Hiệu suất tạm tính và thực tế",
+      "### G-03 — Có cọc mới, khách đóng tiền phòng 3 tháng",
+      "### G-04 — Lợi nhuận tòa nhà tính thế nào?",
+      "### G-05 — Diện tích nào?",
+      "### G-06 — Tiêu chí Mới / Trung bình / Cũ",
+      "### G-07 — PCCC/ĐKKD gồm giấy tờ gì; ai đứng tên?",
+      "### G-08 — Số người/1 vai trò; 1 nhân sự phụ trách nhiều tòa?",
+      "### G-09 — Danh sách trường tài sản",
+      "### G-10 — Lịch thanh toán chủ nhà và nhắc lịch",
+      "## II. Trả lời R-01 đến R-09 — báo cáo doanh thu, kinh doanh, chia cổ phần",
+      "### Kiểm tra chéo quan trọng tại G1 tháng 8",
+      "## III. Trả lời D-01 đến D-09 — quyết định chung SRS/mockup",
+      "### PKG-01…06 / CR-RPT-01 — ranh giới thương mại",
+      "## IV. Các lỗi hoặc chỗ chưa được chứng minh cần sửa trong Markdown hiện tại",
+      "## V. Danh sách ưu tiên phê duyệt để hoàn tất mockup và triển khai",
+      "### Tài liệu dùng để đối chiếu"
+    ],
+    "policy": "Latest explicit decision supersedes historical prose; proposal does not mean approval."
+  },
+  {
+    "file": "docs/md/TIMEHOUSE_MOCKUP_QA.md",
+    "kind": "implementation_document",
+    "bytes": 50098,
+    "sha256": "a0b1b9820ef7347bedd823c2bce4fbf815e171b9a0b4fecdb2049aeeb66a0c56",
+    "headings": [
+      "# TIMEHOUSE — Checklist QA bản mockup",
+      "## 1. Điều kiện hoàn thành (plan §9)",
+      "## 2. Chuyển gói (P1 — DEMO-PKG-01)",
+      "## 3. Kịch bản trình bày (README) — chạy một lượt",
+      "## 4. Lưu ý / hạn chế",
+      "## 5. CR-RPT-01 — Báo cáo theo mẫu khách (20/10/2026)",
+      "## 6. CR-BLD-01 — Chủ nhà, tòa nhà & mốc 5/10/15 theo note.md (20/10/2026)",
+      "## 7. Phản hồi QA_ANSWERS và chạy lại sau schema 7 (20/10/2026)",
+      "### 7.1 Đếm phạm vi tách riêng (QA-P05)",
+      "### 7.2 Smoke test tái lập được (QA-P04)",
+      "### 7.3 Kiểm tra chức năng mới",
+      "### 7.4 Trạng thái các vấn đề QA_ANSWERS §7",
+      "## 8. CR-CUS-01 — Khách thuê theo note.md §8 (20/10/2026, schema 8)",
+      "### 8.1 Đếm phạm vi và smoke test",
+      "### 8.2 Kiểm tra chức năng",
+      "### 8.3 Chạy lại CR_CUS_ANSWERS (schema 9 — 20/10/2026)",
+      "### 8.4 CR-CUS-02 — OCR hợp đồng theo mẫu đầy đủ (21/10/2026, schema 10)",
+      "### 8.5 Bảng bị gãy dòng vì cột hẹp (21/10/2026)",
+      "### 8.6 METER-01 — chọn tòa trước (21/10/2026)",
+      "### 8.7 CR-PAY — thu tiền theo file Excel tháng 9/2026 (21/10/2026, schema 11)",
+      "### 8.8 CR-BILL — tính lẻ ngày, phòng mới, kỳ TT, điện chung, giảm trừ/phụ thu (21/10/2026, schema 12)",
+      "### 8.9 CR-RPT-02 — Báo cáo theo mẫu Excel: xem trước → bản lưu → Excel (21/10/2026, schema 12)",
+      "### 8.10 CR-UI-STD — Chuẩn hóa UI enterprise (22/10/2026)",
+      "### 8.11 CR-UI-ENT — Thiết kế lại theo Ant Design Pro (22/10/2026)",
+      "### 8.12 CR-UI-COMP — Chuẩn component và pattern toàn ứng dụng (23/10/2026)"
+    ],
+    "policy": "Latest explicit decision supersedes historical prose; proposal does not mean approval."
+  },
+  {
+    "file": "docs/md/TIMEHOUSE_MOCKUP_QA_ANSWERS.md",
+    "kind": "implementation_document",
+    "bytes": 28864,
+    "sha256": "f10d7be3c687122ec1152b10dbd7f2408c1ee92ebdfb7964a1d318a5aa8d2f44",
+    "headings": [
+      "# TIMEHOUSE — TRẢ LỜI VÀ KẾT LUẬN CHECKLIST QA MOCKUP",
+      "## 0. Kết luận chung để PM/Codex sử dụng",
+      "## 1. Trả lời 12 điều kiện hoàn thành (QA §1)",
+      "### Số liệu kiểm soát QA #8",
+      "## 2. Trả lời mục chuyển gói DEMO-PKG-01 (QA §2)",
+      "## 3. Trả lời 8 bước demo xuyên màn (QA §3)",
+      "## 4. Trả lời cả bốn cảnh báo/việc chờ ở QA §4",
+      "### 4.1. `file://`, font Inter, localStorage",
+      "### 4.2. In và xuất PDF qua `window.print()`",
+      "### 4.3. Keyboard, focus và Firefox/Safari",
+      "### 4.4. Chưa có Excel báo giá 4 gói",
+      "## 5. Trả lời CR-RPT-01 — RPT-04/RPT-05 (QA §5)",
+      "## 6. Trả lời CR-BLD-01 — chủ nhà/tòa nhà và hiệu suất (QA §6)",
+      "### Kiểm tra phép tính hiệu suất mẫu CG kỳ 09",
+      "## 7. Danh sách vấn đề phát hiện khi đọc chéo QA và Decision log",
+      "## 8. Tiêu chí nghiệm thu lại (Definition of Done) — khuyến nghị",
+      "### Kết luận cuối cùng"
+    ],
+    "policy": "Latest explicit decision supersedes historical prose; proposal does not mean approval."
+  },
+  {
+    "file": "docs/md/TIMEHOUSE_MOCKUP_SESSION_STATUS.md",
+    "kind": "implementation_document",
+    "bytes": 5565,
+    "sha256": "2ba37c9eee5f817ea6bd04b898c6d3cdd4cae37169639a6fdea148273e184ddf",
+    "headings": [
+      "# Trạng thái phiên — Dataset theo tài liệu khách hàng (23/10/2026)",
+      "## Lịch sử — Chuẩn hóa component UI enterprise",
+      "## Lịch sử — CR-CUS-02: OCR hợp đồng (21/10/2026)",
+      "## 1. Đã làm",
+      "## 2. Còn lại / cần đầu vào"
+    ],
+    "policy": "Latest explicit decision supersedes historical prose; proposal does not mean approval."
+  },
+  {
+    "file": "docs/md/TIMEHOUSE_NAVIGATION_RESTRUCTURE.md",
+    "kind": "implementation_document",
+    "bytes": 11072,
+    "sha256": "a9e6cb36e3a9c356ea1a8a7a414e0c3254c899be49a85bfa2879dbaac130c171",
+    "headings": [
+      "# CR-NAV-01 — Thu gọn điều hướng theo nghiệp vụ",
+      "## 1. Vấn đề và nguyên tắc gom",
+      "## 2. Cấu trúc 9 mục",
+      "## 3. Tên nghiệp vụ và cách hiểu thống nhất",
+      "## 4. Quan hệ nghiệp vụ và thao tác",
+      "## 5. Sidebar, quyền và tương thích",
+      "## 6. Kiểm tra"
+    ],
+    "policy": "Latest explicit decision supersedes historical prose; proposal does not mean approval."
+  },
+  {
+    "file": "docs/md/TIMEHOUSE_REPORT_WORKFLOW_PLAN.md",
+    "kind": "implementation_document",
+    "bytes": 19726,
+    "sha256": "b3281748e7bc852146e6b9f9c8cf3d7c8aa9f7a9143cb69f5882f784431a445e",
+    "headings": [
+      "# Plan báo cáo theo mẫu Excel — cập nhật sau Claude CR-BILL",
+      "## 1. Kết quả theo dõi và phần cần cập nhật",
+      "## 2. Luồng và phạm vi đã chốt",
+      "## 3. Số liệu, truy nguồn và xử lý preview sai",
+      "### 3.1 Dùng chung một kết quả tính",
+      "### 3.2 Mọi ô số liệu có thể truy nguồn",
+      "### 3.3 Sửa tại nguồn rồi tính lại",
+      "## 4. Bản lưu, cấu trúc và tương thích",
+      "### 4.1 Bản báo cáo bất biến",
+      "### 4.2 Giao diện xử lý chung",
+      "## 5. Thứ tự thực hiện và tiêu chí nghiệm thu",
+      "### Giai đoạn 1 — Căn cứ số liệu",
+      "### Giai đoạn 2 — Luồng tạo và lưu",
+      "### Kiểm thử bắt buộc"
+    ],
+    "policy": "Latest explicit decision supersedes historical prose; proposal does not mean approval."
+  },
+  {
+    "file": "docs/md/TIMEHOUSE_SRS_GOI_D_v1_1_CAU_HINH_XEM_GOI_A_B_C_D.md",
+    "kind": "implementation_document",
+    "bytes": 319531,
+    "sha256": "70d996f59e0210f248bcb07761ceaa13da79a2c8d83153d7e4096687a6dac440",
+    "headings": [
+      "# TIMEHOUSE CORE — SRS GÓI D (90–100 TRIỆU ĐỒNG)",
+      "## 0. Căn cứ và nguyên tắc truy vết",
+      "## 1. Business Rule",
+      "## 2. Nguyên tắc UI/UX dùng chung (khóa để tạo mockup)",
+      "### 2.1. Package Preview Settings — yêu cầu mới cho mockup tương tác [UX PROPOSED]",
+      "### 2.2. Rule render theo package (FE prototype / Figma / ImageGen)",
+      "## 3. Sơ đồ luồng nghiệp vụ tổng thể",
+      "## 4. Screen description — danh mục 39 màn hình và luồng",
+      "### Screen 01 — AUTH-01: Đăng nhập / chuyển đơn vị quản lý",
+      "### Screen 02 — OWN-01: Danh sách chủ nhà",
+      "### Screen 03 — OWN-02: Hồ sơ chủ nhà",
+      "### Screen 04 — BLD-01: Danh sách tòa",
+      "### Screen 05 — BLD-02: Hồ sơ tòa & phân công quản lý",
+      "### Screen 06 — ROOM-01: Danh sách phòng",
+      "### Screen 07 — ROOM-02: Hồ sơ phòng",
+      "### Screen 08 — CUS-01: Danh sách khách",
+      "### Screen 09 — CUS-02: Hồ sơ khách & OCR",
+      "### Screen 10 — CON-01: Danh sách hợp đồng",
+      "### Screen 11 — CON-02: Form hợp đồng / OCR / phí cố định",
+      "### Screen 12 — CON-03: Hợp đồng sắp hết hạn",
+      "### Screen 13 — METER-01: Bảng điện nước theo tòa/kỳ",
+      "### Screen 14 — INV-01: Lập hóa đơn theo tòa/kỳ",
+      "### Screen 15 — INV-02: Danh sách hóa đơn & công nợ",
+      "### Screen 16 — INV-03: Chi tiết hóa đơn",
+      "### Screen 17 — OA-01: Cấu hình và gửi thông báo",
+      "### Screen 18 — OA-02: Lịch sử Zalo",
+      "### Screen 19 — PAY-01: Báo đã thu theo tòa",
+      "### Screen 20 — PAY-02: Bảng công nợ và mốc 5/10/15",
+      "### Screen 21 — EXP-01: Danh sách & nhập chi phí",
+      "### Screen 22 — HR-01: Hồ sơ nhân sự & đội nhóm",
+      "### Screen 23 — SAL-01: Thiết lập lương và bảng lương nháp",
+      "### Screen 24 — SHARE-01: Bảng cổ phần theo tòa",
+      "### Screen 25 — RPT-01: Báo cáo tòa: thu, nợ, chi phí, lãi",
+      "### Screen 26 — RPT-02: Báo cáo kinh doanh & hiệu suất",
+      "### Screen 27 — RPT-03: Báo cáo lương & chia lợi nhuận",
+      "### Screen 28 — SYS-01: Phân quyền và phạm vi tòa",
+      "### Screen 29 — OWN-IMP: Import chủ nhà theo mẫu",
+      "### Screen 30 — BLD-IMP: Import tòa nhà theo mẫu",
+      "### Screen 31 — ROOM-IMP: Import phòng theo tòa",
+      "### Screen 32 — OCR-CUS: OCR giấy tờ và xác nhận field",
+      "### Screen 33 — OCR-CON: OCR hợp đồng và đối chiếu",
+      "### Screen 34 — CON-FOLLOW: Cập nhật kết quả hỏi gia hạn",
+      "### Screen 35 — INV-PREV: Xem trước hóa đơn tòa/kỳ",
+      "### Screen 36 — PAY-APP: Xác nhận phiếu thu kế toán",
+      "### Screen 37 — HR-ASSIGN: Phân công nhân viên theo tòa",
+      "### Screen 38 — SAL-ADJ: Điều chỉnh lương kỳ",
+      "### Screen 39 — SHARE-RESULT: Xem phân bổ lợi nhuận theo tòa",
+      "### Screen 40 (UX DEMO ONLY) — DEMO-PKG-01: Settings / Chọn chế độ xem gói A–B–C–D",
+      "## 5. Ma trận 52 nhóm chức năng & tiêu chí nghiệm thu theo GÓI D",
+      "### 5A. Ma trận chú giải chính xác 52 nhóm chức năng theo A / B / C / D (dùng để cấu hình Settings)",
+      "## 6. User Steps — kịch bản tổng hợp cuối cùng",
+      "## 7. Decision Log / Open Questions — phải duyệt trước khi khóa mockup",
+      "### 7.1. Các quyết định mới phải hỏi khách về Package Preview (không tự coi đã chốt)",
+      "## 8. Tiêu chí bàn giao để tạo UI mockup"
+    ],
+    "policy": "Latest explicit decision supersedes historical prose; proposal does not mean approval."
+  },
+  {
+    "file": "docs/md/TIMEHOUSE_UI_COMPONENT_STANDARD.md",
+    "kind": "implementation_document",
+    "bytes": 9471,
+    "sha256": "fb951bb3e72564225239bce82d0bf9c872e0181955dae432add710b7e9b03c70",
+    "headings": [
+      "# TIMEHOUSE — Chuẩn component và pattern enterprise",
+      "## 1. Nền tảng và mẫu trang",
+      "## 2. Hợp đồng component",
+      "### Nhóm hành động",
+      "### Tab và panel",
+      "### Form và phản hồi",
+      "## 3. Ánh xạ nghiệp vụ",
+      "## 4. Bằng chứng kiểm tra và giới hạn"
+    ],
+    "policy": "Latest explicit decision supersedes historical prose; proposal does not mean approval."
+  },
+  {
+    "file": "docs/md/TIMEHOUSE_UI_GLOSSARY.md",
+    "kind": "implementation_document",
+    "bytes": 3589,
+    "sha256": "c44343598f1af50c069de4379d529f75cd79eef9354d453019a0e6797446f7a4",
+    "headings": [
+      "# TIMEHOUSE — Bảng thuật ngữ giao diện (CR-UI-STD)",
+      "## 1. Từ tiếng Anh → tiếng Việt",
+      "## 2. Viết tắt",
+      "## 3. Trạng thái — nhãn và tone thống nhất",
+      "## 4. Nhãn nút chuẩn",
+      "## 5. Mã nội bộ (F0xx, D-0x, K-0x, BILL-Qx, CR-…, mã màn)"
+    ],
+    "policy": "Latest explicit decision supersedes historical prose; proposal does not mean approval."
+  },
+  {
+    "file": "docs/md/TIMEHOUSE_UI_MOCKUP_PLAN.md",
+    "kind": "implementation_document",
+    "bytes": 16944,
+    "sha256": "0454e3c0911bb63ef85878831f15641afcd45244d93e30ed25fca05d683f21ec",
+    "headings": [
+      "# TIMEHOUSE — Kế hoạch mockup HTML/CSS/JS",
+      "## 1. Mục tiêu và căn cứ",
+      "## 2. Hướng trải nghiệm đề xuất",
+      "## 3. Thiết kế và độ mượt",
+      "## 4. Quy tắc gói bắt buộc",
+      "## 5. Cấu trúc kỹ thuật gọn",
+      "## 6. Dữ liệu và mức tương tác",
+      "## 7. Thứ tự triển khai và mốc bàn giao",
+      "### P0 — Khóa nền tảng và mapping",
+      "### P1 — Hoàn thiện chuyển gói trước",
+      "### P2 — Bản demo ưu tiên: 8 màn + cấu hình gói",
+      "### P3 — Mở rộng đủ 39 màn/luồng",
+      "### P4 — Trang giới thiệu, polish và bàn giao",
+      "## 8. Kịch bản trình bày khoảng 5–7 phút",
+      "## 9. Điều kiện hoàn thành"
+    ],
+    "policy": "Latest explicit decision supersedes historical prose; proposal does not mean approval."
+  },
+  {
+    "file": "docs/qa/import-schema/runtime-audit.json",
+    "kind": "qa_evidence",
+    "bytes": 2047,
+    "sha256": "295fb4a936aa4d7fa93382c23931012cd8805023337ec6bd132dbe0499328cd2"
+  },
+  {
+    "file": "docs/qa/import-schema/source-metadata.json",
+    "kind": "qa_evidence",
+    "bytes": 51424,
+    "sha256": "73bd0ac8befc8bc29ea1e230c30f5756df6cb064adf19d0a3ead7932772ed47b"
+  },
+  {
+    "file": "docs/qa/navigation/desktop-collapsed.png",
+    "kind": "qa_evidence",
+    "bytes": 125871,
+    "sha256": "723de0f45675d6f0ab2ecc68d52479a901d29b326d870e92227df9a0681cdd76"
+  },
+  {
+    "file": "docs/qa/navigation/desktop-expanded.png",
+    "kind": "qa_evidence",
+    "bytes": 143910,
+    "sha256": "5ac331665a326e4ff724b0c969afbde78ec7a739c14f1fea2a45d8f5668efc64"
+  },
+  {
+    "file": "docs/qa/navigation/mobile-content.png",
+    "kind": "qa_evidence",
+    "bytes": 43722,
+    "sha256": "95316d9300d71a09690912af49aa5276d1e9eb8b5aab0c5a94330bd026f5ccab"
+  },
+  {
+    "file": "docs/qa/navigation/mobile-menu.png",
+    "kind": "qa_evidence",
+    "bytes": 48786,
+    "sha256": "120beb7112e841ec27ee7afcdd11ea9003880e5b8b325cfe82742c7e9bbd845f"
+  },
+  {
+    "file": "docs/qa/navigation/results.json",
+    "kind": "qa_evidence",
+    "bytes": 6732,
+    "sha256": "43462661a4ae2cd9ab1d2c6b1e4d313be12e572b9c12c3d05a1f37bf55b207c9"
+  },
+  {
+    "file": "docs/qa/report-plan-review/results.json",
+    "kind": "qa_evidence",
+    "bytes": 3793,
+    "sha256": "33e34d33733859fdfe4cb104bbc56edb8c2db62bbd7a42e1370d3ac663d23a46"
+  },
+  {
+    "file": "docs/qa/schema10/cus02-contract-ocr-1440.png",
+    "kind": "qa_evidence",
+    "bytes": 529719,
+    "sha256": "54bbba0d0254d04933ad4199a16a5d500a5f4194184e89753d8fc634345ebf7f"
+  },
+  {
+    "file": "docs/qa/schema10/cus02-contract-ocr-375.png",
+    "kind": "qa_evidence",
+    "bytes": 400258,
+    "sha256": "18198550143fa9b331fe216fa981a0143a9ba0678cc886ef9154815b3e80810b"
+  },
+  {
+    "file": "docs/qa/schema10/cus02-read-contract-1440.png",
+    "kind": "qa_evidence",
+    "bytes": 248022,
+    "sha256": "976abd5e7503dbc1bc015388b43aaa2829ded9aa642dd9d370be5ab91e933eb3"
+  },
+  {
+    "file": "docs/qa/schema10/cus02-stay-terms-1440.png",
+    "kind": "qa_evidence",
+    "bytes": 356582,
+    "sha256": "638b20d958a621ee0912dcc1676fe6159ccadba4bacf5b8b3a4c74e4730a669b"
+  },
+  {
+    "file": "docs/qa/schema10/ocr-con-1440.png",
+    "kind": "qa_evidence",
+    "bytes": 249224,
+    "sha256": "611b0999d4d1142d4177fbfaf96f924081ae941b1e7d5cb3e7522a9749e01138"
+  },
+  {
+    "file": "docs/qa/schema10/ocr-con-375.png",
+    "kind": "qa_evidence",
+    "bytes": 67205,
+    "sha256": "cf05670391f98220b898efa3c5c1c599fec3d503b321987573d3d5a6786abac2"
+  },
+  {
+    "file": "docs/qa/schema10/results.json",
+    "kind": "qa_evidence",
+    "bytes": 1912,
+    "sha256": "5ce72c66869835733553290b1377e336d288862cbae100e25796bb913134d44d"
+  },
+  {
+    "file": "docs/qa/schema9/cus01-1440.png",
+    "kind": "qa_evidence",
+    "bytes": 477577,
+    "sha256": "55ef5e2d50e194d6a01af7ec3979c54a3701a9bde1a6f22d56275f2c3cc8605f"
+  },
+  {
+    "file": "docs/qa/schema9/cus01-375.png",
+    "kind": "qa_evidence",
+    "bytes": 278188,
+    "sha256": "2a72af1592c9f0478b1e36dffce5c959a98b554d4d6b5a1bb8b1a05c3dccd074"
+  },
+  {
+    "file": "docs/qa/schema9/cus02-contract-1440.png",
+    "kind": "qa_evidence",
+    "bytes": 402932,
+    "sha256": "b728495ac4a527be4db3e3c0f31b0f3885657675d6c81f009fd9df80c29d7402"
+  },
+  {
+    "file": "docs/qa/schema9/cus02-contract-375.png",
+    "kind": "qa_evidence",
+    "bytes": 293209,
+    "sha256": "294d938e5fb7ad20af755a0044bbc00167b39b4f52bf625cbcc61f2336e64eff"
+  },
+  {
+    "file": "docs/qa/schema9/cus02-finance-1440.png",
+    "kind": "qa_evidence",
+    "bytes": 400245,
+    "sha256": "8fc6fd9bcee9f0f46590afabf5b3d9f6e3dec241d64ea2bdeab4c8e5828fe9a3"
+  },
+  {
+    "file": "docs/qa/schema9/cus02-finance-375.png",
+    "kind": "qa_evidence",
+    "bytes": 292209,
+    "sha256": "3b7803e55e22b468c6c4f57ca835ab3d08ff0f3b18ab55bf7d7ecfbfda5dad54"
+  },
+  {
+    "file": "docs/qa/schema9/cus02-stay-1440.png",
+    "kind": "qa_evidence",
+    "bytes": 399777,
+    "sha256": "98a2528c07aeb5bf093eda8117b71b22a67d066e3220b588b3c7f5ab54890a55"
+  },
+  {
+    "file": "docs/qa/schema9/cus02-stay-375.png",
+    "kind": "qa_evidence",
+    "bytes": 304321,
+    "sha256": "dc0e4212d989d65f304d232707d66b9eb4fd28c77ad3f0cc9137d074823f5e09"
+  },
+  {
+    "file": "docs/qa/schema9/results.json",
+    "kind": "qa_evidence",
+    "bytes": 5625,
+    "sha256": "1297f0f2959c8239d6567b035f5248e53f592024b4c7e949354387aec37e4446"
+  },
+  {
+    "file": "docs/qa/schema9/sys01-expiry-1440.png",
+    "kind": "qa_evidence",
+    "bytes": 219358,
+    "sha256": "2d314ec8e441a674c687f615f6f80659d39b7386dd5658a972d83b23f8da498d"
+  },
+  {
+    "file": "docs/qa/schema9/sys01-expiry-375.png",
+    "kind": "qa_evidence",
+    "bytes": 158278,
+    "sha256": "aa22e8218bb62321463227f24da536c25cb39ca12b4f0c7bfcf62de2545e85eb"
+  },
+  {
+    "file": "docs/qa/ui-enterprise/after-detail-1440.png",
+    "kind": "qa_evidence",
+    "bytes": 297053,
+    "sha256": "7b3bd5de9194e695c77e185878321b105d1ef435784b53ec30720395a6e4d0ad"
+  },
+  {
+    "file": "docs/qa/ui-enterprise/after-detail-375.png",
+    "kind": "qa_evidence",
+    "bytes": 240869,
+    "sha256": "7315345727410b61197f14fee0d79a5d1c8f69de03022496565969415f631355"
+  },
+  {
+    "file": "docs/qa/ui-enterprise/after-finance-1440.png",
+    "kind": "qa_evidence",
+    "bytes": 281745,
+    "sha256": "328d30bb7d3960fd1f60bd30663dc861ceaa23eb49388e267ce2b1f0c4a4f8d6"
+  },
+  {
+    "file": "docs/qa/ui-enterprise/after-finance-375.png",
+    "kind": "qa_evidence",
+    "bytes": 221040,
+    "sha256": "8f5ac5a4865358425b125a060a4ba160065e3256a937943310d2ed3c1f30157c"
+  },
+  {
+    "file": "docs/qa/ui-enterprise/after-list-1440.png",
+    "kind": "qa_evidence",
+    "bytes": 289310,
+    "sha256": "f0b00a4768bad0676e0786f1fa3fdfe1e9ba9e64a4f355ab8733838c614ced0c"
+  },
+  {
+    "file": "docs/qa/ui-enterprise/after-list-375.png",
+    "kind": "qa_evidence",
+    "bytes": 195666,
+    "sha256": "f5c2183f74d6cfeaf6d93f8717b04d96434f77dd06cc57e6a6773be8a13a8fd5"
+  },
+  {
+    "file": "docs/qa/ui-enterprise/after-workflow-1440.png",
+    "kind": "qa_evidence",
+    "bytes": 96827,
+    "sha256": "09cf76edaa7c8ee8dc55d0b354c91f074ef8f0470f198d884964e54d6bf5120e"
+  },
+  {
+    "file": "docs/qa/ui-enterprise/after-workflow-375.png",
+    "kind": "qa_evidence",
+    "bytes": 55708,
+    "sha256": "36f0aa1aaa2dd4e0c1ebb9616574ada6042b6b2fd533f51f15cd075c2a537525"
+  },
+  {
+    "file": "docs/qa/ui-enterprise/before-detail.png",
+    "kind": "qa_evidence",
+    "bytes": 306653,
+    "sha256": "b62c0cd580bc04d88986af6f1bc48285449acc47de7ea07d00db233ea1c2c295"
+  },
+  {
+    "file": "docs/qa/ui-enterprise/before-list.png",
+    "kind": "qa_evidence",
+    "bytes": 289345,
+    "sha256": "43f2db2d812ea44670a6528dbd7559371f3b874d10e7db114ed3224c4a00ff5b"
+  },
+  {
+    "file": "docs/qa/ui-enterprise/before-workflow.png",
+    "kind": "qa_evidence",
+    "bytes": 96827,
+    "sha256": "09cf76edaa7c8ee8dc55d0b354c91f074ef8f0470f198d884964e54d6bf5120e"
+  },
+  {
+    "file": "docs/qa/ui-enterprise/navigation-desktop-collapsed.png",
+    "kind": "qa_evidence",
+    "bytes": 125472,
+    "sha256": "88e4d1dbce63b6c66da730bc7edeeea6068bd50bda16a6ce37717962e3ef67b5"
+  },
+  {
+    "file": "docs/qa/ui-enterprise/navigation-desktop-expanded.png",
+    "kind": "qa_evidence",
+    "bytes": 143204,
+    "sha256": "e93b7bd3002deab7aa8fa2777dab0177872d5401643aaba47a09c105c9218c77"
+  },
+  {
+    "file": "docs/qa/ui-enterprise/navigation-mobile-content.png",
+    "kind": "qa_evidence",
+    "bytes": 41963,
+    "sha256": "76ea7076ad914cfcb5aaaa9818f516e867d6ef3d5606c9608a6d5c7ae73d5548"
+  },
+  {
+    "file": "docs/qa/ui-enterprise/navigation-mobile-menu.png",
+    "kind": "qa_evidence",
+    "bytes": 48947,
+    "sha256": "edc782478d7941ea3068acb32dadac0c77326cde8a71fbdc39946da550dbaef7"
+  },
+  {
+    "file": "docs/qa/ui-enterprise/results.json",
+    "kind": "qa_evidence",
+    "bytes": 39040,
+    "sha256": "5188f36afedf07e52a10c0dd1abcba9558a9d4e91258e5b8163db0bc1292f748"
+  },
+  {
+    "file": "docs/sơ đồ tổ chức.jpg",
+    "kind": "customer_reference",
+    "bytes": 63696,
+    "sha256": "cf37ec2969f4102cf1bcca6a2d55da60770a6f52db159a3d3a36ca679e59ff54",
+    "review": "Organisation chart visually reviewed; three operations departments share one technical employee. Role naming remains proposed."
+  },
+  {
+    "file": "docs/tenplate/Hop_dong_khach_thue_P302_TH01_demo_dong_bo.pdf",
+    "kind": "customer_reference",
+    "bytes": 108580,
+    "sha256": "d3e4fc42c4b04338fbf6d2ed2378de1fa4207ec59b82fc30ba63512479602820",
+    "pages": 2,
+    "textCharacters": 3706,
+    "review": "DAYDU is the active contract template; P302 retained as historical comparison, not merged into DAYDU."
+  },
+  {
+    "file": "docs/tenplate/Hop_dong_thue_phong_demo_day_du.pdf",
+    "kind": "customer_reference",
+    "bytes": 318210,
+    "sha256": "33ece87d46f4d3d9634a1d5dfb6280bffcec6d0fad0ae729a83a4356f86acae9",
+    "pages": 4,
+    "textCharacters": 10328,
+    "review": "DAYDU is the active contract template; P302 retained as historical comparison, not merged into DAYDU."
+  },
+  {
+    "file": "docs/Thông tin nhà.xlsx",
+    "kind": "customer_reference",
+    "bytes": 93038,
+    "sha256": "08aa9654be1f0f1ecd2584b74b2e41d3045087590b5d45366f6baaf6f6ff4be6"
+  },
+  {
+    "file": "docs/UI_DESIGN_REVIEW.md",
+    "kind": "implementation_document",
+    "bytes": 14798,
+    "sha256": "b79ef92a4f86ce79c457d9c26a921453ed9319ed42a1e690b6f4ce396d438a6d",
+    "headings": [
+      "# TIMEHOUSE · Kiểm tra và tối ưu UI",
+      "## Lần tối ưu tiếp theo: danh sách và mobile",
+      "## Phạm vi và hướng thiết kế của lần trước",
+      "## Câu hỏi và dữ liệu của từng màn",
+      "## Kết quả kiểm tra",
+      "## Nhận xét trực quan",
+      "## Giới hạn và dữ liệu cần thay trước khi đưa vào sử dụng"
+    ],
+    "policy": "Latest explicit decision supersedes historical prose; proposal does not mean approval."
+  }
+]

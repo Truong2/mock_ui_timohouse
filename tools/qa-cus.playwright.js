@@ -39,6 +39,7 @@ async (page) => {
   });
   const initial = await read(() => ({
     schema: TH.DATA_SCHEMA,
+    datasetVersion: TH.db.dataset && TH.db.dataset.version,
     kd09: TH.calc.pnl('2026-09', 'ALL', 'kd').lnr,
     total09: TH.calc.pnl('2026-09', 'ALL', 'tong').lnr,
     kd10: TH.calc.pnl('2026-10', 'ALL', 'kd').lnr,
@@ -46,7 +47,9 @@ async (page) => {
     invoice: TH.calc.invoice('INV-2610-CG202').total,
     hs: TH.calc.perfBuilding('2026-09', 'TH-CG').hs,
   }));
-  check('REGRESSION', initial.schema >= 9 && initial.kd09 === 16682599 && initial.total09 === 7282599 && initial.kd10 === 9655000 && initial.invoice === 6069800 && Math.round(initial.hs * 1000) === 723, initial);
+  // New totals independently verified in docs/qa/dataset/decimal-results.json.
+  const expected = initial.datasetVersion === 'excel-demo-v1' ? [23643400, 14243400, 11430000, 54930000] : [16682599, 7282599, 9655000, 53155000];
+  check('REGRESSION', initial.schema >= 9 && initial.kd09 === expected[0] && initial.total09 === expected[1] && initial.kd10 === expected[2] && initial.total10 === expected[3] && initial.invoice === 6069800 && Math.round(initial.hs * 1000) === 723, initial);
   const heads = await read(() => ({ head: TH.calc.areaHead('TH-CG'), lead: TH.calc.teamLead('TH-CG'), tx: TH.calc.areaHead('TH-TX') }));
   check('QA-CUS-01', heads.head && heads.head !== heads.lead && !heads.tx, heads);
   const states = await read(() => TH.calc.tenancyStates(TH.calc.contract('HĐ-DD102/25')));

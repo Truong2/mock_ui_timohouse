@@ -32,9 +32,9 @@
         cols: [
           { key: 'h', label: 'Cổ đông', render: function (s) { var h = C.shareholder(s.shareholderId); return TH.personCell(h.name, esc(h.type + ' · ' + h.id)); } },
           { key: 'r', label: '% sở hữu', num: true, render: function (s) { return editable ? '<label class="sr-only" for="sr-' + s.id + '">Tỷ lệ</label><input id="sr-' + s.id + '" class="input-cell' + (s.dirty ? ' is-warn' : '') + '" style="max-width:90px" inputmode="decimal" value="' + s.ratio + '" data-draft="' + form + '.' + s.id + '" data-live>' : s.ratio + '%'; } },
-          { key: 'c', label: 'Vốn góp', num: true, render: function (s) { return F.money(s.capital); } },
+          { kind: 'money', key: 'c', label: 'Vốn góp', num: true, render: function (s) { return F.money(s.capital); } },
           { key: 'e', label: 'Hiệu lực', render: function (s) { return 'Từ ' + F.date(s.from) + (s.to ? ' → ' + F.date(s.to) : ''); } },
-          { key: 'a', label: 'Lãi được chia (nháp)', num: true, render: function (s) { return base > 0 ? '<b>' + F.money(Math.floor(base * s.ratio / 100 / 1000) * 1000) + '</b>' : '<span class="muted small">Không chia</span>'; } },
+          { kind: 'money', key: 'a', label: 'Lãi được chia (nháp)', num: true, render: function (s) { return base > 0 ? '<b>' + F.money(Math.floor(base * s.ratio / 100 / 1000) * 1000) + '</b>' : '<span class="muted small">Không chia</span>'; } },
         ],
         rows: list,
         foot: { _label: '<b>Tổng</b>', r: '<b class="' + (valid ? '' : 'neg') + '">' + Math.round(sum * 100) / 100 + '%</b>', c: '<b>' + F.money(C.sum(list, function (s) { return s.capital; })) + '</b>', a: base > 0 ? '<b>' + F.money(base) + '</b>' : '' },
@@ -83,9 +83,9 @@
         TH.table({ cols: [
           { key: 'h', label: 'Cổ đông', render: function (x) { return esc(x.holder.name); } },
           { key: 'r', label: 'Tỷ lệ', num: true, render: function (x) { return x.share.ratio + '%'; } },
-          { key: 'a', label: 'Lãi phân bổ (tạm chia)', num: true, render: function (x) { return base > 0 ? '<b>' + F.money(x.amount) + '</b>' : '<span class="muted">0</span>'; } },
-          { key: 'pd', label: 'Đã chi (nhập tay)', num: true, gate: 'F044.B', render: function (x) { return F.money(paid(x.holder.id)); } },
-          { key: 'rm', label: 'Còn phải chi', num: true, gate: 'F044.C', render: function (x) { return F.money(Math.max(0, (base > 0 ? x.amount : 0) - paid(x.holder.id))); } },
+          { kind: 'money', key: 'a', label: 'Lãi phân bổ (tạm chia)', num: true, render: function (x) { return base > 0 ? '<b>' + F.money(x.amount) + '</b>' : '<span class="muted">0</span>'; } },
+          { kind: 'money', key: 'pd', label: 'Đã chi (nhập tay)', num: true, gate: 'F044.B', render: function (x) { return F.money(paid(x.holder.id)); } },
+          { kind: 'money', key: 'rm', label: 'Còn phải chi', num: true, gate: 'F044.C', render: function (x) { return F.money(Math.max(0, (base > 0 ? x.amount : 0) - paid(x.holder.id))); } },
         ], rows: rowsData, foot: { _label: '<b>Tổng tạm chia</b>', r: '<b>' + C.sum(rowsData, function (x) { return x.share.ratio; }) + '%</b>', a: '<b>' + F.money(Math.max(0, base)) + '</b>' } }) +
         '<div class="alert alert-neutral">' + I('info', 'ic-sm') + '<div class="alert-body">Tổng LN phân bổ = LN đủ điều kiện chia (làm tròn nghìn, phần dư dồn dòng đầu). <b>Lợi nhuận phân bổ không đồng nghĩa đã chi tiền.</b>' + (base <= 0 ? ' Kỳ này lãi ≤ 0 nên không phân bổ.' : '') + '</div></div>' +
         TH.gate('F043.C', '<div class="card"><div class="card-hd"><div class="card-title small">Lãi gộp / lãi ròng / chi phí chung ' + TH.up('F043.C') + '</div></div><div class="card-bd">' + TH.kv([['Lãi gộp (trước chi phí chung)', F.money(base)], ['Chi phí chung phân bổ (rule, mô phỏng 2%)', F.money(-Math.round(sm.billed * 0.02))], ['Lãi ròng chia', '<b>' + F.money(base - Math.round(sm.billed * 0.02)) + '</b>']]) + '</div></div>', { label: 'Phân biệt lãi gộp, lãi ròng, chi phí chung', lines: 3 }) +

@@ -21,9 +21,9 @@
           { key: 'b', label: 'Tòa', render: function (e) { return esc(C.building(e.buildingId).short); } },
           { key: 'c', label: 'Nhóm chi', render: function (e) { return esc(TH.EXPENSE_CATS[e.category]); } },
           { key: 'd', label: 'Mô tả', render: function (e) { return esc(e.description) + '<div class="cell-sub">' + I('paperclip', 'ic-sm') + ' ' + esc(e.docNo) + '</div>'; } },
-          { key: 'a', label: 'Giá trị', num: true, render: function (e) { return '<b>' + F.money(e.amount) + '</b>'; } },
+          { kind: 'money', key: 'a', label: 'Giá trị', num: true, render: function (e) { return '<b>' + F.money(e.amount) + '</b>'; } },
           { key: 'u', label: 'Người nhập / duyệt', render: function (e) { return esc(C.staffName(e.createdBy)) + '<div class="cell-sub">' + (e.approvedBy ? esc(C.staffName(e.approvedBy)) : '—') + '</div>'; } },
-          { key: 's', label: 'Trạng thái', render: function (e) { return TH.status(e.status) + (e.reason ? '<div class="cell-sub neg">' + esc(e.reason) + '</div>' : ''); } },
+          { kind: 'status', key: 's', label: 'Trạng thái', render: function (e) { return TH.statusOf('expense', e.status) + (e.reason ? '<div class="cell-sub neg">' + esc(e.reason) + '</div>' : ''); } },
           { key: 'dup', label: 'Kiểm trùng', gate: 'F035.C', render: function (e) { var d = dupOf(e); return d.length ? TH.badge('Trùng số HĐ ' + e.docNo, 'danger', { icon: 'alert', tip: 'Trùng chứng từ với ' + d.map(function (x) { return x.id; }).join(', ') }) : '<span class="muted small">—</span>'; } },
           { key: 'pay', label: 'Phải trả', gate: 'F036.C', render: function (e) { return e.category === 'owner_rent' ? (e.paid ? TH.badge('Đã trả', 'success') : TH.badge('Đến hạn ' + F.date(e.dueAt), 'warning')) : '<span class="muted small">—</span>'; } },
           { key: 'x', label: '', render: function (e) {
@@ -45,7 +45,7 @@
       var schedule = TH.gate('F036.B', '<div class="card">' + TH.cardHd(I('calendar', 'ic-sm') + 'Lịch phải trả chủ nhà' + TH.up('F036.B'), 'Sinh từ điều khoản HĐ thuê tòa · chi tiết ở BLD-02 › Lịch thanh toán') + TH.table({ compact: true, cols: [
         { key: 'b', label: 'Tòa', render: function (b) { return '<a href="' + TH.router.href('BLD-02', b.id) + '">' + esc(b.short) + '</a>'; } },
         { key: 'o', label: 'Chủ nhà', render: function (b) { return esc(C.owner(b.ownerId).name); } },
-        { key: 'r', label: 'Kỳ trả', num: true, render: function (b) { var l = TH.leaseOf(b.id); return l ? F.money(l.rent * l.payCycle) + '<div class="cell-sub">' + l.payCycle + ' tháng/lần</div>' : '—'; } },
+        { kind: 'money', key: 'r', label: 'Kỳ trả', num: true, render: function (b) { var l = TH.leaseOf(b.id); return l ? F.money(l.rent * l.payCycle) + '<div class="cell-sub">' + l.payCycle + ' tháng/lần</div>' : '—'; } },
         { key: 'd', label: 'Hạn kế tiếp', render: function (b) { var c = TH.has('F036.C'), n = TH.db.landlordPays.filter(function (x) { return x.buildingId === b.id && (c ? x.amount > x.paid : x.dueAt >= TH.TODAY); }).sort(function (a, c2) { return a.dueAt < c2.dueAt ? -1 : 1; })[0]; return n ? F.date(n.dueAt) + (c ? ' ' + TH.landlordPayState(n).b : '') : (c ? TH.badge('Đã trả đủ', 'success') : '<span class="muted">—</span>'); } },
       ], rows: bs }) + '</div>', { label: 'Tự sinh lịch phải trả từ điều khoản thuê tòa', lines: 3 });
       var payable = TH.gate('F036.D', '<div class="card">' + TH.cardHd(I('compare', 'ic-sm') + 'Đối chiếu phải trả & cost center' + TH.up('F036.D')) + '<div class="card-bd">' + TH.kv(bs.map(function (b) { var e = all.filter(function (x) { return x.buildingId === b.id; }); return ['CC-' + b.id.slice(3) + ' · ' + b.short, F.money(C.sum(e.filter(function (x) { return x.status === 'approved'; }), function (x) { return x.amount; })) + ' đã duyệt · ' + F.money(C.sum(e.filter(function (x) { return x.category === 'owner_rent' && !x.paid; }), function (x) { return x.amount; })) + ' phải trả']; })) + '</div></div>', { label: 'Đối chiếu payable + cost center', lines: 3 });
@@ -58,7 +58,7 @@
         '<div class="card card-flush u-mb-16"><div class="toolbar">' + TH.searchBox(S, 'Tìm chi phí, chứng từ, nhóm chi…') + filters + '<span class="grow"></span>' + TH.uiSelect(S, 'cat', [{ id: 'all', label: 'Mọi nhóm chi' }].concat(Object.keys(TH.EXPENSE_CATS).map(function (k) { return { id: k, label: TH.EXPENSE_CATS[k] }; })), cat, 'Nhóm chi') + '</div>' + table + TH.pager(S, pg) + '</div>' +
         '<div class="grid-2 u-mb-16">' + schedule + payable + '</div><div class="grid-2">' + shared + revLog + '</div>';
     },
-    dialogs: [function () { expForm('new'); }],
+    dialogs: [function () { return expForm('new'); }],
   };
   function expForm(id) {
     var e = id === 'new' ? null : TH.db.expenses.find(function (x) { return x.id === id; }), form = 'exp-' + id;

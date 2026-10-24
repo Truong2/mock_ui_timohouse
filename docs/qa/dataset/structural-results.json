@@ -1,0 +1,13 @@
+{
+  "passed": 3556,
+  "failed": 0,
+  "baselineUnchanged": true,
+  "datasetVersion": "excel-demo-v1",
+  "counts": {
+    "invoices": 97,
+    "receipts": 98,
+    "rooms": 18,
+    "scenarios": 15,
+    "reports": 2
+  }
+}

@@ -17,8 +17,8 @@
           { key: 'id', label: 'Mã phòng', render: function (r) { return '<a class="cell-main" href="' + TH.router.href('ROOM-02', r.id) + '">' + r.id + '</a>'; } },
           { key: 'b', label: 'Tòa', render: function (r) { return esc(C.building(r.buildingId).short); } },
           { key: 'f', label: 'Tầng', num: true, render: function (r) { return r.floor; } },
-          { key: 'p', label: 'Giá niêm yết', num: true, render: function (r) { return F.money(r.rent); } },
-          { key: 's', label: 'Trạng thái', render: function (r) { return TH.status(r.status); } },
+          { kind: 'money', key: 'p', label: 'Giá niêm yết', num: true, render: function (r) { return F.money(r.rent); } },
+          { kind: 'status', key: 's', label: 'Trạng thái', render: function (r) { return TH.statusOf('room', r.status); } },
           { key: 'k', label: 'Khách / hợp đồng', render: function (r) { var c = C.contractOfRoom(r.id); return c ? esc(C.customer(c.customerId).name) + '<div class="cell-sub mono">' + esc(c.id) + '</div>' : '<span class="muted">—</span>'; } },
           { key: 'chk', label: 'Kiểm đổi trạng thái', gate: 'F007.B', render: function (r) { var c = C.contractOfRoom(r.id); return c ? TH.badge('Khóa theo HĐ đến ' + F.date(c.end), 'info', { icon: 'lock' }) : '<span class="muted small">Tự do</span>'; } },
           { key: 'ev', label: 'Đổi trạng thái gần nhất', gate: 'F007.C', render: function (r) { var e = TH.db.roomEvents.find(function (x) { return x.roomId === r.id; }); return e ? F.date(e.at) + '<div class="cell-sub">' + TH.statusLabel(e.from) + ' → ' + TH.statusLabel(e.to) + '</div>' : '<span class="muted small">—</span>'; } },
@@ -31,7 +31,7 @@
       return TH.pageHeader({ screen: S, actions: '<button type="button" class="btn" data-act="imp.open" data-screen="ROOM-IMP">' + I('upload', 'ic-sm') + 'Nhập từ Excel</button>' + TH.permBtn('master.edit', '<button type="button" class="btn btn-primary" data-act="room.add">' + I('plus', 'ic-sm') + 'Thêm phòng</button>', 'Thêm · 403') }) +
         '<div class="card card-flush"><div class="toolbar">' + TH.searchBox(S, 'Tìm mã phòng, khách, số HĐ…') + TH.chips(S, 'st', [{ id: 'all', label: 'Tất cả', count: all.length }, { id: 'occupied', label: 'Đang thuê', count: cnt('occupied') }, { id: 'vacant', label: 'Trống', count: cnt('vacant') }, { id: 'maintenance', label: 'Đang sửa', count: cnt('maintenance') }], st) + '</div>' + table + TH.pager(S, pg) + '</div>';
     },
-    dialogs: [function () { roomForm('new'); }],
+    dialogs: [function () { return roomForm('new'); }],
   };
   function roomForm(id) {
     var room = id === 'new' ? null : C.room(id), form = 'room-' + id;
@@ -81,7 +81,7 @@
       var invs = TH.db.invoices.filter(function (i) { return i.roomId === r.id; }).sort(function (a, z) { return a.period < z.period ? 1 : -1; });
       var body;
       if (tab === 'overview') {
-        body = '<div class="grid-2"><div class="card"><div class="card-hd"><div class="card-title">Chi tiết phòng</div></div><div class="card-bd">' + TH.kv([['Mã phòng', '<b>' + r.id + '</b>'], ['Tòa', '<a href="' + TH.router.href('BLD-02', b.id) + '">' + esc(b.name) + '</a>'], ['Tầng · diện tích', r.floor + ' · ' + r.area + ' m²'], ['Giá niêm yết', F.money(r.rent)], ['Trạng thái', TH.status(r.status)], ['Công tơ', esc(r.meters.map(function (m) { return m.code; }).join(' · ')) + ' <span class="small muted">(1 điện + 1 nước)</span>']]) + '</div></div>' +
+        body = '<div class="grid-2"><div class="card"><div class="card-hd"><div class="card-title">Chi tiết phòng</div></div><div class="card-bd">' + TH.kv([['Mã phòng', '<b>' + r.id + '</b>'], ['Tòa', '<a href="' + TH.router.href('BLD-02', b.id) + '">' + esc(b.name) + '</a>'], ['Tầng · diện tích', r.floor + ' · ' + r.area + ' m²'], ['Giá niêm yết', F.money(r.rent)], ['Trạng thái', TH.statusOf('room', r.status)], ['Công tơ', esc(r.meters.map(function (m) { return m.code; }).join(' · ')) + ' <span class="small muted">(1 điện + 1 nước)</span>']]) + '</div></div>' +
           '<div class="card card-flush">' + TH.cardHd('Hóa đơn gần đây') + TH.table({ compact: true, cols: [{ key: 'p', label: 'Kỳ', render: function (i) { return F.period(i.period); } }, { key: 'id', label: 'Hóa đơn', render: function (i) { return '<a class="mono small" href="' + TH.router.href('INV-03', i.id) + '">' + i.id + '</a>'; } }, { key: 't', label: 'Tổng', num: true, render: function (i) { return F.money(i.total); } }, { key: 's', label: 'Trạng thái', render: function (i) { return TH.status(C.payState(i)); } }], rows: invs.slice(0, 4), empty: { title: 'Chưa có hóa đơn', text: '' } }) + '</div></div>';
       } else if (tab === 'tenant') {
         body = '<div class="card"><div class="card-bd">' + (k ? TH.kv([['Khách', '<a href="' + TH.router.href('CUS-02', k.id) + '">' + esc(k.name) + '</a>'], ['Liên hệ', esc(k.phone)], ['Giấy tờ', esc(k.idType + ' ' + k.idNo)], ['Zalo OA', k.oaLinked ? TH.badge('Đã liên kết', 'success') : TH.badge('Chưa liên kết', 'neutral')]]) : TH.state('empty', { title: 'Phòng chưa có khách', text: 'Tạo hợp đồng để gán khách.' })) + '</div></div>';
@@ -105,10 +105,10 @@
       var hist = TH.gate('F007.C', '<div class="card u-mt-16"><div class="card-hd"><div class="card-title">Lịch sử trạng thái phòng ' + TH.up('F007.C') + '</div></div><div class="card-bd"><ul class="timeline">' + (TH.db.roomEvents.filter(function (e) { return e.roomId === r.id; }).map(function (e) { return '<li>' + TH.statusLabel(e.from) + ' → <b>' + TH.statusLabel(e.to) + '</b> · ' + esc(e.note) + '<div class="when">' + F.date(e.at) + ' · ' + esc(C.staffName(e.by)) + '</div></li>'; }).join('') || '<li class="muted">Chưa đổi trạng thái.</li>') + '</ul>' +
         TH.gate('F007.D', '<div class="small u-mt-8">' + TH.tierPill('D') + ' Giá theo hiệu lực: ' + (TH.db.priceHistory.filter(function (x) { return x.roomId === r.id; }).map(function (x) { return F.money(x.rent) + ' từ ' + F.date(x.from); }).join(' → ') || 'chưa thay đổi') + '</div>', { mode: 'mini', label: 'Theo dõi giá qua hiệu lực' }) + '</div></div>', { label: 'Event lịch sử trạng thái phòng', lines: 2 });
       var ctR = C.contractOfRoom(r.id), kR = ctR && C.customer(ctR.customerId);
-      return TH.pageHeader({ screen: 'ROOM-02', title: 'Phòng ' + r.id, crumbs: [['Phòng', TH.router.href('ROOM-01')], [r.id]], status: TH.status(r.status),
+      return TH.pageHeader({ screen: 'ROOM-02', title: 'Phòng ' + r.id, crumbs: [['Phòng', TH.router.href('ROOM-01')], [r.id]], status: TH.statusOf('room', r.status),
           facts: TH.detailFacts([['Tòa', esc(b.name)], ['Tầng · diện tích', 'Tầng ' + r.floor + ' · ' + r.area + ' m²'], ['Giá niêm yết', F.money(r.rent) + '/tháng'], ['Khách hiện tại', kR ? '<a href="' + TH.router.href('CUS-02', ctR.id) + '">' + esc(kR.name) + '</a>' : '<span class="muted">Phòng trống</span>']]),
           actions: '<a class="btn" href="' + TH.router.href('METER-01') + '">' + I('zap', 'ic-sm') + 'Chỉ số điện nước</a>' + TH.permBtn('master.edit', '<button type="button" class="btn btn-primary" data-act="room.edit" data-id="' + r.id + '">' + I('edit', 'ic-sm') + 'Sửa phòng</button>', 'Sửa · 403') }) +
-        '<div class="card tab-card u-mb-16">' + TH.tabs(S, tabs, tab) + '</div>' + body + hist;
+        '<div class="card tab-card u-mb-16">' + TH.tabs(S, tabs, tab) + '</div>' + TH.tabPanel(S, tab, body) + hist;
     },
   };
 
