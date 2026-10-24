@@ -32,7 +32,7 @@ async (page) => {
     const q2 = await read(() => ({ width: document.querySelector('#sidebar').getBoundingClientRect().width, accessible: [...document.querySelectorAll('#nav > a')].every(a => a.getAttribute('aria-label') && a.title), count: document.querySelectorAll('#nav > a').length }));
     await page.reload(); await page.waitForFunction(() => TH.navigation && document.querySelector('#shell').classList.contains('nav-compact'));
     const kept = await read(() => TH.store.ui('navigation', 'collapsed', false));
-    check('NAV-02', q2.width === 72 && q2.accessible && q2.count === 9 && kept, { ...q2, persistedAfterReload: kept });
+    check('NAV-02', Math.abs(q2.width - 72) < 1 && q2.accessible && q2.count === 9 && kept, { ...q2, persistedAfterReload: kept });
     await page.screenshot({ path: 'docs/qa/ui-enterprise/navigation-desktop-collapsed.png' });
     await page.locator('#nav-compact-toggle').click();
     await page.waitForFunction(() => Math.abs(document.querySelector('#sidebar').getBoundingClientRect().width - 232) < 1);

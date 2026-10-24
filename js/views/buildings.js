@@ -45,7 +45,7 @@
             return TH.canScreen('ROOM-02') ? '<a class="room-slot room-' + esc(r.status) + '" href="' + TH.router.href('ROOM-02', r.id) + '" aria-label="' + esc(name) + '" title="' + esc(name) + '">' + text + '</a>' : '<span class="room-slot room-' + esc(r.status) + '" title="' + esc(name) + '">' + text + '</span>';
           }).join('') + '</div></div>';
         }).join('') + '</div></section>' : '';
-      return TH.pageHeader({ screen: S, desc: 'Thông tin tòa, công suất phòng và tình trạng vận hành.', actions: '<button type="button" class="btn" data-act="imp.open" data-screen="BLD-IMP">' + I('upload', 'ic-sm') + 'Nhập từ Excel</button>' + TH.permBtn('master.edit', '<button type="button" class="btn btn-primary" data-act="bld.add">' + I('plus', 'ic-sm') + 'Thêm tòa</button>', 'Thêm · 403') }) +
+      return TH.pageHeader({ screen: S, desc: 'Thông tin tòa, công suất phòng và tình trạng vận hành.', actions: TH.gate('F005.B', '<button type="button" class="btn" data-act="imp.open" data-screen="BLD-IMP">' + I('upload', 'ic-sm') + 'Nhập từ Excel</button>', { mode: 'btn' }) + TH.permBtn('master.edit', '<button type="button" class="btn btn-primary" data-act="bld.add">' + I('plus', 'ic-sm') + 'Thêm tòa</button>', 'Thêm · 403') }) +
         '<div class="card card-flush"><div class="toolbar">' + TH.searchBox(S, 'Tìm mã, tên, địa chỉ, chủ nhà…') + TH.uiSelect(S, 'area', areas, area, 'Khu vực') + '</div>' + table + TH.pager(S, pg) + '</div>' + roomBoard;
     },
     dialogs: [function () { return bldForm(); }],

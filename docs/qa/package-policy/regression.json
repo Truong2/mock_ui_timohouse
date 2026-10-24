@@ -1,0 +1,2376 @@
+{
+  "pricing": {
+    "passed": 50,
+    "results": [
+      {
+        "id": "PRICE-375-A",
+        "pass": true,
+        "evidence": {
+          "key": "A",
+          "selected": 1,
+          "price": true,
+          "steps": 6,
+          "link": "http://127.0.0.1:8779/index.html?previewPackage=A#/",
+          "query": "A",
+          "focus": true,
+          "visible": true,
+          "overflow": -15,
+          "bad": 0,
+          "demo": "A",
+          "screen": "#/demo/inv-02",
+          "scope": "Giới hạn triển khai\nOCR: một mẫu giấy tờ khách và một mẫu hợp đồng đã chọn; sửa và xác nhận từng file.\nOA: một OA, tối đa hai mẫu tin được duyệt; gửi từng hóa đơn và một lịch nhắc cố định.\nBáo cáo: hai mẫu gốc, xem và xuất theo kỳ; không tự thiết kế mẫu mới.\nNhập và xử lý từng hồ sơ/chứng từ; nhập Excel, lập/xác nhận/gửi hàng loạt có từ B.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+          "foundation": "Có OCR và Zalo OA",
+          "baseEnabled": true,
+          "reportTypes": "RPT-04,RPT-05",
+          "upgradeGates": true
+        }
+      },
+      {
+        "id": "SCOPE-375-A",
+        "pass": true,
+        "evidence": {
+          "limits": "Giới hạn triển khai\nOCR: một mẫu giấy tờ khách và một mẫu hợp đồng đã chọn; sửa và xác nhận từng file.\nOA: một OA, tối đa hai mẫu tin được duyệt; gửi từng hóa đơn và một lịch nhắc cố định.\nBáo cáo: hai mẫu gốc, xem và xuất theo kỳ; không tự thiết kế mẫu mới.\nNhập và xử lý từng hồ sơ/chứng từ; nhập Excel, lập/xác nhận/gửi hàng loạt có từ B.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+          "baseEnabled": true,
+          "reportTypes": "RPT-04,RPT-05",
+          "upgradeGates": true
+        }
+      },
+      {
+        "id": "PRICE-375-B",
+        "pass": true,
+        "evidence": {
+          "key": "B",
+          "selected": 1,
+          "price": true,
+          "steps": 6,
+          "link": "http://127.0.0.1:8779/index.html?previewPackage=B#/",
+          "query": "B",
+          "focus": true,
+          "visible": true,
+          "overflow": -15,
+          "bad": 0,
+          "demo": "B",
+          "screen": "#/demo/inv-01",
+          "scope": "Giới hạn triển khai\nOCR: tối đa hai mẫu cho mỗi loại giấy tờ/hợp đồng; chưa nhận dạng mẫu tùy ý.\nOA: kế thừa một OA; thêm mẫu hóa đơn/nhắc nợ/hết hạn hợp đồng và ba mốc nhắc.\nBáo cáo: giữ hai mẫu gốc; thêm truy nguồn và xu hướng tối đa sáu kỳ.\nChỉ xử lý hàng loạt trên các tác vụ và mẫu Excel đã thống nhất.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+          "foundation": "Có OCR và Zalo OA",
+          "baseEnabled": true,
+          "reportTypes": "RPT-04,RPT-05",
+          "upgradeGates": true
+        }
+      },
+      {
+        "id": "SCOPE-375-B",
+        "pass": true,
+        "evidence": {
+          "limits": "Giới hạn triển khai\nOCR: tối đa hai mẫu cho mỗi loại giấy tờ/hợp đồng; chưa nhận dạng mẫu tùy ý.\nOA: kế thừa một OA; thêm mẫu hóa đơn/nhắc nợ/hết hạn hợp đồng và ba mốc nhắc.\nBáo cáo: giữ hai mẫu gốc; thêm truy nguồn và xu hướng tối đa sáu kỳ.\nChỉ xử lý hàng loạt trên các tác vụ và mẫu Excel đã thống nhất.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+          "baseEnabled": true,
+          "reportTypes": "RPT-04,RPT-05",
+          "upgradeGates": true
+        }
+      },
+      {
+        "id": "PRICE-375-C",
+        "pass": true,
+        "evidence": {
+          "key": "C",
+          "selected": 1,
+          "price": true,
+          "steps": 6,
+          "link": "http://127.0.0.1:8779/index.html?previewPackage=C#/",
+          "query": "C",
+          "focus": true,
+          "visible": true,
+          "overflow": -15,
+          "bad": 0,
+          "demo": "C",
+          "screen": "#/demo/exp-01",
+          "scope": "Giới hạn triển khai\nOCR: giữ giới hạn mẫu của B, thêm kiểm trùng và so khớp phòng–khách–hợp đồng.\nOA: kế thừa một OA; thêm cá nhân hóa theo tòa và xử lý lỗi gửi theo quy tắc.\nBáo cáo: giữ hai mẫu gốc; thêm so sánh tòa/nhóm/kỳ và bản số liệu đã duyệt.\nQuy trình duyệt và quy tắc phân bổ cố định theo danh sách đã chốt.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+          "foundation": "Có OCR và Zalo OA",
+          "baseEnabled": true,
+          "reportTypes": "RPT-04,RPT-05",
+          "upgradeGates": true
+        }
+      },
+      {
+        "id": "SCOPE-375-C",
+        "pass": true,
+        "evidence": {
+          "limits": "Giới hạn triển khai\nOCR: giữ giới hạn mẫu của B, thêm kiểm trùng và so khớp phòng–khách–hợp đồng.\nOA: kế thừa một OA; thêm cá nhân hóa theo tòa và xử lý lỗi gửi theo quy tắc.\nBáo cáo: giữ hai mẫu gốc; thêm so sánh tòa/nhóm/kỳ và bản số liệu đã duyệt.\nQuy trình duyệt và quy tắc phân bổ cố định theo danh sách đã chốt.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+          "baseEnabled": true,
+          "reportTypes": "RPT-04,RPT-05",
+          "upgradeGates": true
+        }
+      },
+      {
+        "id": "PRICE-375-D",
+        "pass": true,
+        "evidence": {
+          "key": "D",
+          "selected": 1,
+          "price": true,
+          "steps": 6,
+          "link": "http://127.0.0.1:8779/index.html?previewPackage=D#/",
+          "query": "D",
+          "focus": true,
+          "visible": true,
+          "overflow": -15,
+          "bad": 0,
+          "demo": "D",
+          "screen": "#/demo/reports",
+          "scope": "Giới hạn triển khai\nOCR: thư viện mẫu theo danh mục được duyệt; số mẫu ghi trong báo giá, không nhận mọi định dạng.\nOA: kế thừa một OA; thêm phiên bản mẫu, lịch sử và giám sát gửi lại.\nBáo cáo: giữ hai mẫu gốc; thêm khóa kỳ, phiên bản và đối chiếu lịch sử; không tự thiết kế báo cáo bất kỳ.\nKhóa kỳ, phiên bản và đối soát chỉ áp dụng cho dữ liệu/mẫu đã chốt; chưa kết nối ngân hàng tự động.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+          "foundation": "Có OCR và Zalo OA",
+          "baseEnabled": true,
+          "reportTypes": "RPT-04,RPT-05",
+          "upgradeGates": true
+        }
+      },
+      {
+        "id": "SCOPE-375-D",
+        "pass": true,
+        "evidence": {
+          "limits": "Giới hạn triển khai\nOCR: thư viện mẫu theo danh mục được duyệt; số mẫu ghi trong báo giá, không nhận mọi định dạng.\nOA: kế thừa một OA; thêm phiên bản mẫu, lịch sử và giám sát gửi lại.\nBáo cáo: giữ hai mẫu gốc; thêm khóa kỳ, phiên bản và đối chiếu lịch sử; không tự thiết kế báo cáo bất kỳ.\nKhóa kỳ, phiên bản và đối soát chỉ áp dụng cho dữ liệu/mẫu đã chốt; chưa kết nối ngân hàng tự động.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+          "baseEnabled": true,
+          "reportTypes": "RPT-04,RPT-05",
+          "upgradeGates": true
+        }
+      },
+      {
+        "id": "COMPARE-375",
+        "pass": true,
+        "evidence": {
+          "mobile": true,
+          "rows": 8,
+          "localRows": 8,
+          "minTargets": 44
+        }
+      },
+      {
+        "id": "PRICE-768-A",
+        "pass": true,
+        "evidence": {
+          "key": "A",
+          "selected": 1,
+          "price": true,
+          "steps": 6,
+          "link": "http://127.0.0.1:8779/index.html?previewPackage=A#/",
+          "query": "A",
+          "focus": true,
+          "visible": true,
+          "overflow": -15,
+          "bad": 0,
+          "demo": "A",
+          "screen": "#/demo/inv-02",
+          "scope": "Giới hạn triển khai\nOCR: một mẫu giấy tờ khách và một mẫu hợp đồng đã chọn; sửa và xác nhận từng file.\nOA: một OA, tối đa hai mẫu tin được duyệt; gửi từng hóa đơn và một lịch nhắc cố định.\nBáo cáo: hai mẫu gốc, xem và xuất theo kỳ; không tự thiết kế mẫu mới.\nNhập và xử lý từng hồ sơ/chứng từ; nhập Excel, lập/xác nhận/gửi hàng loạt có từ B.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+          "foundation": "Có OCR và Zalo OA",
+          "baseEnabled": true,
+          "reportTypes": "RPT-04,RPT-05",
+          "upgradeGates": true
+        }
+      },
+      {
+        "id": "SCOPE-768-A",
+        "pass": true,
+        "evidence": {
+          "limits": "Giới hạn triển khai\nOCR: một mẫu giấy tờ khách và một mẫu hợp đồng đã chọn; sửa và xác nhận từng file.\nOA: một OA, tối đa hai mẫu tin được duyệt; gửi từng hóa đơn và một lịch nhắc cố định.\nBáo cáo: hai mẫu gốc, xem và xuất theo kỳ; không tự thiết kế mẫu mới.\nNhập và xử lý từng hồ sơ/chứng từ; nhập Excel, lập/xác nhận/gửi hàng loạt có từ B.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+          "baseEnabled": true,
+          "reportTypes": "RPT-04,RPT-05",
+          "upgradeGates": true
+        }
+      },
+      {
+        "id": "PRICE-768-B",
+        "pass": true,
+        "evidence": {
+          "key": "B",
+          "selected": 1,
+          "price": true,
+          "steps": 6,
+          "link": "http://127.0.0.1:8779/index.html?previewPackage=B#/",
+          "query": "B",
+          "focus": true,
+          "visible": true,
+          "overflow": -15,
+          "bad": 0,
+          "demo": "B",
+          "screen": "#/demo/inv-01",
+          "scope": "Giới hạn triển khai\nOCR: tối đa hai mẫu cho mỗi loại giấy tờ/hợp đồng; chưa nhận dạng mẫu tùy ý.\nOA: kế thừa một OA; thêm mẫu hóa đơn/nhắc nợ/hết hạn hợp đồng và ba mốc nhắc.\nBáo cáo: giữ hai mẫu gốc; thêm truy nguồn và xu hướng tối đa sáu kỳ.\nChỉ xử lý hàng loạt trên các tác vụ và mẫu Excel đã thống nhất.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+          "foundation": "Có OCR và Zalo OA",
+          "baseEnabled": true,
+          "reportTypes": "RPT-04,RPT-05",
+          "upgradeGates": true
+        }
+      },
+      {
+        "id": "SCOPE-768-B",
+        "pass": true,
+        "evidence": {
+          "limits": "Giới hạn triển khai\nOCR: tối đa hai mẫu cho mỗi loại giấy tờ/hợp đồng; chưa nhận dạng mẫu tùy ý.\nOA: kế thừa một OA; thêm mẫu hóa đơn/nhắc nợ/hết hạn hợp đồng và ba mốc nhắc.\nBáo cáo: giữ hai mẫu gốc; thêm truy nguồn và xu hướng tối đa sáu kỳ.\nChỉ xử lý hàng loạt trên các tác vụ và mẫu Excel đã thống nhất.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+          "baseEnabled": true,
+          "reportTypes": "RPT-04,RPT-05",
+          "upgradeGates": true
+        }
+      },
+      {
+        "id": "PRICE-768-C",
+        "pass": true,
+        "evidence": {
+          "key": "C",
+          "selected": 1,
+          "price": true,
+          "steps": 6,
+          "link": "http://127.0.0.1:8779/index.html?previewPackage=C#/",
+          "query": "C",
+          "focus": true,
+          "visible": true,
+          "overflow": -15,
+          "bad": 0,
+          "demo": "C",
+          "screen": "#/demo/exp-01",
+          "scope": "Giới hạn triển khai\nOCR: giữ giới hạn mẫu của B, thêm kiểm trùng và so khớp phòng–khách–hợp đồng.\nOA: kế thừa một OA; thêm cá nhân hóa theo tòa và xử lý lỗi gửi theo quy tắc.\nBáo cáo: giữ hai mẫu gốc; thêm so sánh tòa/nhóm/kỳ và bản số liệu đã duyệt.\nQuy trình duyệt và quy tắc phân bổ cố định theo danh sách đã chốt.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+          "foundation": "Có OCR và Zalo OA",
+          "baseEnabled": true,
+          "reportTypes": "RPT-04,RPT-05",
+          "upgradeGates": true
+        }
+      },
+      {
+        "id": "SCOPE-768-C",
+        "pass": true,
+        "evidence": {
+          "limits": "Giới hạn triển khai\nOCR: giữ giới hạn mẫu của B, thêm kiểm trùng và so khớp phòng–khách–hợp đồng.\nOA: kế thừa một OA; thêm cá nhân hóa theo tòa và xử lý lỗi gửi theo quy tắc.\nBáo cáo: giữ hai mẫu gốc; thêm so sánh tòa/nhóm/kỳ và bản số liệu đã duyệt.\nQuy trình duyệt và quy tắc phân bổ cố định theo danh sách đã chốt.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+          "baseEnabled": true,
+          "reportTypes": "RPT-04,RPT-05",
+          "upgradeGates": true
+        }
+      },
+      {
+        "id": "PRICE-768-D",
+        "pass": true,
+        "evidence": {
+          "key": "D",
+          "selected": 1,
+          "price": true,
+          "steps": 6,
+          "link": "http://127.0.0.1:8779/index.html?previewPackage=D#/",
+          "query": "D",
+          "focus": true,
+          "visible": true,
+          "overflow": -15,
+          "bad": 0,
+          "demo": "D",
+          "screen": "#/demo/reports",
+          "scope": "Giới hạn triển khai\nOCR: thư viện mẫu theo danh mục được duyệt; số mẫu ghi trong báo giá, không nhận mọi định dạng.\nOA: kế thừa một OA; thêm phiên bản mẫu, lịch sử và giám sát gửi lại.\nBáo cáo: giữ hai mẫu gốc; thêm khóa kỳ, phiên bản và đối chiếu lịch sử; không tự thiết kế báo cáo bất kỳ.\nKhóa kỳ, phiên bản và đối soát chỉ áp dụng cho dữ liệu/mẫu đã chốt; chưa kết nối ngân hàng tự động.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+          "foundation": "Có OCR và Zalo OA",
+          "baseEnabled": true,
+          "reportTypes": "RPT-04,RPT-05",
+          "upgradeGates": true
+        }
+      },
+      {
+        "id": "SCOPE-768-D",
+        "pass": true,
+        "evidence": {
+          "limits": "Giới hạn triển khai\nOCR: thư viện mẫu theo danh mục được duyệt; số mẫu ghi trong báo giá, không nhận mọi định dạng.\nOA: kế thừa một OA; thêm phiên bản mẫu, lịch sử và giám sát gửi lại.\nBáo cáo: giữ hai mẫu gốc; thêm khóa kỳ, phiên bản và đối chiếu lịch sử; không tự thiết kế báo cáo bất kỳ.\nKhóa kỳ, phiên bản và đối soát chỉ áp dụng cho dữ liệu/mẫu đã chốt; chưa kết nối ngân hàng tự động.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+          "baseEnabled": true,
+          "reportTypes": "RPT-04,RPT-05",
+          "upgradeGates": true
+        }
+      },
+      {
+        "id": "COMPARE-768",
+        "pass": true,
+        "evidence": {
+          "mobile": true,
+          "rows": 8,
+          "localRows": 8,
+          "minTargets": 44
+        }
+      },
+      {
+        "id": "PRICE-1024-A",
+        "pass": true,
+        "evidence": {
+          "key": "A",
+          "selected": 1,
+          "price": true,
+          "steps": 6,
+          "link": "http://127.0.0.1:8779/index.html?previewPackage=A#/",
+          "query": "A",
+          "focus": true,
+          "visible": true,
+          "overflow": -15,
+          "bad": 0,
+          "demo": "A",
+          "screen": "#/demo/inv-02",
+          "scope": "Giới hạn triển khai\nOCR: một mẫu giấy tờ khách và một mẫu hợp đồng đã chọn; sửa và xác nhận từng file.\nOA: một OA, tối đa hai mẫu tin được duyệt; gửi từng hóa đơn và một lịch nhắc cố định.\nBáo cáo: hai mẫu gốc, xem và xuất theo kỳ; không tự thiết kế mẫu mới.\nNhập và xử lý từng hồ sơ/chứng từ; nhập Excel, lập/xác nhận/gửi hàng loạt có từ B.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+          "foundation": "Có OCR và Zalo OA",
+          "baseEnabled": true,
+          "reportTypes": "RPT-04,RPT-05",
+          "upgradeGates": true
+        }
+      },
+      {
+        "id": "SCOPE-1024-A",
+        "pass": true,
+        "evidence": {
+          "limits": "Giới hạn triển khai\nOCR: một mẫu giấy tờ khách và một mẫu hợp đồng đã chọn; sửa và xác nhận từng file.\nOA: một OA, tối đa hai mẫu tin được duyệt; gửi từng hóa đơn và một lịch nhắc cố định.\nBáo cáo: hai mẫu gốc, xem và xuất theo kỳ; không tự thiết kế mẫu mới.\nNhập và xử lý từng hồ sơ/chứng từ; nhập Excel, lập/xác nhận/gửi hàng loạt có từ B.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+          "baseEnabled": true,
+          "reportTypes": "RPT-04,RPT-05",
+          "upgradeGates": true
+        }
+      },
+      {
+        "id": "PRICE-1024-B",
+        "pass": true,
+        "evidence": {
+          "key": "B",
+          "selected": 1,
+          "price": true,
+          "steps": 6,
+          "link": "http://127.0.0.1:8779/index.html?previewPackage=B#/",
+          "query": "B",
+          "focus": true,
+          "visible": true,
+          "overflow": -15,
+          "bad": 0,
+          "demo": "B",
+          "screen": "#/demo/inv-01",
+          "scope": "Giới hạn triển khai\nOCR: tối đa hai mẫu cho mỗi loại giấy tờ/hợp đồng; chưa nhận dạng mẫu tùy ý.\nOA: kế thừa một OA; thêm mẫu hóa đơn/nhắc nợ/hết hạn hợp đồng và ba mốc nhắc.\nBáo cáo: giữ hai mẫu gốc; thêm truy nguồn và xu hướng tối đa sáu kỳ.\nChỉ xử lý hàng loạt trên các tác vụ và mẫu Excel đã thống nhất.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+          "foundation": "Có OCR và Zalo OA",
+          "baseEnabled": true,
+          "reportTypes": "RPT-04,RPT-05",
+          "upgradeGates": true
+        }
+      },
+      {
+        "id": "SCOPE-1024-B",
+        "pass": true,
+        "evidence": {
+          "limits": "Giới hạn triển khai\nOCR: tối đa hai mẫu cho mỗi loại giấy tờ/hợp đồng; chưa nhận dạng mẫu tùy ý.\nOA: kế thừa một OA; thêm mẫu hóa đơn/nhắc nợ/hết hạn hợp đồng và ba mốc nhắc.\nBáo cáo: giữ hai mẫu gốc; thêm truy nguồn và xu hướng tối đa sáu kỳ.\nChỉ xử lý hàng loạt trên các tác vụ và mẫu Excel đã thống nhất.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+          "baseEnabled": true,
+          "reportTypes": "RPT-04,RPT-05",
+          "upgradeGates": true
+        }
+      },
+      {
+        "id": "PRICE-1024-C",
+        "pass": true,
+        "evidence": {
+          "key": "C",
+          "selected": 1,
+          "price": true,
+          "steps": 6,
+          "link": "http://127.0.0.1:8779/index.html?previewPackage=C#/",
+          "query": "C",
+          "focus": true,
+          "visible": true,
+          "overflow": -15,
+          "bad": 0,
+          "demo": "C",
+          "screen": "#/demo/exp-01",
+          "scope": "Giới hạn triển khai\nOCR: giữ giới hạn mẫu của B, thêm kiểm trùng và so khớp phòng–khách–hợp đồng.\nOA: kế thừa một OA; thêm cá nhân hóa theo tòa và xử lý lỗi gửi theo quy tắc.\nBáo cáo: giữ hai mẫu gốc; thêm so sánh tòa/nhóm/kỳ và bản số liệu đã duyệt.\nQuy trình duyệt và quy tắc phân bổ cố định theo danh sách đã chốt.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+          "foundation": "Có OCR và Zalo OA",
+          "baseEnabled": true,
+          "reportTypes": "RPT-04,RPT-05",
+          "upgradeGates": true
+        }
+      },
+      {
+        "id": "SCOPE-1024-C",
+        "pass": true,
+        "evidence": {
+          "limits": "Giới hạn triển khai\nOCR: giữ giới hạn mẫu của B, thêm kiểm trùng và so khớp phòng–khách–hợp đồng.\nOA: kế thừa một OA; thêm cá nhân hóa theo tòa và xử lý lỗi gửi theo quy tắc.\nBáo cáo: giữ hai mẫu gốc; thêm so sánh tòa/nhóm/kỳ và bản số liệu đã duyệt.\nQuy trình duyệt và quy tắc phân bổ cố định theo danh sách đã chốt.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+          "baseEnabled": true,
+          "reportTypes": "RPT-04,RPT-05",
+          "upgradeGates": true
+        }
+      },
+      {
+        "id": "PRICE-1024-D",
+        "pass": true,
+        "evidence": {
+          "key": "D",
+          "selected": 1,
+          "price": true,
+          "steps": 6,
+          "link": "http://127.0.0.1:8779/index.html?previewPackage=D#/",
+          "query": "D",
+          "focus": true,
+          "visible": true,
+          "overflow": -15,
+          "bad": 0,
+          "demo": "D",
+          "screen": "#/demo/reports",
+          "scope": "Giới hạn triển khai\nOCR: thư viện mẫu theo danh mục được duyệt; số mẫu ghi trong báo giá, không nhận mọi định dạng.\nOA: kế thừa một OA; thêm phiên bản mẫu, lịch sử và giám sát gửi lại.\nBáo cáo: giữ hai mẫu gốc; thêm khóa kỳ, phiên bản và đối chiếu lịch sử; không tự thiết kế báo cáo bất kỳ.\nKhóa kỳ, phiên bản và đối soát chỉ áp dụng cho dữ liệu/mẫu đã chốt; chưa kết nối ngân hàng tự động.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+          "foundation": "Có OCR và Zalo OA",
+          "baseEnabled": true,
+          "reportTypes": "RPT-04,RPT-05",
+          "upgradeGates": true
+        }
+      },
+      {
+        "id": "SCOPE-1024-D",
+        "pass": true,
+        "evidence": {
+          "limits": "Giới hạn triển khai\nOCR: thư viện mẫu theo danh mục được duyệt; số mẫu ghi trong báo giá, không nhận mọi định dạng.\nOA: kế thừa một OA; thêm phiên bản mẫu, lịch sử và giám sát gửi lại.\nBáo cáo: giữ hai mẫu gốc; thêm khóa kỳ, phiên bản và đối chiếu lịch sử; không tự thiết kế báo cáo bất kỳ.\nKhóa kỳ, phiên bản và đối soát chỉ áp dụng cho dữ liệu/mẫu đã chốt; chưa kết nối ngân hàng tự động.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+          "baseEnabled": true,
+          "reportTypes": "RPT-04,RPT-05",
+          "upgradeGates": true
+        }
+      },
+      {
+        "id": "COMPARE-1024",
+        "pass": true,
+        "evidence": {
+          "mobile": false,
+          "rows": 8,
+          "localRows": 8,
+          "minTargets": 44
+        }
+      },
+      {
+        "id": "PRICE-1440-A",
+        "pass": true,
+        "evidence": {
+          "key": "A",
+          "selected": 1,
+          "price": true,
+          "steps": 6,
+          "link": "http://127.0.0.1:8779/index.html?previewPackage=A#/",
+          "query": "A",
+          "focus": true,
+          "visible": true,
+          "overflow": -15,
+          "bad": 0,
+          "demo": "A",
+          "screen": "#/demo/inv-02",
+          "scope": "Giới hạn triển khai\nOCR: một mẫu giấy tờ khách và một mẫu hợp đồng đã chọn; sửa và xác nhận từng file.\nOA: một OA, tối đa hai mẫu tin được duyệt; gửi từng hóa đơn và một lịch nhắc cố định.\nBáo cáo: hai mẫu gốc, xem và xuất theo kỳ; không tự thiết kế mẫu mới.\nNhập và xử lý từng hồ sơ/chứng từ; nhập Excel, lập/xác nhận/gửi hàng loạt có từ B.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+          "foundation": "Có OCR và Zalo OA",
+          "baseEnabled": true,
+          "reportTypes": "RPT-04,RPT-05",
+          "upgradeGates": true
+        }
+      },
+      {
+        "id": "SCOPE-1440-A",
+        "pass": true,
+        "evidence": {
+          "limits": "Giới hạn triển khai\nOCR: một mẫu giấy tờ khách và một mẫu hợp đồng đã chọn; sửa và xác nhận từng file.\nOA: một OA, tối đa hai mẫu tin được duyệt; gửi từng hóa đơn và một lịch nhắc cố định.\nBáo cáo: hai mẫu gốc, xem và xuất theo kỳ; không tự thiết kế mẫu mới.\nNhập và xử lý từng hồ sơ/chứng từ; nhập Excel, lập/xác nhận/gửi hàng loạt có từ B.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+          "baseEnabled": true,
+          "reportTypes": "RPT-04,RPT-05",
+          "upgradeGates": true
+        }
+      },
+      {
+        "id": "PRICE-1440-B",
+        "pass": true,
+        "evidence": {
+          "key": "B",
+          "selected": 1,
+          "price": true,
+          "steps": 6,
+          "link": "http://127.0.0.1:8779/index.html?previewPackage=B#/",
+          "query": "B",
+          "focus": true,
+          "visible": true,
+          "overflow": -15,
+          "bad": 0,
+          "demo": "B",
+          "screen": "#/demo/inv-01",
+          "scope": "Giới hạn triển khai\nOCR: tối đa hai mẫu cho mỗi loại giấy tờ/hợp đồng; chưa nhận dạng mẫu tùy ý.\nOA: kế thừa một OA; thêm mẫu hóa đơn/nhắc nợ/hết hạn hợp đồng và ba mốc nhắc.\nBáo cáo: giữ hai mẫu gốc; thêm truy nguồn và xu hướng tối đa sáu kỳ.\nChỉ xử lý hàng loạt trên các tác vụ và mẫu Excel đã thống nhất.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+          "foundation": "Có OCR và Zalo OA",
+          "baseEnabled": true,
+          "reportTypes": "RPT-04,RPT-05",
+          "upgradeGates": true
+        }
+      },
+      {
+        "id": "SCOPE-1440-B",
+        "pass": true,
+        "evidence": {
+          "limits": "Giới hạn triển khai\nOCR: tối đa hai mẫu cho mỗi loại giấy tờ/hợp đồng; chưa nhận dạng mẫu tùy ý.\nOA: kế thừa một OA; thêm mẫu hóa đơn/nhắc nợ/hết hạn hợp đồng và ba mốc nhắc.\nBáo cáo: giữ hai mẫu gốc; thêm truy nguồn và xu hướng tối đa sáu kỳ.\nChỉ xử lý hàng loạt trên các tác vụ và mẫu Excel đã thống nhất.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+          "baseEnabled": true,
+          "reportTypes": "RPT-04,RPT-05",
+          "upgradeGates": true
+        }
+      },
+      {
+        "id": "PRICE-1440-C",
+        "pass": true,
+        "evidence": {
+          "key": "C",
+          "selected": 1,
+          "price": true,
+          "steps": 6,
+          "link": "http://127.0.0.1:8779/index.html?previewPackage=C#/",
+          "query": "C",
+          "focus": true,
+          "visible": true,
+          "overflow": -15,
+          "bad": 0,
+          "demo": "C",
+          "screen": "#/demo/exp-01",
+          "scope": "Giới hạn triển khai\nOCR: giữ giới hạn mẫu của B, thêm kiểm trùng và so khớp phòng–khách–hợp đồng.\nOA: kế thừa một OA; thêm cá nhân hóa theo tòa và xử lý lỗi gửi theo quy tắc.\nBáo cáo: giữ hai mẫu gốc; thêm so sánh tòa/nhóm/kỳ và bản số liệu đã duyệt.\nQuy trình duyệt và quy tắc phân bổ cố định theo danh sách đã chốt.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+          "foundation": "Có OCR và Zalo OA",
+          "baseEnabled": true,
+          "reportTypes": "RPT-04,RPT-05",
+          "upgradeGates": true
+        }
+      },
+      {
+        "id": "SCOPE-1440-C",
+        "pass": true,
+        "evidence": {
+          "limits": "Giới hạn triển khai\nOCR: giữ giới hạn mẫu của B, thêm kiểm trùng và so khớp phòng–khách–hợp đồng.\nOA: kế thừa một OA; thêm cá nhân hóa theo tòa và xử lý lỗi gửi theo quy tắc.\nBáo cáo: giữ hai mẫu gốc; thêm so sánh tòa/nhóm/kỳ và bản số liệu đã duyệt.\nQuy trình duyệt và quy tắc phân bổ cố định theo danh sách đã chốt.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+          "baseEnabled": true,
+          "reportTypes": "RPT-04,RPT-05",
+          "upgradeGates": true
+        }
+      },
+      {
+        "id": "PRICE-1440-D",
+        "pass": true,
+        "evidence": {
+          "key": "D",
+          "selected": 1,
+          "price": true,
+          "steps": 6,
+          "link": "http://127.0.0.1:8779/index.html?previewPackage=D#/",
+          "query": "D",
+          "focus": true,
+          "visible": true,
+          "overflow": -15,
+          "bad": 0,
+          "demo": "D",
+          "screen": "#/demo/reports",
+          "scope": "Giới hạn triển khai\nOCR: thư viện mẫu theo danh mục được duyệt; số mẫu ghi trong báo giá, không nhận mọi định dạng.\nOA: kế thừa một OA; thêm phiên bản mẫu, lịch sử và giám sát gửi lại.\nBáo cáo: giữ hai mẫu gốc; thêm khóa kỳ, phiên bản và đối chiếu lịch sử; không tự thiết kế báo cáo bất kỳ.\nKhóa kỳ, phiên bản và đối soát chỉ áp dụng cho dữ liệu/mẫu đã chốt; chưa kết nối ngân hàng tự động.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+          "foundation": "Có OCR và Zalo OA",
+          "baseEnabled": true,
+          "reportTypes": "RPT-04,RPT-05",
+          "upgradeGates": true
+        }
+      },
+      {
+        "id": "SCOPE-1440-D",
+        "pass": true,
+        "evidence": {
+          "limits": "Giới hạn triển khai\nOCR: thư viện mẫu theo danh mục được duyệt; số mẫu ghi trong báo giá, không nhận mọi định dạng.\nOA: kế thừa một OA; thêm phiên bản mẫu, lịch sử và giám sát gửi lại.\nBáo cáo: giữ hai mẫu gốc; thêm khóa kỳ, phiên bản và đối chiếu lịch sử; không tự thiết kế báo cáo bất kỳ.\nKhóa kỳ, phiên bản và đối soát chỉ áp dụng cho dữ liệu/mẫu đã chốt; chưa kết nối ngân hàng tự động.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+          "baseEnabled": true,
+          "reportTypes": "RPT-04,RPT-05",
+          "upgradeGates": true
+        }
+      },
+      {
+        "id": "COMPARE-1440",
+        "pass": true,
+        "evidence": {
+          "mobile": false,
+          "rows": 8,
+          "localRows": 8,
+          "minTargets": 44
+        }
+      },
+      {
+        "id": "DATA-UNCHANGED",
+        "pass": true,
+        "evidence": "Package selection preserves business data, role, scope and drafts"
+      },
+      {
+        "id": "KEYBOARD-PICK",
+        "pass": true,
+        "evidence": "Enter selects and announces without losing focus"
+      },
+      {
+        "id": "SHARE-CLEAN",
+        "pass": true,
+        "evidence": "http://127.0.0.1:8779/index.html?previewPackage=B#/"
+      },
+      {
+        "id": "SHARE-RESTORE",
+        "pass": true,
+        "evidence": "Shared link restores selected offer"
+      },
+      {
+        "id": "FAQ-REDUCED-MOTION",
+        "pass": true,
+        "evidence": "Native disclosure and section navigation remain usable"
+      },
+      {
+        "id": "CUSTOMER-MATRIX",
+        "pass": true,
+        "evidence": {
+          "columns": 5,
+          "rows": 52
+        }
+      },
+      {
+        "id": "OA-CURRENT-ROLES",
+        "pass": true,
+        "evidence": "OA stops on confirmed payment without waiting for accountant audit"
+      },
+      {
+        "id": "MATRIX-SWITCH",
+        "pass": true,
+        "evidence": "Comparison stays in sync when opened on landing"
+      },
+      {
+        "id": "REVIEW-MATRIX",
+        "pass": true,
+        "evidence": "Detailed review retains identifiers"
+      },
+      {
+        "id": "DRAWER-SCOPE",
+        "pass": true,
+        "evidence": "A"
+      },
+      {
+        "id": "DRAWER-INTRO",
+        "pass": true,
+        "evidence": "Drawer returns to matching offer without changing package"
+      },
+      {
+        "id": "DEMO-ROUTE",
+        "pass": true,
+        "evidence": "Customer CTA opens the selected package and business screen"
+      },
+      {
+        "id": "SMOKE",
+        "pass": true,
+        "evidence": {
+          "total": 1088,
+          "fails": 0
+        }
+      },
+      {
+        "id": "CONSOLE",
+        "pass": true,
+        "evidence": []
+      }
+    ]
+  },
+  "enterprise-components": {
+    "passed": 21,
+    "results": [
+      {
+        "id": "DOM-PAGE-ORDER",
+        "pass": true,
+        "evidence": "Detail navigation, heading, tabs and panel share reading and visual order"
+      },
+      {
+        "id": "TABS-MANUAL-FOCUS",
+        "pass": true,
+        "evidence": "Arrow changes focus without committing a tab"
+      },
+      {
+        "id": "TABS-ACTIVATION",
+        "pass": true,
+        "evidence": "Enter activates one tab"
+      },
+      {
+        "id": "TABS-END-HOME",
+        "pass": true,
+        "evidence": "End focuses last available tab"
+      },
+      {
+        "id": "TABS-UNSAVED-GUARD",
+        "pass": true,
+        "evidence": "Activation keeps the existing save/discard guard"
+      },
+      {
+        "id": "ACTION-BUSINESS-PRIORITY",
+        "pass": true,
+        "evidence": [
+          "dep.approve"
+        ]
+      },
+      {
+        "id": "ACTION-PERMISSION-GATE",
+        "pass": true,
+        "evidence": "Permission denial is separate from package lock"
+      },
+      {
+        "id": "ACTION-DISABLED-REASON",
+        "pass": true,
+        "evidence": "Disabled action retains its reason and priority"
+      },
+      {
+        "id": "MENU-TOP-LAYER",
+        "pass": true,
+        "evidence": {
+          "topLayer": true,
+          "inside": true,
+          "focused": true
+        }
+      },
+      {
+        "id": "MENU-KEYBOARD",
+        "pass": true,
+        "evidence": "End reaches the destructive item"
+      },
+      {
+        "id": "MENU-ESCAPE",
+        "pass": true,
+        "evidence": "Escape restores trigger focus"
+      },
+      {
+        "id": "MODAL-FOCUS-TRAP",
+        "pass": true,
+        "evidence": "Shift+Tab wraps within the dialog"
+      },
+      {
+        "id": "MODAL-RETURN-TO-MENU",
+        "pass": true,
+        "evidence": "Closing a form returns to the menu trigger, not its hidden item"
+      },
+      {
+        "id": "FORM-CONTRACT",
+        "pass": true,
+        "evidence": {
+          "required": true,
+          "invalid": "true",
+          "descriptions": true,
+          "readonly": true,
+          "disabled": true,
+          "links": 2
+        }
+      },
+      {
+        "id": "FORM-ERROR-LINK",
+        "pass": true,
+        "evidence": "Error summary focuses its field"
+      },
+      {
+        "id": "DOCUMENT-INTEGRITY",
+        "pass": true,
+        "evidence": "The display filter never rewrites source documents"
+      },
+      {
+        "id": "ALL-VARIANTS-DIALOGS",
+        "pass": true,
+        "evidence": {
+          "variants": 1744,
+          "dialogs": 432,
+          "failures": []
+        }
+      },
+      {
+        "id": "FINANCIAL-REGRESSION",
+        "pass": true,
+        "evidence": {
+          "schema": 12,
+          "kd09": 23643400,
+          "total09": 14243400,
+          "kd10": 11430000,
+          "total10": 54930000,
+          "invoice": 6069800
+        }
+      },
+      {
+        "id": "ZOOM-REFLOW",
+        "pass": true,
+        "evidence": "720 CSS pixels represents 1440px at 200% zoom"
+      },
+      {
+        "id": "REDUCED-MOTION",
+        "pass": true,
+        "evidence": "Shell motion is disabled or reduced to the existing negligible duration"
+      },
+      {
+        "id": "NO-RUNTIME-ERRORS",
+        "pass": true,
+        "evidence": []
+      }
+    ]
+  },
+  "ui-standard": {
+    "passed": 19,
+    "results": [
+      {
+        "id": "UI-STD-01",
+        "pass": true,
+        "evidence": {
+          "leaks": [],
+          "reviewOn": {
+            "codes": 1,
+            "tier": 7
+          }
+        }
+      },
+      {
+        "id": "UI-STD-02",
+        "pass": true,
+        "evidence": {
+          "primary": "rgb(15, 118, 110)",
+          "btn": "rgb(15, 118, 110)",
+          "link": "rgb(15, 118, 110)",
+          "tab": "rgb(15, 118, 110)"
+        }
+      },
+      {
+        "id": "UI-STD-03 contrast",
+        "pass": true,
+        "evidence": []
+      },
+      {
+        "id": "UI-STD-04 font≥12",
+        "pass": true,
+        "evidence": []
+      },
+      {
+        "id": "UI-STD-05 icon-label",
+        "pass": true,
+        "evidence": []
+      },
+      {
+        "id": "UI-STD-06 header≤3",
+        "pass": true,
+        "evidence": []
+      },
+      {
+        "id": "UI-STD-07 overflow-menu",
+        "pass": true,
+        "evidence": {
+          "menu": {
+            "items": 3,
+            "btn": true
+          },
+          "opened": {
+            "open": true,
+            "focus": true
+          },
+          "closed": true
+        }
+      },
+      {
+        "id": "UI-STD-08 lists",
+        "pass": true,
+        "evidence": []
+      },
+      {
+        "id": "UI-STD-09 field-errors",
+        "pass": true,
+        "evidence": []
+      },
+      {
+        "id": "UI-STD-12 gate-group",
+        "pass": true,
+        "evidence": {
+          "gateBad": [],
+          "upg": true
+        }
+      },
+      {
+        "id": "UI-STD-10 status+detail",
+        "pass": true,
+        "evidence": {
+          "st": {
+            "unpaid": "<span class=\"badge badge-warning\"><span class=\"dot\"></span>Chưa thu</span>",
+            "bill": "<span class=\"badge badge-warning\"><span class=\"dot\"></span>Chưa thanh toán</span>",
+            "rej": "<span class=\"badge badge-danger\"><span class=\"dot\"></span>Từ chối</span>"
+          },
+          "facts": [
+            {
+              "facts": 6,
+              "tabCard": true,
+              "crumbs": 2
+            },
+            {
+              "facts": 5,
+              "tabCard": true,
+              "crumbs": 2
+            },
+            {
+              "facts": 4,
+              "tabCard": true,
+              "crumbs": 2
+            },
+            {
+              "facts": 5,
+              "tabCard": true,
+              "crumbs": 2
+            },
+            {
+              "facts": 4,
+              "tabCard": true,
+              "crumbs": 2
+            }
+          ]
+        }
+      },
+      {
+        "id": "UI-STD-11 no-hscroll",
+        "pass": true,
+        "evidence": []
+      },
+      {
+        "id": "UI-ENT-01 header",
+        "pass": true,
+        "evidence": {
+          "pos": "fixed",
+          "left": 0,
+          "width": 1424.800048828125,
+          "top": 0,
+          "bg": "rgb(17, 94, 89)",
+          "brand": true,
+          "contrastFg": 7.583501565900062,
+          "sbBrandHidden": true
+        }
+      },
+      {
+        "id": "UI-ENT-02 layout+card",
+        "pass": true,
+        "evidence": {
+          "radius": "0px",
+          "shellBg": "rgb(245, 247, 248)",
+          "card": "8px"
+        }
+      },
+      {
+        "id": "UI-ENT-03 sizes",
+        "pass": true,
+        "evidence": {
+          "btn": 32,
+          "input": 32,
+          "title": "20px",
+          "kpi": "24px",
+          "headRow": 40,
+          "tdPad": "6px"
+        }
+      },
+      {
+        "id": "UI-ENT-04 page-header",
+        "pass": true,
+        "evidence": {
+          "order": true,
+          "inv": "Hóa đơn & thu tiền Hóa đơn",
+          "cus": "Khách thuê & hợp đồng Khách thuê"
+        }
+      },
+      {
+        "id": "UI-ENT-05 no-dup-scope",
+        "pass": true,
+        "evidence": []
+      },
+      {
+        "id": "UI-ENT-06 mobile",
+        "pass": true,
+        "evidence": {
+          "mob": {
+            "bg": "rgb(17, 94, 89)",
+            "over": -15
+          },
+          "drw": {
+            "brand": true,
+            "open": true
+          }
+        }
+      },
+      {
+        "id": "SMOKE",
+        "pass": true,
+        "evidence": {
+          "smoke": {
+            "total": 1088,
+            "fails": 0
+          },
+          "errors": []
+        }
+      }
+    ]
+  },
+  "navigation": {
+    "passed": 22,
+    "results": [
+      {
+        "id": "NAV-01",
+        "pass": true,
+        "evidence": {
+          "modules": [
+            "overview",
+            "properties",
+            "tenancies",
+            "utilities",
+            "billing",
+            "expenses",
+            "people",
+            "equity",
+            "reports"
+          ],
+          "names": [
+            "Tổng quan",
+            "Tòa nhà & phòng",
+            "Khách thuê & hợp đồng",
+            "Điện nước & dịch vụ",
+            "Hóa đơn & thu tiền",
+            "Chi phí vận hành",
+            "Nhân sự & tiền lương",
+            "Cổ đông & lợi nhuận",
+            "Báo cáo"
+          ],
+          "tabs": [
+            "Tòa nhà",
+            "Phòng",
+            "Chủ nhà"
+          ],
+          "noTruncatedNames": true,
+          "noScreenCode": true,
+          "title": "Tòa nhà"
+        }
+      },
+      {
+        "id": "NAV-02",
+        "pass": true,
+        "evidence": {
+          "width": 72.3375015258789,
+          "accessible": true,
+          "count": 9,
+          "persistedAfterReload": true
+        }
+      },
+      {
+        "id": "NAV-03-ROOM-02",
+        "pass": true,
+        "evidence": {
+          "group": "properties",
+          "section": "Phòng",
+          "activeCount": 1
+        }
+      },
+      {
+        "id": "NAV-03-OWN-02",
+        "pass": true,
+        "evidence": {
+          "group": "properties",
+          "section": "Chủ nhà",
+          "activeCount": 1
+        }
+      },
+      {
+        "id": "NAV-03-CON-03",
+        "pass": true,
+        "evidence": {
+          "group": "tenancies",
+          "section": "Hợp đồng thuê phòng",
+          "activeCount": 1
+        }
+      },
+      {
+        "id": "NAV-03-INV-01",
+        "pass": true,
+        "evidence": {
+          "group": "billing",
+          "section": "Hóa đơn",
+          "activeCount": 1
+        }
+      },
+      {
+        "id": "NAV-03-INV-03",
+        "pass": true,
+        "evidence": {
+          "group": "billing",
+          "section": "Hóa đơn",
+          "activeCount": 1
+        }
+      },
+      {
+        "id": "NAV-03-PAY-01",
+        "pass": true,
+        "evidence": {
+          "group": "billing",
+          "section": "Thu tiền & công nợ",
+          "activeCount": 1
+        }
+      },
+      {
+        "id": "NAV-03-OA-02",
+        "pass": true,
+        "evidence": {
+          "group": "billing",
+          "section": "Nhắc thanh toán",
+          "activeCount": 1
+        }
+      },
+      {
+        "id": "NAV-03-SAL-01",
+        "pass": true,
+        "evidence": {
+          "group": "people",
+          "section": "Bảng lương",
+          "activeCount": 1
+        }
+      },
+      {
+        "id": "NAV-04-HR",
+        "pass": true,
+        "evidence": [
+          {
+            "id": "people",
+            "allowed": true
+          },
+          {
+            "id": "reports",
+            "allowed": true
+          }
+        ]
+      },
+      {
+        "id": "NAV-04-SEARCH-PERM",
+        "pass": true,
+        "evidence": "Không có kết quả cho “chi phí”."
+      },
+      {
+        "id": "NAV-04-MANAGER",
+        "pass": true,
+        "evidence": {
+          "ids": [
+            "overview",
+            "properties",
+            "tenancies",
+            "utilities",
+            "billing",
+            "expenses",
+            "reports"
+          ],
+          "forbidden": false
+        }
+      },
+      {
+        "id": "NAV-05-STAY",
+        "pass": true,
+        "evidence": {
+          "screen": "OWN-02",
+          "dirty": true
+        }
+      },
+      {
+        "id": "NAV-05-DISCARD",
+        "pass": true,
+        "evidence": "Dữ liệu chủ nhà giữ nguyên sau khi bỏ nháp"
+      },
+      {
+        "id": "NAV-06-ALIAS",
+        "pass": true,
+        "evidence": "Phiếu thu & đối soát\nDanh sách & tác vụ"
+      },
+      {
+        "id": "NAV-07-REPORT-HUB",
+        "pass": true,
+        "evidence": "Mục Báo cáo mở luồng REPORTS hiện có"
+      },
+      {
+        "id": "NAV-07-RETURN",
+        "pass": true,
+        "evidence": {
+          "exists": true,
+          "first": true
+        }
+      },
+      {
+        "id": "NAV-08-DRAWER",
+        "pass": true,
+        "evidence": {
+          "closed": {
+            "inert": true,
+            "overflow": -15
+          },
+          "opened": {
+            "inert": false,
+            "expanded": "true",
+            "focusInNav": true,
+            "scrollLocked": true
+          },
+          "focusTrapped": true,
+          "escClosed": true
+        }
+      },
+      {
+        "id": "NAV-08-NAVIGATE",
+        "pass": true,
+        "evidence": {
+          "overflow": -15,
+          "active": "properties"
+        }
+      },
+      {
+        "id": "NAV-08-LANDING",
+        "pass": true,
+        "evidence": "Về trang giới thiệu không giữ khóa cuộn của drawer"
+      },
+      {
+        "id": "NAV-09-SMOKE",
+        "pass": true,
+        "evidence": {
+          "total": 1088,
+          "fails": []
+        }
+      }
+    ]
+  },
+  "ocr": {
+    "passed": 9,
+    "results": [
+      {
+        "id": "QA-OCR-01",
+        "pass": true,
+        "evidence": {
+          "fields": 38,
+          "groups": 7,
+          "rows": 30,
+          "warn": 9,
+          "disabled": true
+        }
+      },
+      {
+        "id": "QA-OCR-01-all",
+        "pass": true,
+        "evidence": "Đánh dấu tất cả mở khóa nút xác nhận"
+      },
+      {
+        "id": "QA-OCR-02",
+        "pass": true,
+        "evidence": {
+          "lines": "ELEC,WATER,NET,SVC,PARK_MOTO,PARK_EBIKE,PARK_EV",
+          "water": "per_person",
+          "refund": 10,
+          "auto": true,
+          "late": 200000,
+          "assets": 30,
+          "e": 1250,
+          "w": 85,
+          "prepaid": 9000000,
+          "veh": "Xe máy:pending",
+          "idPlace": "Cục Cảnh sát QLHC về TTXH"
+        }
+      },
+      {
+        "id": "QA-OCR-03",
+        "pass": true,
+        "evidence": {
+          "before": {
+            "inv": 4970800,
+            "hist": 0
+          },
+          "q3": {
+            "from": "2026-11",
+            "water": "2x120000",
+            "inv": 4970800,
+            "hist": 1,
+            "job": "contract/update"
+          }
+        }
+      },
+      {
+        "id": "QA-OCR-04",
+        "pass": true,
+        "evidence": {
+          "q4": {
+            "danger": 1,
+            "disabled": true
+          },
+          "q4b": false
+        }
+      },
+      {
+        "id": "QA-OCR-05",
+        "pass": true,
+        "evidence": {
+          "cond": "Trầy xước thành giường",
+          "ded": "Điện nước 01–27/09 (chưa lập hóa đơn)|Chỉ số bà;Thấm trần — chờ xác định lỗi bên nào|Biên bản ;Hư hỏng: Tường|Điều 2.2 "
+        }
+      },
+      {
+        "id": "QA-OCR-06",
+        "pass": true,
+        "evidence": {
+          "transfer": true,
+          "late": true,
+          "debt": 0
+        }
+      },
+      {
+        "id": "QA-OCR-07",
+        "pass": true,
+        "evidence": {
+          "conf": 0,
+          "locked": 5,
+          "enabled": true
+        }
+      },
+      {
+        "id": "SMOKE",
+        "pass": true,
+        "evidence": {
+          "total": 1088,
+          "fails": 0
+        }
+      }
+    ]
+  },
+  "bill": {
+    "passed": 8,
+    "results": [
+      {
+        "id": "QA-BILL-01",
+        "pass": true,
+        "evidence": {
+          "status": "draft",
+          "days": 12,
+          "base": 30,
+          "k": 0.4,
+          "amount": 1520000,
+          "expect": 1520000,
+          "fixedFull": true,
+          "old": true,
+          "rowK": 0.4
+        }
+      },
+      {
+        "id": "QA-BILL-02",
+        "pass": true,
+        "evidence": {
+          "base": 31,
+          "amount": 1471000,
+          "same": true,
+          "back": 1520000
+        }
+      },
+      {
+        "id": "QA-BILL-03",
+        "pass": true,
+        "evidence": {
+          "kind": "new",
+          "list": 4000000,
+          "rent": 3800000,
+          "dep": 4000000,
+          "days": 12,
+          "state": "deposit",
+          "paid": 4000000,
+          "offPaid": 0,
+          "offDep": 0,
+          "offAll": 4000000
+        }
+      },
+      {
+        "id": "QA-BILL-04",
+        "pass": true,
+        "evidence": {
+          "qty": 3,
+          "amount": 14700000,
+          "cover": "2026-09,2026-10,2026-11",
+          "noRent": true,
+          "prepaidTo": "2026-11",
+          "p9": 4900000,
+          "p10": 4900000,
+          "future": 9800000,
+          "ky10": 0,
+          "ky9": 3,
+          "row": 3
+        }
+      },
+      {
+        "id": "QA-BILL-05",
+        "pass": true,
+        "evidence": {
+          "kwh": 126,
+          "amount": 504000,
+          "sum": 504000,
+          "sum2": 504000,
+          "tx102": 3,
+          "before": 112000,
+          "after": 151200,
+          "row11": 151200,
+          "prior": false
+        }
+      },
+      {
+        "id": "QA-BILL-06",
+        "pass": true,
+        "evidence": {
+          "q6": {
+            "s1": "approved",
+            "s2": "pending",
+            "p1": "2026-11",
+            "by": "NV-003"
+          },
+          "q6b": {
+            "blocked": true,
+            "approved": "approved",
+            "draftLine": false,
+            "t0": 2122000,
+            "t1": 2122000,
+            "disc": -120000,
+            "row9": true
+          }
+        }
+      },
+      {
+        "id": "QA-BILL-07",
+        "pass": true,
+        "evidence": {
+          "ui1": {
+            "rules": true,
+            "adj": true,
+            "lek": true,
+            "prepaid": true
+          },
+          "o1": -15,
+          "ui2": {
+            "rows": 1,
+            "tx202": true
+          },
+          "o2": -15,
+          "ui3": {
+            "rows": 5,
+            "input": true
+          }
+        }
+      },
+      {
+        "id": "SMOKE",
+        "pass": true,
+        "evidence": {
+          "total": 1088,
+          "fails": 0
+        }
+      }
+    ]
+  },
+  "pay": {
+    "passed": 12,
+    "results": [
+      {
+        "id": "QA-PAY-01",
+        "pass": true,
+        "evidence": [
+          {
+            "id": "TH-CG",
+            "due": 40852600,
+            "sumDue": 40852600,
+            "paid": 24479200,
+            "sumPaid": 24479200,
+            "m1": true,
+            "m2": true,
+            "m3": true,
+            "after": true,
+            "bd": 0,
+            "bp": 0
+          },
+          {
+            "id": "TH-DD",
+            "due": 28556000,
+            "sumDue": 28556000,
+            "paid": 18473000,
+            "sumPaid": 18473000,
+            "m1": true,
+            "m2": true,
+            "m3": true,
+            "after": true,
+            "bd": 5723400,
+            "bp": 3000000
+          },
+          {
+            "id": "TH-TX",
+            "due": 0,
+            "sumDue": 0,
+            "paid": 4000000,
+            "sumPaid": 4000000,
+            "m1": true,
+            "m2": true,
+            "m3": true,
+            "after": true,
+            "bd": 0,
+            "bp": 0
+          }
+        ]
+      },
+      {
+        "id": "QA-PAY-02",
+        "pass": true,
+        "evidence": {
+          "n": 3,
+          "due": 69408600,
+          "sysDue": 69408600,
+          "paid": 46952200,
+          "sysPaid": 46952200,
+          "after": 19733000
+        }
+      },
+      {
+        "id": "QA-PAY-03",
+        "pass": true,
+        "evidence": {
+          "cg101": "over",
+          "creditOK": true,
+          "expected": "over",
+          "cg302": [
+            "unpaid",
+            true,
+            true
+          ],
+          "dd201": "short",
+          "tx202": "deposit",
+          "tx101": "nobill",
+          "cg401": "empty"
+        }
+      },
+      {
+        "id": "QA-PAY-04",
+        "pass": true,
+        "evidence": {
+          "room": "DD-201",
+          "chase": 581400,
+          "elec": 581400,
+          "paid": 3000000,
+          "masked": true,
+          "dep": "pending_approval",
+          "ledger": 0,
+          "months": 8
+        }
+      },
+      {
+        "id": "QA-PAY-05",
+        "pass": true,
+        "evidence": [
+          "CG-401:PT:true",
+          "DD-302:Đang sửa:true"
+        ]
+      },
+      {
+        "id": "QA-PAY-06",
+        "pass": true,
+        "evidence": {
+          "state": "over",
+          "bal": 100000,
+          "d9": 0,
+          "bal10": 100000,
+          "n": 2,
+          "allConfirmed": true
+        }
+      },
+      {
+        "id": "QA-PAY-07",
+        "pass": true,
+        "evidence": {
+          "ok": true,
+          "status": "confirmed",
+          "by": "NV-003",
+          "ddInScope": false
+        }
+      },
+      {
+        "id": "QA-PAY-08",
+        "pass": true,
+        "evidence": {
+          "noConfirm": true,
+          "audit": "ok",
+          "stmt": "FT26290001",
+          "debtSame": true,
+          "badBlocked": true
+        }
+      },
+      {
+        "id": "QA-PAY-09",
+        "pass": true,
+        "evidence": {
+          "ct": "terminated",
+          "room": "vacant",
+          "list": [
+            "DD-201",
+            "CG-302"
+          ],
+          "loss": "Phá HĐ",
+          "dep": "pending_approval",
+          "tag": true,
+          "cnt": 1
+        }
+      },
+      {
+        "id": "QA-PAY-10",
+        "pass": true,
+        "evidence": {
+          "rows": 12,
+          "total": 10403600,
+          "due": 10403600,
+          "code": true,
+          "ck": true,
+          "acc": true,
+          "refund": true
+        }
+      },
+      {
+        "id": "QA-PAY-11",
+        "pass": true,
+        "evidence": {
+          "q11": {
+            "tabs": 7,
+            "cols": [
+              "Mã tòa",
+              "Quản lý",
+              "DT phải thu",
+              "DT thu được",
+              "Trong đó cọc mới",
+              "DT phá hợp đồng",
+              "Phá hợp đồng thu được",
+              "Tỉ lệ thu",
+              "Tỉ lệ phá hợp đồng",
+              "Lũy kế M5",
+              "Lũy kế M10",
+              "Lũy kế M15",
+              "DT mốc 1 · 100%",
+              "DT mốc 2 · 90%",
+              "DT mốc 3 · 70%",
+              "Tổng 3 mốc"
+            ]
+          },
+          "over": -15
+        }
+      },
+      {
+        "id": "SMOKE",
+        "pass": true,
+        "evidence": {
+          "total": 1088,
+          "fails": 0
+        }
+      }
+    ]
+  },
+  "cus": {
+    "passed": 23,
+    "results": [
+      {
+        "id": "SCHEMA-UPGRADE",
+        "pass": true,
+        "evidence": {
+          "schema": 12,
+          "name": "Phạm Quốc Bảo",
+          "contracts": 20
+        }
+      },
+      {
+        "id": "REGRESSION",
+        "pass": true,
+        "evidence": {
+          "schema": 12,
+          "datasetVersion": "excel-demo-v1",
+          "kd09": 23643400,
+          "total09": 14243400,
+          "kd10": 11430000,
+          "total10": 54930000,
+          "invoice": 6069800,
+          "hs": 0.7226573305363141
+        }
+      },
+      {
+        "id": "QA-CUS-01",
+        "pass": true,
+        "evidence": {
+          "head": "NV-013",
+          "lead": "NV-003",
+          "tx": null
+        }
+      },
+      {
+        "id": "QA-CUS-02",
+        "pass": true,
+        "evidence": [
+          "Sắp hết HĐ",
+          "Chờ bàn giao"
+        ]
+      },
+      {
+        "id": "QA-CUS-03-pending",
+        "pass": true,
+        "evidence": {
+          "state": "pending_approval",
+          "ledger": 0
+        }
+      },
+      {
+        "id": "QA-CUS-03-approved",
+        "pass": true,
+        "evidence": {
+          "state": "approved",
+          "ledger": 0
+        }
+      },
+      {
+        "id": "DEFAULT-TXN",
+        "pass": true,
+        "evidence": "CK-20261020-261001"
+      },
+      {
+        "id": "QA-CUS-04/17",
+        "pass": true,
+        "evidence": {
+          "state": "refunded",
+          "refund": 3990000,
+          "paidBy": "NV-002",
+          "rows": 1,
+          "kd": 11430000,
+          "total": 50940000
+        }
+      },
+      {
+        "id": "QA-CUS-05-seed",
+        "pass": true,
+        "evidence": {
+          "labels": [
+            "Phá HĐ",
+            "Mất cọc"
+          ],
+          "basis": "Điều 4.3 & 7.1 HĐ ký 29/07/2025 (mẫu đầy đủ) — khách đơn phương chấm dứt",
+          "approver": "NV-001"
+        }
+      },
+      {
+        "id": "QA-CUS-05-partial",
+        "pass": true,
+        "evidence": "Giữ 1.000.000; duyệt hoàn 3.000.000 / cọc 4.000.000"
+      },
+      {
+        "id": "QA-CUS-06/08/09",
+        "pass": true,
+        "evidence": {
+          "water": {
+            "type": "water",
+            "name": "Nước (theo người)",
+            "qty": 2,
+            "unit": "người",
+            "price": 120000,
+            "amount": 240000
+          },
+          "sm": 400000,
+          "charging": "na",
+          "effective": "2026-11",
+          "oldInvoicesUnchanged": true
+        }
+      },
+      {
+        "id": "QA-CUS-07",
+        "pass": true,
+        "evidence": {
+          "moto": {
+            "code": "PARK_MOTO",
+            "price": 0,
+            "method": "per_vehicle",
+            "qtySource": "vehicles",
+            "active": true,
+            "from": "2025-05",
+            "basis": "HĐ ký 2025-04-28",
+            "note": "Miễn phí — giữ dòng để lưu quyền sử dụng và số xe đã đăng ký"
+          },
+          "pending": 1,
+          "smQty": 0
+        }
+      },
+      {
+        "id": "VEHICLE-CONFIRM",
+        "pass": true,
+        "evidence": "XE-001-9"
+      },
+      {
+        "id": "VEHICLE-DUPLICATE",
+        "pass": true,
+        "evidence": "Biển số đang hoạt động ở hồ sơ khác bị chặn xác nhận"
+      },
+      {
+        "id": "QA-CUS-10/11/12/13/14",
+        "pass": true,
+        "evidence": {
+          "p302": {
+            "template": "DAYDU",
+            "templateName": "Hợp đồng cho thuê phòng — mẫu đầy đủ 2026",
+            "refundDays": 10,
+            "autoRenew": true,
+            "autoRenewMonths": 12,
+            "noticeDays": 30,
+            "earlyTermination": "forfeit_all",
+            "transferFee": 200000,
+            "lateFeePerDay": 200000,
+            "lateGraceDays": 3,
+            "payNoticeDay": 25,
+            "payWindow": "Từ ngày 25 đến ngày 30 của kỳ trước",
+            "payAccount": "BIDV •••8058",
+            "warrantyDays": 10,
+            "peopleMax": 2,
+            "vehiclesDeclared": 0,
+            "source": "Hop_dong_thue_phong_demo_day_du.pdf — Điều 1.2 (số người/xe), 2.2 (tài sản bàn giao), 3.4 (mặc nhiên gia hạn 12 tháng nếu không báo trước 30 ngày), 4.1 (giá, tiền đã nộp), 4.2 (chỉ số), 4.3 (cọc 1 tháng; hoàn trong 10 ngày; mất cọc khi đơn phương chấm dứt; phí nhượng phòng 200.000), 4.4 (thông báo ngày 25, nộp 25–30, STK, biểu phí, phạt 200.000 đ/ngày tối đa 3 ngày), 5.2.4 (bảo hành 10 ngày), 6.2.11 (báo trước 30 ngày), 7.1 (mất cọc)",
+            "signedAt": "2025-11-13"
+          },
+          "amendment": {
+            "n": 1,
+            "mode": "amendment",
+            "from": "2026-06-01",
+            "to": "2027-05-31",
+            "at": "2026-05-01",
+            "by": "NV-003",
+            "evidence": "Phụ lục gia hạn hai bên ký 2026-05-01",
+            "file": "phu_luc_gia_han_CG-102_2026.pdf"
+          },
+          "previous": "HĐ-CG201/24",
+          "transfer": "transferred",
+          "count": 2,
+          "notice": 30,
+          "alert": 35
+        }
+      },
+      {
+        "id": "VEHICLE-HISTORY/MASK",
+        "pass": true,
+        "evidence": {
+          "duplicate": false,
+          "nullable": true,
+          "masked": true
+        }
+      },
+      {
+        "id": "TENANCY-ROWS",
+        "pass": true,
+        "evidence": "KH-003 có hai dòng HĐ"
+      },
+      {
+        "id": "QA-CUS-16-occupation",
+        "pass": true,
+        "evidence": "Không ghi lịch sử liên hệ khi sửa nghề"
+      },
+      {
+        "id": "QA-CUS-16-contact",
+        "pass": true,
+        "evidence": "Sửa SĐT thêm đúng một lịch sử liên hệ; audit chung được ghi khi lưu"
+      },
+      {
+        "id": "K-06",
+        "pass": true,
+        "evidence": {
+          "count35": 2,
+          "count45": 3
+        }
+      },
+      {
+        "id": "MANAGER-PERMISSIONS",
+        "pass": true,
+        "evidence": "QL tòa mở hồ sơ được; không có thao tác duyệt/thực chi"
+      },
+      {
+        "id": "MANAGER-SCOPE",
+        "pass": true,
+        "evidence": "DD-302 nằm ngoài phạm vi Cầu Giấy"
+      },
+      {
+        "id": "SMOKE",
+        "pass": true,
+        "evidence": {
+          "total": 1088,
+          "fails": [],
+          "counts": {
+            "route": 45,
+            "screenSrs": 39,
+            "screenCr": 3,
+            "popup": 11,
+            "dialog": 27,
+            "tab": 55,
+            "variant": 109,
+            "figma": null
+          }
+        }
+      }
+    ]
+  },
+  "report": {
+    "passed": 11,
+    "results": [
+      {
+        "id": "QA-RPT-01",
+        "pass": true,
+        "evidence": {
+          "btn4": "Xác nhận tạo 2 báo cáo",
+          "items4": 2,
+          "afterCancel": 0,
+          "disabledBeforeAck": true,
+          "q1a": {
+            "runs": [
+              "BC04-202610-CG-v1",
+              "BC04-202610-TX-v1"
+            ],
+            "hash": "#/demo/reports/view/BC04-202610-CG-v1"
+          },
+          "q1b": {
+            "n": 1,
+            "sheets": [
+              "BAO CAO KINH DOANH T10",
+              "BAO CAO TONG T10",
+              "BC DT T10 NHÓM NHÀ 1",
+              "BC DT T10 NHÓM NHÀ 2",
+              "NGUON SO LIEU",
+              "CONG THUC"
+            ],
+            "g1cols": [
+              "TỔNG",
+              "Cầu Giấy"
+            ],
+            "ids": [
+              "TH-CG",
+              "TH-TX"
+            ]
+          }
+        }
+      },
+      {
+        "id": "QA-RPT-02",
+        "pass": true,
+        "evidence": {
+          "q2": {
+            "same": true,
+            "cells": 728,
+            "bad": [],
+            "xlMismatch": 0,
+            "size": 194372,
+            "file": "TIMEHOUSE_RPT-05_ALL_ky_2026-09_v1",
+            "errors": 0
+          },
+          "uiCells": {
+            "expect": 224,
+            "btns": 224,
+            "named": true
+          }
+        }
+      },
+      {
+        "id": "QA-RPT-03",
+        "pass": true,
+        "evidence": {
+          "q3": {
+            "line": 14700000,
+            "cover": "2026-09,2026-10,2026-11",
+            "c9": 4900000,
+            "p10": [
+              "INV-2609-TX301",
+              4900000,
+              "2026-09",
+              14700000,
+              4900000,
+              4900000
+            ]
+          },
+          "q3nav": {
+            "hash": "#/demo/inv-03/INV-2609-TX301",
+            "banner": true,
+            "period": "2026-10"
+          },
+          "q3back": true
+        }
+      },
+      {
+        "id": "QA-RPT-04",
+        "pass": true,
+        "evidence": {
+          "warn": true,
+          "rentDraft": 4900000,
+          "stale": true,
+          "blocked": "stale",
+          "diff": 12,
+          "contrib": 1520000,
+          "raw": 1520000,
+          "days": "12/30",
+          "from": "2026-10-20",
+          "roundTo": 1000,
+          "conf": 1520000,
+          "draftAlt": 1471000,
+          "stale2": true
+        }
+      },
+      {
+        "id": "QA-RPT-05",
+        "pass": true,
+        "evidence": {
+          "n": 2,
+          "room": [
+            "TX-101",
+            "TX-202"
+          ],
+          "kwh": 126,
+          "meter": 504000,
+          "sum": 504000,
+          "base": 9,
+          "units": 2,
+          "e0": 0,
+          "common0": 0
+        }
+      },
+      {
+        "id": "QA-RPT-06",
+        "pass": true,
+        "evidence": {
+          "adj": [
+            [
+              -120000,
+              "Khách về quê 10 ngày đầu tháng — hỗ trợ DV chung",
+              "approved",
+              "NV-005",
+              "2026-10"
+            ]
+          ],
+          "count": 1,
+          "pend": 0,
+          "rent": 8280000,
+          "check": 8280000,
+          "warn": true
+        }
+      },
+      {
+        "id": "QA-RPT-07",
+        "pass": true,
+        "evidence": {
+          "d31": "occupied",
+          "d28": "occupied",
+          "d30": "occupied",
+          "nov1": "vacant",
+          "sep": "vacant",
+          "leap": "occupied",
+          "feb": "occupied",
+          "mar1": "vacant",
+          "dd302sep": "maintenance",
+          "cg401aug": "vacant",
+          "cg401jul": "occupied"
+        }
+      },
+      {
+        "id": "QA-RPT-08",
+        "pass": true,
+        "evidence": {
+          "stale": true,
+          "blocked": "stale",
+          "v1": [
+            1,
+            1700000
+          ],
+          "v2": [
+            "BC04-202609-CG-v2",
+            2,
+            true,
+            true,
+            2700000
+          ],
+          "kept": true,
+          "sameExcel": true,
+          "rules": "d30"
+        }
+      },
+      {
+        "id": "QA-RPT-09",
+        "pass": true,
+        "evidence": {
+          "q9a": {
+            "ok": true,
+            "pkg": "A",
+            "durable": true
+          },
+          "q9b": {
+            "r5": false,
+            "seeRun5": false,
+            "dd": "Tòa ngoài quyền truy cập: TH-DD (403).",
+            "salaryHidden": true,
+            "listRows": 1
+          },
+          "q9c": {
+            "forbidden": true,
+            "r4": false
+          },
+          "q9d": {
+            "runs": 1,
+            "storage": [
+              "local"
+            ]
+          },
+          "q9e": {
+            "ok": true,
+            "durable": false,
+            "storage": "session"
+          }
+        }
+      },
+      {
+        "id": "QA-RPT-10",
+        "pass": true,
+        "evidence": {
+          "q10a": {
+            "type": "RPT-04",
+            "checked": [
+              "TH-DD"
+            ],
+            "runs": 0
+          },
+          "over": {
+            "preview": -15,
+            "view": -15,
+            "list": -15
+          },
+          "errors": []
+        }
+      },
+      {
+        "id": "SMOKE",
+        "pass": true,
+        "evidence": {
+          "total": 1088,
+          "fails": 0
+        }
+      }
+    ]
+  },
+  "dataset": {
+    "passed": 31,
+    "results": [
+      {
+        "id": "DATASET-FRESH",
+        "pass": true,
+        "evidence": {
+          "version": "excel-demo-v1",
+          "schema": 12,
+          "rooms": 18,
+          "reports": 2,
+          "scenarios": 15
+        }
+      },
+      {
+        "id": "DATASET-KEEP-SAVED",
+        "pass": true,
+        "evidence": {
+          "name": "Giữ dữ liệu người dùng",
+          "draft": "Nháp đã lưu"
+        }
+      },
+      {
+        "id": "DATASET-NEW-BROWSER",
+        "pass": true,
+        "evidence": "Fresh storage selects the new seed"
+      },
+      {
+        "id": "DATASET-RESET-GUARD",
+        "pass": true,
+        "evidence": "Cancel preserves the current edit"
+      },
+      {
+        "id": "DATASET-RESET",
+        "pass": true,
+        "evidence": "Reset clears edit state and loads fixed snapshots"
+      },
+      {
+        "id": "DATASET-REVIEW-375",
+        "pass": true,
+        "evidence": {
+          "scenarios": 15
+        }
+      },
+      {
+        "id": "DATASET-DS-02-375",
+        "pass": true,
+        "evidence": {
+          "overflow": 0,
+          "text": true,
+          "inDialog": true
+        }
+      },
+      {
+        "id": "DATASET-DS-08-375",
+        "pass": true,
+        "evidence": {
+          "overflow": 0,
+          "text": true,
+          "inDialog": true
+        }
+      },
+      {
+        "id": "DATASET-DS-09-375",
+        "pass": true,
+        "evidence": {
+          "overflow": 0,
+          "text": true,
+          "inDialog": true
+        }
+      },
+      {
+        "id": "DATASET-DS-13-375",
+        "pass": true,
+        "evidence": {
+          "overflow": 0,
+          "text": true,
+          "inDialog": true
+        }
+      },
+      {
+        "id": "DATASET-REVIEW-768",
+        "pass": true,
+        "evidence": {
+          "scenarios": 15
+        }
+      },
+      {
+        "id": "DATASET-DS-02-768",
+        "pass": true,
+        "evidence": {
+          "overflow": 0,
+          "text": true,
+          "inDialog": true
+        }
+      },
+      {
+        "id": "DATASET-DS-08-768",
+        "pass": true,
+        "evidence": {
+          "overflow": 0,
+          "text": true,
+          "inDialog": true
+        }
+      },
+      {
+        "id": "DATASET-DS-09-768",
+        "pass": true,
+        "evidence": {
+          "overflow": 0,
+          "text": true,
+          "inDialog": true
+        }
+      },
+      {
+        "id": "DATASET-DS-13-768",
+        "pass": true,
+        "evidence": {
+          "overflow": 0,
+          "text": true,
+          "inDialog": true
+        }
+      },
+      {
+        "id": "DATASET-REVIEW-1024",
+        "pass": true,
+        "evidence": {
+          "scenarios": 15
+        }
+      },
+      {
+        "id": "DATASET-DS-02-1024",
+        "pass": true,
+        "evidence": {
+          "overflow": 0,
+          "text": true,
+          "inDialog": true
+        }
+      },
+      {
+        "id": "DATASET-DS-08-1024",
+        "pass": true,
+        "evidence": {
+          "overflow": 0,
+          "text": true,
+          "inDialog": true
+        }
+      },
+      {
+        "id": "DATASET-DS-09-1024",
+        "pass": true,
+        "evidence": {
+          "overflow": 0,
+          "text": true,
+          "inDialog": true
+        }
+      },
+      {
+        "id": "DATASET-DS-13-1024",
+        "pass": true,
+        "evidence": {
+          "overflow": 0,
+          "text": true,
+          "inDialog": true
+        }
+      },
+      {
+        "id": "DATASET-REVIEW-1440",
+        "pass": true,
+        "evidence": {
+          "scenarios": 15
+        }
+      },
+      {
+        "id": "DATASET-DS-02-1440",
+        "pass": true,
+        "evidence": {
+          "overflow": 0,
+          "text": true,
+          "inDialog": true
+        }
+      },
+      {
+        "id": "DATASET-DS-08-1440",
+        "pass": true,
+        "evidence": {
+          "overflow": 0,
+          "text": true,
+          "inDialog": true
+        }
+      },
+      {
+        "id": "DATASET-DS-09-1440",
+        "pass": true,
+        "evidence": {
+          "overflow": 0,
+          "text": true,
+          "inDialog": true
+        }
+      },
+      {
+        "id": "DATASET-DS-13-1440",
+        "pass": true,
+        "evidence": {
+          "overflow": 0,
+          "text": true,
+          "inDialog": true
+        }
+      },
+      {
+        "id": "DATASET-PERMISSIONS",
+        "pass": true,
+        "evidence": "Manager cannot open portfolio evidence"
+      },
+      {
+        "id": "DATASET-SNAPSHOT",
+        "pass": true,
+        "evidence": {
+          "same": true,
+          "old": 33006600,
+          "version": 2,
+          "previous": "BC04-202609-CG-v1",
+          "original": "BC04-202609-CG-v1"
+        }
+      },
+      {
+        "id": "DATASET-EXPORT",
+        "pass": true,
+        "evidence": "Saved report-seed.xlsx through the application export path"
+      },
+      {
+        "id": "DATASET-FORECAST-READONLY",
+        "pass": true,
+        "evidence": {
+          "unchanged": true,
+          "rows": 3,
+          "valid": true
+        }
+      },
+      {
+        "id": "SMOKE",
+        "pass": true,
+        "evidence": {
+          "total": 1088,
+          "fails": []
+        }
+      },
+      {
+        "id": "DATASET-CONSOLE",
+        "pass": true,
+        "evidence": []
+      }
+    ]
+  }
+}

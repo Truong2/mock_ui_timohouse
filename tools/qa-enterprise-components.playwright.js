@@ -32,6 +32,7 @@ async (page) => {
   check('TABS-UNSAVED-GUARD', await page.getByRole('dialog').count() === 1, 'Activation keeps the existing save/discard guard');
   await page.getByRole('button', { name: 'Tiếp tục chỉnh sửa', exact: true }).click();
   await page.locator('[data-act="sec.cancel"]').click();
+  await page.waitForFunction(() => !document.querySelector('.overlay'));
   // Exercise the public contract without calling any business handler.
   const contract = await page.evaluate(() => {
     const holder = document.createElement('div'); holder.id = 'qa-component-fixture'; document.body.appendChild(holder);

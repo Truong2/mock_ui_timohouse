@@ -77,6 +77,7 @@
   TH.act['exp.save'] = function (el) {
     var id = el.dataset.id, form = 'exp-' + id, g = function (k, d) { return TH.store.draft(form, k, d); };
     var e = id === 'new' ? null : TH.db.expenses.find(function (x) { return x.id === id; });
+    if (TH.periodLocked(e ? e.period : TH.store.state.period) || (e && e.status === 'approved') || ['draft', 'pending'].indexOf(el.dataset.st) < 0) return;
     var amount = +String(g('amount', e ? e.amount : '')).replace(/\D/g, ''), desc = (g('desc', e ? e.description : '') || '').trim();
     var errs = {}; if (!desc) errs.desc = 'Nhập mô tả khoản chi.'; if (!amount) errs.amount = 'Nhập giá trị lớn hơn 0.';
     if (!TH.formErrors(form, errs)) { TH.modal.rerenderAll(); return; }
@@ -89,6 +90,7 @@
   TH.act['exp.submit'] = function (el) { var e = TH.db.expenses.find(function (x) { return x.id === el.dataset.id; }); e.status = 'pending'; TH.log('Gửi duyệt chi phí', e.id, '', 'expense', e.buildingId); TH.app.refresh(); TH.toast('Đã gửi duyệt', esc(e.id)); };
   TH.act['exp.approve'] = function (el) {
     var e = TH.db.expenses.find(function (x) { return x.id === el.dataset.id; });
+    if (!e || e.status !== 'pending' || TH.periodLocked(e.period) || !TH.inScope(e.buildingId)) return;
     var d = dupOf(e);
     var go = function () { e.status = 'approved'; e.approvedBy = TH.me().id; e.approvedAt = TH.TODAY; if (e.category === 'owner_rent') e.paid = false; TH.log('Duyệt chi phí', e.id, e.description + ' · ' + F.money(e.amount), 'expense', e.buildingId); TH.app.refresh(); TH.toast('Đã duyệt chi phí', esc(e.id) + ' · báo cáo đã cập nhật'); };
     if (d.length && TH.has('F035.C')) TH.confirm({ title: 'Chứng từ nghi trùng', body: '<p>' + esc(e.docNo) + ' trùng với ' + d.map(function (x) { return x.id; }).join(', ') + '. Vẫn duyệt?</p>', ok: 'Vẫn duyệt', danger: true }).then(function (ok) { if (ok) go(); });

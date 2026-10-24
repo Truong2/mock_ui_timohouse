@@ -7,7 +7,7 @@ async (page) => {
   page.on('pageerror', e => errors.push(e.message));
   await page.goto('http://127.0.0.1:8779/index.html?previewPackage=D&pricingQa=' + Date.now() + '#/');
   await page.waitForFunction(() => window.TH && TH.pricing && TH.db);
-  await page.evaluate(() => { TH.store.state.reviewMode = false; document.body.classList.remove('is-review'); });
+  await page.evaluate(() => { TH.store.state.reviewMode = false; TH.store.state.ui.CMP = {q:'',mod:'ALL',only:'all'}; document.body.classList.remove('is-review'); });
   const baseline = await page.evaluate(() => JSON.stringify({ db: TH.db, role: TH.store.state.role, drafts: TH.store.state.drafts, building: TH.store.state.building }));
   for (const width of [375, 768, 1024, 1440]) {
     await page.setViewportSize({ width, height: 1000 });
@@ -57,7 +57,7 @@ async (page) => {
   await page.evaluate(() => TH.act['pkg.compare']());
   let matrix = await page.evaluate(() => ({ columns: document.querySelectorAll('.cmp-table thead th').length, rows: document.querySelectorAll('.cmp-table tbody tr:not(.is-module)').length, text: TH.modal.top().el.innerText }));
   check('CUSTOMER-MATRIX', matrix.columns === 5 && matrix.rows === 52 && !/F0\d\d|UI-ID|QA-B01|UX PROPOSED/.test(matrix.text), { columns: matrix.columns, rows: matrix.rows });
-  check('OA-CURRENT-ROLES', !matrix.text.includes('sau kế toán xác nhận') && matrix.text.includes('dừng nhắc khoản đã xác nhận thu đủ'), 'OA stops on confirmed payment without waiting for accountant audit');
+  check('OA-CURRENT-ROLES', !matrix.text.includes('sau kế toán xác nhận') && matrix.text.includes('không gửi lặp hoặc nhắc khoản đã thu đủ'), 'OA stops on confirmed payment without waiting for accountant audit');
   await page.locator('[data-act="pkg.seg"][data-pkg="C"]').click();
   await page.waitForFunction(() => TH.store.state.pkg === 'C' && TH.modal.top().el.querySelector('[data-act="pkg.seg"][data-pkg="C"]').getAttribute('aria-pressed') === 'true');
   check('MATRIX-SWITCH', await page.evaluate(() => TH.modal.top().el.innerText.includes('80–90')), 'Comparison stays in sync when opened on landing');

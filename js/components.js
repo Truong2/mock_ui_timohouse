@@ -921,17 +921,24 @@ var TH = window.TH = window.TH || {};
     closeMenus(open ? wrap : null);
     pop.hidden = !open; el.setAttribute('aria-expanded', String(open));
     if (open) {
+      pop._pageScroll = [window.scrollX, window.scrollY];
       // The top layer keeps a table or card's overflow from clipping its menu.
       if (pop.showPopover) pop.showPopover();
       var r = el.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
       pop.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.right - w)) + 'px';
       pop.style.top = Math.max(8, Math.min(innerHeight - h - 8, r.bottom + 4)) + 'px';
-      var first = pop.querySelector('button.menu-item:not([disabled]):not([aria-disabled="true"]),a.menu-item[href]'); if (first) first.focus();
+      var first = pop.querySelector('button.menu-item:not([disabled]):not([aria-disabled="true"]),a.menu-item[href]'); if (first) first.focus({ preventScroll: true });
     }
   };
   TH.act['field.focus'] = function (el) { var field = document.getElementById(el.dataset.target); if (field) field.focus(); };
   window.addEventListener('resize', function () { closeMenus(null); });
-  document.addEventListener('scroll', function (e) { if (!e.target.closest || !e.target.closest('.action-pop')) closeMenus(null); }, true);
+  document.addEventListener('scroll', function (e) {
+    if (e.target.closest && e.target.closest('.action-pop')) return;
+    var open = document.querySelector('.action-pop:not([hidden])');
+    // A click may queue a scroll event before opening the menu. Only close for a new scroll.
+    if (e.target === document && open && open._pageScroll && open._pageScroll[0] === window.scrollX && open._pageScroll[1] === window.scrollY) return;
+    closeMenus(null);
+  }, true);
   document.addEventListener('click', function (e) {
     var t = e.target.closest ? e.target.closest('.action-menu') : null;
     if (!t) closeMenus(null);
@@ -949,7 +956,7 @@ var TH = window.TH = window.TH || {};
     } else if (pop && ['ArrowDown', 'ArrowUp', 'Home', 'End'].indexOf(e.key) > -1) {
       var list = Array.prototype.slice.call(pop.querySelectorAll('button.menu-item:not([disabled]):not([aria-disabled="true"]),a.menu-item[href]')), i = list.indexOf(document.activeElement);
       var index = e.key === 'Home' ? 0 : e.key === 'End' ? list.length - 1 : (i + (e.key === 'ArrowDown' ? 1 : list.length - 1)) % list.length;
-      if (list[index]) { list[index].focus(); e.preventDefault(); }
+      if (list[index]) { list[index].focus({ preventScroll: true }); e.preventDefault(); }
     } else if (pop && e.key === 'Tab') {
       var trigger = pop.parentNode.querySelector('[data-act="amenu.toggle"]'); closeMenus(null); if (trigger) trigger.focus();
     } else if (e.target.matches('[role="tab"]') && ['ArrowRight', 'ArrowLeft', 'Home', 'End'].indexOf(e.key) > -1) {

@@ -231,6 +231,7 @@ var TH = window.TH = window.TH || {};
   }
 
   /* ---------------- Built-in actions ---------------- */
+  app.openUpgrade = openUpgrade;
   var A = TH.act;
   A['ui.set'] = function (el) {
     var apply = function () {
@@ -501,6 +502,7 @@ var TH = window.TH = window.TH || {};
 
   /* ---------------- Boot ---------------- */
   function boot() {
+    TH.packagePolicy.install();
     TH.store.init();
     app.render();
     if (TH.store.state.invalidQuery) TH.toast('Gói không hợp lệ: “' + TH.store.state.invalidQuery + '”', 'Đã dùng ' + TH.PACKAGES[TH.store.state.pkg].name + ' theo thứ tự ưu tiên (lựa chọn đã lưu → D).', 'warning');

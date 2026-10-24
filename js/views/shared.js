@@ -8,6 +8,8 @@
             inc:{ preview, upsert, history }, commit(rows, policy) → n, backHref }
      ========================================================= */
   TH.importFlow = function (cfg) {
+    if (TH._rec) [cfg.inc.preview, cfg.inc.upsert, cfg.inc.history].forEach(function (inc) { TH._rec(inc); });
+    if (!TH.has(cfg.inc.preview)) return { title: 'Nhập Excel · ' + TH.screen(cfg.screen).title, body: '<p>Gói A nhập từng hồ sơ qua biểu mẫu. Nhập Excel và xem trước danh sách có từ gói B.</p>' + TH.gate(cfg.inc.preview, '', { mode: 'btn', label: 'Nhập Excel và xem trước' }), foot: '<button type="button" class="btn" data-close>Đóng</button>' };
     var S = cfg.screen, step = TH.store.ui(S, 'step', 'upload');
     var rows = cfg.sample();
     var policy = TH.store.ui(S, 'policy', 'skip');

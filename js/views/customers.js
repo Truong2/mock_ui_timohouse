@@ -115,6 +115,7 @@
   TH.act['cus.add'] = function () { TH.modal.open({ key: 'cus-form', size: 'md', render: cusForm }); };
   TH.act['cus.save'] = function () {
     var g = function (k, d) { return TH.store.draft('cus-new', k, d); };
+    if (!TH.formErrors('cus-new', String(g('name', '')).trim() ? {} : {name:'Nhập họ tên khách.'})) { TH.modal.rerenderAll(); return; }
     var id = 'KH-' + String(TH.db.customers.length + 1).padStart(3, '0'), idNo = String(g('idNo', '')).replace(/\D/g, '');
     TH.db.customers.push({ id: id, name: g('name', ''), dob: g('dob', ''), phone: g('phone', '') || '—', idNo: idNo ? idNo.slice(0, 4) + '•••••' + idNo.slice(-3) : '—', idType: 'CCCD', hometown: g('hometown', '') || '—', occupation: g('occupation', ''), permAddress: '', note: '', vehicles: [], oaLinked: false, oaConsentAt: null, status: 'active', createdAt: TH.TODAY });
     TH.log('Thêm khách', id, g('name', ''), 'customer'); TH.store.clearDraft('cus-new'); TH.modal.close('cus-form', { silent: true }); TH.app.refresh(); TH.toast('Đã thêm khách', esc(id));

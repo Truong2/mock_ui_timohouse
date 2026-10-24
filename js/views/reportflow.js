@@ -228,6 +228,8 @@
   /* ---------- API ---------- */
   function validate(req) {
     if (!req || !TYPES[req.type]) return 'Chọn loại báo cáo.';
+    if (req.previousRunId && !TH.has('F045.D')) return 'Tạo phiên bản báo cáo có từ gói D.';
+    if (req.type === 'RPT-05' && req.tpl && req.tpl !== 'MAU-BCKD' && !TH.has('F046.D')) return 'Chọn phiên bản mẫu báo cáo có từ gói D.';
     if (!canType(req.type)) return 'Vai trò hiện tại không được tạo ' + req.type + ' (403).';
     if (TH.PERIODS.indexOf(req.period) === -1) return 'Kỳ báo cáo không hợp lệ.';
     if (!req.buildingIds || !req.buildingIds.length) return 'Chọn ít nhất một tòa.';
@@ -424,6 +426,7 @@
     r = Object.assign({ type: types[0] || 'RPT-04', period: TH.store.state.period, buildingIds: TH.scope() !== 'ALL' ? [TH.scope()] : allow.slice(), tpl: 'MAU-BCKD', previousRunId: null }, r || {});
     if (types.indexOf(r.type) === -1) r.type = types[0];
     r.buildingIds = (r.buildingIds || []).filter(function (b) { return allow.indexOf(b) > -1; });
+    if (!TH.has('F046.D')) { r.tpl = 'MAU-BCKD'; r.previousRunId = null; }
     return r;
   }
   function setReq(patch) { TH.store.setUi(S, 'req', Object.assign(req(), patch)); }
@@ -495,6 +498,7 @@
 
   /* Bảng sheet (preview / bản lưu) — mỗi ô số là nút mở “Nguồn và cách tính” */
   function cellBtn(where, id, item, mode, col, metric, html, aria) {
+    if (!TH.has('F045.B')) return html;
     return '<button type="button" class="rptf-cell" data-act="rptf.trace" data-where="' + where + '" data-id="' + esc(id) + '" data-item="' + item + '" data-mode="' + mode + '" data-col="' + esc(col) + '" data-m="' + esc(metric) + '" aria-label="Nguồn và cách tính: ' + esc(aria) + '">' + html + '</button>';
   }
   function fmtVal(l, x) {
@@ -590,9 +594,9 @@
     if (!r) return TH.pageHeader({ screen: S, title: 'Bản báo cáo', crumbs: [['Báo cáo theo mẫu Excel', TH.router.href(S)], [id]] }) + '<div class="card">' + TH.state('empty', { title: 'Không tìm thấy bản báo cáo ' + esc(id) }) + '</div>';
     if (!canSee(r)) return forbidden('Bản báo cáo thuộc tòa/loại ngoài quyền của vai trò hiện tại.');
     var group = (TH.db.reportRuns || []).filter(function (x) { return x.groupKey === r.groupKey; }).sort(function (a, b) { return b.version - a.version; });
-    var meta = TH.kv([['Mã', '<span class="mono">' + esc(r.id) + '</span>'], ['Loại', typeBadge(r.type) + ' ' + esc(TYPES[r.type].label)], ['Kỳ', F.period(r.period)], ['Phạm vi', esc(scopeLabel(r.buildingIds))], ['Phiên bản', 'v' + r.version + (r.prevId ? ' · bản trước <a href="' + href('view/' + r.prevId) + '">' + esc(r.prevId) + '</a>' : '') + (r.fromRunId && r.fromRunId !== r.prevId ? ' · tạo từ ' + esc(r.fromRunId) : '')],
+    var meta = TH.kv([['Mã', '<span class="mono">' + esc(r.id) + '</span>'], ['Loại', typeBadge(r.type) + ' ' + esc(TYPES[r.type].label)], ['Kỳ', F.period(r.period)], ['Phạm vi', esc(scopeLabel(r.buildingIds))], [TH.has('F045.D') ? 'Phiên bản' : 'Bản lưu', TH.has('F045.D') ? 'v' + r.version + (r.prevId ? ' · bản trước <a href="' + href('view/' + r.prevId) + '">' + esc(r.prevId) + '</a>' : '') + (r.fromRunId && r.fromRunId !== r.prevId ? ' · tạo từ ' + esc(r.fromRunId) : '') : 'Số liệu tại thời điểm tạo'],
       ['Người / lúc tạo', esc(C.staffName(r.createdBy)) + ' · ' + esc(r.createdAt)], ['Mẫu · bộ tính', esc(r.template) + ' · ' + esc(r.engine) + ' · schema ' + r.schema], ['Lưu trữ', r.storage === 'session' ? '<span class="warn-text">Chỉ trong phiên — trình duyệt chặn/đầy bộ nhớ</span>' : 'Trình duyệt (localStorage demo)']]);
-    var versions = group.length > 1 ? '<div class="card">' + TH.cardHd(I('history', 'ic-sm') + 'Các phiên bản cùng nhóm', group.length + ' bản') + '<div class="card-bd"><ul class="timeline">' + group.map(function (x) { return '<li>' + (x.id === r.id ? '<b>' + esc(x.id) + '</b> (đang xem)' : '<a href="' + href('view/' + x.id) + '">' + esc(x.id) + '</a>') + '<div class="when">' + esc(C.staffName(x.createdBy)) + ' · ' + esc(x.createdAt) + '</div></li>'; }).join('') + '</ul></div></div>' : '';
+    var versions = TH.has('F045.D') && group.length > 1 ? '<div class="card">' + TH.cardHd(I('history', 'ic-sm') + 'Các phiên bản cùng nhóm', group.length + ' bản') + '<div class="card-bd"><ul class="timeline">' + group.map(function (x) { return '<li>' + (x.id === r.id ? '<b>' + esc(x.id) + '</b> (đang xem)' : '<a href="' + href('view/' + x.id) + '">' + esc(x.id) + '</a>') + '<div class="when">' + esc(C.staffName(x.createdBy)) + ' · ' + esc(x.createdAt) + '</div></li>'; }).join('') + '</ul></div></div>' : '';
     return TH.pageHeader({ screen: S, title: r.id, crumbs: [['Báo cáo theo mẫu Excel', TH.router.href(S)], [r.id]], status: TH.badge('Bản lưu · chỉ đọc', 'success', { icon: 'lock' }),
       desc: 'Số liệu và nguồn hiển thị <b>tại thời điểm tạo báo cáo</b>; xem lại/tải Excel không tính lại theo dữ liệu hiện tại. Mở bản ghi sống ghi rõ “Mở dữ liệu hiện tại”.',
       actions: '<button type="button" class="btn" data-act="rptf.xlsx" data-id="' + r.id + '">' + I('download', 'ic-sm') + 'Tải Excel</button><button type="button" class="btn btn-primary" data-act="rptf.version" data-id="' + r.id + '">' + I('refresh', 'ic-sm') + 'Tạo phiên bản mới</button>' }) +

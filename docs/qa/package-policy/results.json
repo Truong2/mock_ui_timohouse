@@ -1,0 +1,468 @@
+{
+  "date": "2026-10-24",
+  "passed": 55,
+  "results": [
+    {
+      "id": "POLICY",
+      "pass": true,
+      "evidence": "Registry, schema and prices retained"
+    },
+    {
+      "id": "ARITHMETIC-A",
+      "pass": true,
+      "evidence": "18 building-period results, payroll and two report types match across packages"
+    },
+    {
+      "id": "DIRECT-GUARDS-A",
+      "pass": true,
+      "evidence": {
+        "unchanged": true,
+        "names": [
+          "imp.open",
+          "imp.pick",
+          "imp.commit",
+          "imp.template",
+          "imp.errfile",
+          "imp.rollback",
+          "mtr.saveAll",
+          "mtr.approve",
+          "mtr.preview",
+          "mtr.price",
+          "mtr.swap",
+          "mtr.swapSave",
+          "inv.multi",
+          "inv.meters",
+          "inv.sel",
+          "inv.bulkPdf",
+          "inv.bulkSend",
+          "inv.cancel",
+          "inv.adjust",
+          "bill.rule",
+          "exp.import",
+          "exp.reverse",
+          "hr.import",
+          "sal.import",
+          "shr.import",
+          "lpay.gen",
+          "sal.preview",
+          "sal.lock",
+          "shr.payout",
+          "con.addendum",
+          "con.addendum.save",
+          "rpt.drill",
+          "rpt4.drill",
+          "rpt.approve",
+          "rpt.lock",
+          "rpt4.poolSave",
+          "rptf.trace",
+          "rptf.tdrill",
+          "rptf.tback",
+          "rptf.open",
+          "rptf.version",
+          "rptf.tpl",
+          "oa.retry",
+          "pay.sel",
+          "pay.batch",
+          "pay.adjust",
+          "rpt3.preview",
+          "rpt4.pool",
+          "lpay.pay",
+          "lpay.paySave",
+          "bld.assign",
+          "bld.assignSave",
+          "asg.end",
+          "own.link",
+          "own.link.save",
+          "bdoc.upload",
+          "bdoc.save"
+        ]
+      }
+    },
+    {
+      "id": "ARITHMETIC-B",
+      "pass": true,
+      "evidence": "18 building-period results, payroll and two report types match across packages"
+    },
+    {
+      "id": "DIRECT-GUARDS-B",
+      "pass": true,
+      "evidence": {
+        "unchanged": true,
+        "names": [
+          "imp.rollback",
+          "mtr.approve",
+          "mtr.swap",
+          "mtr.swapSave",
+          "inv.cancel",
+          "inv.adjust",
+          "exp.reverse",
+          "sal.lock",
+          "shr.payout",
+          "con.addendum",
+          "con.addendum.save",
+          "rpt.approve",
+          "rpt.lock",
+          "rpt4.poolSave",
+          "rptf.version",
+          "rptf.tpl",
+          "oa.retry",
+          "pay.adjust",
+          "rpt4.pool",
+          "lpay.pay",
+          "lpay.paySave",
+          "asg.end"
+        ]
+      }
+    },
+    {
+      "id": "ARITHMETIC-C",
+      "pass": true,
+      "evidence": "18 building-period results, payroll and two report types match across packages"
+    },
+    {
+      "id": "DIRECT-GUARDS-C",
+      "pass": true,
+      "evidence": {
+        "unchanged": true,
+        "names": [
+          "imp.rollback",
+          "inv.adjust",
+          "exp.reverse",
+          "shr.payout",
+          "rpt.lock",
+          "rptf.version",
+          "rptf.tpl"
+        ]
+      }
+    },
+    {
+      "id": "ARITHMETIC-D",
+      "pass": true,
+      "evidence": "18 building-period results, payroll and two report types match across packages"
+    },
+    {
+      "id": "DIRECT-GUARDS-D",
+      "pass": true,
+      "evidence": {
+        "unchanged": true,
+        "names": []
+      }
+    },
+    {
+      "id": "IMPORT-DEEP-LINK-A",
+      "pass": true,
+      "evidence": "Import route shows package lock and manual alternative"
+    },
+    {
+      "id": "A-INVOICE-REQUIRES-ROOM",
+      "pass": true,
+      "evidence": "No silent all-room fallback"
+    },
+    {
+      "id": "A-PROFILE-CONTRACT-FLOW",
+      "pass": true,
+      "evidence": {
+        "owner": true,
+        "building": true,
+        "room": true,
+        "contract": true
+      }
+    },
+    {
+      "id": "A-INVOICE-SINGLE-IDEMPOTENT",
+      "pass": true,
+      "evidence": {
+        "added": [
+          "TX-101"
+        ],
+        "room": "TX-101",
+        "unique": true
+      }
+    },
+    {
+      "id": "A-CONFIRM-SINGLE",
+      "pass": true,
+      "evidence": [
+        "confirmed",
+        "draft"
+      ]
+    },
+    {
+      "id": "B-INVOICE-BATCH",
+      "pass": true,
+      "evidence": "One operation creates multiple room invoices"
+    },
+    {
+      "id": "DOWNGRADE-CONFIRM-GUARD",
+      "pass": true,
+      "evidence": "D confirmation cannot lock a period after downgrade"
+    },
+    {
+      "id": "SHARE-100-A",
+      "pass": true,
+      "evidence": "Invalid allocation is rejected at every tier"
+    },
+    {
+      "id": "SHARE-100-B",
+      "pass": true,
+      "evidence": "Invalid allocation is rejected at every tier"
+    },
+    {
+      "id": "SHARE-100-C",
+      "pass": true,
+      "evidence": "Invalid allocation is rejected at every tier"
+    },
+    {
+      "id": "SHARE-100-D",
+      "pass": true,
+      "evidence": "Invalid allocation is rejected at every tier"
+    },
+    {
+      "id": "OA-SAFETY-A",
+      "pass": true,
+      "evidence": {
+        "sent": "sent",
+        "unique": true,
+        "again": "Đã gửi hôm nay — chống trùng",
+        "reminder": "Đã thu đủ — không nhắc"
+      }
+    },
+    {
+      "id": "OA-SAFETY-B",
+      "pass": true,
+      "evidence": {
+        "sent": "sent",
+        "unique": true,
+        "again": "Đã gửi hôm nay — chống trùng",
+        "reminder": "Đã thu đủ — không nhắc"
+      }
+    },
+    {
+      "id": "OA-SAFETY-C",
+      "pass": true,
+      "evidence": {
+        "sent": "sent",
+        "unique": true,
+        "again": "Đã gửi hôm nay — chống trùng",
+        "reminder": "Đã thu đủ — không nhắc"
+      }
+    },
+    {
+      "id": "OA-SAFETY-D",
+      "pass": true,
+      "evidence": {
+        "sent": "sent",
+        "unique": true,
+        "again": "Đã gửi hôm nay — chống trùng",
+        "reminder": "Đã thu đủ — không nhắc"
+      }
+    },
+    {
+      "id": "A-OA-STALE-MULTI",
+      "pass": true,
+      "evidence": "Saved multi-selection cannot send from A"
+    },
+    {
+      "id": "A-OA-SINGLE",
+      "pass": true,
+      "evidence": "A retains functional OCR/OA baseline"
+    },
+    {
+      "id": "REPORT-VERSION-DIRECT-GUARD",
+      "pass": true,
+      "evidence": "Direct report API cannot create an advanced version from A"
+    },
+    {
+      "id": "REPORT-SAVE-A",
+      "pass": true,
+      "evidence": [
+        {
+          "type": "RPT-04",
+          "ok": true,
+          "match": true
+        },
+        {
+          "type": "RPT-05",
+          "ok": true,
+          "match": true
+        }
+      ]
+    },
+    {
+      "id": "REPORT-SAVE-B",
+      "pass": true,
+      "evidence": [
+        {
+          "type": "RPT-04",
+          "ok": true,
+          "match": true
+        },
+        {
+          "type": "RPT-05",
+          "ok": true,
+          "match": true
+        }
+      ]
+    },
+    {
+      "id": "REPORT-SAVE-C",
+      "pass": true,
+      "evidence": [
+        {
+          "type": "RPT-04",
+          "ok": true,
+          "match": true
+        },
+        {
+          "type": "RPT-05",
+          "ok": true,
+          "match": true
+        }
+      ]
+    },
+    {
+      "id": "REPORT-SAVE-D",
+      "pass": true,
+      "evidence": [
+        {
+          "type": "RPT-04",
+          "ok": true,
+          "match": true
+        },
+        {
+          "type": "RPT-05",
+          "ok": true,
+          "match": true
+        }
+      ]
+    },
+    {
+      "id": "A-FIRST-READING",
+      "pass": true,
+      "evidence": "First-month entry is available without a seeded reading"
+    },
+    {
+      "id": "A-METER-VALIDATION",
+      "pass": true,
+      "evidence": "Invalid readings do not require an advanced package to be rejected"
+    },
+    {
+      "id": "A-CONTRACT-OVERLAP",
+      "pass": true,
+      "evidence": "Overlapping tenancy is rejected before any customer/contract mutation"
+    },
+    {
+      "id": "A-RECEIPT-ONE-CREDIT-IDEMPOTENT",
+      "pass": true,
+      "evidence": {
+        "one": true,
+        "noDuplicate": true,
+        "credit": true
+      }
+    },
+    {
+      "id": "A-SALARY-SINGLE",
+      "pass": true,
+      "evidence": "Saving one employee leaves other employee drafts untouched"
+    },
+    {
+      "id": "ROLE-INDEPENDENT",
+      "pass": true,
+      "evidence": "A higher tier never grants a role permission"
+    },
+    {
+      "id": "SMOKE-MAPPING",
+      "pass": true,
+      "evidence": {
+        "total": 1088,
+        "fails": [],
+        "missing": []
+      }
+    },
+    {
+      "id": "LAYOUT-375-A",
+      "pass": true,
+      "evidence": "Pricing page fits viewport and selected package"
+    },
+    {
+      "id": "LAYOUT-375-B",
+      "pass": true,
+      "evidence": "Pricing page fits viewport and selected package"
+    },
+    {
+      "id": "LAYOUT-375-C",
+      "pass": true,
+      "evidence": "Pricing page fits viewport and selected package"
+    },
+    {
+      "id": "LAYOUT-375-D",
+      "pass": true,
+      "evidence": "Pricing page fits viewport and selected package"
+    },
+    {
+      "id": "LAYOUT-768-A",
+      "pass": true,
+      "evidence": "Pricing page fits viewport and selected package"
+    },
+    {
+      "id": "LAYOUT-768-B",
+      "pass": true,
+      "evidence": "Pricing page fits viewport and selected package"
+    },
+    {
+      "id": "LAYOUT-768-C",
+      "pass": true,
+      "evidence": "Pricing page fits viewport and selected package"
+    },
+    {
+      "id": "LAYOUT-768-D",
+      "pass": true,
+      "evidence": "Pricing page fits viewport and selected package"
+    },
+    {
+      "id": "LAYOUT-1024-A",
+      "pass": true,
+      "evidence": "Pricing page fits viewport and selected package"
+    },
+    {
+      "id": "LAYOUT-1024-B",
+      "pass": true,
+      "evidence": "Pricing page fits viewport and selected package"
+    },
+    {
+      "id": "LAYOUT-1024-C",
+      "pass": true,
+      "evidence": "Pricing page fits viewport and selected package"
+    },
+    {
+      "id": "LAYOUT-1024-D",
+      "pass": true,
+      "evidence": "Pricing page fits viewport and selected package"
+    },
+    {
+      "id": "LAYOUT-1440-A",
+      "pass": true,
+      "evidence": "Pricing page fits viewport and selected package"
+    },
+    {
+      "id": "LAYOUT-1440-B",
+      "pass": true,
+      "evidence": "Pricing page fits viewport and selected package"
+    },
+    {
+      "id": "LAYOUT-1440-C",
+      "pass": true,
+      "evidence": "Pricing page fits viewport and selected package"
+    },
+    {
+      "id": "LAYOUT-1440-D",
+      "pass": true,
+      "evidence": "Pricing page fits viewport and selected package"
+    },
+    {
+      "id": "CONSOLE",
+      "pass": true,
+      "evidence": []
+    }
+  ]
+}

@@ -24,8 +24,8 @@
       var al = C.allocation(bId, p), base = al.base;
       var dirty = list.some(function (s) { return s.dirty; });
       var valid = Math.abs(sum - 100) < 0.001;
-      var checkOn = TH.has('F042.C');
-      var editable = TH.can('share.edit');
+      var checkOn = true;
+      var editable = TH.can('share.edit') && !TH.periodLocked(p);
       TH.app.guard = dirty ? { tier: 'A', dirty: false, label: 'Điều chỉnh tỷ lệ' } : null;
       var table = TH.table({
         label: 'Bảng cổ phần ' + b.name,
@@ -39,13 +39,13 @@
         rows: list,
         foot: { _label: '<b>Tổng</b>', r: '<b class="' + (valid ? '' : 'neg') + '">' + Math.round(sum * 100) / 100 + '%</b>', c: '<b>' + F.money(C.sum(list, function (s) { return s.capital; })) + '</b>', a: base > 0 ? '<b>' + F.money(base) + '</b>' : '' },
       });
-      var check = TH.gate('F042.C', '<div class="alert ' + (valid ? 'alert-success' : 'alert-danger') + '">' + I(valid ? 'checkCircle' : 'xCircle', 'ic-sm') + '<div class="alert-body"><b>Kiểm tổng tỷ lệ & hiệu lực ' + TH.up('F042.C') + '</b><span>' + (valid ? 'Tổng 100%, không có khoảng hiệu lực chồng lấn trong kỳ.' : 'Tổng ' + Math.round(sum * 100) / 100 + '% ≠ 100% — không thể lưu/duyệt kỳ.') + '</span></div></div>', { label: 'Kiểm tổng tỷ lệ 100% và thời hạn hiệu lực', lines: 1 });
+      var check = '<div class="alert ' + (valid ? 'alert-success' : 'alert-danger') + '"><div class="alert-body"><b>Tổng tỷ lệ: ' + Math.round(sum * 100) / 100 + '%</b><span>Phải bằng 100% ở mọi gói trước khi lưu.</span></div></div>' + TH.gate('F042.C', '<p class="small muted">Soát hiệu lực và ngoại lệ liên kỳ theo quy tắc đã chốt.</p>', { mode: 'mini', label: 'Soát hiệu lực và ngoại lệ liên kỳ' });
       var hist = TH.db.shares.filter(function (s) { return s.buildingId === bId; });
       var snap = TH.gate('F042.D', '<div class="card">' + TH.cardHd(I('history', 'ic-sm') + 'Bản chốt tỷ lệ & lịch sử' + TH.up('F042.D')) + '<div class="card-bd"><ul class="timeline">' +
         hist.slice().sort(function (a, c) { return a.from < c.from ? 1 : -1; }).map(function (s) { return '<li><b>' + esc(C.shareholder(s.shareholderId).name) + '</b> ' + s.ratio + '%<div class="when">' + F.date(s.from) + (s.to ? ' → ' + F.date(s.to) + ' · đã kết thúc' : ' → nay') + '</div></li>'; }).join('') +
         '</ul><div class="small muted">' + (TH.periodLocked(p) ? 'Kỳ ' + F.period(p) + ' đã chốt — bản chốt tỷ lệ đã lưu.' : 'Bản chốt tỷ lệ được lưu khi chốt kỳ.') + '</div></div></div>', { label: 'Bản chốt tỷ lệ khi chốt kỳ; lịch sử thay đổi', lines: 4 });
       var bTabs = '<div class="toolbar">' + TH.chips(S, 'b', TH.db.buildings.filter(function (x) { return TH.inScope(x.id); }).map(function (x) { return { id: x.id, label: x.short }; }), bId) + '<span class="grow"></span>' +
-        (dirty ? '<button type="button" class="btn btn-sm" data-act="shr.discard">Bỏ thay đổi</button>' + TH.permBtn('share.edit', '<button type="button" class="btn btn-sm btn-primary" data-act="shr.save"' + (checkOn && !valid ? ' disabled data-tip="Tổng tỷ lệ phải bằng 100% (C)"' : '') + '>' + I('check', 'ic-sm') + 'Lưu điều chỉnh tỷ lệ</button>', '403') : '<span class="small muted">' + (editable ? 'Sửa trực tiếp cột % để điều chỉnh tỷ lệ' : 'Chỉ xem') + '</span>') + '</div>';
+        (dirty ? '<button type="button" class="btn btn-sm" data-act="shr.discard">Bỏ thay đổi</button>' + TH.permBtn('share.edit', '<button type="button" class="btn btn-sm btn-primary" data-act="shr.save"' + (checkOn && !valid ? ' disabled data-tip="Tổng tỷ lệ phải bằng 100% ở mọi gói"' : '') + '>' + I('check', 'ic-sm') + 'Lưu điều chỉnh tỷ lệ</button>', '403') : '<span class="small muted">' + (editable ? 'Sửa trực tiếp cột % để điều chỉnh tỷ lệ' : 'Chỉ xem') + '</span>') + '</div>';
       return TH.pageHeader({ screen: S, status: TH.badge('Phân bổ nháp', 'draft', { dot: true }), desc: 'Nhập tỷ lệ và vốn theo tòa/kỳ; lãi được chia tính nháp từ lãi dòng tiền tạm tính. Phân bổ không đồng nghĩa đã chi tiền.',
           actions: TH.gate('F042.B', TH.permBtn('share.edit', '<button type="button" class="btn" data-act="shr.import">' + I('upload', 'ic-sm') + 'Nhập từ Excel' + TH.up('F042.B') + '</button>', '403'), { mode: 'btn', label: 'Nhập từ Excel chia cổ phần' }) +
             '<a class="btn btn-primary" href="' + TH.router.href('SHARE-RESULT', bId) + '">' + I('pie', 'ic-sm') + 'Xem phân bổ lợi nhuận</a>' }) +
@@ -58,9 +58,11 @@
   TH.act['shr.discard'] = function () { TH.store.clearDraft('shr-' + curBuilding() + '-' + TH.store.state.period); TH.app.refresh(); };
   TH.act['shr.save'] = function () {
     var p = TH.store.state.period, bId = curBuilding(), list = editedShares(bId, p), sum = C.sum(list, function (s) { return s.ratio; });
+    if (!TH.can('share.edit') || TH.periodLocked(p)) return;
+    if (list.some(function (s) { return !isFinite(s.ratio) || s.ratio < 0 || s.ratio > 100; }) || Math.abs(sum - 100) >= 0.001) { TH.toast('Chưa lưu tỷ lệ', 'Tổng tỷ lệ phải bằng 100%, mỗi tỷ lệ từ 0 đến 100% ở mọi gói.', 'danger'); return; }
     list.forEach(function (s) { if (s.dirty) { var orig = TH.db.shares.find(function (x) { return x.id === s.id; }); TH.log('Điều chỉnh tỷ lệ cổ phần', bId, C.shareholder(s.shareholderId).name + ': ' + orig.ratio + '% → ' + s.ratio + '%', 'share', bId); orig.ratio = s.ratio; } });
     TH.store.clearDraft('shr-' + bId + '-' + p); TH.app.refresh();
-    TH.toast('Đã lưu tỷ lệ', Math.abs(sum - 100) < 0.001 ? 'Tổng 100%.' : 'Lưu ý: tổng ' + sum + '% (gói A không chặn — kiểm tổng là nâng cấp C).', Math.abs(sum - 100) < 0.001 ? 'success' : 'warning');
+    TH.toast('Đã lưu tỷ lệ', 'Tổng 100%.', 'success');
   };
   TH.act['shr.import'] = function () { TH.toast('Import bảng chia cổ phần (mô phỏng)', 'Tệp “bang_chia_CP_T10.xlsx”: 3 tòa, 9 dòng, khớp template.', 'info'); };
 

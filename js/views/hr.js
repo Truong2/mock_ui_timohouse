@@ -87,7 +87,7 @@
           TH.field({ form: form, name: 'staff', label: 'Nhân viên', type: 'select', options: TH.db.staff.filter(function (x) { return x.status === 'active' && x.role !== 'admin'; }).map(function (x) { return { id: x.id, label: x.id + ' · ' + x.name }; }), value: s.id }) +
           TH.field({ label: 'Đội', value: teamOf(s.team).name, readonly: true, id: 'asg-team' }) +
           TH.field({ form: form, name: 'b', label: 'Tòa', type: 'select', options: TH.buildingOptions(false) }) +
-          TH.field({ form: form, name: 'role', label: 'Vai trò tại tòa', type: 'select', options: [{ id: 'main', label: TH.ROLE_MAIN + ' (phụ trách chính)' }].concat(TH.BLD_ROLES.map(function (r) { return { id: r.id, label: r.id }; })), def: TH.ROLE_MAIN }) +
+          TH.field({ form: form, name: 'role', label: 'Vai trò tại tòa', type: 'select', options: [{ id: 'main', label: TH.ROLE_MAIN + ' (phụ trách chính)' }].concat((TH.has('F006.B') ? TH.BLD_ROLES : []).map(function (r) { return { id: r.id, label: r.id }; })), def: 'main' }) +
           TH.gate('F038.D', TH.field({ form: form, name: 'from', label: 'Hiệu lực từ', type: 'date', def: TH.TODAY, labelExtra: TH.up('F038.D') }) + TH.field({ form: form, name: 'to', label: 'Đến (bỏ trống = không hạn)', type: 'date', def: '' }), { ghost: 'self', label: 'Điều chuyển có hiệu lực lịch sử' }) + '</div>' +
           '<div class="card card-flush">' + TH.cardHd('Phân công hiện tại của ' + esc(s.name), multi ? 'Có thể phụ trách nhiều tòa ' + TH.up('F038.C') : 'Gói A: một tòa chính') + TH.table({ compact: true, cols: [{ key: 'b', label: 'Tòa', render: function (a) { return esc(C.building(a.buildingId).name); } }, { key: 'r', label: 'Vai trò', render: function (a) { return esc(a.role) + (a.main ? ' ' + TH.badge('Chính', 'teal') : ''); } }, { key: 'f', label: 'Từ', render: function (a) { return F.date(a.from); } }, { key: 'x', label: '', render: function (a) { return '<button type="button" class="btn btn-xs btn-ghost" data-act="asg.end" data-id="' + a.id + '">Kết thúc</button>'; } }], rows: cur, empty: { title: 'Chưa phân công', text: '' } }) + '</div>' +
           (!multi && cur.length ? '<div class="alert alert-warning">' + I('info', 'ic-sm') + '<div class="alert-body">Gói A: phân công mới sẽ kết thúc phân công hiện tại (một tòa chính). Giữ nhiều tòa là nâng cấp C.</div></div>' : '') + '</div>',
@@ -97,6 +97,8 @@
   TH.act['asg.save'] = function () {
     var g = function (k, d) { return TH.store.draft('hr-asg', k, d); };
     var sid = g('staff', 'NV-006'), b = g('b', TH.buildingOptions(false)[0].id), role = g('role', TH.ROLE_MAIN), main = role === 'main';
+    if (!TH.can('hr.edit') || !TH.inScope(b)) return;
+    if (role !== 'main' && role !== TH.ROLE_MAIN && !TH.requireFeature('F006.B')) return;
     if (main) role = TH.ROLE_MAIN;
     var from = TH.has('F038.D') ? g('from', TH.TODAY) : TH.TODAY, to = TH.has('F038.D') ? (g('to', '') || null) : null;
     if (!TH.has('F038.C')) TH.db.assignments.forEach(function (a) { if (a.staffId === sid && !a.to) a.to = TH.addDays(from, -1); });

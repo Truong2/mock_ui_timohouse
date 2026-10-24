@@ -28,7 +28,7 @@
         empty: { title: 'Không có phòng phù hợp', text: 'Đổi từ khóa tìm kiếm hoặc bộ lọc trạng thái.' },
         rowAttrs: function (r) { return 'class="is-clickable" tabindex="0" data-href="' + TH.router.href('ROOM-02', r.id) + '"'; },
       });
-      return TH.pageHeader({ screen: S, actions: '<button type="button" class="btn" data-act="imp.open" data-screen="ROOM-IMP">' + I('upload', 'ic-sm') + 'Nhập từ Excel</button>' + TH.permBtn('master.edit', '<button type="button" class="btn btn-primary" data-act="room.add">' + I('plus', 'ic-sm') + 'Thêm phòng</button>', 'Thêm · 403') }) +
+      return TH.pageHeader({ screen: S, actions: TH.gate('F008.B', '<button type="button" class="btn" data-act="imp.open" data-screen="ROOM-IMP">' + I('upload', 'ic-sm') + 'Nhập từ Excel</button>', { mode: 'btn' }) + TH.permBtn('master.edit', '<button type="button" class="btn btn-primary" data-act="room.add">' + I('plus', 'ic-sm') + 'Thêm phòng</button>', 'Thêm · 403') }) +
         '<div class="card card-flush"><div class="toolbar">' + TH.searchBox(S, 'Tìm mã phòng, khách, số HĐ…') + TH.chips(S, 'st', [{ id: 'all', label: 'Tất cả', count: all.length }, { id: 'occupied', label: 'Đang thuê', count: cnt('occupied') }, { id: 'vacant', label: 'Trống', count: cnt('vacant') }, { id: 'maintenance', label: 'Đang sửa', count: cnt('maintenance') }], st) + '</div>' + table + TH.pager(S, pg) + '</div>';
     },
     dialogs: [function () { return roomForm('new'); }],

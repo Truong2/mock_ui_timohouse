@@ -354,14 +354,14 @@ img, svg { display: block; }
 .gate-inline {
   display: inline-flex; align-items: center; gap: 6px; height: var(--ctl-h); padding: 0 12px;
   border: 1px dashed var(--n-300); border-radius: var(--r-md); background: var(--n-50); color: var(--text-3);
-  font-size: var(--fs-14); font-weight: 500; cursor: pointer; white-space: nowrap;
+  font-size: var(--fs-14); font-weight: 500; cursor: pointer; white-space: normal; max-width: 100%; min-height: var(--ctl-h); height: auto; padding-block: 4px; overflow-wrap: anywhere;
   transition: border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease), background var(--t-fast) var(--ease);
 }
 .gate-inline:hover { border-color: var(--n-400); color: var(--text-2); background: var(--surface); }
-.gate-inline.btn-sm { height: 28px; font-size: var(--fs-13); padding: 0 10px; }
-.gate-inline.btn-xs { height: var(--ctl-h-sm); font-size: var(--fs-12); padding: 0 8px; }
+.gate-inline.btn-sm { min-height: 28px; height: auto; font-size: var(--fs-13); padding: 4px 10px; }
+.gate-inline.btn-xs { min-height: var(--ctl-h-sm); height: auto; font-size: var(--fs-12); padding: 4px 8px; }
 .gate-inline .ic { width: 14px; height: 14px; }
-.gate-mini { display: inline-flex; align-items: center; gap: 4px; color: var(--text-3); font-size: var(--fs-12); cursor: pointer; background: none; border: 0; padding: 0; }
+.gate-mini { display: inline-flex; align-items: center; flex-wrap: wrap; max-width: 100%; white-space: normal; gap: 4px; color: var(--text-3); font-size: var(--fs-12); cursor: pointer; background: none; border: 0; padding: 0; }
 .gate-mini:hover { color: var(--text-2); }
 .gated-on { position: relative; }
 .up-tag { display: inline-flex; vertical-align: middle; margin-left: 6px; }

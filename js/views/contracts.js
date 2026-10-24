@@ -144,7 +144,7 @@
   function validNew(d) {
     if (!d.customer || !d.room || !d.rent || !d.start || !d.end) return 'Nhập đủ khách, phòng, giá thuê và thời hạn.';
     if (d.end <= d.start) return 'Ngày kết thúc phải sau ngày bắt đầu.';
-    if (TH.db.contracts.some(function (c) { return c.roomId === d.room && c.status === 'active'; })) return 'Phòng đã có hợp đồng hiệu lực — không cho thuê trùng.';
+    if (TH.db.contracts.some(function (c) { return c.roomId === d.room && c.status !== 'cancelled' && c.start <= d.end && (!c.end || c.end >= d.start); })) return 'Phòng đã có hợp đồng trùng thời gian thuê.';
     return '';
   }
   TH.act['con.saveDraft'] = function () {

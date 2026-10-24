@@ -57,11 +57,12 @@
             { kind: 'money', key: 'b', label: 'Lương tháng', num: true, render: function (r) { return editable ? '<label class="sr-only" for="sb-' + r.staff.id + '">Lương ' + esc(r.staff.name) + '</label><input id="sb-' + r.staff.id + '" class="input-cell" inputmode="numeric" value="' + r.base + '" data-draft="' + form + '.' + r.staff.id + '.base" data-live>' : F.money(r.base); } },
             { kind: 'money', key: 'a', label: 'Phụ cấp cố định', num: true, render: function (r) { return editable ? '<label class="sr-only" for="sa-' + r.staff.id + '">Phụ cấp ' + esc(r.staff.name) + '</label><input id="sa-' + r.staff.id + '" class="input-cell" inputmode="numeric" value="' + r.allowance + '" data-draft="' + form + '.' + r.staff.id + '.allow" data-live>' : F.money(r.allowance); } },
             { kind: 'date', key: 'e', label: 'Hiệu lực từ', render: function () { return F.period(TH.store.state.period); } },
+            { key: 'save', label: '', render: function (r) { return !auto && editable ? '<button type="button" class="btn btn-xs" data-act="sal.saveSetup" data-id="' + r.staff.id + '"' + (r.dirty ? '' : ' disabled') + '>Lưu nhân viên này</button>' : ''; } },
             { key: 'v', label: 'Phiên bản', gate: 'F039.C', render: function (r) { return r.dirty ? TH.badge('v2 · chờ kế toán', 'draft') : 'v1'; } },
             { key: 'pol', label: 'Bộ chính sách', gate: 'F039.D', render: function (r) { return '<span class="small">' + esc({ admin: 'CS-Quản lý', accountant: 'CS-Văn phòng', manager: 'CS-Vận hành', staff: 'CS-Vận hành', hr: 'CS-Văn phòng' }[r.staff.role] || '—') + '</span>'; } },
           ],
           rows: list,
-        }) + '<div class="card-ft"><span class="small muted">Lương đã xác nhận kỳ cũ không đổi theo mức mới.</span>' + (editable ? '<button type="button" class="btn btn-sm btn-primary" data-act="sal.saveSetup"' + (list.some(function (r) { return r.dirty; }) ? '' : ' disabled') + '>Lưu mức lương</button>' : '') + '</div>';
+        }) + '<div class="card-ft"><span class="small muted">Lương đã xác nhận kỳ cũ không đổi theo mức mới. Gói A lưu từng nhân viên.</span>' + (editable ? TH.gate('F040.B', '<button type="button" class="btn btn-sm btn-primary" data-act="sal.saveSetup"' + (list.some(function (r) { return r.dirty; }) ? '' : ' disabled') + '>Lưu mức lương</button>', {mode:'btn', label:'Lưu danh sách mức lương'}) : '') + '</div>';
       }
       TH.app.guard = null;
       var flow = [['draft', 'Nháp'], ['preview', 'Duyệt preview'], ['locked', 'Khóa kỳ']];
@@ -100,9 +101,13 @@
     var p = TH.store.state.period;
     TH.confirm({ title: 'Khóa kỳ lương ' + F.period(p) + '?', body: '<p>Sau khóa, thay đổi phải qua điều chỉnh mới có audit.</p>', ok: 'Khóa kỳ lương' }).then(function (ok) { if (!ok) return; TH.db.payrollStatus[p] = { status: 'locked', by: TH.me().id, at: TH.TODAY }; TH.log('Khóa kỳ lương', 'Kỳ ' + F.period(p), '', 'salary'); TH.app.refresh(); TH.toast('Đã khóa kỳ lương', ''); });
   };
-  TH.act['sal.saveSetup'] = function () {
+  TH.act['sal.saveSetup'] = function (el) {
     var p = TH.store.state.period, form = 'sal-' + p;
-    rows(p).forEach(function (r) { if (r.dirty) { r.staff.base = r.base; r.staff.allowance = r.allowance; TH.log('Đổi mức lương', r.staff.id, F.money(r.base) + ' + ' + F.money(r.allowance), 'salary'); } TH.store.setDraft(form, r.staff.id + '.base', undefined); TH.store.setDraft(form, r.staff.id + '.allow', undefined); });
+    if (TH.periodLocked(p) || (TH.db.payrollStatus[p] || {}).status === 'locked') return;
+    var list = rows(p), id = el && el.dataset.id;
+    if (!TH.has('F040.B')) { if (!id) { TH.toast('Lưu từng nhân viên', 'Dùng nút lưu tại dòng nhân viên. Lưu danh sách có từ B.', 'info'); return; } list = list.filter(function (r) { return r.staff.id === id; }); }
+    if (list.some(function (r) { return !isFinite(r.base) || r.base < 0 || !isFinite(r.allowance) || r.allowance < 0; })) { TH.toast('Mức lương không hợp lệ', 'Nhập lương và phụ cấp không âm.', 'danger'); return; }
+    list.forEach(function (r) { if (r.dirty) { r.staff.base = r.base; r.staff.allowance = r.allowance; TH.log('Đổi mức lương', r.staff.id, F.money(r.base) + ' + ' + F.money(r.allowance), 'salary'); } TH.store.setDraft(form, r.staff.id + '.base', undefined); TH.store.setDraft(form, r.staff.id + '.allow', undefined); });
     TH.app.refresh(); TH.toast('Đã lưu mức lương', TH.has('F039.C') ? 'Lưu phiên bản mới, chờ kế toán xác nhận.' : 'Áp dụng từ kỳ đang xem.');
   };
   TH.act['sal.import'] = function () { TH.toast('Import bảng lương nguồn (mô phỏng)', 'Tệp “luong_nguon_T10.xlsx” khớp ' + TH.db.staff.filter(function (s) { return s.status === 'active'; }).length + ' nhân viên, 0 lỗi.', 'info'); };

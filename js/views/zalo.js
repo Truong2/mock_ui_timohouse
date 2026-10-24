@@ -4,13 +4,18 @@
 
   /* Gửi mô phỏng — không gọi provider thật. Trả 'sent' hoặc lý do không gửi. */
   TH.zaloSend = function (inv, tplId) {
+    if (!inv || !TH.can('oa.send') || !TH.inScope(inv.buildingId)) return 'Không có quyền gửi hóa đơn này';
+    var template = TH.db.oaTemplates.find(function (t) { return t.id === tplId; });
+    if (!template || template.status !== 'approved') return 'Mẫu tin chưa được duyệt';
+    if (!TH.has('F026.B') && TH.db.oaTemplates.filter(function (t) { return t.status === 'approved' && t.kind !== 'expiry'; }).slice(0, 2).indexOf(template) === -1) { TH.requireFeature('F026.B'); return 'Mẫu ngoài giới hạn gói A'; }
+    if (template.kind === 'expiry' && !TH.requireFeature('F026.B')) return 'Mẫu có từ gói B';
     var k = C.customer(inv.customerId), msgId = 'ZL-' + String(TH.db.messages.length + 1).padStart(4, '0');
     var now = TH.TODAY + ' ' + String(new Date().getHours()).padStart(2, '0') + ':' + String(new Date().getMinutes()).padStart(2, '0');
     var reason = '';
     if (inv.status !== 'confirmed') reason = 'Hóa đơn chưa xác nhận';
     else if (!k.oaLinked) reason = 'Người nhận chưa liên kết OA';
     else if (tplId === 'TPL-02' && C.debt(inv) <= 0) reason = 'Đã thu đủ — không nhắc';
-    else if (TH.has('F027.C') && TH.db.messages.some(function (m) { return m.invoiceId === inv.id && m.template === tplId && m.at.slice(0, 10) === TH.TODAY && m.status === 'sent'; })) reason = 'Đã gửi hôm nay — chống trùng';
+    else if (TH.db.messages.some(function (m) { return m.invoiceId === inv.id && m.template === tplId && m.at.slice(0, 10) === TH.TODAY && m.status === 'sent'; })) return 'Đã gửi hôm nay — chống trùng';
     TH.db.messages.push({ id: msgId, invoiceId: inv.id, customerId: k.id, template: tplId, at: now, status: reason ? 'skipped' : 'sent', reason: reason, retries: 0, by: TH.me().id });
     if (!reason) TH.log('Gửi Zalo (mô phỏng)', inv.id, TH.db.oaTemplates.find(function (t) { return t.id === tplId; }).name, 'oa', inv.buildingId);
     return reason || 'sent';
@@ -26,9 +31,13 @@
       var S = 'OA-01', p = TH.store.state.period, oa = TH.db.oa;
       var tplId = TH.store.ui(S, 'tpl', 'TPL-01');
       var tpls = TH.db.oaTemplates;
+      var allowedTpls = tpls.filter(function (t) { return t.status === 'approved' && (TH.has('F026.B') || t.kind !== 'expiry'); });
+      if (!TH.has('F026.B')) allowedTpls = allowedTpls.slice(0, 2);
+      if (!allowedTpls.some(function (t) { return t.id === tplId; })) tplId = allowedTpls[0] ? allowedTpls[0].id : '';
       var tpl = tpls.find(function (t) { return t.id === tplId; }) || tpls[0];
       var invs = TH.db.invoices.filter(function (i) { return i.period === p && i.status === 'confirmed' && TH.inScope(i.buildingId); });
       var sel = TH.store.ui(S, 'sel', []);
+      if (!TH.has('F027.B') && sel.length > 1) sel = [];
       var eligible = function (i) {
         var k = C.customer(i.customerId);
         if (!k.oaLinked) return 'Chưa liên kết OA';
@@ -38,7 +47,7 @@
       var recipients = TH.table({
         compact: true, label: 'Danh sách người nhận',
         cols: [
-          { key: 'ck', label: '', labelHtml: '<span class="sr-only">Chọn</span>', cls: 'cell-check', tdCls: 'cell-check', render: function (i) { return eligible(i) ? '' : '<input type="checkbox" aria-label="Chọn ' + i.roomId + '" data-act="oa.sel" data-id="' + i.id + '"' + (sel.indexOf(i.id) > -1 ? ' checked' : '') + '>'; } },
+          { key: 'ck', label: '', labelHtml: '<span class="sr-only">Chọn</span>', cls: 'cell-check', tdCls: 'cell-check', render: function (i) { return eligible(i) ? '' : '<input type="' + (TH.has('F027.B') ? 'checkbox' : 'radio') + '" name="oa-recipient" aria-label="Chọn ' + i.roomId + '" data-act="oa.sel" data-id="' + i.id + '"' + (sel.indexOf(i.id) > -1 ? ' checked' : '') + '>'; } },
           { key: 'r', label: 'Phòng', render: function (i) { return '<b>' + i.roomId + '</b>'; } },
           { key: 'k', label: 'Khách', render: function (i) { return esc(C.customer(i.customerId).name); } },
           { kind: 'money', key: 'd', label: 'Còn nợ', num: true, render: function (i) { return F.money(C.debt(i)); } },
@@ -55,7 +64,7 @@
       var schedule = '<div class="card">' + TH.cardHd(I('calendar', 'ic-sm') + 'Lịch nhắc', 'Phụ thuộc khả năng của OA') + '<div class="card-bd stack">' +
         (TH.has('F027.B') ? '<div><div class="small strong u-mb-8">3 mốc nhắc đã duyệt ' + TH.up('F027.B') + '</div><div class="row">' + oa.reminders.map(function (d) { return TH.badge('Ngày ' + String(d).padStart(2, '0'), 'teal', { icon: 'bell' }); }).join('') + '</div><div class="small muted u-mt-8">Tự bỏ qua hóa đơn đã thu đủ.</div></div>'
           : '<label class="switch"><input type="checkbox" checked disabled><span class="switch-track"></span><span class="small"><b>1 lịch nhắc đơn giản</b> · ngày ' + String(oa.reminderDay).padStart(2, '0') + ' hằng tháng (nếu OA cho phép)</span></label>' + TH.gate('F027.B', '', { mode: 'btn', label: '3 mốc nhắc cấu hình', size: 'btn-sm' })) +
-        TH.gate('F027.C', '<div class="alert alert-neutral">' + I('shieldCheck', 'ic-sm') + '<div class="alert-body"><b>Tự dừng nhắc & hàng đợi retry ' + TH.up('F027.C') + '</b><span>Dừng nhắc ngay khi kế toán xác nhận đủ tiền; tin lỗi vào hàng đợi retry (' + TH.db.messages.filter(function (m) { return m.status === 'failed'; }).length + ' tin).</span></div></div>', { label: 'Tự dừng nhắc sau xác nhận; hàng đợi gửi lại', lines: 1 }) + '</div></div>';
+        '<p class="small muted">Mọi gói dừng nhắc khoản đã xác nhận thu đủ và chống gửi lặp cùng hóa đơn/mẫu trong ngày.</p>' + TH.gate('F027.C', '<div class="alert alert-neutral">' + I('shieldCheck', 'ic-sm') + '<div class="alert-body"><b>Hàng đợi và xử lý ngoại lệ ' + TH.up('F027.C') + '</b><span>Tin lỗi vào hàng đợi gửi lại (' + TH.db.messages.filter(function (m) { return m.status === 'failed'; }).length + ' tin).</span></div></div>', { label: 'Hàng đợi gửi lại và xử lý ngoại lệ', lines: 1 }) + '</div></div>';
       var sent = TH.db.messages.filter(function (m) { return m.at.slice(0, 7) === p; });
       var stats = TH.gate('F027.D', '<div class="card">' + TH.cardHd(I('chart', 'ic-sm') + 'Trạng thái nhà cung cấp' + TH.up('F027.D')) + '<div class="card-bd">' + TH.kv([['Đã gửi', String(sent.filter(function (m) { return m.status === 'sent'; }).length)], ['Lỗi / bị trả về', String(sent.filter(function (m) { return m.status === 'failed'; }).length)], ['Bỏ qua (không đủ điều kiện)', String(sent.filter(function (m) { return m.status === 'skipped'; }).length)], ['Gửi lại có kiểm soát', 'Tối đa 2 lần / tin']]) + '</div></div>', { label: 'Thống kê gửi/lỗi/bị trả về và gửi lại', lines: 3 });
       var rules = TH.gate('F026.C', '<div class="card">' + TH.cardHd(I('sliders', 'ic-sm') + 'Cá nhân hóa theo tòa' + TH.up('F026.C')) + '<div class="card-bd small">' + TH.db.buildings.filter(function (b) { return TH.inScope(b.id); }).map(function (b) { return '<div class="u-mb-8"><b>' + esc(b.short) + ':</b> chữ ký “QL ' + esc(C.staffName(b.managerId)) + '”, số hotline tòa.</div>'; }).join('') + '</div></div>', { label: 'Quy tắc cá nhân hóa nội dung theo tòa', lines: 2 });
@@ -64,15 +73,17 @@
       return TH.pageHeader({ screen: S, status: TH.openBadge('D-05', 'DRAFT / CHỜ DUYỆT provider'), desc: 'Gửi hóa đơn và nhắc thanh toán qua Zalo OA. Bản demo <b>không gọi provider thật</b>; chỉ gửi tới người nhận đủ điều kiện (đã liên kết OA, hóa đơn đã xác nhận).',
           actions: '<a class="btn" href="' + TH.router.href('OA-02') + '">' + I('history', 'ic-sm') + 'Lịch sử gửi</a>' }) +
         '<div class="grid-main-side"><div class="stack"><div class="card card-flush">' + TH.cardHd(I('send', 'ic-sm') + 'Gửi thủ công · kỳ ' + F.period(p), sel.length + ' người nhận đã chọn',
-          '<label class="sr-only" for="oa-tpl">Mẫu</label><select id="oa-tpl" class="select select-sm u-w-auto" data-ui="OA-01.tpl">' + tpls.filter(function (t) { return t.status === 'approved' || TH.has('F026.B'); }).filter(function (t) { return t.kind !== 'expiry' || TH.has('F026.B'); }).map(function (t) { return '<option value="' + t.id + '"' + (t.id === tpl.id ? ' selected' : '') + '>' + esc(t.name) + '</option>'; }).join('') + '</select>' +
+          '<label class="sr-only" for="oa-tpl">Mẫu</label><select id="oa-tpl" class="select select-sm u-w-auto" data-ui="OA-01.tpl">' + allowedTpls.map(function (t) { return '<option value="' + t.id + '"' + (t.id === tpl.id ? ' selected' : '') + '>' + esc(t.name) + '</option>'; }).join('') + '</select>' +
           TH.permBtn('oa.send', '<button type="button" class="btn btn-sm btn-primary" data-act="oa.send"' + (sel.length ? '' : ' disabled') + '>' + I('send', 'ic-sm') + 'Gửi ' + (sel.length || '') + '</button>', '403')) + recipients + '</div>' + preview + '</div>' +
         '<div class="stack"><div class="card">' + TH.cardHd(I('message', 'ic-sm') + 'Kết nối OA', null, TH.simBadge()) + '<div class="card-bd">' + TH.kv([['OA', esc(oa.name)], ['Nhà cung cấp', esc(oa.provider) + ' ' + TH.openBadge('D-05')], ['Liên kết người nhận', TH.db.customers.filter(function (k) { return k.oaLinked; }).length + '/' + TH.db.customers.length + ' khách']]) + '</div></div>' +
         '<div class="card">' + TH.cardHd(I('fileCheck', 'ic-sm') + 'Mẫu tin', 'Gói A: 1–2 mẫu được duyệt') + '<div class="card-bd" style="padding-top:4px">' + tplRows + '</div></div>' + schedule + rules + stats + consent + '</div></div>';
     },
   };
-  TH.act['oa.sel'] = function (el, ev) { ev.stopPropagation(); var s = TH.store.ui('OA-01', 'sel', []).slice(), i = s.indexOf(el.dataset.id); if (i > -1) s.splice(i, 1); else s.push(el.dataset.id); TH.store.setUi('OA-01', 'sel', s); TH.app.refresh(); };
+  TH.act['oa.sel'] = function (el, ev) { if (ev) ev.stopPropagation(); var s = TH.has('F027.B') ? TH.store.ui('OA-01', 'sel', []).slice() : [], i = s.indexOf(el.dataset.id); if (i > -1) s.splice(i, 1); else s.push(el.dataset.id); TH.store.setUi('OA-01', 'sel', s); TH.app.refresh(); };
   TH.act['oa.send'] = function () {
     var ids = TH.store.ui('OA-01', 'sel', []), tpl = TH.store.ui('OA-01', 'tpl', 'TPL-01'), ok = 0, skip = [];
+    if (!TH.can('oa.send') || (ids.length > 1 && !TH.requireFeature('F027.B'))) return;
+    if (ids.some(function (id) { var i = C.invoice(id); return !i || !TH.inScope(i.buildingId); })) return;
     ids.forEach(function (id) { var r = TH.zaloSend(C.invoice(id), tpl); if (r === 'sent') ok++; else skip.push(id + ': ' + r); });
     TH.store.setUi('OA-01', 'sel', []); TH.app.refresh();
     TH.toast('Đã gửi ' + ok + ' tin (mô phỏng)', skip.length ? esc(skip.join('; ')) : 'Xem kết quả ở OA-02.', skip.length ? 'warning' : 'success');

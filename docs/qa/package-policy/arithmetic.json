@@ -1,0 +1,14 @@
+{
+  "baseline": {
+    "passed": 2524,
+    "baseline": "committed engine-results.json",
+    "failed": 0
+  },
+  "independent": {
+    "passed": 3718,
+    "failed": 0,
+    "method": "Python Decimal; direct input ledger aggregation, no JS calculation calls",
+    "toleranceVND": 0.000001,
+    "rounding": "floor(value / step + 0.5) * step; line shares preserve remainder"
+  }
+}

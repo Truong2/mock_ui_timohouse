@@ -164,9 +164,9 @@
         { key: 'st', label: 'Trạng thái', render: function (r) { return stBadge(r) + (r.locked ? '<div class="cell-sub">' + I('lock', 'ic-sm') + ' đã dùng ở hóa đơn</div>' : ''); } },
         { key: 'mon', label: 'Giám sát', gate: 'F019.C', render: function (r) { return r.issue ? '<span class="row-flag ' + (r.issue.level === 'spike' ? 'warn-text' : 'neg') + '" data-tip="' + esc(r.issue.text) + '">' + I('activity', 'ic-sm') + esc(r.issue.level === 'spike' ? 'Đột biến' : r.issue.level === 'missing' ? 'Thiếu số' : 'Số lùi') + '</span>' + (r.rd && r.rd.approvedBy ? '<div class="cell-sub">Duyệt: ' + esc(C.staffName(r.rd.approvedBy)) + '</div>' : '') : '<span class="muted small">Bình thường</span>'; } },
         { key: 'act', label: '', render: function (r) {
-          if (!r.rd || r.locked) return '';
+          if (r.locked) return '';
           var out = '';
-          if (!bulk) out += TH.permBtn('meter.edit', '<button type="button" class="btn btn-xs" data-act="mtr.edit" data-id="' + r.room.id + '">' + I('edit', 'ic-sm') + 'Nhập</button>', '403');
+          if (!bulk || !r.rd) out += TH.permBtn('meter.edit', '<button type="button" class="btn btn-xs" data-act="mtr.edit" data-id="' + r.room.id + '">' + I('edit', 'ic-sm') + 'Nhập</button>', '403');
           if (monitor && stateOf(r) === 'review') out += TH.permBtn('meter.approve', '<button type="button" class="btn btn-xs btn-soft" data-act="mtr.approve" data-id="' + r.room.id + '">Duyệt</button>', 'Duyệt · 403');
           return '<div class="row-actions">' + out + '</div>';
         } },
@@ -211,7 +211,7 @@
         (bId ? '<div class="card card-flush u-mb-16">' + TH.cardHd(I('gauge', 'ic-sm') + 'Chỉ số kỳ ' + F.period(p) + ' · ' + esc(C.building(bId).name), kpiRows.length + ' phòng đang ở' + (showVac && vacantN ? ' + ' + vacantN + ' phòng trống' : '') + ' · ' + progBadges(progressOf(p, bId)), buildingSwitch(p, bId)) + bulkBar +
           TH.table({ label: 'Bảng chỉ số điện nước', cols: cols, rows: rows, rowAttrs: function (r) { var s = stateOf(r); return s === 'error' || s === 'missing' ? 'class="u-row-alert"' : !r.occ ? 'class="u-row-muted"' : ''; }, empty: { title: 'Tòa chưa có phòng đang ở', text: 'Mở phòng trống nếu cần chốt số.' } }) +
           (vacantN ? '<div class="card-ft"><button type="button" class="btn btn-sm btn-ghost" data-act="mtr.vacant">' + I('eye', 'ic-sm') + (showVac ? 'Ẩn ' : 'Hiện ') + vacantN + ' phòng trống</button><span class="small muted">Phòng trống chỉ cần chốt số khi bàn giao hoặc kiểm tra; không tính cho khách.</span></div>' : '') + '</div>' +
-          '<div class="u-mb-16">' + TH.gate('F018.D', commonCard(p, bId), { label: 'Công tơ điện chung — phân bổ theo người/phòng', lines: 3 }) + '</div>' +
+          '<div class="u-mb-16">' + commonCard(p, bId) + TH.gate('F018.D', '<p class="small muted">Đối chiếu lịch sử nhiều công tơ theo phiên bản.</p>', { mode: 'mini', label: 'Đối chiếu nhiều công tơ theo phiên bản' }) + '</div>' +
           '<div class="grid-2 u-mb-16">' + feeCard + priceCard + '</div>' +
           '<div class="grid-3">' + meterCard + recon + snap + '</div>'
         : buildingList(p));
@@ -220,15 +220,19 @@
   };
 
   /* Dialog nhập chỉ số 1 phòng (A) */
+  function newReading(roomId, p) {
+    var prev = C.reading(roomId, TH.addMonthsYm(p, -1));
+    return { roomId: roomId, period: p, elecPrev: prev && prev.elecCur !== null ? prev.elecCur : 0, waterPrev: prev && prev.waterCur !== null ? prev.waterCur : 0, elecCur: null, waterCur: null, status: 'draft', note: '' };
+  }
   function editForm(roomId) {
-    var p = TH.store.state.period, rd = C.reading(roomId, p), form = 'mtr1-' + roomId;
+    var p = TH.store.state.period, existing = C.reading(roomId, p), rd = existing || newReading(roomId, p), form = 'mtr1-' + roomId;
     var e = TH.store.draft(form, 'e', rd.elecCur === null ? '' : rd.elecCur), w = TH.store.draft(form, 'w', rd.waterCur === null ? '' : rd.waterCur);
     var view = Object.assign({}, rd, { elecCur: e === '' ? null : +e, waterCur: w === '' ? null : +w });
     var issue = C.readingIssue(view, C.room(roomId));
     return { title: 'Nhập chỉ số · ' + esc(roomId), sub: 'Kỳ ' + F.period(p) + ' · số cũ tự lấy từ kỳ trước',
       body: '<div class="stack"><div class="form-grid">' +
-        TH.field({ label: 'Điện — số cũ', value: rd.elecPrev, readonly: true, id: 'mo-e' }) + TH.field({ form: form, name: 'e', label: 'Điện — số mới', def: rd.elecCur === null ? '' : rd.elecCur, num: true, inputmode: 'numeric', live: true, invalid: issue && issue.level === 'error' && view.elecCur < rd.elecPrev }) +
-        TH.field({ label: 'Nước — số cũ', value: rd.waterPrev, readonly: true, id: 'mo-w' }) + TH.field({ form: form, name: 'w', label: 'Nước — số mới', def: rd.waterCur === null ? '' : rd.waterCur, num: true, inputmode: 'numeric', live: true, invalid: issue && issue.level === 'error' && view.waterCur < rd.waterPrev }) + '</div>' +
+        (existing ? TH.field({ label: 'Điện — số cũ', value: rd.elecPrev, readonly: true, id: 'mo-e' }) : TH.field({ form: form, name: 'ep', label: 'Điện — số cũ', def: rd.elecPrev, num: true })) + TH.field({ form: form, name: 'e', label: 'Điện — số mới', def: rd.elecCur === null ? '' : rd.elecCur, num: true, inputmode: 'numeric', live: true, invalid: issue && issue.level === 'error' && view.elecCur < rd.elecPrev }) +
+        (existing ? TH.field({ label: 'Nước — số cũ', value: rd.waterPrev, readonly: true, id: 'mo-w' }) : TH.field({ form: form, name: 'wp', label: 'Nước — số cũ', def: rd.waterPrev, num: true })) + TH.field({ form: form, name: 'w', label: 'Nước — số mới', def: rd.waterCur === null ? '' : rd.waterCur, num: true, inputmode: 'numeric', live: true, invalid: issue && issue.level === 'error' && view.waterCur < rd.waterPrev }) + '</div>' +
         (issue ? '<div class="alert alert-' + (issue.level === 'spike' ? 'warning' : 'danger') + '">' + I('alert', 'ic-sm') + '<div class="alert-body"><b>' + esc(issue.text) + '</b><span>' + (issue.level === 'error' ? 'Không tính âm: kiểm tra lại số hoặc ghi nhận thay công tơ.' : issue.level === 'missing' ? 'Nhập đủ số mới để lưu.' : 'Có thể lưu; gói C sẽ chuyển người duyệt.') + '</span></div></div>' : '<div class="alert alert-success">' + I('checkCircle', 'ic-sm') + '<div class="alert-body">Tiêu thụ: ' + F.num(view.elecCur - rd.elecPrev) + ' kWh · ' + F.num(view.waterCur - rd.waterPrev) + ' m³</div></div>') +
         TH.field({ form: form, name: 'note', label: 'Ghi chú', def: rd.note || '' }) + '</div>',
       foot: '<button type="button" class="btn" data-close>Hủy</button><button type="button" class="btn btn-primary" data-act="mtr.save1" data-id="' + roomId + '"' + (issue && issue.level !== 'spike' ? ' disabled' : '') + '>' + I('check', 'ic-sm') + 'Lưu chỉ số</button>' };
@@ -243,11 +247,16 @@
   }
   TH.act['mtr.edit'] = function (el) { var id = el.dataset.id; TH.modal.open({ key: 'mtr1', size: 'sm', render: function () { return editForm(id); } }); };
   TH.act['mtr.save1'] = function (el) {
-    var id = el.dataset.id, p = TH.store.state.period, rd = C.reading(id, p), form = 'mtr1-' + id;
+    var id = el.dataset.id, p = TH.store.state.period, existing = C.reading(id, p), rd = existing || newReading(id, p), form = 'mtr1-' + id;
+    if (!C.room(id) || !TH.inScope(C.room(id).buildingId) || invoiced(id, p) || TH.periodLocked(p)) return;
+    if (!existing) { rd.elecPrev = +TH.store.draft(form, 'ep', rd.elecPrev); rd.waterPrev = +TH.store.draft(form, 'wp', rd.waterPrev); }
     var e = TH.store.draft(form, 'e', rd.elecCur), w = TH.store.draft(form, 'w', rd.waterCur);
+    if (e === null || e === undefined || String(e).trim() === '' || w === null || w === undefined || String(w).trim() === '') { TH.toast('Nhập đủ chỉ số', 'Nhập số mới điện và nước trước khi lưu.', 'warning'); return; }
     var probe = C.readingIssue(Object.assign({}, rd, { elecCur: e === '' ? null : +e, waterCur: w === '' ? null : +w }), C.room(id));
+    if (![rd.elecPrev, rd.waterPrev, +e, +w].every(function (n) { return isFinite(n) && n >= 0; })) { TH.toast('Chỉ số không hợp lệ', 'Nhập chỉ số không âm.', 'danger'); return; }
     if (probe && probe.level !== 'spike') { TH.toast('Chưa lưu', esc(probe.text), 'danger'); return; }
     commitReading(rd, e, w, TH.store.draft(form, 'note', rd.note));
+    if (!existing) TH.db.readings.push(rd);
     TH.log('Nhập chỉ số', id, 'Kỳ ' + F.period(p), 'meter', C.room(id).buildingId);
     TH.store.clearDraft(form); TH.modal.close('mtr1', { silent: true }); TH.app.refresh();
     TH.toast('Đã lưu chỉ số ' + id, rd.status === 'review' ? 'Bất thường — chờ người duyệt (C).' : 'Đã xác nhận.');

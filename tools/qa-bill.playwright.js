@@ -77,7 +77,10 @@ async (page) => {
   });
   await reset('accountant');
   const q6b = await read(() => {
+    // Test setup uses an authorized issuer; accountant retains the existing approval role.
+    TH.store.state.role = 'admin';
     TH.act['inv.gen']({ dataset: {} });
+    TH.store.state.role = 'accountant';
     const d = () => TH.db.invoices.find(i => i.roomId === 'TX-301' && i.period === '2026-10');
     const before = d(), blocked = before.lines.some(l => l.type === 'adjust' && l.draft), t0 = before.total;
     TH.act['adj.ok']({ dataset: { id: 'DC-2610-03' } });

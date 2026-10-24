@@ -4,6 +4,8 @@
 
 Tài liệu này bổ sung CR-UI-ENT, thay mô tả “Framed sheet” và cách gom hành động sau render trong các ghi chép cũ. Áp dụng cho 39 màn SRS + 3 màn CR, các dialog/drawer và luồng báo cáo. Giữ HTML/CSS/JS thuần, Inter local, teal và các quy tắc nghiệp vụ hiện tại.
 
+**CR-PKG-OPS (24/10/2026):** phân tầng theo [ma trận hiệu lực](TIMEHOUSE_PACKAGE_FUNCTION_MATRIX.md). A thao tác từng hồ sơ/chứng từ; B nhập Excel và hàng loạt; C kiểm soát nâng cao; D quản trị kỳ. Khóa gói hiển thị lý do và kiểm tra lại ở handler/dialog; không thay quyền vai trò. Các ô tiền báo cáo A vẫn hiển thị đầy đủ, chỉ phần mở nguồn cần B. Quy tắc tính tiền và kiểm dữ liệu bắt buộc không bị khóa theo gói. Nhãn khóa được xuống dòng trong vùng chứa; menu bàn phím giữ focus, không tự đóng vì sự kiện cuộn đã chờ trước lúc mở.
+
 ## 1. Nền tảng và mẫu trang
 
 | Thành phần | Chuẩn | Nguồn triển khai |

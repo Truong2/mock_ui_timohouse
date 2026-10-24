@@ -4,6 +4,8 @@ Ngày 24/10/2026. Bản đề xuất trình bày lại từ dự án hiện tạ
 
 **Điều chỉnh đã chốt với người dùng:** OCR và Zalo OA có ở mọi gói. Mọi gói giữ hai mẫu báo cáo gốc; B/C/D tăng khả năng phân tích và kiểm soát, không tăng thành 3/4/5 mẫu. Các giới hạn dưới đây dùng cho UI và trao đổi phạm vi; điều kiện tích hợp, mẫu được duyệt và phí sử dụng dịch vụ phải ghi trong báo giá.
 
+**CR-PKG-OPS — thay thế phân tầng cũ:** A nhập và xử lý từng hồ sơ/chứng từ, tính theo bộ công thức cố định; B mới có nhập Excel và thao tác hàng loạt. C thêm kiểm soát nâng cao; D thêm quản trị kỳ/phiên bản. Không cắt phân hệ nghiệp vụ, OCR, OA hoặc hai mẫu báo cáo khỏi A. [Ma trận 52 nhóm hiệu lực](TIMEHOUSE_PACKAGE_FUNCTION_MATRIX.md).
+
 ## 1. Cách giới thiệu dự án
 
 TIMEHOUSE là hệ thống quản lý vận hành nhà cho thuê, liên kết hồ sơ chủ nhà, tòa, phòng, khách thuê và hợp đồng với hóa đơn, thu tiền, công nợ, chi phí và báo cáo kết quả kinh doanh. Dữ liệu phát sinh tại từng tòa được tổng hợp theo kỳ, có phân công trách nhiệm và căn cứ để đối chiếu.
@@ -22,16 +24,16 @@ Giá dưới đây là **tổng giá trị từng gói**, gói cao bao gồm ph�
 - Giao diện thống nhất, biểu mẫu kiểm tra lỗi, hỗ trợ màn hình nhỏ, bảo vệ dữ liệu đang nhập.
 - Phân quyền và các điều kiện tài chính tối thiểu: quản lý xác nhận thu tại tòa được giao, kế toán hậu kiểm; người lập và người duyệt hoàn cọc khác nhau; chỉ hoàn tất hoàn cọc sau thực chi. Các điều kiện này áp dụng xuyên gói.
 
-Gói A có 39 màn/52 nhóm nghiệp vụ cốt lõi ở mức cơ bản theo ma trận dự án. Số màn là chỉ số bao phủ; nội dung và điều kiện nghiệm thu từng chức năng mới là căn cứ bàn giao. Hai mẫu báo cáo gốc có ngay trong A; mẫu mới ngoài hai mẫu này phải được xác định riêng.
+Số màn/nhóm trong registry là chỉ số bao phủ kỹ thuật; không dùng làm cam kết mọi công cụ nâng cao đều có trong A. A thực hiện đầy đủ nghiệp vụ qua từng hồ sơ/chứng từ. Nhập Excel, tự lấy dữ liệu liên phân hệ và xử lý hàng loạt được phân tầng riêng. Hai mẫu báo cáo gốc có ngay trong A; mẫu mới ngoài hai mẫu này phải được xác định riêng.
 
 ## 3. Chức năng và giá trị theo mức giá
 
 | Gói | Giá tham chiếu | Phạm vi bàn giao | Giá trị sử dụng |
 |---|---:|---|---|
-| **A — Quản lý vận hành cơ bản** | **50–60 triệu** | Danh mục và hồ sơ; hợp đồng/biểu phí; nhập điện nước; hóa đơn; thu nhiều lần và công nợ; chi phí; nhân sự, lương/cổ phần cơ bản; hai báo cáo theo mẫu khách; Excel mẫu cố định, OCR một mẫu đã chọn có người rà soát; chức năng OA cơ bản khi đủ điều kiện tích hợp. | Tập trung dữ liệu và chuẩn hóa quy trình vận hành hằng tháng. |
-| **B — Tự động hóa thao tác** | **70–80 triệu** | Toàn bộ A; xem trước và báo lỗi khi nhập Excel; xử lý danh sách/hàng loạt; OCR tối đa hai mẫu theo ma trận, chỉ rõ trường cần kiểm tra; quy tắc tính lẻ ngày đã chốt; sinh lịch trả chủ nhà; cấu hình nhắc thanh toán ba mốc; truy ngược báo cáo về chứng từ và xu hướng 3–6 kỳ. | Giảm nhập lặp, giảm thời gian lập hóa đơn và theo dõi thu tiền. |
-| **C — Kiểm soát và đối chiếu** | **80–90 triệu** | Toàn bộ B; kiểm trùng hồ sơ/chứng từ/phiếu thu; kiểm dữ liệu và ngoại lệ trước khi xác nhận; các bước duyệt bổ sung theo nghiệp vụ; lịch sử phân công/điều chỉnh; bản chụp số liệu kỳ đã duyệt, so sánh sai lệch; phân bổ chi phí chung theo quy tắc đã duyệt; báo cáo nhóm nhà, so kỳ và cảnh báo biên lợi nhuận. | Giảm sai sót và tăng khả năng kiểm soát khi nhiều người cùng vận hành. |
-| **D — Quản trị theo kỳ và truy vết** | **90–100 triệu** | Toàn bộ C; nhật ký chi tiết thay đổi dữ liệu tài chính; dữ liệu/biểu phí/công thức có phiên bản trong phạm vi đã chốt; khóa kỳ và quản lý điều chỉnh; báo cáo lưu có phiên bản, truy nguồn và đối chiếu lịch sử; đối soát sao kê bằng dữ liệu nhập; giám sát batch/OA và xử lý lỗi có kiểm soát. | Có căn cứ giải thích số liệu, kiểm tra thay đổi và đối chiếu các kỳ đã chốt. |
+| **A — Vận hành cơ bản** | **50–60 triệu** | Nhập từng hồ sơ, hợp đồng, chỉ số; lập/xác nhận từng hóa đơn; thu từng khoản, công nợ và cọc đủ quy trình; chi phí, nhân sự, lương/cổ phần theo công thức cố định; OCR từng file; OA từng hóa đơn; hai mẫu báo cáo gốc và xuất Excel. | Đủ nghiệp vụ để vận hành, hệ thống tính đúng từ đầu vào đã nhập. |
+| **B — Hỗ trợ nhập liệu** | **70–80 triệu** | Toàn bộ A; nhập Excel có xem trước/lỗi dòng; nhập chỉ số, lập/xác nhận/xuất/gửi hóa đơn hàng loạt; OCR tối đa hai mẫu mỗi loại; lấy đầu vào liên phân hệ; sinh lịch trả; OA gửi danh sách/ba mốc; truy nguồn và xu hướng sáu kỳ. | Giảm nhập lặp và thời gian xử lý danh sách. |
+| **C — Kiểm soát nâng cao** | **80–90 triệu** | Toàn bộ B; gợi ý khoản nghi trùng, so khớp hồ sơ và ngoại lệ; duyệt, đối chiếu, lịch sử phân công; bản số liệu đã duyệt; phân bổ theo quy tắc; so tòa/nhóm/kỳ, cảnh báo; hàng đợi OA. | Kiểm soát phối hợp nhiều người và sai lệch liên nguồn. |
+| **D — Quản trị theo kỳ** | **90–100 triệu** | Toàn bộ C; khóa kỳ tài chính, điều chỉnh có căn cứ; phiên bản và đối chiếu báo cáo; lịch sử chính sách trong phạm vi chốt; đối soát sao kê nhập vào, phân bổ một khoản thu nhiều hóa đơn; thư viện OCR theo danh mục, giám sát OA. | Giải trình thay đổi và đối chiếu các kỳ đã chốt. |
 
 ### Giải thích phần giá tăng thêm
 
@@ -45,12 +47,16 @@ Không diễn giải rằng gói thấp bỏ các bước bảo vệ tài chính
 
 | Phần | A | B (gồm A) | C (gồm B) | D (gồm C) |
 |---|---|---|---|---|
-| OCR | Một mẫu đã chọn cho mỗi loại giấy tờ/hợp đồng; người dùng sửa và xác nhận | Tối đa hai mẫu mỗi loại; chỉ rõ trường cần rà soát | Giữ giới hạn mẫu của B; thêm kiểm trùng và so khớp phòng–khách–hợp đồng | Thư viện theo danh mục được duyệt; số mẫu ghi trong báo giá; có lịch sử sửa |
-| OA | Một OA, 1–2 mẫu tin được duyệt; gửi tay và một lịch nhắc đơn giản | Giữ một OA; thêm mẫu hóa đơn/nhắc nợ/hết hạn hợp đồng và ba mốc nhắc | Cá nhân hóa theo tòa và xử lý lỗi gửi theo quy tắc | Phiên bản mẫu, lịch sử và giám sát gửi lại |
+| OCR | Một mẫu giấy tờ khách và một mẫu hợp đồng đã chọn; sửa và xác nhận từng file | Tối đa hai mẫu mỗi loại; chỉ rõ trường cần rà soát | Giữ giới hạn mẫu của B; thêm kiểm trùng và so khớp phòng–khách–hợp đồng | Thư viện theo danh mục được duyệt; số mẫu ghi trong báo giá; có lịch sử sửa |
+| OA | Một OA, tối đa hai mẫu tin duyệt; gửi từng hóa đơn và một lịch nhắc cố định | Giữ một OA; thêm gửi danh sách, mẫu hết hạn hợp đồng và ba mốc nhắc | Cá nhân hóa theo tòa và xử lý lỗi gửi theo quy tắc | Phiên bản mẫu, lịch sử và giám sát gửi lại |
 | Báo cáo | Hai mẫu gốc: doanh thu theo tòa và kinh doanh tháng; xem/xuất theo kỳ | Giữ hai mẫu; truy nguồn chứng từ và xu hướng tối đa sáu kỳ | Giữ hai mẫu; so tòa/nhóm/kỳ, lưu số liệu duyệt và theo dõi sai lệch | Giữ hai mẫu; khóa kỳ, phiên bản và đối chiếu lịch sử |
-| Xử lý bổ sung | Excel cố định, lương/cổ phần theo bộ quy tắc chốt | Chỉ chạy hàng loạt các tác vụ/mẫu đã thống nhất | Quy trình duyệt và phân bổ theo danh sách đã chốt | Phiên bản/đối soát theo đối tượng và mẫu đã chốt; chưa kết nối ngân hàng tự động |
+| Xử lý bổ sung | Nhập từng hồ sơ; lương/cổ phần theo bộ quy tắc cố định; không nhập Excel | Nhập Excel và chạy hàng loạt các tác vụ/mẫu đã thống nhất | Quy trình duyệt và phân bổ theo danh sách đã chốt | Phiên bản/đối soát theo đối tượng và mẫu đã chốt; chưa kết nối ngân hàng tự động |
 
 Không cam kết OCR mọi định dạng, nhiều OA không giới hạn, tự thiết kế báo cáo hoặc tự cấu hình mọi công thức. Mọi gói đều bỏ qua khoản đã xác nhận thu đủ khi nhắc thanh toán; không đợi kế toán hậu kiểm mới dừng nhắc. Hai mẫu là hai loại báo cáo, không phải giới hạn số lần chạy hoặc số bản lưu.
+
+Mọi gói kiểm tra trường bắt buộc, mã duy nhất, chỉ số hợp lệ, thuê chồng thời gian, tổng cổ phần 100%, chống ghi/gửi trùng. Thành phần A/B/C/D trong công thức hiệu suất dùng đầy đủ ở mọi gói; không phải quyền gói giá. Khác biệt hiển thị hiệu suất A/B so với bản trước được giải thích bằng việc bỏ công thức rút gọn theo gói; bộ tính hóa đơn/P&L/dataset không đổi.
+
+Thu tiền cho công nợ của hóa đơn kỳ cũ đã khóa vẫn được phép theo quyền và ngày thực nhận; không sửa nội dung hóa đơn cũ. A ghi thiếu/thừa trên một hóa đơn; phân bổ một khoản thu cho nhiều hóa đơn từ D.
 
 ## 4. Mốc bàn giao và tiêu chí nghiệm thu
 
@@ -95,6 +101,12 @@ Trang `index.html?previewPackage=A#/` có thẻ giá A–D, phần chi tiết g�
 
 Nút **Sao chép liên kết** tạo URL trang giới thiệu đúng gói, bỏ tham số QA. Dùng URL website đã triển khai để gửi khách; địa chỉ localhost hoặc file trên máy chỉ phục vụ kiểm tra tại máy. Bản giới thiệu phân biệt demo mô phỏng với phạm vi cần triển khai thật, không tự cam kết thời gian, tỷ lệ thanh toán hoặc chi phí dịch vụ chưa thống nhất.
 
-**Kết quả mới nhất sau chốt giới hạn:** [50 kiểm tra giới thiệu giá](../qa/pricing/results.json), smoke 1.088 lượt không lỗi; lint UI không có phát hiện. Bốn gói được kiểm ở 375, 768, 1024 và 1440px; không tràn ngang trang. Có kiểm OCR/OA hiện diện ở mọi gói, giới hạn hai mẫu báo cáo, chọn gói bằng bàn phím, focus, reduced motion, bảo toàn dữ liệu/nháp/quyền, liên kết chia sẻ và chế độ review. [40 kiểm tra hồi quy UI/component](../qa/pricing/regression.json) ghi nhận ở lần bàn giao UI giá trước điều chỉnh nội dung này. Số kiểm tra này không thay bằng chứng kiểm thử dataset trước đó. Trình duyệt QA là Chromium; chưa kiểm Firefox/Safari trong đợt này.
+**QA CR-PKG-OPS:** [261 assertion trình duyệt](../qa/package-policy/summary.json), gồm 55 kiểm tra chính sách và 206 hồi quy; smoke 1.088/0 lỗi, mapping 156/156. Quét 1.744 biến thể màn và 432 dialog ở 375/768/1024/1440px không lỗi bố cục/tab/input. Có kiểm guard handler/deep link/dialog sau hạ gói, bảo toàn nháp/dữ liệu, OCR/OA, hóa đơn, thu tiền, cọc, lương/cổ phần và báo cáo. 2.524 chỉ tiêu tài chính khớp baseline đã lưu; 3.718 phép đối chiếu Decimal đạt. Lint UI không có phát hiện. Trình duyệt QA là Chromium; Firefox/Safari chưa kiểm trong đợt này.
+
+Nguồn chung `js/package-policy.js` nạp sau registry/CR và trước các view. `TH.requireFeature(incId)` là helper nội bộ trả boolean, mở giải thích khi khóa gói; không cấp thêm quyền vai trò. Giữ API ngoài, ID, schema 12 và dữ liệu đã lưu. Phiếu thu mới có metadata `clientRequest` tùy chọn để chống gửi lại cùng yêu cầu; bản cũ không cần migration. OCR/OA vẫn mô phỏng, không gọi dịch vụ thật.
+
+Ảnh các gói: [A desktop](../qa/package-policy/A-1440.png), [B desktop](../qa/package-policy/B-1440.png), [C desktop](../qa/package-policy/C-1440.png), [D desktop](../qa/package-policy/D-1440.png), [A mobile](../qa/package-policy/A-375.png), [B mobile](../qa/package-policy/B-375.png), [C mobile](../qa/package-policy/C-375.png), [D mobile](../qa/package-policy/D-375.png).
+
+Đối chiếu hình trước/sau phần giới thiệu D: [trước desktop](../qa/package-policy/before-D-1440.png) → [sau desktop](../qa/package-policy/D-1440.png); [trước mobile](../qa/package-policy/before-D-375.png) → [sau mobile](../qa/package-policy/D-375.png). Ảnh trước lấy nguyên từ commit nền `fc8e64c`. [Đối chiếu số học](../qa/package-policy/arithmetic.json).
 
 Ảnh bàn giao: [desktop — giới thiệu](../qa/pricing/desktop-intro.png), [desktop — mức giá](../qa/pricing/desktop-prices.png), [mobile — giới thiệu](../qa/pricing/mobile-intro.png), [mobile — phạm vi gói](../qa/pricing/mobile-scope.png), [mốc bàn giao desktop](../qa/pricing/milestones-1440.png), [mốc bàn giao mobile](../qa/pricing/milestones-375.png).

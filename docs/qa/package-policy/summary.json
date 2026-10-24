@@ -1,0 +1,38 @@
+{
+  "date": "2026-10-24",
+  "policy": 55,
+  "suites": {
+    "pricing": {
+      "passed": 50
+    },
+    "enterprise-components": {
+      "passed": 21
+    },
+    "ui-standard": {
+      "passed": 19
+    },
+    "navigation": {
+      "passed": 22
+    },
+    "ocr": {
+      "passed": 9
+    },
+    "bill": {
+      "passed": 8
+    },
+    "pay": {
+      "passed": 12
+    },
+    "cus": {
+      "passed": 23
+    },
+    "report": {
+      "passed": 11
+    },
+    "dataset": {
+      "passed": 31
+    }
+  },
+  "smoke": 1088,
+  "assertions": 261
+}

@@ -24,6 +24,8 @@ Mở `index.html?previewPackage=A#/` (thay A bằng B/C/D để chọn gói). Tr
 
 Mọi gói đều có OCR, Zalo OA và hai mẫu báo cáo gốc. B/C/D tăng dần truy nguồn, phân tích, duyệt, khóa kỳ và phiên bản; không tăng số loại báo cáo. Giới hạn mẫu OCR, OA và khả năng xử lý được ghi tại **Giới hạn triển khai** của từng gói.
 
+**CR-PKG-OPS:** A nhập và xử lý từng hồ sơ/chứng từ; **nhập Excel và xử lý hàng loạt từ B**. C thêm kiểm soát; D thêm quản trị kỳ. Mọi gói tính đúng cùng công thức và kiểm dữ liệu bắt buộc. Hành vi demo, giới thiệu và khóa thao tác dùng chung `js/package-policy.js`. [Ma trận 52 nhóm hiệu lực](docs/md/TIMEHOUSE_PACKAGE_FUNCTION_MATRIX.md), [QA 261 assertion](docs/qa/package-policy/summary.json).
+
 Chọn **Sao chép liên kết** ở cuối trang để gửi đúng gói đang xem. Khi gửi khách, dùng địa chỉ static hosting đã triển khai; liên kết localhost hoặc đường dẫn máy cá nhân chỉ dùng thử tại máy. Trong ứng dụng, mở phần chọn gói → **Xem phạm vi và mốc bàn giao** để trở lại nội dung này. [Nội dung giới thiệu và phạm vi giá](docs/md/TIMEHOUSE_FUNCTIONS_PRICING_MILESTONES.md), [QA và ảnh giao diện](docs/qa/pricing/).
 
 ## Deep link gửi khách

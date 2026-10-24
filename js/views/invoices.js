@@ -22,7 +22,7 @@
   TH.invPeriodCell = periodCell;
   /* CR-BILL: thẻ quy tắc tính tiền (đề xuất, chờ khách duyệt) — đổi chỉ tính lại hóa đơn nháp */
   function rulesCard() {
-    var R = TH.billRules(), can = TH.can('billing.rules');
+    var R = TH.billRules(), can = TH.can('billing.rules') && TH.has('F023.B');
     var row = function (key) {
       var L = TH.BILL_RULE_LABELS[key], id = 'rule-' + key;
       var ctl = can ? '<select id="' + id + '" class="select select-sm" data-act-change="bill.rule" data-key="' + key + '">' + Object.keys(L.options).map(function (v) { return '<option value="' + v + '"' + (R[key] === v ? ' selected' : '') + '>' + esc(L.options[v]) + '</option>'; }).join('') + '</select>'
@@ -123,6 +123,10 @@
     if (!TH.inScope(b)) b = TH.roleScope()[0];
     return multi ? TH.db.buildings.filter(function (x) { return TH.inScope(x.id); }).map(function (x) { return x.id; }) : [b];
   }
+  function singleRoom() { return TH.store.ui('INV-01', 'room', ''); }
+  function selectedDrafts(p, bs) {
+    return TH.db.invoices.filter(function (i) { return i.period === p && i.status === 'draft' && bs.indexOf(i.buildingId) > -1 && (TH.has('F025.B') || i.roomId === singleRoom()); });
+  }
 
   /* ---------------- INV-01 ---------------- */
   TH.views['INV-01'] = {
@@ -141,6 +145,7 @@
 
       var bSel = '<div class="field" style="min-width:240px"><label for="inv1-b">Tòa</label><select id="inv1-b" class="select" data-ui="INV-01.b"' + (multi ? ' disabled' : '') + '>' + TH.buildingOptions(false).map(function (o) { return '<option value="' + o.id + '"' + (o.id === bs[0] && !multi ? ' selected' : '') + '>' + esc(o.label) + '</option>'; }).join('') + '</select></div>';
       var pSel = '<div class="field"><label for="inv1-p">Kỳ</label><select id="inv1-p" class="select" data-global="period">' + TH.PERIODS.slice().reverse().map(function (x) { return '<option value="' + x + '"' + (x === p ? ' selected' : '') + '>Kỳ ' + F.period(x) + '</option>'; }).join('') + '</select></div>';
+      if (!TH.has('F022.B')) pSel += '<div class="field"><label for="inv1-room">Phòng / hợp đồng bắt buộc chọn</label><select id="inv1-room" class="select" data-ui="INV-01.room"><option value="">Chọn một phòng</option>' + contracts.map(function (c) { return '<option value="' + esc(c.roomId) + '"' + (c.roomId === singleRoom() ? ' selected' : '') + '>' + esc(c.roomId + ' · ' + c.id) + '</option>'; }).join('') + '</select></div>';
       var multiCtl = TH.gate('F022.B', '<label class="switch" style="align-self:flex-end;padding-bottom:6px"><input type="checkbox" data-act-change="inv.multi"' + (multi ? ' checked' : '') + '><span class="switch-track"></span><span class="small"><b>Lập hàng loạt nhiều tòa</b> ' + TH.up('F022.B') + '</span></label>', { mode: 'btn', label: 'Lập hàng loạt nhiều tòa', size: 'btn-sm' });
 
       var stepper = '<div class="stepper">' + [['1', 'Chọn tòa/kỳ', true], ['2', 'Sinh nháp', invs.length > 0], ['3', 'Bổ sung phí & soát', drafts.length > 0 && !drafts.some(function (i) { return blockers(i).length; })], ['4', 'Xem trước & xác nhận', confirmed.length > 0 && !drafts.length]].map(function (s, i, arr) {
@@ -168,7 +173,7 @@
           { key: 'ver', label: 'Biểu phí', gate: 'F023.C', render: function (i) { return '<span class="small">v' + C.contract(i.contractId).versions.length + '</span>'; } },
           { kind: 'money', key: 'tot', label: 'Tổng', num: true, render: function (i) { return '<b>' + F.money(i.total) + '</b>'; } },
           { kind: 'status', key: 'st', label: 'Trạng thái', render: function (i) { var bl = i.status === 'draft' ? blockers(i) : []; return TH.status(i.status) + (bl.length ? '<div class="cell-sub neg">' + I('lock', 'ic-sm') + ' ' + esc(bl.join('; ')) + '</div>' : ''); } },
-          { key: 'a', label: '', render: function (i) { return '<a class="btn btn-xs btn-ghost" href="' + TH.router.href('INV-03', i.id) + '">' + I('eye', 'ic-sm') + '</a>'; } },
+          { key: 'a', label: '', render: function (i) { return !TH.has('F025.B') && i.status === 'draft' ? '<button type="button" class="btn btn-xs" data-act="inv.previewOne" data-id="' + i.id + '">Xem và xác nhận</button>' : '<a class="btn btn-xs btn-ghost" href="' + TH.router.href('INV-03', i.id) + '" aria-label="Xem hóa đơn">' + I('eye', 'ic-sm') + '</a>'; } },
         ],
         rows: invs,
         foot: invs.length ? { _label: '<b>' + invs.length + ' hóa đơn</b>', tot: '<b>' + F.money(C.sum(invs, function (i) { return i.total; })) + '</b>' } : null,
@@ -176,6 +181,7 @@
       });
 
       var genBtn = TH.permBtn('invoice.draft', '<button type="button" class="btn btn-primary" data-act="inv.gen"' + (toCreate.length && !locked ? '' : ' disabled') + '>' + I('sparkles', 'ic-sm') + 'Sinh nháp ' + (toCreate.length ? toCreate.length + ' phòng' : '') + '</button>', 'Sinh nháp · 403');
+      if (!TH.has('F022.B')) genBtn = TH.permBtn('invoice.draft', '<button type="button" class="btn btn-primary" data-act="inv.gen"' + (toCreate.some(function (c) { return c.roomId === singleRoom(); }) && !locked ? '' : ' disabled') + '>Lập một hóa đơn nháp</button>', 'Sinh nháp · 403');
       var meterBtn = TH.gate('F024.B', '<button type="button" class="btn" data-act="inv.meters"' + (readingsMissing.length ? '' : ' disabled') + '>' + I('zap', 'ic-sm') + 'Nhập chỉ số tại kỳ' + TH.up('F024.B') + '</button>', { mode: 'btn', label: 'Nhập bảng công tơ tại kỳ hóa đơn' });
       return TH.pageHeader({ screen: 'INV-01', status: TH.periodBadge(p), desc: 'Sinh hóa đơn nháp từng phòng theo tòa từ hợp đồng hiện hành, phí cố định, chỉ số điện nước và phí phát sinh. Không tạo trùng hóa đơn phòng–kỳ.',
           actions: '<button type="button" class="btn" data-act="mtr.fee">' + I('plus', 'ic-sm') + 'Bổ sung phí</button>' + TH.permBtn('invoice.adjust', '<button type="button" class="btn" data-act="adj.new">' + I('edit', 'ic-sm') + 'Giảm trừ / phụ thu</button>', '403') + meterBtn + '<a class="btn btn-primary" href="' + TH.router.href('INV-PREV') + '"' + (drafts.length ? '' : ' aria-disabled="true" data-tip="Chưa có hóa đơn nháp"') + '>' + I('eye', 'ic-sm') + 'Xem trước & xác nhận</a>' }) +
@@ -188,9 +194,16 @@
     },
   };
   TH.onChange['inv.multi'] = function (el) { TH.store.setUi('INV-01', 'multi', el.checked); TH.app.refresh(); };
+  TH.act['inv.previewOne'] = function (el) { var i = C.invoice(el.dataset.id); if (!i || !TH.inScope(i.buildingId)) return; TH.store.setUi('INV-01', 'b', i.buildingId); TH.store.setUi('INV-01', 'room', i.roomId); TH.go('INV-PREV'); };
   TH.act['inv.gen'] = function (el) {
+    if (!TH.can('invoice.draft')) return;
     var p = TH.store.state.period, bs = targetBuildings();
+    if (TH.periodLocked(p)) { TH.toast('Kỳ đã khóa', 'Không lập thêm hóa đơn trong kỳ đã khóa.', 'warning'); return; }
+    var bulk = TH.has('F022.B');
+    if (el && el.dataset.rerun && !TH.requireFeature('F022.D')) return;
     var contracts = TH.db.contracts.filter(function (c) { return c.status === 'active' && bs.indexOf(c.buildingId) > -1 && c.start <= TH.monthEnd(p); });
+    if (!bulk) contracts = contracts.filter(function (c) { return c.roomId === singleRoom(); }).slice(0, 1);
+    if (!contracts.length) { TH.toast('Chọn một phòng', 'Chọn phòng/hợp đồng trong phạm vi trước khi lập hóa đơn.', 'warning'); return; }
     var created = 0, skipped = 0;
     var bid = 'BATCH-' + p.slice(2, 4) + p.slice(5) + '-' + String(TH.db.batches.filter(function (b) { return b.period === p; }).length + 1).padStart(2, '0');
     contracts.forEach(function (c) {
@@ -199,7 +212,7 @@
       var n = 1; while (C.invoice(inv.id)) { n++; inv.id = inv.id.replace(/-v\d+$/, '') + '-v' + n; }
       TH.db.invoices.push(inv); created++;
     });
-    TH.db.batches.unshift({ id: bid, period: p, buildings: bs, at: TH.TODAY + ' 09:30', by: TH.me().id, created: created, skipped: skipped, status: 'draft', run: TH.db.batches.filter(function (b) { return b.period === p; }).length + 1 });
+    if (bulk) TH.db.batches.unshift({ id: bid, period: p, buildings: bs, at: TH.TODAY + ' 09:30', by: TH.me().id, created: created, skipped: skipped, status: 'draft', run: TH.db.batches.filter(function (b) { return b.period === p; }).length + 1 });
     TH.log(el.dataset.rerun ? 'Chạy lại batch hóa đơn' : 'Sinh hóa đơn nháp', bid, created + ' tạo mới, ' + skipped + ' bỏ qua (đã có)', 'invoice');
     TH.app.refresh();
     TH.toast(created ? 'Đã sinh ' + created + ' hóa đơn nháp' : 'Không tạo thêm hóa đơn', skipped ? skipped + ' phòng đã có hóa đơn kỳ này — bỏ qua, không tạo trùng.' : 'Lô ' + bid);
@@ -220,7 +233,7 @@
     render: function () {
       var p = TH.store.state.period, bs = targetBuildings();
       bs.forEach(function (b) { refreshDrafts(b, p); });
-      var drafts = TH.db.invoices.filter(function (i) { return i.period === p && i.status === 'draft' && bs.indexOf(i.buildingId) > -1; });
+      var drafts = selectedDrafts(p, bs);
       var ready = drafts.filter(function (i) { return !blockers(i).length; });
       var total = C.sum(drafts, function (i) { return i.total; });
       var body = drafts.length ? '<div class="grid-4 u-mb-16">' + TH.kpi({ label: 'Hóa đơn nháp', value: String(drafts.length) }) + TH.kpi({ label: 'Sẵn sàng xác nhận', value: String(ready.length) }) + TH.kpi({ label: 'Bị khóa', value: String(drafts.length - ready.length), neg: drafts.length > ready.length }) + TH.kpi({ label: 'Tổng trước chốt', value: F.short(total) }) + '</div>' +
@@ -247,12 +260,20 @@
     },
   };
   TH.act['inv.confirm'] = function () {
+    if (!TH.can('invoice.confirm')) return;
     var p = TH.store.state.period, bs = targetBuildings();
-    var ready = TH.db.invoices.filter(function (i) { return i.period === p && i.status === 'draft' && bs.indexOf(i.buildingId) > -1 && !blockers(i).length; });
+    if (TH.periodLocked(p)) return;
+    var bulk = TH.has('F025.B'), ready = selectedDrafts(p, bs).filter(function (i) { return !blockers(i).length; });
+    if (!ready.length) { TH.toast('Chưa chọn hóa đơn sẵn sàng', 'Gói A cần chọn một phòng/hợp đồng trước khi xác nhận.', 'warning'); return; }
+    var signature = JSON.stringify(ready);
     TH.confirm({ title: 'Xác nhận ' + ready.length + ' hóa đơn?', body: '<p>Tổng <b>' + F.money(C.sum(ready, function (i) { return i.total; })) + '</b>. Sau khi xác nhận, hóa đơn không bị thay đổi im lặng; công nợ bắt đầu tính.</p>', ok: 'Xác nhận hóa đơn' }).then(function (ok) {
       if (!ok) return;
+      if ((bulk && !TH.requireFeature('F025.B')) || !TH.can('invoice.confirm') || TH.periodLocked(p) || ready.some(function (i) { return !TH.inScope(i.buildingId); })) return;
+      var current = ready.map(function (i) { return C.invoice(i.id); });
+      if (JSON.stringify(current) !== signature || current.some(function (i) { return !i || i.status !== 'draft' || blockers(i).length; })) { TH.toast('Dữ liệu đã thay đổi', 'Mở lại xem trước để xác nhận số liệu mới.', 'warning'); return; }
+      ready = current;
       ready.forEach(function (i) { i.status = 'confirmed'; i.confirmedBy = TH.me().id; i.confirmedAt = TH.TODAY; i.issuedAt = TH.TODAY; i.dueAt = TH.addDays(TH.TODAY, 10); });
-      TH.db.batches.filter(function (b) { return b.period === p && b.status === 'draft'; }).forEach(function (b) { b.status = 'confirmed'; });
+      TH.db.batches.filter(function (b) { return b.period === p && b.status === 'draft' && TH.db.invoices.filter(function (i) { return i.batch === b.id; }).every(function (i) { return i.status === 'confirmed'; }); }).forEach(function (b) { b.status = 'confirmed'; });
       TH.log('Xác nhận hóa đơn', ready.length + ' hóa đơn kỳ ' + F.period(p), bs.join(', '), 'invoice');
       TH.store.persist();
       var top = TH.modal.top(); if (top && top.key.indexOf('route:INV-PREV') === 0) TH.modal.close(top.key);

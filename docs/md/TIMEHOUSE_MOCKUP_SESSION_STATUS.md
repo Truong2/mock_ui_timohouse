@@ -1,5 +1,11 @@
 # Trạng thái phiên — UI giới thiệu giá và mốc bàn giao (24/10/2026)
 
+**Mới nhất — CR-PKG-OPS:** đã triển khai phân tầng hỗ trợ vận hành, thay mô tả A nhập Excel trước đó. A xử lý từng hồ sơ/hóa đơn/tin OA; B nhập Excel và hàng loạt; C kiểm soát; D quản trị kỳ. OCR/OA/hai mẫu báo cáo và đầy đủ công thức có ở mọi gói. Chính sách chung và guard chặn handler/deep link/dialog vượt gói; giữ schema 12 và dữ liệu lưu.
+
+**QA mới nhất:** 261 assertion trình duyệt; smoke 1.088/0; mapping 156/156; quét 1.744 biến thể màn + 432 dialog qua bốn kích thước đạt. 2.524 chỉ tiêu khớp baseline và 3.718 kiểm tra Decimal đạt; lint UI không có phát hiện. [Ma trận 52 nhóm](TIMEHOUSE_PACKAGE_FUNCTION_MATRIX.md), [bàn giao giá](TIMEHOUSE_FUNCTIONS_PRICING_MILESTONES.md), [kết quả/ảnh A–D](../qa/package-policy/). Bản vận hành thật chưa nằm trong đợt này.
+
+## Lịch sử — UI giới thiệu và giới hạn gói trước CR-PKG-OPS
+
 **Hiện tại:** trang giới thiệu đã có bốn mức đầu tư A–D, phạm vi và giá trị từng gói, ví dụ nghiệp vụ, điều kiện nghiệm thu, bảng so sánh và sáu mốc bàn giao. Nội dung dùng chung với drawer chọn gói; giá tiếp tục lấy từ `TH.PACKAGES`. Liên kết gửi khách mở đúng gói và loại bỏ tham số QA. Không thay dataset, phép tính hoặc quyền nghiệp vụ.
 
 **Chốt giới hạn gói:** OCR và Zalo OA có ở mọi gói. Hai mẫu báo cáo gốc được giữ xuyên A–D; B thêm truy nguồn/xu hướng sáu kỳ, C thêm so sánh/duyệt số liệu, D thêm khóa kỳ/phiên bản. UI có mục giới hạn OCR/OA/báo cáo trong chi tiết và drawer; không cam kết không giới hạn mẫu, OA hoặc tự thiết kế báo cáo.

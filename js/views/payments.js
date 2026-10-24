@@ -98,16 +98,24 @@
   };
   TH.act['pay.reportSave'] = function () {
     var g = function (k, d) { return TH.store.draft('pay-rep', k, d); };
-    var invObj = C.invoice(g('inv')), amount = +String(g('amount', C.debt(invObj))).replace(/\D/g, '');
+    var invObj = C.invoice(g('inv'));
+    if (!invObj || invObj.status !== 'confirmed' || !TH.inScope(invObj.buildingId) || !TH.can('receipt.report')) return;
+    var amount = +String(g('amount', C.debt(invObj))).replace(/\D/g, '');
+    if (!amount || !isFinite(amount)) { TH.toast('Chưa ghi nhận', 'Nhập số tiền lớn hơn 0.', 'warning'); return; }
+    var requestId = g('_requestId');
+    if (!requestId) { requestId = 'TH-RECV-' + Date.now() + '-' + Math.random().toString(36).slice(2); TH.store.setDraft('pay-rep', '_requestId', requestId); }
+    if (TH.db.receipts.some(function (r) { return r.clientRequest === requestId; })) return;
     var direct = TH.can('receipt.confirm') && TH.inScope(invObj.buildingId);
     /* Vượt nợ hóa đơn đang chọn → phân bổ FIFO sang hóa đơn còn nợ khác của phòng (kỳ cũ trước); phần còn lại ghi vào hóa đơn mới nhất = Thừa */
     var others = TH.db.invoices.filter(function (i) { return i !== invObj && i.roomId === invObj.roomId && i.status === 'confirmed' && C.debt(i) > 0; }).sort(function (a, b) { return a.period < b.period ? -1 : 1; });
+    if (!TH.has('F031.D')) others = [];
     var targets = [invObj].concat(others), left = amount, parts = [];
     targets.forEach(function (t, n) { if (left <= 0) return; var a = n === targets.length - 1 ? left : Math.min(left, C.debt(t)); if (a > 0) { parts.push({ inv: t, amount: a }); left -= a; } });
     if (left > 0) parts[parts.length - 1].amount += left;
     var ids = parts.map(function (pt) {
       var id = 'PT-' + pt.inv.period.slice(2, 4) + pt.inv.period.slice(5) + '-' + String(TH.db.receipts.length + 1).padStart(3, '0');
       var r = { id: id, invoiceId: pt.inv.id, amount: pt.amount, reportedBy: TH.me().id, reportedAt: TH.TODAY, receivedAt: g('date', TH.TODAY), method: g('method', 'Chuyển khoản'), evidence: 'ck_bao_thu_' + invObj.roomId + '.png', status: 'pending', confirmedBy: null, confirmedAt: null, note: (g('note', '') + (parts.length > 1 ? ' · phân bổ FIFO 1 lần thu ' + F.money(amount) : '')).trim().replace(/^· /, '') };
+      r.clientRequest = requestId;
       TH.db.receipts.push(r);
       if (direct) confirmReceipt(r); else TH.log('Báo đã thu', id, pt.inv.id + ' · ' + F.money(pt.amount), 'receipt', pt.inv.buildingId);
       return id;
@@ -130,6 +138,7 @@
     });
   };
   function confirmReceipt(r, receivedAt) {
+    if (!r || r.status !== 'pending' || !canConfirm(r)) return false;
     var invObj = inv(r), amt = r.amount; // CR-PAY: không cắt phần vượt nợ — phần thừa hiện "Thừa" và trừ vào nợ cũ kỳ sau
     if (receivedAt && receivedAt !== r.receivedAt) {
       TH.db.receiptEdits.push({ receiptRoom: invObj.roomId, period: invObj.period, from: r.receivedAt, to: receivedAt, by: TH.me().id, at: TH.TODAY + ' 10:00', reason: 'Điều chỉnh khi xác nhận theo chứng từ' });
@@ -138,6 +147,7 @@
     r.amount = amt; r.status = 'confirmed'; r.confirmedBy = TH.me().id; r.confirmedAt = TH.TODAY;
     var ms = C.milestone(r, invObj);
     TH.log('Xác nhận phiếu thu', r.id, invObj.roomId + ' · ' + F.money(amt) + ' · thực nhận ' + F.date(r.receivedAt) + ' (' + (ms ? ms.label : '') + ')', 'receipt', invObj.buildingId);
+    return true;
   }
 
   /* ---------------- PAY-APP ---------------- */
@@ -181,7 +191,7 @@
   };
   TH.act['app.ok'] = function (el) {
     var r = TH.db.receipts.find(function (x) { return x.id === el.dataset.id; }), form = 'app-' + r.id;
-    confirmReceipt(r, TH.store.draft(form, 'recv', r.receivedAt));
+    if (!confirmReceipt(r, TH.store.draft(form, 'recv', r.receivedAt))) return;
     TH.store.clearDraft(form);
     TH.modal.close(TH.modal.top().key);
     TH.app.refresh();
@@ -435,8 +445,8 @@
     var formula = '<div class="card card-flush">' + TH.cardHd(I('calculator', 'ic-sm') + 'Hiệu suất theo tòa', 'HS% = [A − A × B + C] ÷ tổng giá niêm yết · tạm tính & thực tế', TH.openBadge('D-04')) +
       TH.perfTable(p, bs) +
       '<div class="card-bd stack-sm">' +
-      TH.gate('F033.B', '', { mode: 'mini', label: 'Tách tỷ lệ dịch vụ B = dịch vụ phải thu ÷ DT phải thu' }) +
-      TH.gate('F033.C', '', { mode: 'mini', label: 'Cộng thu thêm C: tiền phòng phát sinh đã thu đủ + khách bỏ cọc' }) +
+      TH.gate('F033.B', '', { mode: 'mini', label: 'Hỗ trợ lấy và giải thích đầu vào hiệu suất' }) +
+      TH.gate('F033.C', '', { mode: 'mini', label: 'Soát ngoại lệ và đối chiếu đầu vào hiệu suất' }) +
       TH.gate('F033.D', '<div class="small">' + TH.tierPill('D') + ' Công thức <b>HS-01 v0.4</b> (A/B/C/D theo note khách 20/10/2026) · nhánh cọc mới & đóng 3 tháng chờ chốt.</div>', { mode: 'mini', label: 'Phiên bản công thức & kiểm thử' }) +
       TH.perfFormulaNote() + '<div class="small muted">A của hiệu suất chỉ tính phiếu thu của hóa đơn kỳ nhận trong tháng; “Tổng 3 mốc” ở tab Theo tòa tính trên mọi khoản đã đóng (gồm trả nợ cũ, cọc) như file Excel. Thu sau ngày 15 vẫn giảm nợ nhưng không tính vào A.</div></div></div>';
     return '<div class="card u-mb-16"><div class="card-bd"><div class="row-between u-mb-12"><b class="small">Thực thu hóa đơn kỳ theo mốc ngày nhận</b><span class="small muted">Quy đổi A = ' + F.money(Math.round(ms.weighted)) + '</span></div>' +

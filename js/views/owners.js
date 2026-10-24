@@ -189,7 +189,7 @@
         empty: { title: 'Không có chủ nhà phù hợp', text: q ? 'Không có kết quả cho “' + esc(q) + '”.' : 'Thêm chủ nhà hoặc import từ Excel mẫu.' },
       });
       var counts = { all: all.length, active: all.filter(function (o) { return o.status === 'active'; }).length, inactive: all.filter(function (o) { return o.status === 'inactive'; }).length };
-      var actions = '<button type="button" class="btn" data-act="imp.open" data-screen="OWN-IMP">' + I('upload', 'ic-sm') + 'Nhập từ Excel</button>' +
+      var actions = TH.gate('F002.B', '<button type="button" class="btn" data-act="imp.open" data-screen="OWN-IMP">' + I('upload', 'ic-sm') + 'Nhập từ Excel</button>', { mode: 'btn' }) +
         TH.permBtn('master.edit', '<button type="button" class="btn btn-primary" data-act="own.add">' + I('plus', 'ic-sm') + 'Thêm chủ nhà</button>', 'Thêm · 403');
       var recon = TH.gate('F003.D', '<div class="card">' + TH.cardHd(I('compare', 'ic-sm') + 'Đối chiếu chủ nhà theo kỳ' + TH.up('F003.D'), 'Liên kết tòa hiệu lực ↔ chi phí trả chủ nhà kỳ ' + F.period(TH.store.state.period)) +
         TH.table({ compact: true, cols: [
@@ -239,6 +239,7 @@
     if (!name || !phone) { TH.store.setDraft(form, '_err', 'Nhập đủ họ tên và số điện thoại.'); TH.app.refresh(); return; }
     var addr = g('permAddress', '') || '—';
     var o = { id: g('id', 'CN-' + String(TH.db.owners.length + 1).padStart(3, '0')), kind: g('kind', 'person'), name: name, phone: phone, email: g('email', '') || '—', address: addr, permAddress: addr, idNo: g('idNo', ''), idDate: g('idDate', ''), idPlace: '', taxCode: g('taxCode', '') || '—', bank: { no: '', name: '', holder: '' }, status: 'active', note: g('note', ''), createdAt: TH.TODAY };
+    if (TH.db.owners.some(function (x) { return x.id === o.id; })) { TH.toast('Mã chủ nhà đã tồn tại', 'Chọn mã duy nhất trước khi lưu.', 'danger'); return; }
     TH.db.owners.push(o); TH.log('Thêm chủ nhà', o.id, o.name, 'owner');
     TH.store.clearDraft(form);
     TH.modal.close('own-form', { silent: true });
