@@ -11,10 +11,10 @@ var TH = window.TH = window.TH || {};
 
   /* Phần báo cáo có trong từng gói (cộng dồn) — dùng cho drawer gói, landing, mục lục */
   TH.REPORT_PACK = {
-    A: { head: 'Có đủ 2 báo cáo theo đúng mẫu Excel', items: ['Doanh thu theo tòa (mẫu G1): doanh thu, cọc, giá vốn, chi phí, LNG/LNR, 13 tỷ lệ, bảng chia cổ phần', 'Báo cáo kinh doanh tháng: cột Tổng + từng tòa, chế độ Tổng / Kinh doanh', 'Xuất Excel đúng bố cục mẫu, in/PDF'] },
-    B: { head: 'Thêm truy vết & xu hướng', items: ['Bấm từng dòng để mở hóa đơn, cọc, chi phí nguồn', 'Đối chiếu doanh thu báo cáo với thu thực', 'Biểu đồ xu hướng 6 kỳ DT / LNG / LNR'] },
-    C: { head: 'Thêm kiểm soát số liệu', items: ['Duyệt kỳ, snapshot và theo dõi sai lệch', 'Chi phí chung tự kéo từ lương đã duyệt theo rule phân bổ', 'Gộp theo nhóm nhà, so sánh kỳ trước, cảnh báo biên lợi nhuận thấp'] },
-    D: { head: 'Thêm chốt phiên bản', items: ['Đối chiếu 3 kỳ lịch sử theo vai trò', 'Khóa kỳ & chốt phiên bản báo cáo', 'Mẫu báo cáo quản trị có version'] },
+    A: { head: 'Hai mẫu gốc: xem và xuất theo kỳ', items: ['Doanh thu theo tòa (mẫu G1): doanh thu, cọc, giá vốn, chi phí, LNG/LNR, tỷ lệ và chia cổ phần', 'Báo cáo kinh doanh tháng: Tổng + từng tòa, chế độ Tổng / Kinh doanh', 'Xuất Excel theo mẫu; không tự thiết kế báo cáo mới'] },
+    B: { head: 'Giữ hai mẫu gốc · thêm truy nguồn và xu hướng', items: ['Bấm dòng để mở hóa đơn, cọc, chi phí nguồn', 'Đối chiếu doanh thu báo cáo với thu thực', 'Xu hướng tối đa sáu kỳ doanh thu / LNG / LNR'] },
+    C: { head: 'Giữ hai mẫu gốc · thêm so sánh và duyệt', items: ['Lưu bản số liệu đã duyệt và theo dõi sai lệch', 'Phân bổ chi phí chung theo quy tắc đã thống nhất', 'So sánh tòa, nhóm nhà, kỳ; cảnh báo biên lợi nhuận'] },
+    D: { head: 'Giữ hai mẫu gốc · thêm khóa kỳ và phiên bản', items: ['Đối chiếu lịch sử theo phạm vi quyền', 'Khóa kỳ và quản lý phiên bản báo cáo', 'Truy vết chênh lệch; mẫu mới ngoài hai mẫu gốc được xác định riêng'] },
   };
 
   /* Cập nhật mô tả nhóm chức năng — giữ bản SRS gốc trong f.srs */

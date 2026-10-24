@@ -1,8 +1,16 @@
-# Trạng thái phiên — Dataset theo tài liệu khách hàng (23/10/2026)
+# Trạng thái phiên — UI giới thiệu giá và mốc bàn giao (24/10/2026)
+
+**Hiện tại:** trang giới thiệu đã có bốn mức đầu tư A–D, phạm vi và giá trị từng gói, ví dụ nghiệp vụ, điều kiện nghiệm thu, bảng so sánh và sáu mốc bàn giao. Nội dung dùng chung với drawer chọn gói; giá tiếp tục lấy từ `TH.PACKAGES`. Liên kết gửi khách mở đúng gói và loại bỏ tham số QA. Không thay dataset, phép tính hoặc quyền nghiệp vụ.
+
+**Chốt giới hạn gói:** OCR và Zalo OA có ở mọi gói. Hai mẫu báo cáo gốc được giữ xuyên A–D; B thêm truy nguồn/xu hướng sáu kỳ, C thêm so sánh/duyệt số liệu, D thêm khóa kỳ/phiên bản. UI có mục giới hạn OCR/OA/báo cáo trong chi tiết và drawer; không cam kết không giới hạn mẫu, OA hoặc tự thiết kế báo cáo.
+
+**QA mới nhất:** 50 kiểm tra giới thiệu giá đạt; smoke 1.088 lượt không lỗi. Đã kiểm bốn gói tại 375/768/1024/1440px, giới hạn OCR/OA/hai mẫu báo cáo, bàn phím, reduced motion, liên kết chia sẻ và review. Kết quả 19 kiểm tra UI và 21 kiểm tra component là lần hồi quy trước điều chỉnh nội dung giới hạn. [Phạm vi và hướng dẫn](TIMEHOUSE_FUNCTIONS_PRICING_MILESTONES.md), [kết quả và ảnh](../qa/pricing/). Thời gian, lịch thanh toán và phí dịch vụ cần ghi trong thỏa thuận triển khai.
+
+## Lịch sử — Dataset theo tài liệu khách hàng (23/10/2026)
 
 **Hiện tại:** đã triển khai `excel-demo-v1`: 3 tòa/18 phòng/6 kỳ, giữ schema 12 và dữ liệu người dùng đã lưu. 13 workbook/248 sheet/108.090 ô công thức có hồ sơ; 15 tình huống nghiệp vụ, 97 hóa đơn/98 phiếu thu, sổ dịch vụ/sửa chữa/hoa hồng và hai báo cáo lưu sẵn.
 
-**QA dataset:** 3.556 kiểm tra cấu trúc và giải thích chênh lệch; 3.718 phép đối chiếu Decimal; 236 assertion trình duyệt; smoke 1.088 lượt không lỗi. Số mới được đối chiếu độc lập; mốc dữ liệu cũ chạy trên bộ tính hiện tại giữ nguyên kết quả. [Bàn giao và giới hạn](TIMEHOUSE_DATASET_QA.md), [nguồn/công thức](TIMEHOUSE_DATASET_SOURCES.md), [ma trận](TIMEHOUSE_DATASET_MATRIX.md). Chưa commit đợt UI/dataset trong working tree.
+**QA dataset:** 3.556 kiểm tra cấu trúc và giải thích chênh lệch; 3.718 phép đối chiếu Decimal; 236 assertion trình duyệt; smoke 1.088 lượt không lỗi. Số mới được đối chiếu độc lập; mốc dữ liệu cũ chạy trên bộ tính hiện tại giữ nguyên kết quả. [Bàn giao và giới hạn](TIMEHOUSE_DATASET_QA.md), [nguồn/công thức](TIMEHOUSE_DATASET_SOURCES.md), [ma trận](TIMEHOUSE_DATASET_MATRIX.md). UI/dataset đã commit và push tại `6907d59`.
 
 ## Lịch sử — Chuẩn hóa component UI enterprise
 

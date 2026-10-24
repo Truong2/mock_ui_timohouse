@@ -16,7 +16,15 @@ Bản demo tĩnh có tương tác cho hệ thống quản lý vận hành tòa n
 | Local server (khuyên dùng) | `python -m http.server 8080` trong thư mục này rồi mở `http://localhost:8080/`. |
 | Static hosting | Đưa nguyên thư mục lên bất kỳ static hosting; mọi route là hash nên không cần rewrite. |
 
-Điểm vào: trang giới thiệu `#/` → `Khám phá bản demo` mở `RPT-01` ở gói D.
+Điểm vào: trang giới thiệu `#/` trình bày bốn mức đầu tư, phạm vi, ví dụ sử dụng, tiêu chí nghiệm thu và sáu mốc bàn giao. Nút xem demo mở màn nghiệp vụ tương ứng với gói đang chọn.
+
+## Giới thiệu mức giá cho khách
+
+Mở `index.html?previewPackage=A#/` (thay A bằng B/C/D để chọn gói). Trang giới thiệu cho phép xem chi tiết gói, so sánh tám nhóm nghiệp vụ, mở bảng 52 chức năng và xem các mốc bàn giao. Gói cao bao gồm gói thấp; khoảng giá là tổng đầu tư của gói, không cộng dồn.
+
+Mọi gói đều có OCR, Zalo OA và hai mẫu báo cáo gốc. B/C/D tăng dần truy nguồn, phân tích, duyệt, khóa kỳ và phiên bản; không tăng số loại báo cáo. Giới hạn mẫu OCR, OA và khả năng xử lý được ghi tại **Giới hạn triển khai** của từng gói.
+
+Chọn **Sao chép liên kết** ở cuối trang để gửi đúng gói đang xem. Khi gửi khách, dùng địa chỉ static hosting đã triển khai; liên kết localhost hoặc đường dẫn máy cá nhân chỉ dùng thử tại máy. Trong ứng dụng, mở phần chọn gói → **Xem phạm vi và mốc bàn giao** để trở lại nội dung này. [Nội dung giới thiệu và phạm vi giá](docs/md/TIMEHOUSE_FUNCTIONS_PRICING_MILESTONES.md), [QA và ảnh giao diện](docs/qa/pricing/).
 
 ## Deep link gửi khách
 

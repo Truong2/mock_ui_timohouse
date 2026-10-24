@@ -1,5 +1,7 @@
 # TIMEHOUSE — Decision log của bản mockup
 
+**CR-PKG-SCOPE (24/10/2026):** người dùng xác nhận OCR và Zalo OA có ở mọi gói, giữ hai mẫu báo cáo gốc và tăng dần khả năng phân tích/kiểm soát ở B/C/D. Không áp dụng phương án tăng 2/3/4/5 mẫu hoặc bỏ OCR/OA khỏi A. Giá A–D giữ nguyên. UI giới thiệu, drawer, mô tả gói và bảng báo cáo được đồng bộ; giới hạn chi tiết và điều kiện tích hợp nằm trong [phạm vi giá](TIMEHOUSE_FUNCTIONS_PRICING_MILESTONES.md). Không thay bộ tính, schema, dữ liệu lưu hoặc mở rộng dịch vụ thật.
+
 **CR-DATA-01 (23/10/2026):** theo lựa chọn người dùng, tạo dữ liệu tương tự tài liệu khách hàng và nạp sẵn; giữ 3 tòa/18 phòng, kỳ 05–10/2026, schema 12. `excel-demo-v1` bổ sung căn cứ công thức, nước theo người, thu dư, hóa đơn lịch sử hợp đồng kết thúc, dịch vụ đầu vào, sửa chữa, hoa hồng, pool 18 phòng, dự kiến nháp và hai bản báo cáo mô phỏng. Không tự thay dữ liệu đã lưu, không mở rộng import Excel thật. Chi tiết và khác biệt: [nguồn](TIMEHOUSE_DATASET_SOURCES.md), [ma trận](TIMEHOUSE_DATASET_MATRIX.md), [QA](TIMEHOUSE_DATASET_QA.md). Quy tắc `/90`, TH1, phân chia phí và vốn cổ phần tiếp tục giữ nháp/đề xuất.
 
 Ngày lập: 20/10/2026. Nguồn đối chiếu: `TIMEHOUSE_SRS_GOI_D_v1_1_CAU_HINH_XEM_GOI_A_B_C_D.md` (§4, §5A, §7) và handoff. **Excel báo giá, SRS v2.3, mẫu chứng từ chưa có trong workspace** — các mục đánh dấu ⚠ chưa thể xác minh với Excel.

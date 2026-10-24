@@ -1,0 +1,650 @@
+{
+  "date": "2026-10-24",
+  "passed": 50,
+  "results": [
+    {
+      "id": "PRICE-375-A",
+      "pass": true,
+      "evidence": {
+        "key": "A",
+        "selected": 1,
+        "price": true,
+        "steps": 6,
+        "link": "http://127.0.0.1:8779/index.html?previewPackage=A#/",
+        "query": "A",
+        "focus": true,
+        "visible": true,
+        "overflow": -15,
+        "bad": 0,
+        "demo": "A",
+        "screen": "#/demo/inv-02",
+        "scope": "Giới hạn triển khai\nOCR: một mẫu đã chọn cho mỗi loại giấy tờ/hợp đồng; xác nhận trước khi ghi dữ liệu.\nOA: một OA, 1–2 mẫu tin được duyệt; chỉ gửi cho người nhận đủ điều kiện.\nBáo cáo: hai mẫu gốc, xem và xuất theo kỳ; không tự thiết kế mẫu mới.\nExcel theo mẫu cố định; lương/cổ phần theo bộ công thức đã thống nhất.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+        "foundation": "Có OCR và Zalo OA",
+        "baseEnabled": true,
+        "reportTypes": "RPT-04,RPT-05",
+        "upgradeGates": true
+      }
+    },
+    {
+      "id": "SCOPE-375-A",
+      "pass": true,
+      "evidence": {
+        "limits": "Giới hạn triển khai\nOCR: một mẫu đã chọn cho mỗi loại giấy tờ/hợp đồng; xác nhận trước khi ghi dữ liệu.\nOA: một OA, 1–2 mẫu tin được duyệt; chỉ gửi cho người nhận đủ điều kiện.\nBáo cáo: hai mẫu gốc, xem và xuất theo kỳ; không tự thiết kế mẫu mới.\nExcel theo mẫu cố định; lương/cổ phần theo bộ công thức đã thống nhất.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+        "baseEnabled": true,
+        "reportTypes": "RPT-04,RPT-05",
+        "upgradeGates": true
+      }
+    },
+    {
+      "id": "PRICE-375-B",
+      "pass": true,
+      "evidence": {
+        "key": "B",
+        "selected": 1,
+        "price": true,
+        "steps": 6,
+        "link": "http://127.0.0.1:8779/index.html?previewPackage=B#/",
+        "query": "B",
+        "focus": true,
+        "visible": true,
+        "overflow": -15,
+        "bad": 0,
+        "demo": "B",
+        "screen": "#/demo/inv-01",
+        "scope": "Giới hạn triển khai\nOCR: tối đa hai mẫu cho mỗi loại giấy tờ/hợp đồng; chưa nhận dạng mẫu tùy ý.\nOA: kế thừa một OA; thêm mẫu hóa đơn/nhắc nợ/hết hạn hợp đồng và ba mốc nhắc.\nBáo cáo: giữ hai mẫu gốc; thêm truy nguồn và xu hướng tối đa sáu kỳ.\nChỉ xử lý hàng loạt trên các tác vụ và mẫu Excel đã thống nhất.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+        "foundation": "Có OCR và Zalo OA",
+        "baseEnabled": true,
+        "reportTypes": "RPT-04,RPT-05",
+        "upgradeGates": true
+      }
+    },
+    {
+      "id": "SCOPE-375-B",
+      "pass": true,
+      "evidence": {
+        "limits": "Giới hạn triển khai\nOCR: tối đa hai mẫu cho mỗi loại giấy tờ/hợp đồng; chưa nhận dạng mẫu tùy ý.\nOA: kế thừa một OA; thêm mẫu hóa đơn/nhắc nợ/hết hạn hợp đồng và ba mốc nhắc.\nBáo cáo: giữ hai mẫu gốc; thêm truy nguồn và xu hướng tối đa sáu kỳ.\nChỉ xử lý hàng loạt trên các tác vụ và mẫu Excel đã thống nhất.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+        "baseEnabled": true,
+        "reportTypes": "RPT-04,RPT-05",
+        "upgradeGates": true
+      }
+    },
+    {
+      "id": "PRICE-375-C",
+      "pass": true,
+      "evidence": {
+        "key": "C",
+        "selected": 1,
+        "price": true,
+        "steps": 6,
+        "link": "http://127.0.0.1:8779/index.html?previewPackage=C#/",
+        "query": "C",
+        "focus": true,
+        "visible": true,
+        "overflow": -15,
+        "bad": 0,
+        "demo": "C",
+        "screen": "#/demo/exp-01",
+        "scope": "Giới hạn triển khai\nOCR: giữ giới hạn mẫu của B, thêm kiểm trùng và so khớp phòng–khách–hợp đồng.\nOA: kế thừa một OA; thêm cá nhân hóa theo tòa và xử lý lỗi gửi theo quy tắc.\nBáo cáo: giữ hai mẫu gốc; thêm so sánh tòa/nhóm/kỳ và bản số liệu đã duyệt.\nQuy trình duyệt và quy tắc phân bổ cố định theo danh sách đã chốt.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+        "foundation": "Có OCR và Zalo OA",
+        "baseEnabled": true,
+        "reportTypes": "RPT-04,RPT-05",
+        "upgradeGates": true
+      }
+    },
+    {
+      "id": "SCOPE-375-C",
+      "pass": true,
+      "evidence": {
+        "limits": "Giới hạn triển khai\nOCR: giữ giới hạn mẫu của B, thêm kiểm trùng và so khớp phòng–khách–hợp đồng.\nOA: kế thừa một OA; thêm cá nhân hóa theo tòa và xử lý lỗi gửi theo quy tắc.\nBáo cáo: giữ hai mẫu gốc; thêm so sánh tòa/nhóm/kỳ và bản số liệu đã duyệt.\nQuy trình duyệt và quy tắc phân bổ cố định theo danh sách đã chốt.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+        "baseEnabled": true,
+        "reportTypes": "RPT-04,RPT-05",
+        "upgradeGates": true
+      }
+    },
+    {
+      "id": "PRICE-375-D",
+      "pass": true,
+      "evidence": {
+        "key": "D",
+        "selected": 1,
+        "price": true,
+        "steps": 6,
+        "link": "http://127.0.0.1:8779/index.html?previewPackage=D#/",
+        "query": "D",
+        "focus": true,
+        "visible": true,
+        "overflow": -15,
+        "bad": 0,
+        "demo": "D",
+        "screen": "#/demo/reports",
+        "scope": "Giới hạn triển khai\nOCR: thư viện mẫu theo danh mục được duyệt; số mẫu ghi trong báo giá, không nhận mọi định dạng.\nOA: kế thừa một OA; thêm phiên bản mẫu, lịch sử và giám sát gửi lại.\nBáo cáo: giữ hai mẫu gốc; thêm khóa kỳ, phiên bản và đối chiếu lịch sử; không tự thiết kế báo cáo bất kỳ.\nKhóa kỳ, phiên bản và đối soát chỉ áp dụng cho dữ liệu/mẫu đã chốt; chưa kết nối ngân hàng tự động.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+        "foundation": "Có OCR và Zalo OA",
+        "baseEnabled": true,
+        "reportTypes": "RPT-04,RPT-05",
+        "upgradeGates": true
+      }
+    },
+    {
+      "id": "SCOPE-375-D",
+      "pass": true,
+      "evidence": {
+        "limits": "Giới hạn triển khai\nOCR: thư viện mẫu theo danh mục được duyệt; số mẫu ghi trong báo giá, không nhận mọi định dạng.\nOA: kế thừa một OA; thêm phiên bản mẫu, lịch sử và giám sát gửi lại.\nBáo cáo: giữ hai mẫu gốc; thêm khóa kỳ, phiên bản và đối chiếu lịch sử; không tự thiết kế báo cáo bất kỳ.\nKhóa kỳ, phiên bản và đối soát chỉ áp dụng cho dữ liệu/mẫu đã chốt; chưa kết nối ngân hàng tự động.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+        "baseEnabled": true,
+        "reportTypes": "RPT-04,RPT-05",
+        "upgradeGates": true
+      }
+    },
+    {
+      "id": "COMPARE-375",
+      "pass": true,
+      "evidence": {
+        "mobile": true,
+        "rows": 8,
+        "localRows": 8,
+        "minTargets": 44
+      }
+    },
+    {
+      "id": "PRICE-768-A",
+      "pass": true,
+      "evidence": {
+        "key": "A",
+        "selected": 1,
+        "price": true,
+        "steps": 6,
+        "link": "http://127.0.0.1:8779/index.html?previewPackage=A#/",
+        "query": "A",
+        "focus": true,
+        "visible": true,
+        "overflow": -15,
+        "bad": 0,
+        "demo": "A",
+        "screen": "#/demo/inv-02",
+        "scope": "Giới hạn triển khai\nOCR: một mẫu đã chọn cho mỗi loại giấy tờ/hợp đồng; xác nhận trước khi ghi dữ liệu.\nOA: một OA, 1–2 mẫu tin được duyệt; chỉ gửi cho người nhận đủ điều kiện.\nBáo cáo: hai mẫu gốc, xem và xuất theo kỳ; không tự thiết kế mẫu mới.\nExcel theo mẫu cố định; lương/cổ phần theo bộ công thức đã thống nhất.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+        "foundation": "Có OCR và Zalo OA",
+        "baseEnabled": true,
+        "reportTypes": "RPT-04,RPT-05",
+        "upgradeGates": true
+      }
+    },
+    {
+      "id": "SCOPE-768-A",
+      "pass": true,
+      "evidence": {
+        "limits": "Giới hạn triển khai\nOCR: một mẫu đã chọn cho mỗi loại giấy tờ/hợp đồng; xác nhận trước khi ghi dữ liệu.\nOA: một OA, 1–2 mẫu tin được duyệt; chỉ gửi cho người nhận đủ điều kiện.\nBáo cáo: hai mẫu gốc, xem và xuất theo kỳ; không tự thiết kế mẫu mới.\nExcel theo mẫu cố định; lương/cổ phần theo bộ công thức đã thống nhất.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+        "baseEnabled": true,
+        "reportTypes": "RPT-04,RPT-05",
+        "upgradeGates": true
+      }
+    },
+    {
+      "id": "PRICE-768-B",
+      "pass": true,
+      "evidence": {
+        "key": "B",
+        "selected": 1,
+        "price": true,
+        "steps": 6,
+        "link": "http://127.0.0.1:8779/index.html?previewPackage=B#/",
+        "query": "B",
+        "focus": true,
+        "visible": true,
+        "overflow": -15,
+        "bad": 0,
+        "demo": "B",
+        "screen": "#/demo/inv-01",
+        "scope": "Giới hạn triển khai\nOCR: tối đa hai mẫu cho mỗi loại giấy tờ/hợp đồng; chưa nhận dạng mẫu tùy ý.\nOA: kế thừa một OA; thêm mẫu hóa đơn/nhắc nợ/hết hạn hợp đồng và ba mốc nhắc.\nBáo cáo: giữ hai mẫu gốc; thêm truy nguồn và xu hướng tối đa sáu kỳ.\nChỉ xử lý hàng loạt trên các tác vụ và mẫu Excel đã thống nhất.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+        "foundation": "Có OCR và Zalo OA",
+        "baseEnabled": true,
+        "reportTypes": "RPT-04,RPT-05",
+        "upgradeGates": true
+      }
+    },
+    {
+      "id": "SCOPE-768-B",
+      "pass": true,
+      "evidence": {
+        "limits": "Giới hạn triển khai\nOCR: tối đa hai mẫu cho mỗi loại giấy tờ/hợp đồng; chưa nhận dạng mẫu tùy ý.\nOA: kế thừa một OA; thêm mẫu hóa đơn/nhắc nợ/hết hạn hợp đồng và ba mốc nhắc.\nBáo cáo: giữ hai mẫu gốc; thêm truy nguồn và xu hướng tối đa sáu kỳ.\nChỉ xử lý hàng loạt trên các tác vụ và mẫu Excel đã thống nhất.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+        "baseEnabled": true,
+        "reportTypes": "RPT-04,RPT-05",
+        "upgradeGates": true
+      }
+    },
+    {
+      "id": "PRICE-768-C",
+      "pass": true,
+      "evidence": {
+        "key": "C",
+        "selected": 1,
+        "price": true,
+        "steps": 6,
+        "link": "http://127.0.0.1:8779/index.html?previewPackage=C#/",
+        "query": "C",
+        "focus": true,
+        "visible": true,
+        "overflow": -15,
+        "bad": 0,
+        "demo": "C",
+        "screen": "#/demo/exp-01",
+        "scope": "Giới hạn triển khai\nOCR: giữ giới hạn mẫu của B, thêm kiểm trùng và so khớp phòng–khách–hợp đồng.\nOA: kế thừa một OA; thêm cá nhân hóa theo tòa và xử lý lỗi gửi theo quy tắc.\nBáo cáo: giữ hai mẫu gốc; thêm so sánh tòa/nhóm/kỳ và bản số liệu đã duyệt.\nQuy trình duyệt và quy tắc phân bổ cố định theo danh sách đã chốt.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+        "foundation": "Có OCR và Zalo OA",
+        "baseEnabled": true,
+        "reportTypes": "RPT-04,RPT-05",
+        "upgradeGates": true
+      }
+    },
+    {
+      "id": "SCOPE-768-C",
+      "pass": true,
+      "evidence": {
+        "limits": "Giới hạn triển khai\nOCR: giữ giới hạn mẫu của B, thêm kiểm trùng và so khớp phòng–khách–hợp đồng.\nOA: kế thừa một OA; thêm cá nhân hóa theo tòa và xử lý lỗi gửi theo quy tắc.\nBáo cáo: giữ hai mẫu gốc; thêm so sánh tòa/nhóm/kỳ và bản số liệu đã duyệt.\nQuy trình duyệt và quy tắc phân bổ cố định theo danh sách đã chốt.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+        "baseEnabled": true,
+        "reportTypes": "RPT-04,RPT-05",
+        "upgradeGates": true
+      }
+    },
+    {
+      "id": "PRICE-768-D",
+      "pass": true,
+      "evidence": {
+        "key": "D",
+        "selected": 1,
+        "price": true,
+        "steps": 6,
+        "link": "http://127.0.0.1:8779/index.html?previewPackage=D#/",
+        "query": "D",
+        "focus": true,
+        "visible": true,
+        "overflow": -15,
+        "bad": 0,
+        "demo": "D",
+        "screen": "#/demo/reports",
+        "scope": "Giới hạn triển khai\nOCR: thư viện mẫu theo danh mục được duyệt; số mẫu ghi trong báo giá, không nhận mọi định dạng.\nOA: kế thừa một OA; thêm phiên bản mẫu, lịch sử và giám sát gửi lại.\nBáo cáo: giữ hai mẫu gốc; thêm khóa kỳ, phiên bản và đối chiếu lịch sử; không tự thiết kế báo cáo bất kỳ.\nKhóa kỳ, phiên bản và đối soát chỉ áp dụng cho dữ liệu/mẫu đã chốt; chưa kết nối ngân hàng tự động.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+        "foundation": "Có OCR và Zalo OA",
+        "baseEnabled": true,
+        "reportTypes": "RPT-04,RPT-05",
+        "upgradeGates": true
+      }
+    },
+    {
+      "id": "SCOPE-768-D",
+      "pass": true,
+      "evidence": {
+        "limits": "Giới hạn triển khai\nOCR: thư viện mẫu theo danh mục được duyệt; số mẫu ghi trong báo giá, không nhận mọi định dạng.\nOA: kế thừa một OA; thêm phiên bản mẫu, lịch sử và giám sát gửi lại.\nBáo cáo: giữ hai mẫu gốc; thêm khóa kỳ, phiên bản và đối chiếu lịch sử; không tự thiết kế báo cáo bất kỳ.\nKhóa kỳ, phiên bản và đối soát chỉ áp dụng cho dữ liệu/mẫu đã chốt; chưa kết nối ngân hàng tự động.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+        "baseEnabled": true,
+        "reportTypes": "RPT-04,RPT-05",
+        "upgradeGates": true
+      }
+    },
+    {
+      "id": "COMPARE-768",
+      "pass": true,
+      "evidence": {
+        "mobile": true,
+        "rows": 8,
+        "localRows": 8,
+        "minTargets": 44
+      }
+    },
+    {
+      "id": "PRICE-1024-A",
+      "pass": true,
+      "evidence": {
+        "key": "A",
+        "selected": 1,
+        "price": true,
+        "steps": 6,
+        "link": "http://127.0.0.1:8779/index.html?previewPackage=A#/",
+        "query": "A",
+        "focus": true,
+        "visible": true,
+        "overflow": -15,
+        "bad": 0,
+        "demo": "A",
+        "screen": "#/demo/inv-02",
+        "scope": "Giới hạn triển khai\nOCR: một mẫu đã chọn cho mỗi loại giấy tờ/hợp đồng; xác nhận trước khi ghi dữ liệu.\nOA: một OA, 1–2 mẫu tin được duyệt; chỉ gửi cho người nhận đủ điều kiện.\nBáo cáo: hai mẫu gốc, xem và xuất theo kỳ; không tự thiết kế mẫu mới.\nExcel theo mẫu cố định; lương/cổ phần theo bộ công thức đã thống nhất.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+        "foundation": "Có OCR và Zalo OA",
+        "baseEnabled": true,
+        "reportTypes": "RPT-04,RPT-05",
+        "upgradeGates": true
+      }
+    },
+    {
+      "id": "SCOPE-1024-A",
+      "pass": true,
+      "evidence": {
+        "limits": "Giới hạn triển khai\nOCR: một mẫu đã chọn cho mỗi loại giấy tờ/hợp đồng; xác nhận trước khi ghi dữ liệu.\nOA: một OA, 1–2 mẫu tin được duyệt; chỉ gửi cho người nhận đủ điều kiện.\nBáo cáo: hai mẫu gốc, xem và xuất theo kỳ; không tự thiết kế mẫu mới.\nExcel theo mẫu cố định; lương/cổ phần theo bộ công thức đã thống nhất.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+        "baseEnabled": true,
+        "reportTypes": "RPT-04,RPT-05",
+        "upgradeGates": true
+      }
+    },
+    {
+      "id": "PRICE-1024-B",
+      "pass": true,
+      "evidence": {
+        "key": "B",
+        "selected": 1,
+        "price": true,
+        "steps": 6,
+        "link": "http://127.0.0.1:8779/index.html?previewPackage=B#/",
+        "query": "B",
+        "focus": true,
+        "visible": true,
+        "overflow": -15,
+        "bad": 0,
+        "demo": "B",
+        "screen": "#/demo/inv-01",
+        "scope": "Giới hạn triển khai\nOCR: tối đa hai mẫu cho mỗi loại giấy tờ/hợp đồng; chưa nhận dạng mẫu tùy ý.\nOA: kế thừa một OA; thêm mẫu hóa đơn/nhắc nợ/hết hạn hợp đồng và ba mốc nhắc.\nBáo cáo: giữ hai mẫu gốc; thêm truy nguồn và xu hướng tối đa sáu kỳ.\nChỉ xử lý hàng loạt trên các tác vụ và mẫu Excel đã thống nhất.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+        "foundation": "Có OCR và Zalo OA",
+        "baseEnabled": true,
+        "reportTypes": "RPT-04,RPT-05",
+        "upgradeGates": true
+      }
+    },
+    {
+      "id": "SCOPE-1024-B",
+      "pass": true,
+      "evidence": {
+        "limits": "Giới hạn triển khai\nOCR: tối đa hai mẫu cho mỗi loại giấy tờ/hợp đồng; chưa nhận dạng mẫu tùy ý.\nOA: kế thừa một OA; thêm mẫu hóa đơn/nhắc nợ/hết hạn hợp đồng và ba mốc nhắc.\nBáo cáo: giữ hai mẫu gốc; thêm truy nguồn và xu hướng tối đa sáu kỳ.\nChỉ xử lý hàng loạt trên các tác vụ và mẫu Excel đã thống nhất.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+        "baseEnabled": true,
+        "reportTypes": "RPT-04,RPT-05",
+        "upgradeGates": true
+      }
+    },
+    {
+      "id": "PRICE-1024-C",
+      "pass": true,
+      "evidence": {
+        "key": "C",
+        "selected": 1,
+        "price": true,
+        "steps": 6,
+        "link": "http://127.0.0.1:8779/index.html?previewPackage=C#/",
+        "query": "C",
+        "focus": true,
+        "visible": true,
+        "overflow": -15,
+        "bad": 0,
+        "demo": "C",
+        "screen": "#/demo/exp-01",
+        "scope": "Giới hạn triển khai\nOCR: giữ giới hạn mẫu của B, thêm kiểm trùng và so khớp phòng–khách–hợp đồng.\nOA: kế thừa một OA; thêm cá nhân hóa theo tòa và xử lý lỗi gửi theo quy tắc.\nBáo cáo: giữ hai mẫu gốc; thêm so sánh tòa/nhóm/kỳ và bản số liệu đã duyệt.\nQuy trình duyệt và quy tắc phân bổ cố định theo danh sách đã chốt.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+        "foundation": "Có OCR và Zalo OA",
+        "baseEnabled": true,
+        "reportTypes": "RPT-04,RPT-05",
+        "upgradeGates": true
+      }
+    },
+    {
+      "id": "SCOPE-1024-C",
+      "pass": true,
+      "evidence": {
+        "limits": "Giới hạn triển khai\nOCR: giữ giới hạn mẫu của B, thêm kiểm trùng và so khớp phòng–khách–hợp đồng.\nOA: kế thừa một OA; thêm cá nhân hóa theo tòa và xử lý lỗi gửi theo quy tắc.\nBáo cáo: giữ hai mẫu gốc; thêm so sánh tòa/nhóm/kỳ và bản số liệu đã duyệt.\nQuy trình duyệt và quy tắc phân bổ cố định theo danh sách đã chốt.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+        "baseEnabled": true,
+        "reportTypes": "RPT-04,RPT-05",
+        "upgradeGates": true
+      }
+    },
+    {
+      "id": "PRICE-1024-D",
+      "pass": true,
+      "evidence": {
+        "key": "D",
+        "selected": 1,
+        "price": true,
+        "steps": 6,
+        "link": "http://127.0.0.1:8779/index.html?previewPackage=D#/",
+        "query": "D",
+        "focus": true,
+        "visible": true,
+        "overflow": -15,
+        "bad": 0,
+        "demo": "D",
+        "screen": "#/demo/reports",
+        "scope": "Giới hạn triển khai\nOCR: thư viện mẫu theo danh mục được duyệt; số mẫu ghi trong báo giá, không nhận mọi định dạng.\nOA: kế thừa một OA; thêm phiên bản mẫu, lịch sử và giám sát gửi lại.\nBáo cáo: giữ hai mẫu gốc; thêm khóa kỳ, phiên bản và đối chiếu lịch sử; không tự thiết kế báo cáo bất kỳ.\nKhóa kỳ, phiên bản và đối soát chỉ áp dụng cho dữ liệu/mẫu đã chốt; chưa kết nối ngân hàng tự động.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+        "foundation": "Có OCR và Zalo OA",
+        "baseEnabled": true,
+        "reportTypes": "RPT-04,RPT-05",
+        "upgradeGates": true
+      }
+    },
+    {
+      "id": "SCOPE-1024-D",
+      "pass": true,
+      "evidence": {
+        "limits": "Giới hạn triển khai\nOCR: thư viện mẫu theo danh mục được duyệt; số mẫu ghi trong báo giá, không nhận mọi định dạng.\nOA: kế thừa một OA; thêm phiên bản mẫu, lịch sử và giám sát gửi lại.\nBáo cáo: giữ hai mẫu gốc; thêm khóa kỳ, phiên bản và đối chiếu lịch sử; không tự thiết kế báo cáo bất kỳ.\nKhóa kỳ, phiên bản và đối soát chỉ áp dụng cho dữ liệu/mẫu đã chốt; chưa kết nối ngân hàng tự động.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+        "baseEnabled": true,
+        "reportTypes": "RPT-04,RPT-05",
+        "upgradeGates": true
+      }
+    },
+    {
+      "id": "COMPARE-1024",
+      "pass": true,
+      "evidence": {
+        "mobile": false,
+        "rows": 8,
+        "localRows": 8,
+        "minTargets": 44
+      }
+    },
+    {
+      "id": "PRICE-1440-A",
+      "pass": true,
+      "evidence": {
+        "key": "A",
+        "selected": 1,
+        "price": true,
+        "steps": 6,
+        "link": "http://127.0.0.1:8779/index.html?previewPackage=A#/",
+        "query": "A",
+        "focus": true,
+        "visible": true,
+        "overflow": -15,
+        "bad": 0,
+        "demo": "A",
+        "screen": "#/demo/inv-02",
+        "scope": "Giới hạn triển khai\nOCR: một mẫu đã chọn cho mỗi loại giấy tờ/hợp đồng; xác nhận trước khi ghi dữ liệu.\nOA: một OA, 1–2 mẫu tin được duyệt; chỉ gửi cho người nhận đủ điều kiện.\nBáo cáo: hai mẫu gốc, xem và xuất theo kỳ; không tự thiết kế mẫu mới.\nExcel theo mẫu cố định; lương/cổ phần theo bộ công thức đã thống nhất.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+        "foundation": "Có OCR và Zalo OA",
+        "baseEnabled": true,
+        "reportTypes": "RPT-04,RPT-05",
+        "upgradeGates": true
+      }
+    },
+    {
+      "id": "SCOPE-1440-A",
+      "pass": true,
+      "evidence": {
+        "limits": "Giới hạn triển khai\nOCR: một mẫu đã chọn cho mỗi loại giấy tờ/hợp đồng; xác nhận trước khi ghi dữ liệu.\nOA: một OA, 1–2 mẫu tin được duyệt; chỉ gửi cho người nhận đủ điều kiện.\nBáo cáo: hai mẫu gốc, xem và xuất theo kỳ; không tự thiết kế mẫu mới.\nExcel theo mẫu cố định; lương/cổ phần theo bộ công thức đã thống nhất.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+        "baseEnabled": true,
+        "reportTypes": "RPT-04,RPT-05",
+        "upgradeGates": true
+      }
+    },
+    {
+      "id": "PRICE-1440-B",
+      "pass": true,
+      "evidence": {
+        "key": "B",
+        "selected": 1,
+        "price": true,
+        "steps": 6,
+        "link": "http://127.0.0.1:8779/index.html?previewPackage=B#/",
+        "query": "B",
+        "focus": true,
+        "visible": true,
+        "overflow": -15,
+        "bad": 0,
+        "demo": "B",
+        "screen": "#/demo/inv-01",
+        "scope": "Giới hạn triển khai\nOCR: tối đa hai mẫu cho mỗi loại giấy tờ/hợp đồng; chưa nhận dạng mẫu tùy ý.\nOA: kế thừa một OA; thêm mẫu hóa đơn/nhắc nợ/hết hạn hợp đồng và ba mốc nhắc.\nBáo cáo: giữ hai mẫu gốc; thêm truy nguồn và xu hướng tối đa sáu kỳ.\nChỉ xử lý hàng loạt trên các tác vụ và mẫu Excel đã thống nhất.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+        "foundation": "Có OCR và Zalo OA",
+        "baseEnabled": true,
+        "reportTypes": "RPT-04,RPT-05",
+        "upgradeGates": true
+      }
+    },
+    {
+      "id": "SCOPE-1440-B",
+      "pass": true,
+      "evidence": {
+        "limits": "Giới hạn triển khai\nOCR: tối đa hai mẫu cho mỗi loại giấy tờ/hợp đồng; chưa nhận dạng mẫu tùy ý.\nOA: kế thừa một OA; thêm mẫu hóa đơn/nhắc nợ/hết hạn hợp đồng và ba mốc nhắc.\nBáo cáo: giữ hai mẫu gốc; thêm truy nguồn và xu hướng tối đa sáu kỳ.\nChỉ xử lý hàng loạt trên các tác vụ và mẫu Excel đã thống nhất.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+        "baseEnabled": true,
+        "reportTypes": "RPT-04,RPT-05",
+        "upgradeGates": true
+      }
+    },
+    {
+      "id": "PRICE-1440-C",
+      "pass": true,
+      "evidence": {
+        "key": "C",
+        "selected": 1,
+        "price": true,
+        "steps": 6,
+        "link": "http://127.0.0.1:8779/index.html?previewPackage=C#/",
+        "query": "C",
+        "focus": true,
+        "visible": true,
+        "overflow": -15,
+        "bad": 0,
+        "demo": "C",
+        "screen": "#/demo/exp-01",
+        "scope": "Giới hạn triển khai\nOCR: giữ giới hạn mẫu của B, thêm kiểm trùng và so khớp phòng–khách–hợp đồng.\nOA: kế thừa một OA; thêm cá nhân hóa theo tòa và xử lý lỗi gửi theo quy tắc.\nBáo cáo: giữ hai mẫu gốc; thêm so sánh tòa/nhóm/kỳ và bản số liệu đã duyệt.\nQuy trình duyệt và quy tắc phân bổ cố định theo danh sách đã chốt.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+        "foundation": "Có OCR và Zalo OA",
+        "baseEnabled": true,
+        "reportTypes": "RPT-04,RPT-05",
+        "upgradeGates": true
+      }
+    },
+    {
+      "id": "SCOPE-1440-C",
+      "pass": true,
+      "evidence": {
+        "limits": "Giới hạn triển khai\nOCR: giữ giới hạn mẫu của B, thêm kiểm trùng và so khớp phòng–khách–hợp đồng.\nOA: kế thừa một OA; thêm cá nhân hóa theo tòa và xử lý lỗi gửi theo quy tắc.\nBáo cáo: giữ hai mẫu gốc; thêm so sánh tòa/nhóm/kỳ và bản số liệu đã duyệt.\nQuy trình duyệt và quy tắc phân bổ cố định theo danh sách đã chốt.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+        "baseEnabled": true,
+        "reportTypes": "RPT-04,RPT-05",
+        "upgradeGates": true
+      }
+    },
+    {
+      "id": "PRICE-1440-D",
+      "pass": true,
+      "evidence": {
+        "key": "D",
+        "selected": 1,
+        "price": true,
+        "steps": 6,
+        "link": "http://127.0.0.1:8779/index.html?previewPackage=D#/",
+        "query": "D",
+        "focus": true,
+        "visible": true,
+        "overflow": -15,
+        "bad": 0,
+        "demo": "D",
+        "screen": "#/demo/reports",
+        "scope": "Giới hạn triển khai\nOCR: thư viện mẫu theo danh mục được duyệt; số mẫu ghi trong báo giá, không nhận mọi định dạng.\nOA: kế thừa một OA; thêm phiên bản mẫu, lịch sử và giám sát gửi lại.\nBáo cáo: giữ hai mẫu gốc; thêm khóa kỳ, phiên bản và đối chiếu lịch sử; không tự thiết kế báo cáo bất kỳ.\nKhóa kỳ, phiên bản và đối soát chỉ áp dụng cho dữ liệu/mẫu đã chốt; chưa kết nối ngân hàng tự động.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+        "foundation": "Có OCR và Zalo OA",
+        "baseEnabled": true,
+        "reportTypes": "RPT-04,RPT-05",
+        "upgradeGates": true
+      }
+    },
+    {
+      "id": "SCOPE-1440-D",
+      "pass": true,
+      "evidence": {
+        "limits": "Giới hạn triển khai\nOCR: thư viện mẫu theo danh mục được duyệt; số mẫu ghi trong báo giá, không nhận mọi định dạng.\nOA: kế thừa một OA; thêm phiên bản mẫu, lịch sử và giám sát gửi lại.\nBáo cáo: giữ hai mẫu gốc; thêm khóa kỳ, phiên bản và đối chiếu lịch sử; không tự thiết kế báo cáo bất kỳ.\nKhóa kỳ, phiên bản và đối soát chỉ áp dụng cho dữ liệu/mẫu đã chốt; chưa kết nối ngân hàng tự động.\n\nPhí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.",
+        "baseEnabled": true,
+        "reportTypes": "RPT-04,RPT-05",
+        "upgradeGates": true
+      }
+    },
+    {
+      "id": "COMPARE-1440",
+      "pass": true,
+      "evidence": {
+        "mobile": false,
+        "rows": 8,
+        "localRows": 8,
+        "minTargets": 44
+      }
+    },
+    {
+      "id": "DATA-UNCHANGED",
+      "pass": true,
+      "evidence": "Package selection preserves business data, role, scope and drafts"
+    },
+    {
+      "id": "KEYBOARD-PICK",
+      "pass": true,
+      "evidence": "Enter selects and announces without losing focus"
+    },
+    {
+      "id": "SHARE-CLEAN",
+      "pass": true,
+      "evidence": "http://127.0.0.1:8779/index.html?previewPackage=B#/"
+    },
+    {
+      "id": "SHARE-RESTORE",
+      "pass": true,
+      "evidence": "Shared link restores selected offer"
+    },
+    {
+      "id": "FAQ-REDUCED-MOTION",
+      "pass": true,
+      "evidence": "Native disclosure and section navigation remain usable"
+    },
+    {
+      "id": "CUSTOMER-MATRIX",
+      "pass": true,
+      "evidence": {
+        "columns": 5,
+        "rows": 52
+      }
+    },
+    {
+      "id": "OA-CURRENT-ROLES",
+      "pass": true,
+      "evidence": "OA stops on confirmed payment without waiting for accountant audit"
+    },
+    {
+      "id": "MATRIX-SWITCH",
+      "pass": true,
+      "evidence": "Comparison stays in sync when opened on landing"
+    },
+    {
+      "id": "REVIEW-MATRIX",
+      "pass": true,
+      "evidence": "Detailed review retains identifiers"
+    },
+    {
+      "id": "DRAWER-SCOPE",
+      "pass": true,
+      "evidence": "A"
+    },
+    {
+      "id": "DRAWER-INTRO",
+      "pass": true,
+      "evidence": "Drawer returns to matching offer without changing package"
+    },
+    {
+      "id": "DEMO-ROUTE",
+      "pass": true,
+      "evidence": "Customer CTA opens the selected package and business screen"
+    },
+    {
+      "id": "SMOKE",
+      "pass": true,
+      "evidence": {
+        "total": 1088,
+        "fails": 0
+      }
+    },
+    {
+      "id": "CONSOLE",
+      "pass": true,
+      "evidence": []
+    }
+  ]
+}

@@ -1,0 +1,332 @@
+{
+  "ui-standard": {
+    "passed": 19,
+    "results": [
+      {
+        "id": "UI-STD-01",
+        "pass": true,
+        "evidence": {
+          "leaks": [],
+          "reviewOn": {
+            "codes": 1,
+            "tier": 7
+          }
+        }
+      },
+      {
+        "id": "UI-STD-02",
+        "pass": true,
+        "evidence": {
+          "primary": "rgb(15, 118, 110)",
+          "btn": "rgb(15, 118, 110)",
+          "link": "rgb(15, 118, 110)",
+          "tab": "rgb(15, 118, 110)"
+        }
+      },
+      {
+        "id": "UI-STD-03 contrast",
+        "pass": true,
+        "evidence": []
+      },
+      {
+        "id": "UI-STD-04 font≥12",
+        "pass": true,
+        "evidence": []
+      },
+      {
+        "id": "UI-STD-05 icon-label",
+        "pass": true,
+        "evidence": []
+      },
+      {
+        "id": "UI-STD-06 header≤3",
+        "pass": true,
+        "evidence": []
+      },
+      {
+        "id": "UI-STD-07 overflow-menu",
+        "pass": true,
+        "evidence": {
+          "menu": {
+            "items": 3,
+            "btn": true
+          },
+          "opened": {
+            "open": true,
+            "focus": true
+          },
+          "closed": true
+        }
+      },
+      {
+        "id": "UI-STD-08 lists",
+        "pass": true,
+        "evidence": []
+      },
+      {
+        "id": "UI-STD-09 field-errors",
+        "pass": true,
+        "evidence": []
+      },
+      {
+        "id": "UI-STD-12 gate-group",
+        "pass": true,
+        "evidence": {
+          "gateBad": [],
+          "upg": true
+        }
+      },
+      {
+        "id": "UI-STD-10 status+detail",
+        "pass": true,
+        "evidence": {
+          "st": {
+            "unpaid": "<span class=\"badge badge-warning\"><span class=\"dot\"></span>Chưa thu</span>",
+            "bill": "<span class=\"badge badge-warning\"><span class=\"dot\"></span>Chưa thanh toán</span>",
+            "rej": "<span class=\"badge badge-danger\"><span class=\"dot\"></span>Từ chối</span>"
+          },
+          "facts": [
+            {
+              "facts": 6,
+              "tabCard": true,
+              "crumbs": 2
+            },
+            {
+              "facts": 5,
+              "tabCard": true,
+              "crumbs": 2
+            },
+            {
+              "facts": 4,
+              "tabCard": true,
+              "crumbs": 2
+            },
+            {
+              "facts": 5,
+              "tabCard": true,
+              "crumbs": 2
+            },
+            {
+              "facts": 4,
+              "tabCard": true,
+              "crumbs": 2
+            }
+          ]
+        }
+      },
+      {
+        "id": "UI-STD-11 no-hscroll",
+        "pass": true,
+        "evidence": []
+      },
+      {
+        "id": "UI-ENT-01 header",
+        "pass": true,
+        "evidence": {
+          "pos": "fixed",
+          "left": 0,
+          "width": 1424.800048828125,
+          "top": 0,
+          "bg": "rgb(17, 94, 89)",
+          "brand": true,
+          "contrastFg": 7.583501565900062,
+          "sbBrandHidden": true
+        }
+      },
+      {
+        "id": "UI-ENT-02 layout+card",
+        "pass": true,
+        "evidence": {
+          "radius": "0px",
+          "shellBg": "rgb(245, 247, 248)",
+          "card": "8px"
+        }
+      },
+      {
+        "id": "UI-ENT-03 sizes",
+        "pass": true,
+        "evidence": {
+          "btn": 32,
+          "input": 32,
+          "title": "20px",
+          "kpi": "24px",
+          "headRow": 40,
+          "tdPad": "6px"
+        }
+      },
+      {
+        "id": "UI-ENT-04 page-header",
+        "pass": true,
+        "evidence": {
+          "order": true,
+          "inv": "Hóa đơn & thu tiền Hóa đơn",
+          "cus": "Khách thuê & hợp đồng Khách thuê"
+        }
+      },
+      {
+        "id": "UI-ENT-05 no-dup-scope",
+        "pass": true,
+        "evidence": []
+      },
+      {
+        "id": "UI-ENT-06 mobile",
+        "pass": true,
+        "evidence": {
+          "mob": {
+            "bg": "rgb(17, 94, 89)",
+            "over": -15
+          },
+          "drw": {
+            "brand": true,
+            "open": true
+          }
+        }
+      },
+      {
+        "id": "SMOKE",
+        "pass": true,
+        "evidence": {
+          "smoke": {
+            "total": 1088,
+            "fails": 0
+          },
+          "errors": []
+        }
+      }
+    ]
+  },
+  "enterprise-components": {
+    "passed": 21,
+    "results": [
+      {
+        "id": "DOM-PAGE-ORDER",
+        "pass": true,
+        "evidence": "Detail navigation, heading, tabs and panel share reading and visual order"
+      },
+      {
+        "id": "TABS-MANUAL-FOCUS",
+        "pass": true,
+        "evidence": "Arrow changes focus without committing a tab"
+      },
+      {
+        "id": "TABS-ACTIVATION",
+        "pass": true,
+        "evidence": "Enter activates one tab"
+      },
+      {
+        "id": "TABS-END-HOME",
+        "pass": true,
+        "evidence": "End focuses last available tab"
+      },
+      {
+        "id": "TABS-UNSAVED-GUARD",
+        "pass": true,
+        "evidence": "Activation keeps the existing save/discard guard"
+      },
+      {
+        "id": "ACTION-BUSINESS-PRIORITY",
+        "pass": true,
+        "evidence": [
+          "dep.approve"
+        ]
+      },
+      {
+        "id": "ACTION-PERMISSION-GATE",
+        "pass": true,
+        "evidence": "Permission denial is separate from package lock"
+      },
+      {
+        "id": "ACTION-DISABLED-REASON",
+        "pass": true,
+        "evidence": "Disabled action retains its reason and priority"
+      },
+      {
+        "id": "MENU-TOP-LAYER",
+        "pass": true,
+        "evidence": {
+          "topLayer": true,
+          "inside": true,
+          "focused": true
+        }
+      },
+      {
+        "id": "MENU-KEYBOARD",
+        "pass": true,
+        "evidence": "End reaches the destructive item"
+      },
+      {
+        "id": "MENU-ESCAPE",
+        "pass": true,
+        "evidence": "Escape restores trigger focus"
+      },
+      {
+        "id": "MODAL-FOCUS-TRAP",
+        "pass": true,
+        "evidence": "Shift+Tab wraps within the dialog"
+      },
+      {
+        "id": "MODAL-RETURN-TO-MENU",
+        "pass": true,
+        "evidence": "Closing a form returns to the menu trigger, not its hidden item"
+      },
+      {
+        "id": "FORM-CONTRACT",
+        "pass": true,
+        "evidence": {
+          "required": true,
+          "invalid": "true",
+          "descriptions": true,
+          "readonly": true,
+          "disabled": true,
+          "links": 2
+        }
+      },
+      {
+        "id": "FORM-ERROR-LINK",
+        "pass": true,
+        "evidence": "Error summary focuses its field"
+      },
+      {
+        "id": "DOCUMENT-INTEGRITY",
+        "pass": true,
+        "evidence": "The display filter never rewrites source documents"
+      },
+      {
+        "id": "ALL-VARIANTS-DIALOGS",
+        "pass": true,
+        "evidence": {
+          "variants": 1744,
+          "dialogs": 432,
+          "failures": []
+        }
+      },
+      {
+        "id": "FINANCIAL-REGRESSION",
+        "pass": true,
+        "evidence": {
+          "schema": 12,
+          "kd09": 23643400,
+          "total09": 14243400,
+          "kd10": 11430000,
+          "total10": 54930000,
+          "invoice": 6069800
+        }
+      },
+      {
+        "id": "ZOOM-REFLOW",
+        "pass": true,
+        "evidence": "720 CSS pixels represents 1440px at 200% zoom"
+      },
+      {
+        "id": "REDUCED-MOTION",
+        "pass": true,
+        "evidence": "Shell motion is disabled or reduced to the existing negligible duration"
+      },
+      {
+        "id": "NO-RUNTIME-ERRORS",
+        "pass": true,
+        "evidence": []
+      }
+    ]
+  }
+}

@@ -5,10 +5,10 @@
 var TH = window.TH = window.TH || {};
 
 TH.PACKAGES = {
-  A: { key: 'A', level: 1, name: 'Gói A', price: '50–60 triệu', mode: 'Cơ bản', desc: 'Đủ 39 màn/52 nhóm ở mức cơ bản: nhập tay, Excel mẫu, OCR có người xác nhận. Có sẵn 2 báo cáo theo mẫu khách: doanh thu theo tòa và báo cáo kinh doanh tháng.' },
-  B: { key: 'B', level: 2, name: 'Gói B', price: '70–80 triệu', mode: 'Tự động hóa', desc: 'Toàn bộ A + nâng cấp B: preview import, nhập hàng loạt, nhiều mẫu OCR, nhắc Zalo 3 mốc; báo cáo drill-down về chứng từ và xu hướng 6 kỳ.' },
-  C: { key: 'C', level: 3, name: 'Gói C', price: '80–90 triệu', mode: 'Kiểm soát', desc: 'Toàn bộ B + nâng cấp C: duyệt, chống trùng, lịch sử thay đổi, kiểm tra trước khi chốt; báo cáo có snapshot duyệt kỳ, phân bổ chi phí chung theo rule, gộp nhóm nhà.' },
-  D: { key: 'D', level: 4, name: 'Gói D', price: '90–100 triệu', mode: 'Báo cáo & truy vết', desc: 'Toàn bộ C + nâng cấp D: audit, khóa kỳ, snapshot, đối chiếu phiên bản; báo cáo đối chiếu lịch sử và mẫu quản trị có version.' },
+  A: { key: 'A', level: 1, name: 'Gói A', price: '50–60 triệu', mode: 'Cơ bản', desc: 'Đủ nghiệp vụ cơ bản, OCR một mẫu mỗi loại có người xác nhận; một Zalo OA với 1–2 mẫu tin được duyệt. Hai mẫu báo cáo gốc: doanh thu theo tòa và kinh doanh tháng.' },
+  B: { key: 'B', level: 2, name: 'Gói B', price: '70–80 triệu', mode: 'Tự động hóa', desc: 'Toàn bộ A; xem trước Excel, xử lý hàng loạt, OCR tối đa hai mẫu mỗi loại, nhắc OA ba mốc. Giữ hai mẫu báo cáo gốc, thêm truy nguồn và xu hướng sáu kỳ.' },
+  C: { key: 'C', level: 3, name: 'Gói C', price: '80–90 triệu', mode: 'Kiểm soát', desc: 'Toàn bộ B; OCR so khớp và kiểm trùng, OA cá nhân hóa và xử lý lỗi. Giữ hai mẫu báo cáo gốc, thêm so sánh tòa/nhóm/kỳ, duyệt số liệu và phân bổ theo quy tắc đã chốt.' },
+  D: { key: 'D', level: 4, name: 'Gói D', price: '90–100 triệu', mode: 'Báo cáo & truy vết', desc: 'Toàn bộ C; thư viện OCR theo danh mục được duyệt, OA có phiên bản và giám sát. Giữ hai mẫu báo cáo gốc, thêm khóa kỳ, phiên bản và đối chiếu lịch sử trong phạm vi đã chốt.' },
 };
 TH.PKG_KEYS = ['A', 'B', 'C', 'D'];
 

@@ -1,85 +1,73 @@
-/* Trang giới thiệu (đề xuất trình bày, ngoài 39 màn nghiệp vụ). */
+/* Customer presentation: package value, scope and acceptance milestones. */
 (function () {
-  var I = TH.icon, esc = TH.esc;
-
+  var I = TH.icon, esc = TH.esc, P = TH.pricing;
   var BENEFITS = [
-    ['owner', 'Hồ sơ chủ nhà & tòa, một nguồn dữ liệu', 'Thông tin theo mẫu HĐ thuê nhà, giá thuê/cọc/giữ giá, nhân sự 4 vai trò, tài sản, PCCC/ĐKKD, lịch trả chủ nhà — nối tới phòng, hóa đơn, thu/chi và báo cáo.'],
-    ['shieldCheck', 'Báo thu khác thực thu', 'Quản lý tòa xác nhận thu tiền tòa mình (CR-PAY); chỉ tiền đã xác nhận mới giảm công nợ. Văn phòng xem tiến độ thu theo QL/tòa/phòng và hậu kiểm sao kê.'],
-    ['scan', 'OCR có người xác nhận', 'OCR hợp đồng và giấy tờ chỉ là bản nháp: từng field được soát, sửa và xác nhận trước khi lưu.'],
-    ['zap', 'Điện nước & hóa đơn theo kỳ', 'Tự lấy chỉ số kỳ trước, báo số bất thường, sinh hóa đơn nháp theo tòa và xem trước tổng tiền trước khi chốt.'],
-    ['target', 'Mốc 5/10/15 & hiệu suất tòa', 'Doanh thu sau 3 mốc (100/90/70), trừ tỷ lệ dịch vụ, cộng tiền phòng phát sinh và khách bỏ cọc ÷ giá niêm yết — xem tạm tính và thực tế, đưa vào lương nháp.'],
-    ['pie', 'Lãi dòng tiền & cổ phần', 'Lãi tạm tính = thu đã xác nhận − chi đã duyệt; phân bổ theo tỷ lệ cổ đông hiệu lực. Phân bổ không đồng nghĩa đã chi.'],
+    ['building', 'Hồ sơ liên kết xuyên suốt', 'Chủ nhà, tòa, phòng, khách và hợp đồng được tổ chức cùng một nguồn dữ liệu.'],
+    ['receipt', 'Theo dõi tiền rõ ràng', 'Phân biệt phải thu, thực thu, công nợ và cọc; quản lý xác nhận thu, kế toán hậu kiểm.'],
+    ['chart', 'Báo cáo có căn cứ', 'Tổng hợp doanh thu và chi phí theo tòa, theo kỳ; các gói nâng cao bổ sung đối chiếu và truy vết.']
   ];
-  var FLOW = [['owner', 'Chủ nhà'], ['building', 'Tòa nhà'], ['door', 'Phòng'], ['user', 'Khách thuê'], ['contract', 'Hợp đồng'], ['zap', 'Điện nước'], ['receipt', 'Hóa đơn'], ['send', 'Zalo OA'], ['handCoins', 'Thu tiền'], ['chart', 'Báo cáo']];
-  var MODULES = [
-    ['owner', 'Chủ nhà', 3], ['building', 'Tòa nhà', 3], ['door', 'Phòng', 3], ['user', 'Khách thuê & OCR', 3], ['contract', 'Hợp đồng & gia hạn', 5],
-    ['zap', 'Điện nước', 1], ['receipt', 'Hóa đơn', 4], ['send', 'Zalo OA', 2], ['handCoins', 'Thu tiền & hiệu suất', 3], ['expense', 'Chi phí', 1],
-    ['briefcase', 'Nhân sự', 2], ['calculator', 'Lương', 2], ['pie', 'Cổ phần', 2], ['chart', 'Báo cáo', 5], ['shield', 'Hệ thống', 2],
-  ];
-  var PLAN_POINTS = {
-    A: ['Đủ 39 màn / 52 nhóm chức năng', 'Hồ sơ chủ nhà, HĐ thuê tòa, tài sản, PCCC/ĐKKD; nhập tay + Excel mẫu', 'OCR 1 mẫu, người dùng xác nhận', 'Hóa đơn, công nợ, Zalo đủ điều kiện', 'Lương & cổ phần nháp', 'Báo cáo doanh thu theo tòa & kinh doanh tháng đúng mẫu Excel'],
-    B: ['Toàn bộ gói A', 'Phân công Trưởng nhóm/vệ sinh/kỹ thuật; tự sinh lịch trả chủ nhà từ HĐ', 'Xem trước import, tải file lỗi', 'OCR 2 mẫu, độ tin cậy field', 'Nhập chỉ số hàng loạt theo tòa', 'Nhắc Zalo 3 mốc', 'Báo cáo: mở chứng từ từng dòng, xu hướng 6 kỳ'],
-    C: ['Toàn bộ gói B', 'Hiệu suất cộng thu thêm (C); lịch trả: đã trả/còn lại/quá hạn', 'Duyệt & chống trùng thu/chi', 'Đối chiếu phòng–khách–hợp đồng', 'Lịch sử thay đổi, phụ lục giá', 'Kiểm tỷ lệ cổ phần 100%, khóa nháp lương', 'Báo cáo: bản chốt duyệt kỳ, phân bổ chi phí chung, nhóm nhà'],
-    D: ['Toàn bộ gói C', 'Nhật ký & truy vết chứng từ', 'Khóa kỳ, bản chốt báo cáo', 'Đối soát sao kê, phân bổ phiếu thu', 'Phiên bản công thức & mẫu báo cáo', 'Báo cáo: đối chiếu 3 kỳ, chốt phiên bản'],
-  };
-
-  var RPT_CARDS = [
-    ['RPT-04', 'building', 'Báo cáo doanh thu theo tòa', 'G1.31.8.26.xlsx · BÁO CÁO THÁNG 8', ['Doanh thu tiền phòng + 7 dòng dịch vụ, cọc mới / bỏ / hoàn', 'Giá vốn, chi phí vận hành, chi phí bán hàng', 'Lợi nhuận gộp, lợi nhuận ròng và 13 tỷ lệ', 'Bảng chia cổ phần theo tòa']],
-    ['RPT-05', 'chart', 'Báo cáo kinh doanh tháng', 'BÁO CÁO KINH DOANH THÁNG 8.xlsx', ['Cột TỔNG và từng tòa (hoặc nhóm nhà)', 'Chế độ Báo cáo kinh doanh / Báo cáo tổng', 'Cùng bộ chỉ tiêu và tỷ lệ với báo cáo tòa', 'Xuất Excel: sheet kinh doanh, tổng, theo nhóm nhà']],
-  ];
-
+  function picker(label) {
+    return '<div class="offer-picker" role="group" aria-label="' + label + '">' + TH.PKG_KEYS.map(function (k) {
+      return '<button type="button" class="btn" data-act="pricing.pick" data-pkg="' + k + '" aria-pressed="' + (k === P.selected()) + '" aria-controls="offer-detail">Gói ' + k + '</button>';
+    }).join('') + '</div>';
+  }
   TH.views.landing = {
     render: function () {
-      var pkg = TH.store.state.pkg;
-      var plans = TH.PKG_KEYS.map(function (k) {
-        var p = TH.PACKAGES[k], feat = k === 'D';
-        return '<article class="plan' + (feat ? ' is-featured' : '') + '">' + (feat ? '<span class="plan-flag">Bản master của demo</span>' : '') +
-          '<div class="plan-hd"><span class="plan-key">' + k + '</span><div><div class="plan-name">' + p.name + '</div><div class="plan-level">' + p.mode + '</div></div></div>' +
-          '<div class="plan-price">' + p.price.replace(' triệu', '') + '<small>triệu đồng</small></div>' +
-          '<p class="plan-desc">' + esc(p.desc) + '</p>' +
-          '<ul>' + PLAN_POINTS[k].map(function (t) { return '<li>' + I('check') + '<span>' + esc(t) + '</span></li>'; }).join('') + '</ul>' +
-          '<a class="btn ' + (feat ? 'btn-primary' : '') + '" href="?previewPackage=' + k + '#/demo/rpt-01" data-act="landing.open" data-pkg="' + k + '">Mở demo ' + p.name + I('arrowRight', 'ic-sm') + '</a></article>';
+      var key = P.selected();
+      var plans = TH.PKG_KEYS.map(function (k, i) {
+        var p = TH.PACKAGES[k], o = P.offers[k], prev = TH.PKG_KEYS[i - 1];
+        return '<article class="plan' + (k === key ? ' is-selected' : '') + '" data-pkg="' + k + '" aria-labelledby="offer-' + k + '">' +
+          '<div class="plan-hd"><span class="plan-key">' + k + '</span><div><div class="plan-name">Gói ' + k + '</div><div class="plan-level">' + (prev ? 'Bao gồm gói ' + prev : 'Nền tảng vận hành') + '</div></div></div>' +
+          '<h3 id="offer-' + k + '">' + esc(o.title) + '</h3><div class="plan-price">' + esc(p.price.replace(' triệu', '')) + '<small>triệu đồng</small></div>' +
+          '<p class="offer-price-caption">Tổng giá trị gói · đề xuất</p><p class="small offer-foundation">Có OCR và Zalo OA</p><p class="plan-desc">' + esc(o.audience) + '</p>' +
+          '<div class="offer-card-points"><b>' + (prev ? 'Bổ sung nổi bật' : 'Chức năng nổi bật') + '</b>' + P.list(o.includes.slice(0, 3)) + '</div>' +
+          '<p class="offer-card-value">' + esc(o.outcome) + '</p>' +
+          '<button type="button" class="btn ' + (k === key ? 'btn-primary' : '') + '" data-act="pricing.pick" data-pkg="' + k + '" data-reveal="yes" aria-pressed="' + (k === key) + '" aria-controls="offer-detail">Xem phạm vi gói ' + k + I('arrowRight', 'ic-sm') + '</button></article>';
       }).join('');
+      return '<div class="landing landing-pricing">' +
+        '<header class="l-nav"><div class="l-nav-in"><a class="brand" href="#/" aria-label="TIMEHOUSE — Trang giới thiệu"><span class="brand-mark">' + I('logo') + '</span><span class="brand-name">TIMEHOUSE</span></a>' +
+        '<nav class="l-nav-links" aria-label="Trang giới thiệu"><a href="#bang-gia" data-act="landing.scroll" data-target="bang-gia">Mức đầu tư</a><a href="#so-sanh" data-act="landing.scroll" data-target="so-sanh">So sánh chức năng</a><a href="#moc-ban-giao" data-act="landing.scroll" data-target="moc-ban-giao">Mốc bàn giao</a><a href="#giai-dap" data-act="landing.scroll" data-target="giai-dap">Giải đáp</a></nav>' +
+        '<span class="grow"></span><a class="btn btn-primary" href="?previewPackage=' + key + '#/demo/rpt-01" data-act="landing.open" data-pkg="' + key + '">Xem demo' + I('arrowRight', 'ic-sm') + '</a></div></header>' +
 
-      return '<div class="landing">' +
-        '<header class="l-nav"><div class="l-nav-in">' +
-        '<a class="brand" href="#/" style="border:0;padding:0;height:auto"><span class="brand-mark">' + I('logo') + '</span><span class="brand-name">TIMEHOUSE</span></a>' +
-        '<nav class="l-nav-links" aria-label="Trang giới thiệu"><a href="#loi-ich" data-act="landing.scroll" data-target="loi-ich">Lợi ích</a><a href="#phan-he" data-act="landing.scroll" data-target="phan-he">Phân hệ</a><a href="#bao-cao" data-act="landing.scroll" data-target="bao-cao">Báo cáo</a><a href="#bang-gia" data-act="landing.scroll" data-target="bang-gia">Bốn gói</a></nav>' +
-        '<span class="grow"></span><span class="badge badge-draft" data-tip="Bản trình bày — dữ liệu minh họa, chưa phải giao diện nghiệm thu">DESIGN DRAFT</span>' +
-        '<a class="btn btn-primary" href="?previewPackage=D#/demo/rpt-01" data-act="landing.open" data-pkg="D">Khám phá bản demo</a></div></header>' +
+        '<main><section class="hero"><div class="l-wrap"><span class="hero-eyebrow">TIMEHOUSE · Quản lý vận hành nhà cho thuê</span>' +
+        '<h1>Mỗi mức đầu tư,<br><span class="accent">một bước nâng tầm vận hành.</span></h1>' +
+        '<p class="lead">Từ quản lý hồ sơ và thu tiền đến tự động hóa, kiểm soát và giải trình số liệu. Xem rõ từng gói làm được gì, giá trị nhận được và cách nghiệm thu.</p>' +
+        '<div class="hero-cta"><a class="btn btn-primary btn-lg" href="#bang-gia" data-act="landing.scroll" data-target="bang-gia">Khám phá mức đầu tư' + I('arrowRight', 'ic-sm') + '</a><a class="btn btn-lg" href="#moc-ban-giao" data-act="landing.scroll" data-target="moc-ban-giao">Xem lộ trình bàn giao</a></div>' +
+        '<div class="hero-meta"><span>' + I('layers', 'ic-sm') + 'Bốn gói phát triển cộng dồn</span><span>' + I('checkCircle', 'ic-sm') + 'Đầu ra nghiệm thu rõ ràng</span><span>' + I('database', 'ic-sm') + 'Demo trên dữ liệu mô phỏng</span></div></div></section>' +
 
-        '<section class="hero"><div class="l-wrap">' +
-        '<span class="hero-eyebrow"><span class="badge badge-teal">Mới</span>Xem thử 4 gói A/B/C/D trên cùng một giao diện</span>' +
-        '<h1>Vận hành chuỗi tòa nhà cho thuê, <span class="accent">từ hợp đồng đến lợi nhuận</span></h1>' +
-        '<p class="lead">TIMEHOUSE gom chủ nhà, phòng, khách thuê, điện nước, hóa đơn, thu tiền, chi phí, lương và cổ phần vào một hệ thống — mỗi con số trên báo cáo đều truy được về chứng từ đã xác nhận.</p>' +
-        '<div class="hero-cta"><a class="btn btn-primary btn-lg" href="?previewPackage=D#/demo/rpt-01" data-act="landing.open" data-pkg="D">' + I('play', 'ic-sm') + 'Khám phá bản demo</a>' +
-        '<a class="btn btn-lg" href="#bang-gia" data-act="landing.scroll" data-target="bang-gia">So sánh 4 gói</a></div>' +
-        '<div class="hero-meta"><span>' + I('grid', 'ic-sm') + '39 màn nghiệp vụ</span><span>' + I('layers', 'ic-sm') + '52 nhóm chức năng</span><span>' + I('database', 'ic-sm') + 'Dữ liệu minh họa nhất quán</span></div>' +
-        '<div class="preview-frame"><div class="preview-bar"><i></i><i></i><i></i><span class="url">timehouse.demo / báo cáo tòa · gói D</span></div>' +
-        '<a href="?previewPackage=D#/demo/rpt-01" data-act="landing.open" data-pkg="D" aria-label="Mở báo cáo tổng quan trong bản demo"><img src="assets/preview-rpt01.png" width="1440" height="810" alt="Màn Báo cáo tòa (RPT-01) của bản demo TIMEHOUSE: thẻ thu, nợ, chi, lãi dòng tiền tạm tính theo tòa" loading="eager" onerror="this.closest(\'.preview-frame\').style.display=\'none\'"></a></div>' +
-        '</div></section>' +
+        '<section class="l-section alt" id="bang-gia"><div class="l-wrap"><div class="l-hd"><div class="l-kicker">Chọn mức đầu tư</div><h2>Gói phù hợp với cách bạn vận hành</h2><p>Mọi gói đều có OCR, Zalo OA và hai mẫu báo cáo gốc của khách hàng. Gói cao hơn tăng khả năng phân tích, kiểm soát và truy vết trong giới hạn đã nêu.</p></div>' +
+        '<div class="offer-price-note">' + I('info', 'ic-sm') + '<p><b>Giá hiển thị là tổng giá trị từng gói.</b> Gói B gồm A, gói C gồm B, gói D gồm C. Không cộng giá các gói với nhau.</p></div>' +
+        '<div class="plans">' + plans + '</div><p class="plans-note">Khoảng giá đề xuất để trao đổi phạm vi. Mức chốt, thuế, phí dịch vụ và điều kiện bàn giao được xác nhận trong báo giá.</p>' +
+        '<div class="offer-detail-section" id="pham-vi-goi"><div class="offer-section-bar"><div><span class="l-kicker">Bạn nhận được gì?</span><p data-offer-label>Gói ' + key + ' · ' + esc(TH.PACKAGES[key].price) + '</p></div>' + picker('Chọn gói xem phạm vi') + '</div>' +
+        '<div id="offer-detail" class="offer-detail" role="region" aria-labelledby="offer-detail-title">' + P.detail(key) + '</div></div><p id="offer-live" class="sr-only" aria-live="polite" aria-atomic="true"></p></div></section>' +
 
-        '<section class="l-section" id="loi-ich"><div class="l-wrap"><div class="l-hd"><div class="l-kicker">Lợi ích</div><h2>Ít bảng tính rời, nhiều kiểm soát hơn</h2><p>Thiết kế theo đúng quy trình của tài liệu SRS: dữ liệu có bước kiểm tra, tiền thực nhận phải được xác nhận, và các chính sách chưa chốt luôn được gắn nhãn DRAFT.</p></div>' +
-        '<div class="benefits">' + BENEFITS.map(function (b) { return '<div class="benefit"><div class="b-ic">' + I(b[0]) + '</div><h3>' + esc(b[1]) + '</h3><p>' + esc(b[2]) + '</p></div>'; }).join('') + '</div></div></section>' +
+        '<section class="l-section" id="so-sanh"><div class="l-wrap"><div class="l-hd"><div class="l-kicker">Đối chiếu phạm vi</div><h2>Phần đầu tư tăng thêm nằm ở đâu?</h2><p>A tập trung quản lý. B giảm thao tác lặp. C kiểm soát sai sót. D giữ căn cứ giải trình cho các kỳ đã chốt.</p></div>' +
+        P.comparison() + '<div class="offer-mobile-matrix">' + picker('Chọn gói để so sánh trên điện thoại') + '<div id="offer-mobile-compare">' + P.mobileComparison(key) + '</div></div>' +
+        '<div class="offer-common"><b>Nền chung của mọi gói</b><p>OCR, Zalo OA và hai mẫu báo cáo gốc luôn có từ gói A. Giao diện thống nhất, kiểm tra dữ liệu nhập, phân quyền theo phạm vi, xác nhận thu tiền và quy trình hoàn cọc có người lập/người duyệt riêng.</p></div>' +
+        '<div class="offer-compare-action"><button type="button" class="btn" data-act="pkg.compare">' + I('compare', 'ic-sm') + 'Xem chi tiết 52 chức năng</button><span class="small muted">Mở bảng chi tiết theo phân hệ để cùng đối chiếu phạm vi.</span></div></div></section>' +
 
-        '<section class="l-section alt" id="phan-he"><div class="l-wrap"><div class="l-hd"><div class="l-kicker">Luồng nghiệp vụ</div><h2>15 phân hệ, một luồng liền mạch</h2><p>Mỗi bước tạo dữ liệu cho bước sau. Báo cáo chỉ cộng các khoản đã xác nhận/đã duyệt.</p></div>' +
-        '<div class="flow">' + FLOW.map(function (f, i) { return '<span class="flow-step">' + I(f[0]) + esc(f[1]) + '</span>' + (i < FLOW.length - 1 ? '<span class="flow-arrow">' + I('chevronRight') + '</span>' : ''); }).join('') + '</div>' +
-        '<div class="modules">' + MODULES.map(function (m) { return '<div class="module-tile"><div class="mt-top">' + I(m[0]) + '<span class="badge badge-neutral">' + m[2] + ' màn</span></div><b>' + esc(m[1]) + '</b><span>Có phần lõi ở gói A</span></div>'; }).join('') + '</div></div></section>' +
+        '<section class="l-section alt" id="moc-ban-giao"><div class="l-wrap"><div class="l-hd"><div class="l-kicker">Lộ trình triển khai</div><h2>Mỗi mốc có đầu ra để nghiệm thu</h2><p>Sáu mốc của gói được chọn. Phần nâng cao được triển khai theo phạm vi đã thống nhất, không tính thành sáu gói giá riêng.</p></div>' +
+        '<div class="offer-roadmap-label"><span class="badge badge-teal" data-offer-label>Gói ' + key + ' · ' + esc(TH.PACKAGES[key].price) + '</span><span class="small muted">Lịch thực hiện và thanh toán thống nhất khi chốt phạm vi.</span></div>' +
+        '<div id="offer-roadmap">' + P.roadmap(key) + '</div></div></section>' +
 
-        '<section class="l-section" id="bao-cao"><div class="l-wrap"><div class="l-hd"><div class="l-kicker">Báo cáo trong gói</div><h2>Hai báo cáo đúng mẫu Excel của bạn</h2><p>Có sẵn từ gói A, cùng tên dòng và thứ tự như file đang dùng. Số liệu tự tính từ hóa đơn, cọc, chi phí đã duyệt và lương — xuất Excel đúng bố cục.</p></div>' +
-        '<div class="l-rpt">' + RPT_CARDS.map(function (r) { return '<a class="l-rpt-card" href="?previewPackage=A' + '#/demo/' + r[0].toLowerCase() + '" data-act="landing.open" data-pkg="A" data-go="#/demo/' + r[0].toLowerCase() + '"><div class="l-rpt-top">' + I(r[1]) + '<span class="screen-id">' + r[0] + '</span><span class="badge badge-teal">Có từ gói A</span></div><h3>' + esc(r[2]) + '</h3><p class="small muted">Mẫu: ' + esc(r[3]) + '</p><ul>' + r[4].map(function (t) { return '<li>' + I('check', 'ic-sm') + esc(t) + '</li>'; }).join('') + '</ul><span class="l-rpt-go">Mở bản demo gói A' + I('arrowRight', 'ic-sm') + '</span></a>'; }).join('') + '</div>' +
-        '<div class="l-rpt-tiers">' + TH.PKG_KEYS.map(function (k) { var rp = TH.REPORT_PACK[k]; return '<div class="l-rpt-tier">' + TH.tierPill(k, { plus: k !== 'A', lg: true }) + '<div><b>' + esc(rp.head) + '</b><ul>' + rp.items.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></div></div>'; }).join('') + '</div></div></section>' +
+        '<section class="l-section" id="bao-cao"><div class="l-wrap"><div class="l-hd"><div class="l-kicker">Dữ liệu đến kết quả</div><h2>Cùng một luồng từ hồ sơ đến báo cáo</h2><p>Phần cốt lõi gồm hồ sơ thuê, hóa đơn, thu tiền, cọc, chi phí, nhân sự và hai báo cáo theo mẫu khách. Các gói nâng cao tăng chiều sâu xử lý từng bước.</p></div>' +
+        '<div class="benefits">' + BENEFITS.map(function (b) { return '<article class="benefit"><div class="b-ic">' + I(b[0]) + '</div><h3>' + esc(b[1]) + '</h3><p>' + esc(b[2]) + '</p></article>'; }).join('') + '</div>' +
+        '<div class="offer-report-links"><a class="btn" href="?previewPackage=A#/demo/rpt-04" data-act="landing.open" data-pkg="A" data-go="#/demo/rpt-04">' + I('building', 'ic-sm') + 'Xem báo cáo theo tòa</a><a class="btn" href="?previewPackage=A#/demo/rpt-05" data-act="landing.open" data-pkg="A" data-go="#/demo/rpt-05">' + I('chart', 'ic-sm') + 'Xem báo cáo kinh doanh tháng</a></div></div></section>' +
 
-        '<section class="l-section alt" id="bang-gia"><div class="l-wrap"><div class="l-hd"><div class="l-kicker">Bốn gói</div><h2>Cùng 39 màn, khác chiều sâu xử lý</h2><p>Gói A đã có đủ mọi phân hệ ở mức cơ bản. B, C, D cộng dồn các nâng cấp theo từng dòng chức năng — không khóa cả phân hệ.</p></div>' +
-        '<div class="plans">' + plans + '</div>' +
-        '<p class="plans-note">Giá tham khảo theo cấu hình demo — <b>chưa đối chiếu Excel báo giá gốc</b>, không phải giá chốt. Chi phí OCR, Zalo OA, máy chủ và các mục ngoài gói tính riêng (Decision Log D-08). Đang xem gần nhất: ' + TH.PACKAGES[pkg].name + '.</p></div></section>' +
+        '<section class="l-section alt" id="giai-dap"><div class="l-wrap offer-faq"><div class="l-hd"><div class="l-kicker">Trước khi chốt phương án</div><h2>Những điều cần thống nhất</h2></div>' +
+        '<details><summary>Giá các gói có cộng dồn để thanh toán không?</summary><p>Giá là tổng giá trị của gói được chọn, đã gồm các gói trước. Khi nâng cấp từ hợp đồng đã triển khai, phần phí và phạm vi bổ sung được xác định riêng.</p></details>' +
+        '<details><summary>Gói A đã có OCR và Zalo OA chưa?</summary><p>Có. OCR theo mẫu đã chọn, có người rà soát trước khi ghi. OA có một kết nối, 1–2 mẫu tin được duyệt, gửi thủ công và một lịch nhắc đơn giản khi đủ điều kiện. Gói cao hơn bổ sung khả năng xử lý; không mặc định không giới hạn mẫu hoặc số OA.</p></details>' +
+        '<details><summary>Gói cao hơn có tăng số mẫu báo cáo không?</summary><p>Mọi gói giữ hai mẫu gốc: doanh thu theo tòa và kinh doanh tháng. B thêm truy nguồn và xu hướng sáu kỳ; C thêm so sánh, duyệt số liệu; D thêm khóa kỳ và phiên bản. Mẫu báo cáo mới ngoài hai mẫu này được xác định riêng.</p></details>' +
+        '<details><summary>Các phí OCR, Zalo, máy chủ và bảo trì được tính thế nào?</summary><p>Mọi gói đều có chức năng OCR và OA. Phí sử dụng dịch vụ bên ngoài được ghi riêng trong báo giá chính thức, cùng thuế, hạ tầng và thời hạn hỗ trợ.</p></details>' +
+        '<details><summary>Phiên bản đang xem đã vận hành thực tế chưa?</summary><p>Đây là bản demo tương tác trên dữ liệu mô phỏng để đối chiếu giao diện, quy trình và phạm vi. Bàn giao vận hành cần backend, cơ sở dữ liệu, quyền phía server, lưu trữ, tích hợp thật và kiểm thử nghiệm thu.</p></details>' +
+        '<details><summary>Công thức và dữ liệu khách hàng được xác nhận khi nào?</summary><p>Ở mốc đầu tiên, hai bên chốt mẫu dữ liệu, ví dụ tính tiền, chính sách lương/cổ phần và các trường hợp ngoại lệ. Dữ liệu đầu kỳ được làm sạch, nạp và đối chiếu trước khi đưa vào sử dụng.</p></details>' +
+        '<details><summary>Số tòa, phòng và thời gian bàn giao được xác định ra sao?</summary><p>Demo hiện dùng 3 tòa, 18 phòng và 6 kỳ. Quy mô vận hành, khối lượng chuyển đổi dữ liệu, lịch thực hiện và điều kiện nghiệm thu được ghi trong phạm vi ký kết.</p></details></div></section>' +
 
-        '<section class="l-cta"><div class="l-wrap"><div class="l-cta-box"><div><h2>Xem trực tiếp trên dữ liệu mẫu</h2><p>Mở báo cáo tổng quan ở gói D, rồi đổi sang A/B/C ngay trên topbar để thấy phần lõi và phần nâng cấp của từng màn.</p></div>' +
-        '<a class="btn btn-primary btn-lg" href="?previewPackage=D#/demo/rpt-01" data-act="landing.open" data-pkg="D">Khám phá bản demo' + I('arrowRight', 'ic-sm') + '</a></div></div></section>' +
-
-        '<footer class="l-foot"><div class="l-wrap"><span>© 2026 TIMEHOUSE · Bản demo trình bày — DESIGN DRAFT, dữ liệu minh họa, không gọi dịch vụ thật.</span><a href="#/demo/screens">Mục lục 39 màn</a></div></footer>' +
-        '</div>';
-    },
+        '<section class="l-cta"><div class="l-wrap"><div class="l-cta-box"><div><h2>Cùng xem phương án phù hợp</h2><p>Chia sẻ trang giới thiệu mở đúng gói đang chọn, hoặc vào demo để cùng xem tình huống nghiệp vụ.</p><span class="badge badge-teal" data-offer-label>Gói ' + key + ' · ' + esc(TH.PACKAGES[key].price) + '</span></div>' +
+        '<a class="btn btn-primary btn-lg" href="?previewPackage=' + key + '#/demo/rpt-01" data-act="landing.open" data-pkg="' + key + '" data-offer-demo>Xem demo gói ' + key + I('arrowRight', 'ic-sm') + '</a></div>' +
+        '<div class="offer-share"><label for="offer-link">Liên kết giới thiệu gửi khách</label><div class="copy-field"><input id="offer-link" class="input" type="url" readonly value="' + esc(P.link(key)) + '"><button type="button" class="btn" data-act="pricing.copy">' + I('copy', 'ic-sm') + 'Sao chép liên kết</button></div><p class="small muted">Dùng địa chỉ website đã triển khai khi gửi khách.</p></div></div></section></main>' +
+        '<footer class="l-foot"><div class="l-wrap"><span>© 2026 TIMEHOUSE · Bản trình bày phạm vi và dữ liệu mô phỏng.</span><a href="#bang-gia" data-act="landing.scroll" data-target="bang-gia">Xem lại các mức đầu tư</a></div></footer></div>';
+    }
   };
   TH.act['landing.open'] = function (el) {
     TH.store.setPkg(el.dataset.pkg);
