@@ -1,0 +1,9 @@
+# Chỉ deploy phần chạy demo: index.html, css/, js/, assets/.
+# docs/ chứa file nghiệp vụ gốc của khách (lương, hợp đồng, báo cáo) — không đưa lên Vercel.
+/docs/
+/tools/
+/.taste-skill/
+/.playwright-mcp/
+/.claude/
+*.md
+*.py
