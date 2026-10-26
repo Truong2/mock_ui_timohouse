@@ -5,35 +5,36 @@
   var P = TH.packagePolicy = { version: 'operating-support-v1', offers: {}, matrix: [], actions: {}, imports: { 'OWN-IMP': 'F002.B', 'BLD-IMP': 'F005.B', 'ROOM-IMP': 'F008.B' } };
   TH.CRS = TH.CRS || {};
   TH.CRS['CR-PKG-OPS'] = { id:'CR-PKG-OPS', date:'2026-10-24', title:'Phân tầng theo mức hỗ trợ vận hành' };
+  P.ocrScope = 'OCR chỉ áp dụng cho hợp đồng khách thuê. Giấy tờ tùy thân, hợp đồng chủ nhà/thuê tòa, hóa đơn và các tài liệu khác chỉ nhập tay hoặc đính kèm, không thuộc phạm vi OCR.';
   var OFFERS = {
     A: { title: 'Vận hành cơ bản', audience: 'Cần đủ nghiệp vụ, xử lý từng hồ sơ và chứng từ', outcome: 'Nhập từng hồ sơ, hệ thống tính đúng theo bộ công thức cố định.',
-      includes: ['Thêm/sửa từng chủ nhà, tòa, phòng, khách và hợp đồng', 'Nhập chỉ số từng phòng; lập và xác nhận từng hóa đơn', 'Thu từng khoản; công nợ và hoàn cọc đủ quy trình', 'Nhập đầu vào chi phí, lương và cổ phần; tính theo công thức cố định', 'Hai báo cáo gốc, tổng hợp theo kỳ và xuất Excel', 'OCR một mẫu giấy tờ khách và một mẫu hợp đồng; rà soát từng file', 'Một Zalo OA: gửi từng hóa đơn và một lịch nhắc cố định'],
-      limits: ['OCR: một mẫu giấy tờ khách và một mẫu hợp đồng đã chọn; sửa và xác nhận từng file.', 'OA: một OA, tối đa hai mẫu tin được duyệt; gửi từng hóa đơn và một lịch nhắc cố định.', 'Báo cáo: hai mẫu gốc, xem và xuất theo kỳ; không tự thiết kế mẫu mới.', 'Nhập và xử lý từng hồ sơ/chứng từ; nhập Excel, lập/xác nhận/gửi hàng loạt có từ B.'],
+      includes: ['Thêm/sửa từng chủ nhà, tòa, phòng, khách và hợp đồng', 'Nhập chỉ số từng phòng; lập và xác nhận từng hóa đơn', 'Thu từng khoản; công nợ và hoàn cọc đủ quy trình', 'Nhập đầu vào chi phí, lương và cổ phần; tính theo công thức cố định', 'Hai báo cáo gốc, tổng hợp theo kỳ và xuất Excel', 'OCR một mẫu hợp đồng khách thuê; rà soát từng file', 'Một Zalo OA: gửi từng hóa đơn và một lịch nhắc cố định'],
+      limits: ['OCR: chỉ hợp đồng khách thuê, một mẫu đã chọn; sửa và xác nhận từng file.', 'OA: một OA, tối đa hai mẫu tin được duyệt; gửi từng hóa đơn và một lịch nhắc cố định.', 'Báo cáo: hai mẫu gốc, xem và xuất theo kỳ; không tự thiết kế mẫu mới.', 'Nhập và xử lý từng hồ sơ/chứng từ; nhập Excel, lập/xác nhận/gửi hàng loạt có từ B.'],
       example: 'Từ hợp đồng và chỉ số điện nước, lập hóa đơn, ghi nhận thu từng lần và xem khoản còn nợ của từng phòng.',
       acceptance: 'Hồ sơ liên kết đúng; bộ ví dụ tính tiền khớp; thu tiền, cọc và báo cáo thể hiện đúng trạng thái.',
-      upgrade: 'Đủ nghiệp vụ cơ bản; không có nhập Excel hoặc xử lý hàng loạt. Bộ tính tiền và kiểm tra bắt buộc có ở mọi gói.', demo: 'INV-02' },
+      upgrade: 'Đủ nghiệp vụ cơ bản, OCR một mẫu hợp đồng khách thuê; không có nhập Excel hoặc xử lý hàng loạt. Bộ tính tiền và kiểm tra bắt buộc có ở mọi gói.', demo: 'INV-02' },
     B: { title: 'Hỗ trợ nhập liệu', audience: 'Cần giảm nhập lặp và xử lý danh sách nhanh hơn', outcome: 'Giảm thao tác lặp khi nhập dữ liệu, lập hóa đơn và nhắc thanh toán.',
-      includes: ['Nhập Excel có xem trước, kiểm tra dòng và tải danh sách lỗi', 'Nhập chỉ số; lập, xác nhận và xuất/gửi hóa đơn hàng loạt', 'OCR tối đa hai mẫu mỗi loại, chỉ rõ trường cần kiểm tra', 'Hỗ trợ lấy dữ liệu liên phân hệ; sinh lịch trả từ hợp đồng', 'Gửi danh sách và cấu hình nhắc OA ba mốc', 'Mở chứng từ từ hai báo cáo gốc; xem xu hướng sáu kỳ'],
-      limits: ['OCR: tối đa hai mẫu cho mỗi loại giấy tờ/hợp đồng; chưa nhận dạng mẫu tùy ý.', 'OA: kế thừa một OA; thêm mẫu hóa đơn/nhắc nợ/hết hạn hợp đồng và ba mốc nhắc.', 'Báo cáo: giữ hai mẫu gốc; thêm truy nguồn và xu hướng tối đa sáu kỳ.', 'Chỉ xử lý hàng loạt trên các tác vụ và mẫu Excel đã thống nhất.'],
+      includes: ['Nhập Excel có xem trước, kiểm tra dòng và tải danh sách lỗi', 'Nhập chỉ số; lập, xác nhận và xuất/gửi hóa đơn hàng loạt', 'OCR tối đa hai mẫu hợp đồng khách thuê, chỉ rõ trường cần kiểm tra', 'Hỗ trợ lấy dữ liệu liên phân hệ; sinh lịch trả từ hợp đồng', 'Gửi danh sách và cấu hình nhắc OA ba mốc', 'Mở chứng từ từ hai báo cáo gốc; xem xu hướng sáu kỳ'],
+      limits: ['OCR: chỉ hợp đồng khách thuê, tối đa hai mẫu đã chọn; chưa nhận dạng mẫu tùy ý.', 'OA: kế thừa một OA; thêm mẫu hóa đơn/nhắc nợ/hết hạn hợp đồng và ba mốc nhắc.', 'Báo cáo: giữ hai mẫu gốc; thêm truy nguồn và xu hướng tối đa sáu kỳ.', 'Chỉ xử lý hàng loạt trên các tác vụ và mẫu Excel đã thống nhất.'],
       example: 'Rà soát bảng Excel trước khi ghi, lập hóa đơn theo tòa và mở chứng từ giải thích doanh thu trên báo cáo.',
       acceptance: 'Dòng lỗi được tách để sửa; thao tác hàng loạt đúng kết quả; lịch trả và nhắc thanh toán đúng cấu hình.',
-      upgrade: 'Phần đầu tư tăng thêm dành cho tự động hóa và xử lý hàng loạt.', demo: 'INV-01' },
+      upgrade: 'Tự động hóa và xử lý hàng loạt; OCR tối đa hai mẫu hợp đồng khách thuê, chỉ rõ trường cần kiểm tra.', demo: 'INV-01' },
     C: { title: 'Kiểm soát nâng cao', audience: 'Nhiều người cùng nhập liệu và cần kiểm soát sai sót', outcome: 'Soát ngoại lệ, so khớp và đối chiếu trước khi chốt kết quả.',
       includes: ['Kiểm trùng hồ sơ, chứng từ và yêu cầu thu tiền', 'Kiểm tra ngoại lệ trước khi xác nhận', 'Bổ sung bước duyệt và lịch sử điều chỉnh theo nghiệp vụ', 'Lưu số liệu kỳ đã duyệt, theo dõi sai lệch', 'Phân bổ chi phí chung theo quy tắc đã thống nhất', 'Báo cáo nhóm nhà, so sánh kỳ và cảnh báo biên lợi nhuận'],
-      limits: ['OCR: giữ giới hạn mẫu của B, thêm kiểm trùng và so khớp phòng–khách–hợp đồng.', 'OA: kế thừa một OA; thêm cá nhân hóa theo tòa và xử lý lỗi gửi theo quy tắc.', 'Báo cáo: giữ hai mẫu gốc; thêm so sánh tòa/nhóm/kỳ và bản số liệu đã duyệt.', 'Quy trình duyệt và quy tắc phân bổ cố định theo danh sách đã chốt.'],
+      limits: ['OCR: chỉ hợp đồng khách thuê, giữ tối đa hai mẫu của B; thêm kiểm trùng và so khớp phòng–khách–hợp đồng.', 'OA: kế thừa một OA; thêm cá nhân hóa theo tòa và xử lý lỗi gửi theo quy tắc.', 'Báo cáo: giữ hai mẫu gốc; thêm so sánh tòa/nhóm/kỳ và bản số liệu đã duyệt.', 'Quy trình duyệt và quy tắc phân bổ cố định theo danh sách đã chốt.'],
       example: 'Phát hiện chứng từ chi bị nhập hai lần, kiểm tra người xử lý và đối chiếu số liệu trước/sau duyệt kỳ.',
       acceptance: 'Phát hiện đúng tình huống trùng/ngoại lệ; quyền xử lý đúng; tổng phân bổ và số liệu đối chiếu khớp.',
-      upgrade: 'Phần đầu tư tăng thêm dành cho kiểm soát, xử lý ngoại lệ và đối chiếu.', demo: 'EXP-01' },
+      upgrade: 'Kiểm soát, xử lý ngoại lệ và đối chiếu; OCR hợp đồng khách thuê giữ giới hạn mẫu của B, thêm kiểm trùng và so khớp.', demo: 'EXP-01' },
     D: { title: 'Quản trị theo kỳ', audience: 'Cần giải trình thay đổi và quản lý các kỳ đã chốt', outcome: 'Giữ căn cứ để giải thích số liệu và đối chiếu lịch sử.',
       includes: ['Nhật ký thay đổi dữ liệu tài chính chi tiết', 'Biểu phí và công thức có phiên bản trong phạm vi chốt', 'Khóa kỳ, điều chỉnh có căn cứ và lịch sử', 'Báo cáo lưu có phiên bản, truy ngược nguồn số liệu', 'Đối soát với sao kê nhập vào theo quy tắc', 'Giám sát tác vụ hàng loạt và xử lý lỗi gửi thông báo'],
-      limits: ['OCR: thư viện mẫu theo danh mục được duyệt; số mẫu ghi trong báo giá, không nhận mọi định dạng.', 'OA: kế thừa một OA; thêm phiên bản mẫu, lịch sử và giám sát gửi lại.', 'Báo cáo: giữ hai mẫu gốc; thêm khóa kỳ, phiên bản và đối chiếu lịch sử; không tự thiết kế báo cáo bất kỳ.', 'Khóa kỳ, phiên bản và đối soát chỉ áp dụng cho dữ liệu/mẫu đã chốt; chưa kết nối ngân hàng tự động.'],
+      limits: ['OCR: chỉ hợp đồng khách thuê, thư viện mẫu hợp đồng được duyệt; số mẫu ghi trong báo giá, có lịch sử sửa.', 'OA: kế thừa một OA; thêm phiên bản mẫu, lịch sử và giám sát gửi lại.', 'Báo cáo: giữ hai mẫu gốc; thêm khóa kỳ, phiên bản và đối chiếu lịch sử; không tự thiết kế báo cáo bất kỳ.', 'Khóa kỳ, phiên bản và đối soát chỉ áp dụng cho dữ liệu/mẫu đã chốt; chưa kết nối ngân hàng tự động.'],
       example: 'Giữ báo cáo kỳ đã chốt, mở nguồn từng chỉ tiêu và tạo phiên bản mới để giải thích phần số liệu thay đổi.',
       acceptance: 'Bản chốt giữ nguyên; phiên bản sau có liên kết và chênh lệch; thay đổi tài chính truy được căn cứ.',
-      upgrade: 'Phần đầu tư tăng thêm dành cho lịch sử, phiên bản và khả năng giải trình.', demo: 'REPORTS' }
+      upgrade: 'Lịch sử, phiên bản và khả năng giải trình; OCR chỉ hợp đồng khách thuê, có lịch sử sửa và thư viện mẫu hợp đồng đã duyệt theo báo giá.', demo: 'REPORTS' }
   };
   var MATRIX = [
     ['Hồ sơ và hợp đồng', ['Nhập và sửa từng hồ sơ', 'Nhập Excel, xem trước và gợi ý', 'Thêm so khớp, kiểm soát hiệu lực', 'Thêm phiên bản theo hiệu lực']],
-    ['Excel và OCR', ['OCR một mẫu mỗi loại; xác nhận trước khi ghi', 'OCR tối đa hai mẫu mỗi loại; xem trước Excel', 'Giữ hai mẫu; thêm kiểm trùng và so khớp', 'Thư viện mẫu theo danh mục đã duyệt']],
+    ['Excel và OCR hợp đồng khách thuê', ['OCR một mẫu hợp đồng khách thuê; xác nhận trước khi ghi', 'OCR tối đa hai mẫu hợp đồng khách thuê; xem trước Excel', 'Giữ hai mẫu hợp đồng khách thuê; thêm kiểm trùng và so khớp', 'Thư viện mẫu hợp đồng khách thuê đã duyệt']],
     ['Điện nước và hóa đơn', ['Nhập, lập và xác nhận từng phòng/hóa đơn', 'Nhập/lập/xác nhận hàng loạt theo tòa', 'Soát ngoại lệ trước xác nhận', 'Kiểm chứng theo phiên bản']],
     ['Thu tiền và cọc', ['Thu nhiều lần; công nợ và hoàn cọc theo bước', 'Danh sách và theo dõi quá hạn', 'Kiểm trùng, điều chỉnh có duyệt', 'Đối soát và phân bổ nâng cao']],
     ['Chi phí và lịch trả', ['Nhập, duyệt chi; lịch trả nhập tay', 'Nhập Excel; sinh lịch từ hợp đồng', 'Kiểm trùng; theo dõi còn lại/quá hạn', 'Phân bổ nhiều tòa và truy vết']],
@@ -47,8 +48,8 @@
     F002: { A: 'Thêm/sửa từng chủ nhà qua biểu mẫu; nhập Excel có từ B', B: 'Nhập Excel theo mẫu, xem trước và tải lỗi dòng' },
     F005: { A: 'Thêm/sửa từng tòa qua biểu mẫu; nhập Excel có từ B', B: 'Nhập Excel theo mẫu, kiểm tra chủ nhà và lỗi dòng' },
     F008: { A: 'Thêm/sửa từng phòng qua biểu mẫu; nhập Excel có từ B', B: 'Nhập Excel theo tòa, xem trước và tải lỗi dòng' },
-    F011: { A: 'Một mẫu giấy tờ khách đã chọn; rà soát, sửa và xác nhận từng file', B: 'Tối đa hai mẫu giấy tờ; đánh dấu trường cần rà soát' },
-    F012: { A: 'Một mẫu hợp đồng đã chọn; rà soát, sửa và xác nhận từng file', B: 'Tối đa hai mẫu hợp đồng; hỗ trợ ánh xạ dữ liệu' },
+    F011: { name: 'Giấy tờ khách đính kèm', A: 'Nhập tay thông tin giấy tờ khách và đính kèm file; không OCR', B: 'Tra cứu giấy tờ theo hồ sơ khách', C: 'Quyền truy cập giấy tờ theo tòa và người dùng', D: 'Lịch sử và phiên bản file giấy tờ', action: 'Nhập tay, tải file và tra cứu', uat: 'Thông tin nhập tay và file đính kèm gắn đúng hồ sơ khách', limit: 'OCR chỉ áp dụng cho hợp đồng khách thuê' },
+    F012: { name: 'OCR hợp đồng khách thuê', A: 'Một mẫu hợp đồng khách thuê đã chọn; rà soát, sửa và xác nhận từng file', B: 'Tối đa hai mẫu hợp đồng khách thuê; hỗ trợ ánh xạ dữ liệu', D: 'Log sửa tay so với OCR; thư viện mẫu hợp đồng khách thuê đã duyệt' },
     F022: { A: 'Chọn một phòng/hợp đồng và lập một hóa đơn nháp; không tạo trùng phòng–kỳ', B: 'Lập hóa đơn hàng loạt theo tòa hoặc nhiều tòa', D: 'Lịch sử lô, đối chiếu và chạy lại có kiểm soát; chống tạo trùng có ở mọi gói' },
     F023: { A: 'Tính đúng tiền phòng, lẻ kỳ và kỳ thanh toán theo bộ quy tắc cố định đã chốt', B: 'Hỗ trợ cấu hình và rà soát quy tắc tính tiền' },
     F025: { A: 'Xem trước, xác nhận và in từng hóa đơn theo quyền', B: 'Xác nhận, xuất và gửi danh sách hóa đơn' },

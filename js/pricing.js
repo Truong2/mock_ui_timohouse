@@ -5,8 +5,8 @@
   var esc = function (v) { return TH.esc(v); };
   var OFFERS = TH.packagePolicy.offers, MATRIX = TH.packagePolicy.matrix;
   var MILESTONES = [
-    ['Chốt phạm vi và công thức', 'Thống nhất chức năng, quyền, mẫu chứng từ và quy tắc tính.', 'Có bộ ví dụ và tiêu chí nghiệm thu được hai bên xác nhận.'],
-    ['Hồ sơ và hợp đồng', 'Liên kết chủ nhà, tòa, phòng, khách, hợp đồng và biểu phí.', 'Dữ liệu liên kết đúng, không chồng thời gian thuê, đúng phạm vi quyền.'],
+    ['Chốt phạm vi và công thức', 'Thống nhất chức năng, quyền, mẫu chứng từ, mẫu hợp đồng khách thuê dùng OCR và quy tắc tính.', 'Có bộ ví dụ, trường dữ liệu OCR hợp đồng khách thuê và tiêu chí nghiệm thu được hai bên xác nhận.'],
+    ['Hồ sơ và hợp đồng', 'Liên kết chủ nhà, tòa, phòng, khách, hợp đồng và biểu phí. OCR chỉ hợp đồng khách thuê theo mẫu thuộc gói.', 'Dữ liệu liên kết đúng, không chồng thời gian thuê, đúng phạm vi quyền; dữ liệu OCR hợp đồng khách thuê được rà soát, sửa và xác nhận trước khi ghi.'],
     ['Hóa đơn, thu tiền và cọc', 'Hoàn thiện điện nước, hóa đơn, công nợ và hoàn cọc theo bước.', 'Tính tiền khớp; thu đủ/thiếu/thừa rõ ràng; không ghi nhận trùng.'],
     ['Chi phí và báo cáo', 'Tổng hợp chi phí, hiệu suất, lương/cổ phần và báo cáo theo mẫu.', 'Tổng các tòa khớp toàn hệ thống; báo cáo và file xuất đối chiếu được.'],
     ['Hoàn thiện phạm vi gói đã chọn', '', 'Chạy đạt các tình huống đã thống nhất trong phạm vi gói.'],
@@ -26,7 +26,7 @@
       var o = OFFERS[key], p = TH.PACKAGES[key], prev = TH.PKG_KEYS[TH.PKG_KEYS.indexOf(key) - 1];
       return '<div class="offer-detail-head"><div><span class="l-kicker">Phạm vi gói ' + key + '</span><h3 id="offer-detail-title" tabindex="-1">' + esc(o.title) + '</h3><p>' + esc(o.outcome) + '</p></div><div class="offer-detail-price">' + esc(p.price) + '<span>Giá trị toàn gói · đề xuất</span></div></div>' +
         '<div class="offer-detail-grid"><div><h4>' + (prev ? 'Bao gồm toàn bộ gói ' + prev + ', bổ sung' : 'Chức năng trong gói') + '</h4>' + P.list(o.includes) +
-        '<p class="offer-inherit">' + (prev ? 'Các chức năng và báo cáo của gói thấp hơn được giữ nguyên.' : 'Phân quyền, kiểm tra dữ liệu và bảo vệ nghiệp vụ tài chính là nền chung của mọi gói.') + '</p><div class="offer-limits"><h4>Giới hạn triển khai</h4>' + P.list(o.limits) + '<p class="small muted">Phí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.</p></div></div>' +
+        '<p class="offer-inherit">' + (prev ? 'Các chức năng và báo cáo của gói thấp hơn được giữ nguyên.' : 'Phân quyền, kiểm tra dữ liệu và bảo vệ nghiệp vụ tài chính là nền chung của mọi gói.') + '</p><div class="offer-limits"><h4>Giới hạn triển khai</h4>' + P.list(o.limits) + '<p>' + esc(TH.packagePolicy.ocrScope) + '</p><p class="small muted">Phí sử dụng OCR/OA và điều kiện nhà cung cấp được ghi riêng trong báo giá.</p></div></div>' +
         '<div class="offer-example"><h4>Ví dụ sử dụng</h4><p>' + esc(o.example) + '</p><h4>Khách nghiệm thu được gì?</h4><p>' + esc(o.acceptance) + '</p><p class="offer-inherit">' + esc(o.upgrade) + '</p></div></div>' +
         '<div class="offer-detail-foot"><span>Phạm vi triển khai được xác nhận khi chốt báo giá.</span><a class="btn btn-primary" href="?previewPackage=' + key + '#/demo/' + o.demo.toLowerCase() + '" data-act="landing.open" data-pkg="' + key + '" data-go="#/demo/' + o.demo.toLowerCase() + '">Xem tình huống gói ' + key + TH.icon('arrowRight', 'ic-sm') + '</a></div>';
     },
@@ -42,7 +42,7 @@
     },
     summary: function (key) {
       return '<div class="offer-summary"><b>' + esc(OFFERS[key].title) + '</b><p>' + esc(OFFERS[key].outcome) + '</p>' + P.list(OFFERS[key].includes.slice(0, 3)) +
-        '<p class="small muted">Mọi gói đều có OCR và Zalo OA. ' + (key === 'A' ? 'Có hai mẫu báo cáo khách hàng.' : 'Bao gồm các gói trước và phần nâng cấp nêu trên.') + ' Giá là tổng giá trị gói.</p><h4>Giới hạn triển khai</h4>' + P.list(OFFERS[key].limits) + '</div>';
+        '<p class="small muted">Mọi gói đều có OCR hợp đồng khách thuê và Zalo OA. ' + (key === 'A' ? 'Có hai mẫu báo cáo khách hàng.' : 'Bao gồm các gói trước và phần nâng cấp nêu trên.') + ' Giá là tổng giá trị gói.</p><h4>Giới hạn triển khai</h4>' + P.list(OFFERS[key].limits) + '<p>' + esc(TH.packagePolicy.ocrScope) + '</p></div>';
     }
   };
   TH.act['pricing.pick'] = function (el) {

@@ -1,12 +1,12 @@
 # TIMEHOUSE — Ma trận chức năng theo gói
 
-Ngày 24/10/2026 · CR-PKG-OPS · operating-support-v1
+Cập nhật ngày 26/10/2026 · CR-PKG-OPS · operating-support-v1
 
-A 50–60 triệu: vận hành cơ bản; B 70–80 triệu: hỗ trợ nhập liệu; C 80–90 triệu: kiểm soát nâng cao; D 90–100 triệu: quản trị theo kỳ. Gói cao bao gồm gói thấp. Mọi gói có OCR, OA, hai mẫu báo cáo gốc và đầy đủ kiểm tra bắt buộc.
+A 50–60 triệu: vận hành cơ bản; B 70–80 triệu: hỗ trợ nhập liệu; C 80–90 triệu: kiểm soát nâng cao; D 90–100 triệu: quản trị theo kỳ. Gói cao bao gồm gói thấp. Mọi gói có OCR hợp đồng khách thuê, OA, hai mẫu báo cáo gốc và đầy đủ kiểm tra bắt buộc.
 
 Các cột B/C/D mô tả phần bổ sung. Một số nhóm nhập Excel chỉ có thao tác nhập hàng loạt từ B; ở A, nghiệp vụ tương ứng thực hiện qua form hồ sơ. Các thành phần A/B/C/D của công thức hiệu suất không phải gói giá.
 
-Ma trận lấy từ registry hiệu lực sau các CR và `js/package-policy.js`; thay thế mô tả phân tầng cũ trong giới thiệu giá. Không tự phê duyệt các chính sách đang nháp.
+Ma trận lấy từ registry hiệu lực sau các CR và `js/package-policy.js`; thay thế mô tả phân tầng cũ trong giới thiệu giá. Không tự phê duyệt các chính sách đang nháp. OCR chỉ áp dụng cho hợp đồng khách thuê. F011 là nhập tay/đính kèm giấy tờ khách, không OCR; hợp đồng chủ nhà/thuê tòa, hóa đơn và tài liệu khác không thuộc phạm vi OCR.
 
 | Mã | Phân hệ / chức năng | A — Cơ bản | B — Hỗ trợ nhập liệu | C — Kiểm soát | D — Quản trị |
 |---|---|---|---|---|---|
@@ -20,8 +20,8 @@ Ma trận lấy từ registry hiệu lực sau các CR và `js/package-policy.js
 | F008 | 03. Phòng / Nhập Excel phòng theo tòa | Thêm/sửa từng phòng qua biểu mẫu; nhập Excel có từ B | Nhập Excel theo tòa, xem trước và tải lỗi dòng | Upsert có soát lịch sử giá | Nhập theo nhiều tòa có thống kê batch |
 | F009 | 03. Phòng / Hồ sơ phòng và các mối liên kết | Tab tổng quan/khách/HĐ | Tab chỉ số điện nước và phí | Timeline thu/khai thác có bộ lọc | Tập hợp đầy đủ lịch sử theo kỳ |
 | F010 | 04. Khách thuê/OCR / Hồ sơ khách thuê | Nhập tay, tìm kiếm, gán HĐ; danh sách tổng quan theo mã phòng/tòa + trạng thái; hồ sơ lưu trú (nghề nghiệp, phương tiện, lần ký/gia hạn); sửa từng nhóm | Kiểm trùng theo trường nhận dạng đã duyệt (giấy tờ, biển số xe) | Log lịch sử thông tin liên hệ | Quản lý phiên bản thông tin hợp đồng/định danh |
-| F011 | 04. Khách thuê/OCR / OCR giấy tờ khách | Một mẫu giấy tờ khách đã chọn; rà soát, sửa và xác nhận từng file | Tối đa hai mẫu giấy tờ; đánh dấu trường cần rà soát | Cảnh báo trùng hồ sơ/tính hợp lệ bằng rule | Thư viện mẫu đã duyệt; dashboard lỗi nhận dạng |
-| F012 | 04. Khách thuê/OCR / OCR hợp đồng thuê | Một mẫu hợp đồng đã chọn; rà soát, sửa và xác nhận từng file | Tối đa hai mẫu hợp đồng; hỗ trợ ánh xạ dữ liệu | So khớp phòng–khách–HĐ: số người ≤ tối đa, số xe khai ↔ xe đã xác nhận, chỉ số bàn giao ↔ công tơ, giá ↔ niêm yết | Log sửa tay so với OCR; thư viện mẫu đã duyệt |
+| F011 | 04. Khách thuê/OCR / Giấy tờ khách đính kèm | Nhập tay thông tin giấy tờ khách và đính kèm file; không OCR | Tra cứu giấy tờ theo hồ sơ khách | Quyền truy cập giấy tờ theo tòa và người dùng | Lịch sử và phiên bản file giấy tờ |
+| F012 | 04. Khách thuê/OCR / OCR hợp đồng khách thuê | Một mẫu hợp đồng khách thuê đã chọn; rà soát, sửa và xác nhận từng file | Tối đa hai mẫu hợp đồng khách thuê; hỗ trợ ánh xạ dữ liệu | So khớp phòng–khách–HĐ: số người ≤ tối đa, số xe khai ↔ xe đã xác nhận, chỉ số bàn giao ↔ công tơ, giá ↔ niêm yết | Log sửa tay so với OCR; thư viện mẫu hợp đồng khách thuê đã duyệt |
 | F013 | 04. Khách thuê/OCR / Tài liệu đính kèm và tra cứu | Lưu file gắn hồ sơ: HĐ khách, giấy tờ; sổ đỏ, HĐ thuê tòa, PCCC, ĐKKD | Tìm theo HĐ/khách/phòng | Quyền file theo tòa và người dùng | Phiên bản tài liệu và audit lượt xem |
 | F014 | 05. Hợp đồng & gia hạn / Hợp đồng khách thuê | Form 1 hợp đồng/phòng; tải bản scan | Từ OCR xác nhận chuyển vào form; lịch sử cơ bản | Phụ lục thay đổi giá có hiệu lực từ tháng | Hợp đồng/điều khoản nhiều phiên bản có audit |
 | F015 | 05. Hợp đồng & gia hạn / Phí cố định theo hợp đồng | Một bộ phí hiện hành theo HĐ: điện, nước, mạng, thang máy, dịch vụ chung, sạc xe điện, gửi xe (đơn giá + cách tính) | Nhiều dòng phí với hiệu lực từ kỳ | Preview tác động khi đổi biểu phí | Nhiều giai đoạn giá và lịch sử thay đổi |

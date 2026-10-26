@@ -20,12 +20,12 @@
         }).join('') + '</div></div>' : '';
         return {
           title: 'Các gói triển khai TIMEHOUSE',
-          sub: TH.isReview() ? '<span class="screen-id">DEMO-PKG-01</span> · Phạm vi đề xuất' : 'Chọn mức đầu tư và xem chức năng tương ứng',
+          sub: TH.isReview() ? '<span class="screen-id">DEMO-PKG-01</span> · Phạm vi đề xuất' : 'Chọn gói để xem phạm vi phát triển và giới hạn áp dụng',
           body: '<div class="stack">' +
             '<p class="pkg-client-note">Giá là <b>tổng giá trị từng gói</b>, đã bao gồm các gói trước. Phạm vi, phí dịch vụ và mức giá chốt được xác nhận trong báo giá. Lựa chọn bên dưới dùng để xem chức năng trong demo.</p>' +
             '<fieldset style="border:0;margin:0;padding:0"><legend class="section-title">Chọn gói A / B / C / D</legend><div class="pkg-options">' + opts + '</div></fieldset>' +
             TH.pricing.summary(s.pkg) +
-            '<button type="button" class="btn" data-act="pricing.intro">' + I('layers', 'ic-sm') + 'Xem phạm vi và mốc bàn giao</button>' +
+            '<button type="button" class="btn" data-act="pricing.intro">' + I('layers', 'ic-sm') + 'Xem phạm vi và nội dung bàn giao</button>' +
             '<label class="switch"><input type="checkbox" data-act-change="pkg.locked"' + (s.showLocked ? ' checked' : '') + '><span class="switch-track"></span><span><b>Hiện tính năng gói cao hơn dưới dạng khóa</b><br><span class="small muted">Tắt để ẩn toàn bộ phần nâng cấp vượt gói. Phần lõi A luôn hiển thị.</span></span></label>' +
             '<button type="button" class="btn" data-act="pkg.compare" style="justify-content:flex-start">' + I('compare') + 'So sánh 52 chức năng<span class="muted small u-ml-auto">bảng rộng</span></button>' +
             bldPack(lvl) +

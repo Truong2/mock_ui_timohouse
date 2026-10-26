@@ -80,7 +80,7 @@ var TH = window.TH = window.TH || {};
       closeRouteModals(null);
       app.shellReady = false;
       root.innerHTML = TH.views.landing.render();
-      document.title = 'TIMEHOUSE — Chức năng, mức đầu tư và mốc bàn giao';
+      document.title = 'TIMEHOUSE — Phạm vi phát triển và giới hạn các gói';
       if (navigated) window.scrollTo(0, 0);
       app.prevHash = location.hash;
       return;
