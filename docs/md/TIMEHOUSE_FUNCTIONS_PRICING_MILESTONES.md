@@ -1,10 +1,14 @@
 # TIMEHOUSE — Phạm vi phát triển, giới hạn và giá các gói
 
-Cập nhật ngày 26/10/2026. Bản đề xuất trình bày lại từ dự án hiện tại, phục vụ trao đổi và chốt phạm vi với khách hàng.
+Cập nhật ngày 27/10/2026 theo [Package Scope v2.1](../TIMEHOUSE_Package_Scope_A_B_C_D_v2_1_VanHanhBaoCaoChuan.md) (`PROPOSED — NEEDS CUSTOMER/TEAM SIGN-OFF`). Bản đề xuất phục vụ trao đổi và chốt phạm vi với khách hàng.
 
-**Điều chỉnh đã chốt với người dùng:** OCR hợp đồng khách thuê và Zalo OA có ở mọi gói. **OCR chỉ áp dụng cho hợp đồng khách thuê**; không OCR giấy tờ tùy thân, hợp đồng chủ nhà/thuê tòa, hóa đơn hoặc tài liệu khác. Các tài liệu này chỉ nhập tay hoặc đính kèm. Mọi gói giữ hai mẫu báo cáo gốc; B/C/D tăng khả năng phân tích và kiểm soát, không tăng thành 3/4/5 mẫu. Các giới hạn dưới đây dùng cho UI và trao đổi phạm vi; điều kiện tích hợp, mẫu được duyệt và phí sử dụng dịch vụ phải ghi trong báo giá.
+**Định hướng v2.1:** A = đủ vận hành một kỳ và hai báo cáo RPT-04/RPT-05 đúng mẫu đã ký, phần lớn nhập tay; B = A + nhập liệu/hàng loạt/đối soát nhanh hơn; C = B + tự động hóa có giới hạn (phân bổ chi phí chung theo số phòng); D = C + chốt bản, khóa kỳ, so sánh hai kỳ, xuất theo phiên bản. Bốn gói dùng cùng bộ tính và cùng mẫu xuất; gói cao chỉ khác cách làm, không khác kết quả báo cáo.
 
-**CR-PKG-OPS — thay thế phân tầng cũ:** A nhập và xử lý từng hồ sơ/chứng từ, tính theo bộ công thức cố định; B mới có nhập Excel và thao tác hàng loạt. C thêm kiểm soát nâng cao; D thêm quản trị kỳ/phiên bản. Không cắt phân hệ nghiệp vụ, OCR, OA hoặc hai mẫu báo cáo khỏi A. [Ma trận 52 nhóm hiệu lực](TIMEHOUSE_PACKAGE_FUNCTION_MATRIX.md).
+**Ngoại lệ so với §4 v2.1 — OCR và Zalo OA (chốt với người dùng 27/10/2026):** OCR hợp đồng khách thuê và Zalo OA **có ở mọi gói**; gói nhỏ ít chức năng hơn, gói lớn nhiều hơn (bậc như bản 26/10, xem bảng giới hạn ở §3). OCR chỉ áp dụng cho hợp đồng khách thuê; giấy tờ khác nhập tay hoặc đính kèm.
+
+**CR-PKG-OPS (24/10) — đã thay một phần:** phần "A nhập từng hồ sơ, B mới có Excel/hàng loạt" và các bậc OCR/OA vẫn giữ; phần lập từng hóa đơn ở A và phân bổ một khoản thu nhiều hóa đơn từ D được thay bằng v2.1. [Ma trận 52 nhóm hiệu lực](TIMEHOUSE_PACKAGE_FUNCTION_MATRIX.md) chưa cập nhật theo v2.1.
+
+**Chưa đồng bộ trong demo:** văn bản trang giới thiệu đã theo v2.1, nhưng gating demo còn theo CR-PKG-OPS ở hai chỗ: `F031` phân bổ nhiều hóa đơn vẫn từ D; `inv.multi` (`F022.B`) chặn tạo hóa đơn theo tòa ở A. Cần CR riêng theo §5 v2.1.
 
 ## 1. Cách giới thiệu dự án
 
@@ -22,7 +26,7 @@ Giá dưới đây là **tổng giá trị từng gói**, gói cao bao gồm ph�
 - Tiền phòng, điện nước, phí dịch vụ, hóa đơn, thu nhiều lần, công nợ và hồ sơ xử lý cọc ở mức cơ bản.
 - Chi phí theo tòa/kỳ, thông tin nhân sự, bảng lương và phân bổ cổ phần theo quy tắc đã thống nhất.
 - Báo cáo doanh thu theo tòa và kinh doanh tháng theo mẫu khách; xuất Excel và bản in cơ bản.
-- OCR hợp đồng khách thuê theo mẫu đã chọn, có người xác nhận trước khi ghi; Zalo OA gửi hóa đơn và nhắc thanh toán theo giới hạn gói, khi đủ điều kiện nhà cung cấp.
+- OCR hợp đồng khách thuê theo mẫu thuộc gói, có người xác nhận trước khi ghi; Zalo OA gửi hóa đơn và nhắc thanh toán theo giới hạn gói, khi đủ điều kiện nhà cung cấp.
 - Giao diện thống nhất, biểu mẫu kiểm tra lỗi, hỗ trợ màn hình nhỏ, bảo vệ dữ liệu đang nhập.
 - Phân quyền và các điều kiện tài chính tối thiểu: quản lý xác nhận thu tại tòa được giao, kế toán hậu kiểm; người lập và người duyệt hoàn cọc khác nhau; chỉ hoàn tất hoàn cọc sau thực chi. Các điều kiện này áp dụng xuyên gói.
 
@@ -32,16 +36,18 @@ Số màn/nhóm trong registry là chỉ số bao phủ kỹ thuật; không dù
 
 | Gói | Giá tham chiếu | Phạm vi bàn giao | Giá trị sử dụng |
 |---|---:|---|---|
-| **A — Vận hành cơ bản** | **50–60 triệu** | Nhập từng hồ sơ, hợp đồng, chỉ số; lập/xác nhận từng hóa đơn; thu từng khoản, công nợ và cọc đủ quy trình; chi phí, nhân sự, lương/cổ phần theo công thức cố định; OCR từng file hợp đồng khách thuê; OA từng hóa đơn; hai mẫu báo cáo gốc và xuất Excel. | Đủ nghiệp vụ để vận hành, hệ thống tính đúng từ đầu vào đã nhập. |
-| **B — Hỗ trợ nhập liệu** | **70–80 triệu** | Toàn bộ A; nhập Excel có xem trước/lỗi dòng; nhập chỉ số, lập/xác nhận/xuất/gửi hóa đơn hàng loạt; OCR tối đa hai mẫu hợp đồng khách thuê; lấy đầu vào liên phân hệ; sinh lịch trả; OA gửi danh sách/ba mốc; truy nguồn và xu hướng sáu kỳ. | Giảm nhập lặp và thời gian xử lý danh sách. |
-| **C — Kiểm soát nâng cao** | **80–90 triệu** | Toàn bộ B; gợi ý khoản nghi trùng, so khớp hồ sơ và ngoại lệ; duyệt, đối chiếu, lịch sử phân công; bản số liệu đã duyệt; phân bổ theo quy tắc; so tòa/nhóm/kỳ, cảnh báo; hàng đợi OA. | Kiểm soát phối hợp nhiều người và sai lệch liên nguồn. |
-| **D — Quản trị theo kỳ** | **90–100 triệu** | Toàn bộ C; khóa kỳ tài chính, điều chỉnh có căn cứ; phiên bản và đối chiếu báo cáo; lịch sử chính sách trong phạm vi chốt; đối soát sao kê nhập vào, phân bổ một khoản thu nhiều hóa đơn; thư viện mẫu OCR hợp đồng khách thuê theo danh mục đã duyệt, giám sát OA. | Giải trình thay đổi và đối chiếu các kỳ đã chốt. |
+| **A — Vận hành đầy đủ, nhập tay** | **50–60 triệu** | Chủ nhà/tòa/phòng/khách/hợp đồng: nhận, gia hạn, đổi, trả phòng và quyết toán; nạp số đầu kỳ một lần; chỉ số, tạo hóa đơn theo tòa/kỳ và sửa dòng lỗi; phiếu thu phân bổ thủ công nhiều hóa đơn, thu trước, cọc/hoàn cọc; chi phí, chi phí chung chia tay theo tòa, lương/hoa hồng nhập số đã duyệt có nguồn; RPT-04/RPT-05 đủ mẫu, xuất Excel; OCR một mẫu hợp đồng khách thuê; một Zalo OA gửi từng hóa đơn và một lịch nhắc cố định. | Vận hành trọn một kỳ đến hai báo cáo đúng mẫu; người dùng nhập/chọn/xác nhận, hệ thống tự tính. |
+| **B — Vận hành tối ưu** | **70–80 triệu** | Toàn bộ A; nhập Excel định kỳ theo mẫu cố định; xem trước hóa đơn hàng loạt, lọc lỗi; gợi ý phân bổ thu tiền; hỗ trợ lập hợp đồng, kiểm trùng nâng cao; gợi ý lịch trả; truy nguồn chứng từ và xu hướng sáu kỳ; OCR tối đa hai mẫu hợp đồng khách thuê; OA gửi danh sách, ba mốc nhắc, mẫu hết hạn hợp đồng. | Cùng kết quả với A, giảm thao tác nhập và đối soát. |
+| **C — Tự động hóa chọn lọc** | **80–90 triệu** | Toàn bộ B; tự phân bổ chi phí chung theo số phòng (một quy tắc, có xem trước/duyệt); OCR kiểm trùng và so khớp phòng–khách–hợp đồng; OA cá nhân hóa theo tòa, xử lý lỗi gửi và nhật ký gửi. | Tự động bước lặp, luôn có đường thủ công thay thế. |
+| **D — Kiểm soát nâng cao** | **90–100 triệu** | Toàn bộ C; chốt bản báo cáo tháng không sửa đè; khóa kỳ/mở lại theo chính sách; so sánh hai kỳ; bản xuất báo cáo quản trị theo phiên bản; thư viện mẫu OCR hợp đồng khách thuê và lịch sử sửa; OA phiên bản mẫu, lịch sử, giám sát gửi lại. | Giữ bản đã phát hành và giải trình thay đổi giữa các kỳ. |
 
 ### Giải thích phần giá tăng thêm
 
-- **A → B:** chi phí cho đọc/kiểm dữ liệu đầu vào, thao tác hàng loạt và tự động hóa tác vụ lặp lại.
-- **B → C:** chi phí cho kiểm tra liên kết, chống trùng, xử lý ngoại lệ, quy trình kiểm soát và đối chiếu trước/sau duyệt.
-- **C → D:** chi phí cho lịch sử có phiên bản, khóa kỳ, điều chỉnh có truy vết và khả năng giải trình dữ liệu đã bàn giao.
+- **A → B:** chi phí cho nhập Excel định kỳ, xem trước hàng loạt, gợi ý phân bổ, truy nguồn chứng từ, OCR mẫu thứ hai và OA gửi danh sách/ba mốc nhắc.
+- **B → C:** chi phí cho tự phân bổ chi phí chung theo số phòng, OCR kiểm trùng/so khớp và OA cá nhân hóa, xử lý lỗi gửi.
+- **C → D:** chi phí cho bản chốt bất biến, khóa kỳ, so sánh hai kỳ, xuất theo phiên bản, thư viện mẫu OCR và giám sát gửi lại OA.
+
+Ngoài gói chuẩn (add-on): OCR ngoài hợp đồng khách thuê hoặc ngoài số mẫu của gói, nhiều OA/chiến dịch/escalation, bảng lương tự động, quản lý cổ đông đầy đủ, đối soát ngân hàng tự động, cổng thanh toán, BI tùy chỉnh, SLA 24/7. Không có các engine này không có nghĩa là không được nhập kết quả đã chốt để lên báo cáo.
 
 Không diễn giải rằng gói thấp bỏ các bước bảo vệ tài chính bắt buộc. Giao diện enterprise là nền chung, không phải phần nâng cấp chỉ có ở D.
 
@@ -49,10 +55,10 @@ Không diễn giải rằng gói thấp bỏ các bước bảo vệ tài chính
 
 | Phần | A | B (gồm A) | C (gồm B) | D (gồm C) |
 |---|---|---|---|---|
-| OCR hợp đồng khách thuê | Một mẫu hợp đồng khách thuê đã chọn; sửa và xác nhận từng file | Tối đa hai mẫu hợp đồng khách thuê; chỉ rõ trường cần rà soát | Giữ tối đa hai mẫu hợp đồng khách thuê của B; thêm kiểm trùng và so khớp phòng–khách–hợp đồng | Thư viện mẫu hợp đồng khách thuê được duyệt; số mẫu ghi trong báo giá; có lịch sử sửa |
-| OA | Một OA, tối đa hai mẫu tin duyệt; gửi từng hóa đơn và một lịch nhắc cố định | Giữ một OA; thêm gửi danh sách, mẫu hết hạn hợp đồng và ba mốc nhắc | Cá nhân hóa theo tòa và xử lý lỗi gửi theo quy tắc | Phiên bản mẫu, lịch sử và giám sát gửi lại |
-| Báo cáo | Hai mẫu gốc: doanh thu theo tòa và kinh doanh tháng; xem/xuất theo kỳ | Giữ hai mẫu; truy nguồn chứng từ và xu hướng tối đa sáu kỳ | Giữ hai mẫu; so tòa/nhóm/kỳ, lưu số liệu duyệt và theo dõi sai lệch | Giữ hai mẫu; khóa kỳ, phiên bản và đối chiếu lịch sử |
-| Xử lý bổ sung | Nhập từng hồ sơ; lương/cổ phần theo bộ quy tắc cố định; không nhập Excel | Nhập Excel và chạy hàng loạt các tác vụ/mẫu đã thống nhất | Quy trình duyệt và phân bổ theo danh sách đã chốt | Phiên bản/đối soát theo đối tượng và mẫu đã chốt; chưa kết nối ngân hàng tự động |
+| OCR hợp đồng khách thuê | Một mẫu đã chọn; rà soát, sửa và xác nhận từng file | Tối đa hai mẫu; chỉ rõ trường cần kiểm tra | Giữ hai mẫu của B; thêm kiểm trùng và so khớp phòng–khách–hợp đồng | Thư viện mẫu đã duyệt, số mẫu ghi trong báo giá; lịch sử sửa |
+| OA | Một OA, tối đa hai mẫu tin; gửi từng hóa đơn và một lịch nhắc cố định | Gửi danh sách, ba mốc nhắc, mẫu hết hạn hợp đồng | Cá nhân hóa theo tòa; xử lý lỗi gửi theo quy tắc; nhật ký gửi | Phiên bản mẫu, lịch sử và giám sát gửi lại |
+| Báo cáo | Hai mẫu gốc đủ hàng/cột/sheet đã ký; đầu vào nhập tay có nguồn | Giữ hai mẫu, cùng số; thêm truy nguồn và xu hướng sáu kỳ | = B | Giữ hai mẫu; thêm bản chốt, khóa kỳ, so sánh hai kỳ, xuất theo phiên bản |
+| Xử lý bổ sung | Nhập, chọn, phân bổ và đối soát thủ công | Nhập Excel định kỳ, gợi ý và hàng loạt theo mẫu đã thống nhất | Tự phân bổ chi phí chung theo một quy tắc số phòng | Lưu quy tắc khi chốt kỳ; không gồm quản lý cổ đông, bảng lương tự động, kết nối ngân hàng |
 
 Không cam kết OCR mọi định dạng, nhiều OA không giới hạn, tự thiết kế báo cáo hoặc tự cấu hình mọi công thức. Mọi gói đều bỏ qua khoản đã xác nhận thu đủ khi nhắc thanh toán; không đợi kế toán hậu kiểm mới dừng nhắc. Hai mẫu là hai loại báo cáo, không phải giới hạn số lần chạy hoặc số bản lưu.
 
@@ -66,12 +72,14 @@ A–D là các lựa chọn phạm vi phát triển, không phải các mốc đ
 
 | Mốc | Công việc và đầu ra | Điều kiện nghiệm thu |
 |---|---|---|
-| **M1 — Chốt phạm vi và quy tắc tính** | Ma trận chức năng theo gói; trường dữ liệu; phân quyền; mẫu chứng từ/báo cáo; mẫu hợp đồng khách thuê dùng OCR và danh sách trường cần đọc; danh mục công thức và ví dụ đối chiếu; giao diện được duyệt. | Mỗi chức năng có đầu vào, đầu ra, người xử lý và tình huống kiểm thử; quy tắc chưa chốt được liệt kê và thống nhất cách xử lý. |
-| **M2 — Hồ sơ và hợp đồng** | Chủ nhà → tòa → phòng → khách → hợp đồng; biểu phí; tài liệu, bàn giao; danh mục nhân sự và phân công. OCR chỉ hợp đồng khách thuê theo mức gói; nhập Excel từ B. | Hồ sơ liên kết đúng; kiểm tra trường bắt buộc; không tạo thuê phòng chồng thời gian; quyền truy cập đúng phạm vi; nhập/sửa giữ dữ liệu hợp lệ; dữ liệu OCR hợp đồng khách thuê phải được rà soát, sửa và xác nhận trước khi ghi. Giấy tờ khác chỉ đính kèm hoặc nhập tay. |
-| **M3 — Hóa đơn, thu tiền và cọc** | Điện nước, phí, lập nháp/xác nhận hóa đơn; ghi nhận thu, công nợ, theo dõi mốc 5/10/15; quy trình kết thúc HĐ và hoàn cọc. | Bộ ví dụ tính tiền khớp; thu đủ/thiếu/thừa/nhiều lần rõ ràng; không ghi trùng; quản lý xác nhận thu, kế toán hậu kiểm; duyệt cọc chưa làm phát sinh trạng thái đã chi. |
-| **M4 — Chi phí, hiệu suất và báo cáo** | Chi phí tòa/kỳ; lịch trả chủ nhà; hiệu suất, lương/cổ phần theo phạm vi; báo cáo theo tòa và toàn hệ thống, Excel/bản in. | Tổng tòa khớp tổng hệ thống; doanh thu, tiền thu, cọc và chi phí phân biệt đúng; báo cáo có căn cứ; lương/cổ phần khớp ví dụ đã duyệt. |
-| **M5 — Hoàn thiện nâng cấp của gói** | B: hàng loạt, nhập Excel, OCR tối đa hai mẫu hợp đồng khách thuê, lịch nhắc, xu hướng. C: giữ giới hạn mẫu OCR của B, thêm so khớp hợp đồng khách thuê; kiểm trùng, ngoại lệ, duyệt, snapshot, phân bổ. D: thư viện mẫu OCR hợp đồng khách thuê và lịch sử sửa; phiên bản, khóa kỳ, truy vết, đối soát và giám sát. Với A, nghiệm thu OCR một mẫu hợp đồng khách thuê và phạm vi cơ bản. | Chạy các tình huống riêng của từng mức trên cùng dữ liệu; thao tác lặp không gây sai/trùng; thay đổi không làm mất căn cứ của kỳ/bản đã chốt. |
-| **M6 — UAT và đưa vào sử dụng** | Kiểm thử với dữ liệu khách đã xác nhận; khắc phục lỗi trong phạm vi; nạp dữ liệu đầu kỳ; triển khai, sao lưu/phục hồi, hướng dẫn và bàn giao. | Người dùng thực hiện được quy trình một kỳ; quyền được kiểm tra phía server; kết quả được đối chiếu; thử phục hồi dữ liệu và ký biên bản nghiệm thu. |
+| **M1 — Chốt mẫu báo cáo và chính sách tính** | File Excel chuẩn RPT-04/RPT-05 (sheet, hàng/cột, làm tròn, sheet cổ phần nếu bắt buộc); định nghĩa doanh thu/cọc/thu trước, dồn tích và tiền mặt; quy tắc tính lẻ kỳ; cách chia chi phí chung; danh mục đầu vào nhập tay; quyền theo vai trò/tòa; bộ dữ liệu đối chiếu (golden data); mẫu hợp đồng khách thuê dùng OCR, trường cần đọc và mẫu tin Zalo OA theo gói. | Mẫu báo cáo, golden data, mẫu OCR và mẫu tin OA có người duyệt; mục chưa chốt (GATE-RPT-01..03, GATE-OP-01..02) ghi `DRAFT`/`PENDING CUSTOMER DECISION`, không tính số chính thức theo chính sách suy đoán. |
+| **M2 — Hồ sơ, hợp đồng và số liệu đầu kỳ** | OP-01…04, OP-11: chủ nhà, tòa, phòng, người phụ trách; khách và HĐ thuê (nhận, gia hạn, đổi, trả phòng); HĐ chủ nhà và lịch trả; nạp một lần nợ, cọc, thu trước, chỉ số đầu kỳ có biên bản mapping. OCR hợp đồng khách thuê theo mẫu thuộc gói; giấy tờ khác nhập tay và đính kèm. | Mã duy nhất; không trùng HĐ hiệu lực cùng phòng; giá/cọc đúng hiệu lực; số đầu kỳ đối soát được với bảng nguồn (TC-01); quyền đúng tòa; dữ liệu OCR được rà soát, sửa và xác nhận trước khi ghi. |
+| **M3 — Hóa đơn, thu tiền, cọc và quyết toán** | OP-05…10, OP-15: chỉ số và biểu phí; tạo hóa đơn theo tòa/kỳ, sửa dòng lỗi, phát hành/điều chỉnh; phiếu thu phân bổ thủ công nhiều hóa đơn/nghĩa vụ; thu trước, giữ/hoàn cọc; quyết toán trả phòng; thu theo mốc 5/10/15; gửi hóa đơn và nhắc thanh toán qua Zalo OA theo giới hạn gói. | TC-02…05: chạy lại không nhân đôi hóa đơn; thu thiếu/đủ/thừa đúng, không phân bổ vượt số dư; thu 3 tháng + cọc tách đúng kỳ; trả phòng giữa kỳ ra đúng phải thu/phải hoàn; OA không gửi trùng, không nhắc khoản đã thu đủ. |
+| **M4 — Chi phí và hai báo cáo chuẩn mẫu** | OP-12…14, OP-16: chi phí trực tiếp; chi phí chung chia tay theo tòa; lương/hoa hồng/giá vốn nhập số đã duyệt có nguồn; chi thuê tòa tách thuộc kỳ và thực trả; RPT-04/RPT-05 từ cùng một bộ tính, xuất Excel; bản DRAFT có cảnh báo khi thiếu đầu vào. | TC-06…08, TC-10, TC-11, TC-13, TC-14: khớp golden data trong sai số làm tròn đã ký; tổng tòa = toàn hệ thống; thiếu dữ liệu thì chặn bản chính thức; mỗi số nhập tay có nguồn và người nhập. |
+| **M5 — Tiện ích của gói đã chọn** | A: không có hạng mục riêng; vận hành, hai báo cáo, OCR một mẫu và OA gửi từng hóa đơn đã nghiệm thu ở M2–M4. B: nhập Excel định kỳ, xem trước hóa đơn hàng loạt, gợi ý phân bổ, hỗ trợ lập HĐ, truy nguồn, xu hướng sáu kỳ; OCR hai mẫu; OA gửi danh sách/ba mốc nhắc. C: + tự phân bổ chi phí chung theo số phòng; OCR kiểm trùng/so khớp; OA cá nhân hóa, xử lý lỗi gửi. D: + bản chốt bất biến, khóa kỳ/mở lại theo chính sách, so sánh hai kỳ, xuất theo phiên bản; thư viện mẫu OCR; giám sát gửi lại OA. | TC-12 và §8.3: trên cùng dữ liệu, số báo cáo bằng kết quả nhập tay của A; mỗi công cụ hỗ trợ/tự động có đường thủ công thay thế; bản chốt D dùng cùng bộ tính và không bị sửa đè. |
+| **M6 — UAT và đưa vào sử dụng** | UAT trên ít nhất hai kỳ golden data; nạp số liệu đầu kỳ thật; triển khai, sao lưu/phục hồi, hướng dẫn. | Điều kiện GO-LIVE v2.1: không còn sai lệch P0 chưa giải trình ở thu/cọc/nợ/tổng báo cáo; kế toán duyệt hai kỳ golden data; thử phục hồi đạt; khách ký UAT. Thiếu mẫu/duyệt thì chưa công bố "100% chuẩn mẫu". |
+
+Trên trang giới thiệu ([js/pricing.js](../../js/pricing.js)) các mốc dùng cùng nội dung nhưng bỏ mã OP/TC/GATE; M5 lấy nội dung `upgrade` của gói đang chọn trong [js/package-policy.js](../../js/package-policy.js).
 
 Lịch tuần/ngày và tỷ lệ thanh toán từng mốc được xác định sau khi chốt gói, quy tắc tính và nguồn tích hợp. Chưa có căn cứ trong dự án để coi một lịch hoặc tỷ lệ thanh toán là đã thống nhất.
 
@@ -93,7 +101,7 @@ Dữ liệu 3 tòa/18 phòng là bộ trình diễn hiện tại. Số tòa/phò
 
 ## 7. Câu giới thiệu có thể dùng với khách
 
-> TIMEHOUSE có bốn gói phát triển A–D, giá dự kiến từ 50 đến 100 triệu đồng. Mỗi gói xác định rõ chức năng được phát triển, giới hạn xử lý và nội dung bàn giao. A đáp ứng vận hành cơ bản; B thêm hỗ trợ nhập liệu và xử lý hàng loạt; C thêm kiểm soát sai sót; D thêm quản trị theo kỳ và truy vết. Khách lựa chọn gói theo nhu cầu sử dụng, đối chiếu giới hạn triển khai và điều kiện nghiệm thu trước khi chốt phạm vi.
+> TIMEHOUSE có bốn gói phát triển A–D, giá dự kiến từ 50 đến 100 triệu đồng. Mỗi gói xác định rõ chức năng được phát triển, giới hạn xử lý và nội dung bàn giao. Gói nào cũng vận hành đủ một kỳ, xuất hai báo cáo đúng mẫu đã ký và có OCR hợp đồng khách thuê, Zalo OA theo giới hạn gói: A làm bằng nhập tay; B thêm nhập liệu, xử lý hàng loạt và đối soát nhanh hơn; C thêm tự động hóa có giới hạn; D thêm chốt bản, khóa kỳ và so sánh phiên bản. Khách lựa chọn gói theo nhu cầu sử dụng, đối chiếu giới hạn triển khai và điều kiện nghiệm thu trước khi chốt phạm vi.
 
 Căn cứ: [ma trận chức năng](../../js/features.js), các cập nhật CR trong mã dự án, [cấu hình giá](../../js/store.js), [decision log](TIMEHOUSE_MOCKUP_DECISIONS.md), [bàn giao dataset và QA](TIMEHOUSE_DATASET_QA.md).
 
@@ -114,6 +122,8 @@ Nguồn chung `js/package-policy.js` nạp sau registry/CR và trước các vie
 Ảnh bàn giao: [desktop — giới thiệu](../qa/pricing/desktop-intro.png), [desktop — mức giá](../qa/pricing/desktop-prices.png), [mobile — giới thiệu](../qa/pricing/mobile-intro.png), [mobile — phạm vi gói](../qa/pricing/mobile-scope.png), [mốc bàn giao desktop](../qa/pricing/milestones-1440.png), [mốc bàn giao mobile](../qa/pricing/milestones-375.png).
 
 ## 9. Phạm vi OCR đã chốt ngày 26/10/2026
+
+> Vẫn còn hiệu lực sau khi cập nhật theo v2.1 ngày 27/10/2026 (ngoại lệ OCR/OA, xem đầu tài liệu).
 
 OCR chỉ dùng để đọc hợp đồng khách thuê. Thông tin khách, phòng, giá thuê, phí và các trường khác được trích từ chính hợp đồng, sau đó người dùng rà soát, sửa và xác nhận trước khi lưu. Không bàn giao OCR riêng cho giấy tờ tùy thân, hợp đồng chủ nhà/thuê tòa, hóa đơn hoặc tài liệu khác.
 
