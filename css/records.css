@@ -1,0 +1,8 @@
+/* The shared popover handles row menus; retain existing enterprise tokens. */
+.record-tools { margin-bottom: 12px; flex-wrap: wrap; }
+.rec-type-tabs { gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.rec-type-tabs [aria-pressed="true"] { color: var(--primary); border-color: currentColor; }
+@media (max-width: 640px) {
+  .record-tools .btn { flex: 1 1 auto; }
+  .record-tools { gap: 8px; }
+}

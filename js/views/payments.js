@@ -113,7 +113,7 @@
     targets.forEach(function (t, n) { if (left <= 0) return; var a = n === targets.length - 1 ? left : Math.min(left, C.debt(t)); if (a > 0) { parts.push({ inv: t, amount: a }); left -= a; } });
     if (left > 0) parts[parts.length - 1].amount += left;
     var ids = parts.map(function (pt) {
-      var id = 'PT-' + pt.inv.period.slice(2, 4) + pt.inv.period.slice(5) + '-' + String(TH.db.receipts.length + 1).padStart(3, '0');
+      var id = TH.recordActions.id('PT');
       var r = { id: id, invoiceId: pt.inv.id, amount: pt.amount, reportedBy: TH.me().id, reportedAt: TH.TODAY, receivedAt: g('date', TH.TODAY), method: g('method', 'Chuyển khoản'), evidence: 'ck_bao_thu_' + invObj.roomId + '.png', status: 'pending', confirmedBy: null, confirmedAt: null, note: (g('note', '') + (parts.length > 1 ? ' · phân bổ FIFO 1 lần thu ' + F.money(amount) : '')).trim().replace(/^· /, '') };
       r.clientRequest = requestId;
       TH.db.receipts.push(r);
@@ -516,7 +516,7 @@
     TH.db.breakCases = TH.db.breakCases || [];
     var id = 'PHD-' + period.slice(2, 4) + period.slice(5) + '-' + String(TH.db.breakCases.length + 1).padStart(2, '0');
     TH.db.breakCases.push({ id: id, roomId: room.id, contractId: ct.id, customerId: ct.customerId, buildingId: ct.buildingId, period: period, at: at, reason: reason, note: note, reportedBy: TH.me().id, reportedAt: TH.TODAY });
-    if (!C.depositCase(ct.id)) TH.db.depositCases.push({ id: 'HC-' + period.slice(2, 4) + period.slice(5) + '-' + String(TH.db.depositCases.length + 1).padStart(2, '0'), contractId: ct.id, customerId: ct.customerId, amount: ct.deposit, state: 'pending_approval', handoverAt: at, dueAt: TH.addDays(at, (ct.terms && ct.terms.refundDays) || 10), deductions: [], forfeitAmount: ct.deposit, forfeitBasis: 'Điều 4.3 & 7.1 HĐ — khách đơn phương chấm dứt (đề xuất giữ toàn bộ cọc)', refundAmount: 0, proposedBy: TH.me().id, proposedAt: TH.TODAY, approvedBy: null, approvedAt: null, paidBy: null, paidAt: null, txnRef: null, note: 'Phá HĐ ' + F.date(at) + ' — chờ duyệt mức giữ cọc' });
+    if (!C.depositCase(ct.id)) TH.db.depositCases.push({ id: TH.recordActions.id('HC'), contractId: ct.id, customerId: ct.customerId, amount: ct.deposit, state: 'pending_approval', handoverAt: at, dueAt: TH.addDays(at, (ct.terms && ct.terms.refundDays) || 10), deductions: [], forfeitAmount: ct.deposit, forfeitBasis: 'Điều 4.3 & 7.1 HĐ — khách đơn phương chấm dứt (đề xuất giữ toàn bộ cọc)', refundAmount: 0, proposedBy: TH.me().id, proposedAt: TH.TODAY, approvedBy: null, approvedAt: null, paidBy: null, paidAt: null, txnRef: null, note: 'Phá HĐ ' + F.date(at) + ' — chờ duyệt mức giữ cọc' });
     TH.log('Ghi nhận phá HĐ', ct.id, room.id + ' · ' + (TH.BREAK_REASONS[reason] || '') + ' · ' + F.date(at), 'contract', ct.buildingId);
     TH.store.clearDraft('pay-break'); TH.modal.close('pay-break', { silent: true });
     TH.store.setUi(P2, 'tab', 'break'); TH.app.refresh();

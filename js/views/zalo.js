@@ -9,7 +9,7 @@
     if (!template || template.status !== 'approved') return 'Mẫu tin chưa được duyệt';
     if (!TH.has('F026.B') && TH.db.oaTemplates.filter(function (t) { return t.status === 'approved' && t.kind !== 'expiry'; }).slice(0, 2).indexOf(template) === -1) { TH.requireFeature('F026.B'); return 'Mẫu ngoài giới hạn gói A'; }
     if (template.kind === 'expiry' && !TH.requireFeature('F026.B')) return 'Mẫu có từ gói B';
-    var k = C.customer(inv.customerId), msgId = 'ZL-' + String(TH.db.messages.length + 1).padStart(4, '0');
+    var k = C.customer(inv.customerId), msgId = TH.recordActions.id('ZL');
     var now = TH.TODAY + ' ' + String(new Date().getHours()).padStart(2, '0') + ':' + String(new Date().getMinutes()).padStart(2, '0');
     var reason = '';
     if (inv.status !== 'confirmed') reason = 'Hóa đơn chưa xác nhận';
@@ -62,8 +62,9 @@
       var preview = invs[0] ? '<div class="card" style="background:var(--info-soft);border-color:var(--info-line)"><div class="card-bd"><div class="small strong u-mb-8">' + I('message', 'ic-sm') + ' Xem trước · ' + esc(tpl.name) + '</div><div style="background:var(--surface);border-radius:12px;padding:12px 14px;font-size:13px;box-shadow:var(--shadow-sm)">' + fill(tpl, C.invoice(sel[0] || invs[0].id)) + '</div></div></div>' : '';
 
       var schedule = '<div class="card">' + TH.cardHd(I('calendar', 'ic-sm') + 'Lịch nhắc', 'Phụ thuộc khả năng của OA') + '<div class="card-bd stack">' +
-        (TH.has('F027.B') ? '<div><div class="small strong u-mb-8">3 mốc nhắc đã duyệt ' + TH.up('F027.B') + '</div><div class="row">' + oa.reminders.map(function (d) { return TH.badge('Ngày ' + String(d).padStart(2, '0'), 'teal', { icon: 'bell' }); }).join('') + '</div><div class="small muted u-mt-8">Tự bỏ qua hóa đơn đã thu đủ.</div></div>'
-          : '<label class="switch"><input type="checkbox" checked disabled><span class="switch-track"></span><span class="small"><b>1 lịch nhắc đơn giản</b> · ngày ' + String(oa.reminderDay).padStart(2, '0') + ' hằng tháng (nếu OA cho phép)</span></label>' + TH.gate('F027.B', '', { mode: 'btn', label: '3 mốc nhắc cấu hình', size: 'btn-sm' })) +
+        '<p class="small">' + (TH.has('F027.B') ? 'Tối đa ba mốc nhắc đang hoạt động ' + TH.up('F027.B') : 'Một lịch nhắc đơn giản ' + TH.gate('F027.B', '', { mode: 'btn', label: 'Ba mốc nhắc cấu hình', size: 'btn-sm' })) + '</p>' +
+        TH.table({ compact: true, label: 'Lịch nhắc OA', cols: [{ key: 'n', label: 'Lịch', render: function (s) { return esc(s.name); } }, { key: 'd', label: 'Ngày nhắc', render: function (s) { return 'Ngày ' + s.day; } }, { key: 's', label: 'Trạng thái', render: function (s) { return TH.status(s.status); } }], rows: TH.db.oaSchedules || [], empty: { title: 'Chưa có lịch nhắc', text: 'Thêm lịch để chạy mô phỏng.' } }) +
+        TH.permBtn('oa.send', '<button type="button" class="btn btn-sm" data-act="rec.create" data-type="oaSchedule">Thêm lịch nhắc</button>', '403') +
         '<p class="small muted">Mọi gói dừng nhắc khoản đã xác nhận thu đủ và chống gửi lặp cùng hóa đơn/mẫu trong ngày.</p>' + TH.gate('F027.C', '<div class="alert alert-neutral">' + I('shieldCheck', 'ic-sm') + '<div class="alert-body"><b>Hàng đợi và xử lý ngoại lệ ' + TH.up('F027.C') + '</b><span>Tin lỗi vào hàng đợi gửi lại (' + TH.db.messages.filter(function (m) { return m.status === 'failed'; }).length + ' tin).</span></div></div>', { label: 'Hàng đợi gửi lại và xử lý ngoại lệ', lines: 1 }) + '</div></div>';
       var sent = TH.db.messages.filter(function (m) { return m.at.slice(0, 7) === p; });
       var stats = TH.gate('F027.D', '<div class="card">' + TH.cardHd(I('chart', 'ic-sm') + 'Trạng thái nhà cung cấp' + TH.up('F027.D')) + '<div class="card-bd">' + TH.kv([['Đã gửi', String(sent.filter(function (m) { return m.status === 'sent'; }).length)], ['Lỗi / bị trả về', String(sent.filter(function (m) { return m.status === 'failed'; }).length)], ['Bỏ qua (không đủ điều kiện)', String(sent.filter(function (m) { return m.status === 'skipped'; }).length)], ['Gửi lại có kiểm soát', 'Tối đa 2 lần / tin']]) + '</div></div>', { label: 'Thống kê gửi/lỗi/bị trả về và gửi lại', lines: 3 });

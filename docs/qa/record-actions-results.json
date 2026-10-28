@@ -1,0 +1,100 @@
+{
+  "date": "2026-10-28",
+  "schema": 12,
+  "dataset": {
+    "passed": 3556,
+    "failed": 0
+  },
+  "playwright": {
+    "checks": 476,
+    "suites": [
+      {
+        "file": "qa-records.playwright.js",
+        "checks": 135,
+        "passed": true,
+        "errors": [],
+        "failed": []
+      },
+      {
+        "file": "qa-record-workflows.playwright.js",
+        "checks": 139,
+        "passed": true,
+        "errors": [],
+        "failed": []
+      },
+      {
+        "file": "qa-record-ui.playwright.js",
+        "checks": 11,
+        "passed": true,
+        "errors": [],
+        "failed": []
+      },
+      {
+        "file": "qa-pay.playwright.js",
+        "checks": 12,
+        "passed": true,
+        "errors": [],
+        "failed": []
+      },
+      {
+        "file": "qa-bill.playwright.js",
+        "checks": 8,
+        "passed": true,
+        "errors": [],
+        "failed": []
+      },
+      {
+        "file": "qa-cus.playwright.js",
+        "checks": 23,
+        "passed": true,
+        "errors": [],
+        "failed": []
+      },
+      {
+        "file": "qa-report.playwright.js",
+        "checks": 12,
+        "passed": true,
+        "errors": [],
+        "failed": []
+      },
+      {
+        "file": "qa-ocr.playwright.js",
+        "checks": 9,
+        "passed": true,
+        "errors": [],
+        "failed": []
+      },
+      {
+        "file": "qa-package-policy.playwright.js",
+        "checks": 55,
+        "passed": true,
+        "errors": [],
+        "failed": []
+      },
+      {
+        "file": "qa-pricing.playwright.js",
+        "checks": 50,
+        "passed": true,
+        "errors": [],
+        "failed": []
+      },
+      {
+        "file": "qa-navigation.playwright.js",
+        "checks": 22,
+        "passed": true,
+        "errors": [],
+        "failed": []
+      }
+    ]
+  },
+  "syntax": "passed",
+  "uiLint": {
+    "findings": 0
+  },
+  "viewports": [
+    1440,
+    375
+  ],
+  "demoPeriod": "2026-10",
+  "lockedSourcePeriod": "2026-09"
+}

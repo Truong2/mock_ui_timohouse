@@ -76,7 +76,7 @@
     TH.db.buildings.push(newBuilding({ id: id, name: name, short: name.replace('TimeHouse ', ''), area: g('area', '') || '—', address: g('address', '') || '—', ownerId: owner, managerId: mgr, floors: +g('floors', 3) || 3, floorArea: digits(g('floorArea', '')) || null, ownerRent: rent }));
     TH.db.ownerLinks.push({ buildingId: id, ownerId: owner, role: 'Chủ sở hữu', from: TH.TODAY, to: null });
     TH.db.leases.push({ id: 'HĐT-' + id.slice(3) + '-' + TH.TODAY.slice(0, 4), buildingId: id, ownerId: owner, rent: rent, deposit: rent, handover: TH.TODAY, start: TH.TODAY, end: TH.addDays((+TH.TODAY.slice(0, 4) + 5) + TH.TODAY.slice(4), -1), termMonths: 60, holdFrom: TH.TODAY, holdTo: TH.TODAY, payCycle: 3, payFrom: 1, payTo: 10, referrer: '', enteredBy: TH.me().id, enteredAt: TH.TODAY, note: 'Tạo cùng hồ sơ tòa — cập nhật điều khoản theo HĐ.', file: null, status: 'active', versions: [{ v: 1, at: TH.TODAY, by: TH.me().id, note: 'Khởi tạo' }] });
-    TH.db.assignments.push({ id: 'PC-' + Date.now().toString().slice(-4), staffId: mgr, buildingId: id, role: TH.ROLE_MAIN, main: true, from: TH.TODAY, to: null });
+    TH.db.assignments.push({ id: TH.recordActions.id('PC'), staffId: mgr, buildingId: id, role: TH.ROLE_MAIN, main: true, from: TH.TODAY, to: null });
     TH.log('Thêm tòa', id, name, 'building', id);
     TH.store.clearDraft('bld-new'); TH.modal.close('bld-form', { silent: true }); TH.app.refresh(); TH.toast('Đã thêm tòa', esc(id + ' · ' + name) + ' · <a href="' + TH.router.href('BLD-02', id) + '">Mở chi tiết</a>');
   };
@@ -258,7 +258,7 @@
     var main = !TH.has('F006.B') || TH.store.draft(form, 'main', 'yes') === 'yes';
     if (TH.db.assignments.some(function (a) { return a.buildingId === bId && a.staffId === staff && a.role === role && !a.to; }) && !main) { TH.toast('Đã có phân công', esc(C.staffName(staff) + ' đang là ' + role + ' của tòa.'), 'info'); return; }
     if (main) { TH.db.assignments.forEach(function (a) { if (a.buildingId === bId && a.role === role && a.main && !a.to) a.to = TH.addDays(from, -1); }); if (role === TH.ROLE_MAIN) b.managerId = staff; }
-    TH.db.assignments.push({ id: 'PC-' + Date.now().toString().slice(-5), staffId: staff, buildingId: bId, role: role, main: main, from: from, to: null });
+    TH.db.assignments.push({ id: TH.recordActions.id('PC'), staffId: staff, buildingId: bId, role: role, main: main, from: from, to: null });
     TH.log('Phân công nhân sự tòa', bId, C.staffName(staff) + ' · ' + role + (main ? ' (chính)' : ''), 'building', bId);
     TH.store.clearDraft(form); TH.modal.close('bld-asg', { silent: true }); TH.app.refresh(); TH.toast('Đã lưu phân công', esc(C.staffName(staff) + ' · ' + role));
   };
@@ -312,7 +312,7 @@
     if (!TH.formErrors(form, rec.name ? {} : { name: 'Nhập tên tài sản.' })) { TH.modal.rerenderAll(); return; }
     var bId = a ? a.buildingId : el.dataset.b;
     if (a) Object.assign(a, rec);
-    else { a = Object.assign({ id: 'TS-' + bId.slice(3) + '-' + String(TH.db.assets.filter(function (x) { return x.buildingId === bId; }).length + 1).padStart(2, '0'), buildingId: bId }, rec); TH.db.assets.push(a); }
+    else { a = Object.assign({ id: TH.recordActions.id('TS'), buildingId: bId }, rec); TH.db.assets.push(a); }
     TH.log(id ? 'Sửa tài sản' : 'Thêm tài sản', a.id, a.name + ' · ' + (a.group === 'invest' ? 'đầu tư thêm' : 'chủ nhà') + (moved ? ' · ' + moved : ''), 'building', bId);
     TH.store.clearDraft(form); TH.modal.close('asset', { silent: true }); TH.app.refresh(); TH.toast('Đã lưu tài sản', esc(a.name));
   };
@@ -356,23 +356,23 @@
 
   /* ---------------- Tab: Lịch thanh toán cho chủ nhà (F036) ---------------- */
   function payState(x) {
-    var left = x.amount - x.paid;
+    var left = x.amount - TH.landlordPaid(x);
     if (left <= 0) return { k: 'paid', b: TH.badge('Đã trả', 'success', { dot: true }) };
-    if (x.dueAt < TH.TODAY) return { k: 'overdue', b: TH.badge(x.paid ? 'Quá hạn · trả một phần' : 'Quá hạn', 'danger', { dot: true }) };
+    if (x.dueAt < TH.TODAY) return { k: 'overdue', b: TH.badge(TH.landlordPaid(x) ? 'Quá hạn · trả một phần' : 'Quá hạn', 'danger', { dot: true }) };
     if (C.daysTo(x.dueAt) <= 15) return { k: 'soon', b: TH.badge('Sắp đến hạn', 'warning', { dot: true }) };
-    return { k: 'future', b: TH.badge(x.paid ? 'Trả trước một phần' : 'Chưa đến hạn', 'neutral', { dot: true }) };
+    return { k: 'future', b: TH.badge(TH.landlordPaid(x) ? 'Trả trước một phần' : 'Chưa đến hạn', 'neutral', { dot: true }) };
   }
   TH.landlordPayState = payState;
   function payTab(b) {
     var l = TH.leaseOf(b.id), rows = TH.db.landlordPays.filter(function (x) { return x.buildingId === b.id; }).sort(function (a, c) { return a.from < c.from ? 1 : -1; });
-    var owed = C.sum(rows.filter(function (x) { return x.dueAt <= TH.TODAY; }), function (x) { return x.amount - x.paid; });
+    var owed = C.sum(rows.filter(function (x) { return x.dueAt <= TH.TODAY; }), function (x) { return x.amount - TH.landlordPaid(x); });
     var trackPaid = TH.has('F036.C');
-    var next = rows.filter(function (x) { return trackPaid ? x.amount > x.paid : x.dueAt >= TH.TODAY; }).sort(function (a, c) { return a.dueAt < c.dueAt ? -1 : 1; })[0];
+    var next = rows.filter(function (x) { return trackPaid ? x.amount > TH.landlordPaid(x) : x.dueAt >= TH.TODAY; }).sort(function (a, c) { return a.dueAt < c.dueAt ? -1 : 1; })[0];
     var expRent = function (x) { var ms = []; for (var m = x.from; m <= x.to; m = TH.addMonthsYm(m, 1)) ms.push(m); return C.sum(TH.db.expenses.filter(function (e) { return e.buildingId === b.id && e.category === 'owner_rent' && ms.indexOf(e.period) > -1; }), function (e) { return e.amount; }); };
     var head = '<div class="grid-3 u-mb-16">' +
       TH.kpi({ label: 'Mỗi kỳ phải trả', icon: 'calendar', value: l ? F.short(l.rent * l.payCycle) : '—', foot: l ? (l.payCycle === 1 ? 'Hằng tháng' : String(l.payCycle).padStart(2, '0') + ' tháng/lần') + ' · ngày 01–' + String(l.payTo).padStart(2, '0') + ' tháng đầu kỳ' : 'Chưa có HĐ thuê' }) +
       TH.gate('F036.C', TH.kpi({ label: 'Còn phải trả đến hôm nay', icon: 'wallet', value: F.short(owed), neg: owed > 0, foot: owed > 0 ? 'Có kỳ quá hạn' : 'Không có khoản quá hạn' }), { label: 'Tách phải trả/chưa trả', lines: 2 }) +
-      TH.kpi({ label: 'Kỳ đến hạn gần nhất', icon: 'clock', value: next ? F.date(next.dueAt) : '—', foot: next ? F.period(next.from) + ' → ' + F.period(next.to) + ' · ' + F.money(trackPaid ? next.amount - next.paid : next.amount) : (trackPaid ? 'Đã trả hết các kỳ' : 'Chưa có kỳ sắp tới — thêm kỳ trả') }) + '</div>';
+      TH.kpi({ label: 'Kỳ đến hạn gần nhất', icon: 'clock', value: next ? F.date(next.dueAt) : '—', foot: next ? F.period(next.from) + ' → ' + F.period(next.to) + ' · ' + F.money(trackPaid ? next.amount - TH.landlordPaid(next) : next.amount) : (trackPaid ? 'Đã trả hết các kỳ' : 'Chưa có kỳ sắp tới — thêm kỳ trả') }) + '</div>';
     var table = '<div class="card card-flush">' + TH.cardHd(I('calendar', 'ic-sm') + 'Lịch thanh toán cho chủ nhà', (l ? 'Theo ' + esc(l.id) + ' · ' + esc(C.owner(l.ownerId).name) + ' · ' + F.date(l.start) + ' → ' + F.date(l.end) + (l.file ? ' · bản HĐ ' + esc(l.file) : '') + ((l.appendices || []).length ? ' · ' + l.appendices.length + ' phụ lục' : '') : 'Chưa có HĐ thuê tòa'),
         TH.permBtn('lease.edit', '<button type="button" class="btn btn-sm" data-act="lpay.add" data-b="' + b.id + '">' + I('plus', 'ic-sm') + 'Thêm kỳ trả</button>', '403') +
         TH.gate('F036.B', TH.permBtn('lease.edit', '<button type="button" class="btn btn-sm btn-soft" data-act="lpay.gen" data-b="' + b.id + '">' + I('wand', 'ic-sm') + 'Sinh lịch từ HĐ' + TH.up('F036.B') + '</button>', '403'), { mode: 'btn', label: 'Tự sinh lịch phải trả từ điều khoản thuê tòa', size: 'btn-sm' })) +
@@ -380,18 +380,18 @@
         { key: 'k', label: 'Kỳ thanh toán', render: function (x) { return '<b>' + F.period(x.from) + ' → ' + F.period(x.to) + '</b><div class="cell-sub mono">' + esc(x.id) + (x.source === 'auto' ? ' · tự sinh' : '') + '</div>'; } },
         { kind: 'date', key: 'd', label: 'Hạn trả', render: function (x) { return F.date(x.dueAt); } },
         { kind: 'money', key: 'a', label: 'Phải trả', num: true, render: function (x) { return F.money(x.amount); } },
-        { kind: 'money', key: 'p', label: 'Đã trả', num: true, gate: 'F036.C', render: function (x) { return x.paid ? F.money(x.paid) + '<div class="cell-sub">' + F.date(x.paidAt) + (x.docNo ? ' · ' + esc(x.docNo) : '') + '</div>' : '<span class="muted">0</span>'; } },
-        { kind: 'money', key: 'r', label: 'Còn lại', num: true, gate: 'F036.C', render: function (x) { var r = x.amount - x.paid; return r > 0 ? '<b class="' + (x.dueAt < TH.TODAY ? 'neg' : '') + '">' + F.money(r) + '</b>' : '<span class="muted">0</span>'; } },
+        { kind: 'money', key: 'p', label: 'Đã trả', num: true, gate: 'F036.C', render: function (x) { return TH.landlordPaid(x) ? F.money(TH.landlordPaid(x)) + '<div class="cell-sub">' + F.date(x.paidAt) + (x.docNo ? ' · ' + esc(x.docNo) : '') + '</div>' : '<span class="muted">0</span>'; } },
+        { kind: 'money', key: 'r', label: 'Còn lại', num: true, gate: 'F036.C', render: function (x) { var r = x.amount - TH.landlordPaid(x); return r > 0 ? '<b class="' + (x.dueAt < TH.TODAY ? 'neg' : '') + '">' + F.money(r) + '</b>' : '<span class="muted">0</span>'; } },
         { key: 's', label: 'Trạng thái', gate: 'F036.C', render: function (x) { return payState(x).b; } },
         { key: 'ap', label: 'Duyệt chi', gate: 'F036.C', render: function (x) { return x.approval === 'approved' ? TH.badge('Đã duyệt', 'success') : x.approval === 'pending' ? TH.badge('Chờ duyệt', 'warning') : '<span class="muted small">—</span>'; } },
         { kind: 'money', key: 'e', label: 'Chi phí đã ghi', num: true, gate: 'F036.D', render: function (x) { var e = expRent(x); return F.money(e) + '<div class="cell-sub">' + (e === x.amount ? TH.badge('Khớp', 'success') : TH.badge('Lệch ' + F.short(x.amount - e), 'warning')) + '</div>'; } },
         { key: 'n', label: 'Ghi chú / chứng từ', render: function (x) { return '<span class="small">' + esc(x.note || '') + '</span>'; } },
-        { key: 'x', label: '', render: function (x) { return x.amount > x.paid ? TH.gate('F036.C', TH.permBtn('lease.edit', '<button type="button" class="btn btn-sm" data-act="lpay.pay" data-id="' + x.id + '">' + I('check', 'ic-sm') + 'Ghi nhận trả</button>', ''), { mode: 'btn', label: 'Ghi nhận đã trả', size: 'btn-sm' }) : ''; } },
+        { key: 'x', label: '', render: function (x) { return x.amount > TH.landlordPaid(x) ? TH.gate('F036.C', TH.permBtn('lease.edit', '<button type="button" class="btn btn-sm" data-act="lpay.pay" data-id="' + x.id + '">' + I('check', 'ic-sm') + 'Ghi nhận trả</button>', ''), { mode: 'btn', label: 'Ghi nhận đã trả', size: 'btn-sm' }) : ''; } },
       ], rows: rows, empty: { title: 'Chưa có lịch thanh toán', text: 'Thêm kỳ trả thủ công' + (TH.has('F036.B') ? ' hoặc sinh lịch từ hợp đồng.' : '.') } }) +
       '<div class="card-ft"><span class="small muted">' + I('info', 'ic-sm') + ' Căn cứ điều khoản thanh toán trong HĐ thuê tòa' + (l ? ' (tòa này: ' + (l.payCycle === 1 ? 'hằng tháng' : String(l.payCycle).padStart(2, '0') + ' tháng/lần') + ', ngày 01–' + String(l.payTo).padStart(2, '0') + ' tháng đầu kỳ)' : '') + '. Lịch lấy từ HĐ & phụ lục có hiệu lực, không dùng một chu kỳ chung cho mọi tòa (G-10).</span></div></div>';
     var recon = TH.gate('F036.D', '<div class="card u-mt-16">' + TH.cardHd(I('compare', 'ic-sm') + 'Đối chiếu phải trả ↔ chi phí' + TH.up('F036.D'), 'Lịch trả theo HĐ so với chi phí “Tiền thuê trả chủ nhà” đã ghi theo tháng') + '<div class="card-bd small">Cột “Chi phí đã ghi” cộng chi phí từng tháng trong kỳ trả; lệch khi tháng chưa ghi hoặc chi phí chờ duyệt. Cost center: tòa ' + esc(b.short) + '.</div></div>', { label: 'Đối chiếu payable + cost center', lines: 2 });
     /* G-10 (đề xuất): nhắc nội bộ trước hạn 7 ngày, 3 ngày, ngày đến hạn và khi quá hạn — bật/tắt được */
-    var rc = TH.db.landlordReminder || {}, open = rows.filter(function (x) { return x.amount > x.paid; });
+    var rc = TH.db.landlordReminder || {}, open = rows.filter(function (x) { return x.amount > TH.landlordPaid(x); });
     var remList = [];
     open.forEach(function (x) {
       var d = C.daysTo(x.dueAt);
@@ -402,7 +402,7 @@
     });
     var tg = function (k, lbl) { return '<label class="switch" style="margin-right:12px"><input type="checkbox" data-act-change="lrem.toggle" data-key="' + k + '"' + (rc[k] ? ' checked' : '') + (TH.can('lease.edit') ? '' : ' disabled') + '><span class="switch-track"></span><span class="small">' + lbl + '</span></label>'; };
     var remind = TH.gate('F036.B', '<div class="card u-mt-16">' + TH.cardHd(I('bell', 'ic-sm') + 'Nhắc lịch trả chủ nhà' + TH.up('F036.B'), esc(rc.channel || 'Thông báo nội bộ') + ' · ' + TH.openBadge('', 'PROPOSED')) + '<div class="card-bd stack-sm"><div class="row" style="flex-wrap:wrap;gap:8px">' + tg('before7', 'Trước 7 ngày') + tg('before3', 'Trước 3 ngày') + tg('due', 'Ngày đến hạn') + tg('overdue', 'Khi quá hạn') + '</div>' +
-      (remList.length ? '<ul class="timeline">' + remList.map(function (r) { return '<li>' + TH.badge(r[1], r[2]) + ' <b>' + F.period(r[0].from) + ' → ' + F.period(r[0].to) + '</b> · hạn ' + F.date(r[0].dueAt) + (TH.has('F036.C') ? ' · còn ' + F.money(r[0].amount - r[0].paid) : '') + '</li>'; }).join('') + '</ul>' : '<div class="small muted">Không có nhắc lịch đang kích hoạt.</div>') +
+      (remList.length ? '<ul class="timeline">' + remList.map(function (r) { return '<li>' + TH.badge(r[1], r[2]) + ' <b>' + F.period(r[0].from) + ' → ' + F.period(r[0].to) + '</b> · hạn ' + F.date(r[0].dueAt) + (TH.has('F036.C') ? ' · còn ' + F.money(r[0].amount - TH.landlordPaid(r[0])) : '') + '</li>'; }).join('') + '</ul>' : '<div class="small muted">Không có nhắc lịch đang kích hoạt.</div>') +
       '<div class="small muted">Mô phỏng — không gửi thật. Áp dụng cho mọi tòa; kênh gửi chờ chốt.</div></div></div>', { label: 'Nhắc lịch trả chủ nhà (tự động hóa)', lines: 3 });
     return head + table + remind + recon;
   }
@@ -455,18 +455,18 @@
     var x = TH.db.landlordPays.find(function (p) { return p.id === el.dataset.id; }), form = 'lpay-pay-' + x.id;
     TH.store.clearDraft(form);
     TH.modal.open({ key: 'lpay-pay', size: 'sm', render: function () {
-      return { title: 'Ghi nhận đã trả · ' + esc(x.id), sub: 'F036.C · kỳ ' + F.period(x.from) + ' → ' + F.period(x.to) + ' · còn ' + F.money(x.amount - x.paid),
-        body: '<div class="stack">' + TH.field({ form: form, required: true, name: 'amount', label: 'Số tiền trả (đ)', def: x.amount - x.paid, num: true, inputmode: 'numeric' }) + TH.field({ form: form, name: 'date', label: 'Ngày trả', type: 'date', def: TH.TODAY }) + TH.field({ form: form, name: 'doc', label: 'Số chứng từ (UNC/phiếu chi)', def: 'UNC-' + x.buildingId.slice(3) + '-' + TH.TODAY.slice(5).replace('-', '') }) + '</div>',
+      return { title: 'Ghi nhận đã trả · ' + esc(x.id), sub: 'F036.C · kỳ ' + F.period(x.from) + ' → ' + F.period(x.to) + ' · còn ' + F.money(x.amount - TH.landlordPaid(x)),
+        body: '<div class="stack">' + TH.field({ form: form, required: true, name: 'amount', label: 'Số tiền trả (đ)', def: x.amount - TH.landlordPaid(x), num: true, inputmode: 'numeric' }) + TH.field({ form: form, name: 'date', label: 'Ngày trả', type: 'date', def: TH.TODAY }) + TH.field({ form: form, name: 'doc', label: 'Số chứng từ (UNC/phiếu chi)', def: 'UNC-' + x.buildingId.slice(3) + '-' + TH.TODAY.slice(5).replace('-', '') }) + '</div>',
         foot: '<button type="button" class="btn" data-close>Hủy</button><button type="button" class="btn btn-primary" data-act="lpay.paySave" data-id="' + x.id + '">' + I('check', 'ic-sm') + 'Lưu thay đổi</button>' };
     } });
   };
   TH.act['lpay.paySave'] = function (el) {
     var x = TH.db.landlordPays.find(function (p) { return p.id === el.dataset.id; }), form = 'lpay-pay-' + x.id;
-    var a = digits(TH.store.draft(form, 'amount', x.amount - x.paid));
-    if (!TH.formErrors(form, a <= 0 || a > x.amount - x.paid ? { amount: 'Nhập số tiền từ 1 đến ' + F.money(x.amount - x.paid) + '.' } : {})) { TH.modal.rerenderAll(); return; }
+    var a = digits(TH.store.draft(form, 'amount', x.amount - TH.landlordPaid(x)));
+    if (!TH.formErrors(form, a <= 0 || a > x.amount - TH.landlordPaid(x) ? { amount: 'Nhập số tiền từ 1 đến ' + F.money(x.amount - TH.landlordPaid(x)) + '.' } : {})) { TH.modal.rerenderAll(); return; }
     x.paid += a; x.approval = 'approved'; x.paidAt = TH.store.draft(form, 'date', TH.TODAY); x.docNo = TH.store.draft(form, 'doc', 'UNC-' + x.buildingId.slice(3) + '-' + TH.TODAY.slice(5).replace('-', ''));
     TH.log('Ghi nhận trả chủ nhà', x.buildingId, x.id + ' · ' + F.money(a), 'expense', x.buildingId);
-    TH.store.clearDraft(form); TH.modal.close('lpay-pay', { silent: true }); TH.app.refresh(); TH.toast('Đã ghi nhận', F.money(a) + ' · còn ' + F.money(x.amount - x.paid));
+    TH.store.clearDraft(form); TH.modal.close('lpay-pay', { silent: true }); TH.app.refresh(); TH.toast('Đã ghi nhận', F.money(a) + ' · còn ' + F.money(x.amount - TH.landlordPaid(x)));
   };
 
   /* ---------------- BLD-02 · chi tiết theo tab ---------------- */
@@ -480,7 +480,7 @@
       if (!TH.inScope(b.id)) return TH.pageHeader({ screen: 'BLD-02', title: b.name }) + '<div class="card">' + TH.state('forbidden', { text: 'Tòa ngoài phạm vi được cấp cho vai trò hiện tại.' }) + '</div>';
       var S = 'BLD-02', rooms = roomsOf(b.id), occ = rooms.filter(function (x) { return x.status === 'occupied'; }).length;
       var lease = TH.leaseOf(b.id), docs = docsOf(b.id);
-      var payAlert = TH.has('F036.C') && TH.db.landlordPays.some(function (x) { return x.buildingId === b.id && x.amount > x.paid && x.dueAt < TH.TODAY; });
+      var payAlert = TH.has('F036.C') && TH.db.landlordPays.some(function (x) { return x.buildingId === b.id && x.amount > TH.landlordPaid(x) && x.dueAt < TH.TODAY; });
       var tabs = [
         { id: 'info', label: 'Thông tin chung', icon: 'building' },
         { id: 'owner', label: 'Chủ nhà & hợp đồng thuê tòa', icon: 'contract' },

@@ -8,6 +8,8 @@ async (page) => {
   await page.goto('http://127.0.0.1:8779/index.html?previewPackage=D&v=' + Date.now() + '#/demo/reports');
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.waitForFunction(() => window.TH && TH.db && TH.reports);
+  /* CR-RPT-03: xác nhận cần rà soát đủ nhóm minh chứng — đánh dấu đã rà soát trước mỗi lần xác nhận */
+  await read(() => { window.__rv = id => { const d = TH.reports.draft(id); if (d) TH.reports.reviewState(d).groups.forEach(g => { TH.reports.markSeen(id, g.id); TH.reports.setReview(id, g.id, true); }); return id; }; });
   const reset = (role, pkg) => read(([r, k]) => {
     TH.modal.stack.slice().forEach(m => TH.modal.close(m.key, { silent: true }));
     TH.db = TH.seed(); TH.db.reportRuns = []; TH.db.reportDrafts = [];
@@ -21,8 +23,8 @@ async (page) => {
 
   // QA-RPT-01 — hai mẫu, nhiều tòa: RPT-04 N tòa → N bản; RPT-05 1 bản đủ sheet KD/Tổng/nhóm (chỉ tòa chọn); hủy không tạo; bấm 2 lần không trùng (qua UI)
   await read(() => { location.hash = '#/demo/reports/new'; });
-  await page.waitForSelector('#rptf-type');
-  await page.selectOption('#rptf-type', 'RPT-04');
+  await page.waitForSelector('[data-act="rptf.preview"]');
+  await page.click('[data-act="rptf.pickType"][data-type="RPT-04"]'); await page.waitForTimeout(100);
   await page.locator('[data-act-change="rptf.b"][data-b="TH-DD"]').uncheck();
   await page.click('[data-act="rptf.preview"]');
   await page.waitForSelector('[data-act="rptf.confirm"]');
@@ -31,18 +33,18 @@ async (page) => {
   await page.click('[data-act="rptf.cancel"]'); await page.waitForTimeout(200);
   const afterCancel = await read(() => TH.db.reportRuns.length);
   await read(() => { location.hash = '#/demo/reports/new'; });
-  await page.waitForSelector('#rptf-type');
+  await page.waitForSelector('[data-act="rptf.preview"]');
   await page.click('[data-act="rptf.preview"]');
   await page.waitForSelector('[data-act-change="rptf.ack"]');
   const disabledBeforeAck = await page.locator('[data-act="rptf.confirm"]').isDisabled();
   await page.locator('[data-act-change="rptf.ack"]').check(); await page.waitForTimeout(150);
   const did = await read(() => decodeURIComponent(location.hash).split('/').pop());
-  await read(id => { const el = document.querySelector('[data-act="rptf.confirm"]'); el.click(); TH.act['rptf.confirm']({ dataset: { id }, disabled: false }); }, did);
+  await read(id => { const el = document.querySelector('[data-act="rptf.confirm"]'); el.click(); __rv(id); TH.act['rptf.confirm']({ dataset: { id }, disabled: false }); }, did);
   await page.waitForTimeout(250);
   const q1a = await read(() => ({ runs: TH.db.reportRuns.map(r => r.id), hash: location.hash }));
   const q1b = await read(() => {
     const R = TH.reports, d = R.preview({ type: 'RPT-05', period: '2026-10', buildingIds: ['TH-CG', 'TH-TX'] }).draft;
-    d.ack = true; const c = R.confirm(d.id, { acknowledgeWarnings: true }), r = R.run(c.runIds[0]);
+    d.ack = true; const c = R.confirm(__rv(d.id), { acknowledgeWarnings: true }), r = R.run(c.runIds[0]);
     return { n: c.runIds.length, sheets: r.snapshot.sheets.map(s => s.name), g1cols: r.snapshot.sheets.find(s => s.id === 'g:NHA-1').cols.map(c => c.label), ids: r.buildingIds };
   });
   check('QA-RPT-01', btn4.includes('2 báo cáo') && items4 === 2 && afterCancel === 0 && disabledBeforeAck && q1a.runs.length === 2 && q1a.runs.every(id => /^BC04-202610-(CG|TX)-v1$/.test(id)) &&
@@ -51,7 +53,7 @@ async (page) => {
   // QA-RPT-02 — preview = bản lưu = Excel; mọi ô số truy được, nguồn/thành phần đối chiếu khớp
   const q2 = await read(() => {
     const R = TH.reports, d = R.preview({ type: 'RPT-05', period: '2026-09', buildingIds: ['TH-CG', 'TH-DD', 'TH-TX'] }).draft, it = d.items[0];
-    d.ack = true; const c = R.confirm(d.id, { acknowledgeWarnings: true }), run = R.run(c.runIds[0]);
+    d.ack = true; const c = R.confirm(__rv(d.id), { acknowledgeWarnings: true }), run = R.run(c.runIds[0]);
     const same = JSON.stringify(it.vals) === JSON.stringify(run.snapshot.vals);
     R.export(run.id); const xl = window.__xl[window.__xl.length - 1];
     let cells = 0, bad = [], xlMismatch = 0;
@@ -104,7 +106,7 @@ async (page) => {
     ['TX-202', 'TX-101'].forEach(id => { const rd = TH.calc.reading(id, '2026-10'); rd.status = 'confirmed'; });
     TH.refreshDrafts('TH-TX', '2026-10');
     ['TX-202', 'TX-101'].forEach(id => { const i = TH.db.invoices.find(x => x.roomId === id && x.period === '2026-10'); Object.assign(i, { status: 'confirmed', confirmedBy: 'NV-002', confirmedAt: TH.TODAY }); });
-    const stale = R.isStale(d), blocked = R.confirm(d.id, { acknowledgeWarnings: true }).reason;
+    const stale = R.isStale(d), blocked = R.confirm(__rv(d.id), { acknowledgeWarnings: true }).reason;
     R.recalc(d.id);
     const t = R.trace({ where: 'draft', id: d.id, item: 0, mode: 'tong', col: k, metric: 'rent' }), s202 = t.sources.find(s => s.id === 'INV-2610-TX202'), l = s202.lines.find(x => x.type === 'rent');
     TH.onChange['bill.rule']({ dataset: { key: 'prorateBase' }, value: 'actual' });
@@ -159,14 +161,14 @@ async (page) => {
   const q8 = await read(() => {
     const R = TH.reports, k = R.keyOf(['TH-CG']);
     const d1 = R.preview({ type: 'RPT-04', period: '2026-09', buildingIds: ['TH-CG'] }).draft; d1.ack = true;
-    const v1 = R.run(R.confirm(d1.id, { acknowledgeWarnings: true }).runIds[0]);
+    const v1 = R.run(R.confirm(__rv(d1.id), { acknowledgeWarnings: true }).runIds[0]);
     R.export(v1.id); const x1 = JSON.stringify(window.__xl[window.__xl.length - 1].s);
     const d2 = R.preview({ type: 'RPT-04', period: '2026-09', buildingIds: ['TH-CG'], previousRunId: v1.id }).draft;
     const exp = TH.db.expenses.find(e => e.buildingId === 'TH-CG' && e.period === '2026-09' && e.category === 'repair' && e.status === 'approved');
     exp.amount += 1000000;
-    const stale = R.isStale(d2), blocked = R.confirm(d2.id, { acknowledgeWarnings: true }).reason;
+    const stale = R.isStale(d2), blocked = R.confirm(__rv(d2.id), { acknowledgeWarnings: true }).reason;
     R.recalc(d2.id); d2.ack = true;
-    const v2 = R.run(R.confirm(d2.id, { acknowledgeWarnings: true }).runIds[0]);
+    const v2 = R.run(R.confirm(__rv(d2.id), { acknowledgeWarnings: true }).runIds[0]);
     TH.db.expenses = TH.db.expenses.filter(e => e !== exp);
     TH.onChange['bill.rule']({ dataset: { key: 'prorateBase' }, value: 'actual' });
     const tr = R.trace({ where: 'run', id: v1.id, item: 0, mode: 'tong', col: k, metric: 'repair' });
@@ -178,7 +180,7 @@ async (page) => {
 
   // QA-RPT-09 — quyền & lưu trữ: gói A có luồng; QL không thấy RPT-05/tòa khác, lương bị che; Nhân sự 403; refresh giữ bản lưu; lỗi quota không báo lưu bền vững
   await reset('admin', 'A');
-  const q9a = await read(() => { const d = TH.reports.preview({ type: 'RPT-05', period: '2026-10', buildingIds: ['TH-CG', 'TH-DD'] }).draft; d.ack = true; const c = TH.reports.confirm(d.id, { acknowledgeWarnings: true }); return { ok: c.ok, pkg: TH.store.state.pkg, durable: c.durable }; });
+  const q9a = await read(() => { const d = TH.reports.preview({ type: 'RPT-05', period: '2026-10', buildingIds: ['TH-CG', 'TH-DD'] }).draft; d.ack = true; const c = TH.reports.confirm(__rv(d.id), { acknowledgeWarnings: true }); return { ok: c.ok, pkg: TH.store.state.pkg, durable: c.durable }; });
   await read(() => { TH.store.state.role = 'manager'; location.hash = '#/demo/reports'; TH.app.refresh(); });
   await page.waitForTimeout(200);
   const q9b = await read(() => {
@@ -191,11 +193,12 @@ async (page) => {
   const q9c = await read(() => ({ forbidden: !!document.querySelector('.state-forbidden'), r4: TH.reports.canType('RPT-04') }));
   await read(() => { TH.store.state.role = 'admin'; TH.store.state.pkg = 'D'; TH.store.flush(); });
   await page.reload(); await page.waitForFunction(() => window.TH && TH.db && TH.reports);
+  await read(() => { window.__rv = id => { const d = TH.reports.draft(id); if (d) TH.reports.reviewState(d).groups.forEach(g => { TH.reports.markSeen(id, g.id); TH.reports.setReview(id, g.id, true); }); return id; }; });
   const q9d = await read(() => ({ runs: TH.db.reportRuns.length, storage: TH.db.reportRuns.map(r => r.storage) }));
   const q9e = await read(() => {
     const orig = Storage.prototype.setItem; Storage.prototype.setItem = function () { throw new Error('QuotaExceededError'); };
     const d = TH.reports.preview({ type: 'RPT-04', period: '2026-10', buildingIds: ['TH-TX'] }).draft; d.ack = true;
-    const c = TH.reports.confirm(d.id, { acknowledgeWarnings: true });
+    const c = TH.reports.confirm(__rv(d.id), { acknowledgeWarnings: true });
     Storage.prototype.setItem = orig;
     return { ok: c.ok, durable: c.durable, storage: TH.reports.run(c.runIds[0]).storage };
   });
@@ -204,19 +207,47 @@ async (page) => {
   // QA-RPT-10 — route cũ & UI: RPT-04 link mở form điền sẵn tòa (không tạo bản lưu); 375px không tràn ngang ở danh sách / xem trước / bản lưu; không lỗi JS
   await reset('admin');
   await read(() => { TH.store.setUi('RPT-04', 'b', 'TH-DD'); location.hash = '#/demo/rpt-04'; });
-  await page.waitForSelector('#rptf-type');
-  const q10a = await read(() => ({ type: document.querySelector('#rptf-type').value, checked: Array.from(document.querySelectorAll('[data-act-change="rptf.b"]:checked')).map(x => x.dataset.b), runs: TH.db.reportRuns.length }));
+  await page.waitForSelector('[data-act="rptf.preview"]');
+  const q10a = await read(() => ({ type: (document.querySelector('[data-act="rptf.pickType"][aria-pressed="true"]') || {}).dataset ? document.querySelector('[data-act="rptf.pickType"][aria-pressed="true"]').dataset.type : null, checked: Array.from(document.querySelectorAll('[data-act-change="rptf.b"]:checked')).map(x => x.dataset.b), runs: TH.db.reportRuns.length }));
   await page.click('[data-act="rptf.preview"]'); await page.waitForSelector('.rptf-cell');
   const over = {};
   await page.setViewportSize({ width: 375, height: 800 }); await page.waitForTimeout(250);
   over.preview = await read(() => document.documentElement.scrollWidth - window.innerWidth);
-  await read(() => { const d = TH.db.reportDrafts[TH.db.reportDrafts.length - 1]; d.ack = true; const c = TH.reports.confirm(d.id, { acknowledgeWarnings: true }); location.hash = '#/demo/reports/view/' + c.runIds[0]; });
+  await read(() => { const d = TH.db.reportDrafts[TH.db.reportDrafts.length - 1]; d.ack = true; const c = TH.reports.confirm(__rv(d.id), { acknowledgeWarnings: true }); location.hash = '#/demo/reports/view/' + c.runIds[0]; });
   await page.waitForSelector('[data-act="rptf.xlsx"]'); await page.waitForTimeout(200);
   over.view = await read(() => document.documentElement.scrollWidth - window.innerWidth);
   await read(() => { location.hash = '#/demo/reports'; }); await page.waitForTimeout(250);
   over.list = await read(() => document.documentElement.scrollWidth - window.innerWidth);
   await page.setViewportSize({ width: 1440, height: 900 });
   check('QA-RPT-10', q10a.type === 'RPT-04' && q10a.checked.join() === 'TH-DD' && q10a.runs === 0 && over.preview <= 0 && over.view <= 0 && over.list <= 0 && !errors.length, { q10a, over, errors });
+
+  // QA-RPT-11 — bàn làm việc xem trước: chưa mở nhóm thì không tích được (UI + API); mở nhóm tô ô liên quan; 1440px truy nguồn trong panel, 375px mở modal; hộp sửa công thức hiện kết quả trước khi lưu
+  await reset('admin');
+  await read(() => { const r = TH.reports.preview({ type: 'RPT-AMD', period: '2026-09', buildingIds: ['TH-CG', 'TH-DD', 'TH-TX'] }); TH.store.setUi('REPORTS', 'pane', 'check'); location.hash = '#/demo/reports/preview/' + r.draft.id; });
+  await page.waitForSelector('.rptf-pane [data-act="rptf.group"]');
+  const q11a = await read(() => {
+    const id = decodeURIComponent(location.hash).split('/').pop(), R = TH.reports, g = R.reviewState(R.draft(id)).groups[0];
+    const api = R.setReview(id, g.id, true);
+    document.querySelector('[data-act="rptf.group"][data-g="' + g.id + '"]').click();
+    const cb = document.querySelector('[data-act-change="rptf.review"][data-g="' + g.id + '"]'), hl = document.querySelectorAll('.rptf-cell.is-hl').length;
+    const enabled = !cb.disabled; cb.click();
+    return { id, api: api.ok, enabled, hl, done: R.reviewState(R.draft(id)).groups[0].done };
+  });
+  await read(() => document.querySelector('.rptf-cell[data-m="elecNet"]').click());
+  await page.waitForSelector('.rptf-pane .rptf-eq');
+  const q11b = await read(() => ({ modal: !!TH.modal.top(), sel: document.querySelectorAll('.rptf-cell.is-sel').length, match: /Khớp/.test(document.querySelector('.rptf-pane .rptf-match').textContent) }));
+  await read(() => { document.querySelector('.rptf-pane [data-act="rptf.tdrill"]').click(); });
+  const q11c = await read(() => ({ crumbs: document.querySelectorAll('.rptf-crumbs [data-act="rptf.tjump"]').length, src: document.querySelectorAll('.rptf-pane .rptf-recs li').length + document.querySelectorAll('.rptf-pane [data-act="rptf.tdrill"]').length }));
+  await read(id => { TH.act['rptf.formula']({ dataset: { id, k: 'elecBase' } }); }, q11a.id);
+  await page.waitForSelector('#rptf-fx-live');
+  const q11d = await read(() => { const w = Array.from(document.querySelectorAll('.rptf-fx-w')).find(x => x.dataset.c === 'washPaid'); const before = document.getElementById('rptf-fx-live').textContent; w.value = '0.4'; w.dispatchEvent(new Event('change', { bubbles: true })); const after = document.getElementById('rptf-fx-live').textContent; TH.modal.close('rptf-fx', { silent: true }); return { changed: before !== after && /Sẽ thay đổi/.test(after), runs: TH.db.reportRuns.length }; });
+  await page.setViewportSize({ width: 375, height: 800 }); await page.waitForTimeout(200);
+  await read(() => document.querySelector('.rptf-cell[data-m="elecNet"]').click());
+  await page.waitForTimeout(200);
+  const q11e = await read(() => ({ modal: !!TH.modal.top() && TH.modal.top().key === 'rptf-trace', over: document.documentElement.scrollWidth - window.innerWidth }));
+  await read(() => TH.modal.close('rptf-trace', { silent: true }));
+  await page.setViewportSize({ width: 1440, height: 900 });
+  check('QA-RPT-11', !q11a.api && q11a.enabled && q11a.hl > 0 && q11a.done && !q11b.modal && q11b.sel === 1 && q11b.match && q11c.crumbs === 1 && q11d.changed && q11d.runs === 0 && q11e.modal && q11e.over <= 0, { q11a, q11b, q11c, q11d, q11e });
 
   const smoke = await read(() => { TH.exportXlsx = window.__realXlsx || TH.exportXlsx; TH.db = TH.seed(); Object.assign(TH.store.state, { building: 'ALL', ui: {}, drafts: {}, editing: null, role: 'admin', reportReturn: null }); const r = TH.qaSmoke(); TH.store.flush(); TH.app.refresh(); return { total: r.total, fails: r.fails.length }; });
   check('SMOKE', smoke.total >= 1048 && smoke.fails === 0, smoke);

@@ -9,7 +9,7 @@
     ['Hồ sơ, hợp đồng và số liệu đầu kỳ', 'Chủ nhà, tòa, phòng, người phụ trách; khách và hợp đồng thuê (nhận, gia hạn, đổi, trả phòng); hợp đồng chủ nhà và lịch trả; nạp một lần nợ, cọc, thu trước và chỉ số đầu kỳ. OCR hợp đồng khách thuê theo mẫu thuộc gói; giấy tờ khác nhập tay, đính kèm file.', 'Mã duy nhất; không trùng hợp đồng hiệu lực trên cùng phòng; giá và cọc đúng hiệu lực; số đầu kỳ đối soát được với bảng nguồn; quyền đúng tòa được giao; dữ liệu OCR được rà soát, sửa và xác nhận trước khi ghi.'],
     ['Hóa đơn, thu tiền, cọc và quyết toán', 'Chỉ số và biểu phí; tạo hóa đơn theo tòa/kỳ, sửa dòng lỗi, phát hành và điều chỉnh; phiếu thu phân bổ thủ công cho nhiều hóa đơn; thu trước, giữ và hoàn cọc; quyết toán trả phòng; thu theo mốc 5/10/15; gửi hóa đơn và nhắc thanh toán qua Zalo OA theo giới hạn gói.', 'Chạy lại không nhân đôi hóa đơn; thu thiếu/đủ/thừa đúng, không phân bổ vượt số còn lại; thu ba tháng kèm cọc tách đúng kỳ; trả phòng giữa kỳ ra đúng số phải thu/phải hoàn; OA không gửi trùng, không nhắc khoản đã thu đủ.'],
     ['Chi phí và hai báo cáo chuẩn mẫu', 'Chi phí trực tiếp; chi phí chung chia tay theo tòa; lương, hoa hồng, giá vốn nhập số đã duyệt có nguồn; chi thuê tòa tách phần thuộc kỳ và thực trả; hai báo cáo dựng từ cùng một bộ tính, xuất Excel; bản nháp có cảnh báo khi thiếu đầu vào.', 'Khớp bộ dữ liệu đối chiếu trong sai số làm tròn đã ký; tổng các tòa bằng toàn hệ thống; thiếu dữ liệu thì chặn bản chính thức; mỗi số nhập tay có nguồn và người nhập.'],
-    ['Tiện ích của gói đã chọn', '', 'Trên cùng dữ liệu, số báo cáo bằng kết quả nhập tay của gói A; mỗi công cụ hỗ trợ hoặc tự động đều có đường thủ công thay thế.'],
+    ['Tiện ích của gói đã chọn', '', 'Trên cùng dữ liệu, hai báo cáo gốc bằng kết quả nhập tay của gói A; báo cáo bổ sung của gói khớp số nguồn; mỗi công cụ hỗ trợ hoặc tự động đều có đường thủ công thay thế.'],
     ['UAT và đưa vào sử dụng', 'UAT trên ít nhất hai kỳ dữ liệu đối chiếu; nạp số liệu đầu kỳ thật; triển khai, sao lưu/phục hồi và hướng dẫn sử dụng.', 'Không còn sai lệch nghiêm trọng chưa giải trình ở thu, cọc, nợ và tổng báo cáo; kế toán duyệt hai kỳ đối chiếu; thử phục hồi đạt; khách ký nghiệm thu.']
   ];
   var P = TH.pricing = {
@@ -39,6 +39,13 @@
     },
     roadmap: function (key) {
       return '<ol class="offer-roadmap">' + MILESTONES.map(function (m, i) { return '<li><span class="offer-step" aria-hidden="true">' + String(i + 1).padStart(2, '0') + '</span><div><h3>' + esc(m[0]) + '</h3><p>' + esc(i === 4 ? OFFERS[key].upgrade : m[1]) + '</p><div class="offer-accept"><b>Điều kiện nghiệm thu</b><span>' + esc(i === 4 && key === 'A' ? OFFERS.A.acceptance : m[2]) + '</span></div></div></li>'; }).join('') + '</ol>';
+    },
+    reportList: function () {
+      var groups = [['A', 'Mọi gói A–D', 'Hai mẫu gốc theo file khách đã ký.'], ['C', 'Thêm từ gói C', 'Gói C và D.'], ['D', 'Thêm từ gói D', 'Chỉ gói D.']];
+      return '<div class="offer-reports">' + groups.map(function (g) {
+        var items = TH.packagePolicy.reportCatalog.filter(function (r) { return r.tier === g[0]; });
+        return '<section aria-label="' + esc(g[1]) + '"><h3>' + esc(g[1]) + '</h3><p class="small muted">' + esc(g[2]) + '</p><ul>' + items.map(function (r) { return '<li><b>' + esc(r.name) + '</b><span>' + esc(r.desc) + '</span></li>'; }).join('') + '</ul></section>';
+      }).join('') + '</div>';
     },
     summary: function (key) {
       return '<div class="offer-summary"><b>' + esc(OFFERS[key].title) + '</b><p>' + esc(OFFERS[key].outcome) + '</p>' + P.list(OFFERS[key].includes.slice(0, 3)) +

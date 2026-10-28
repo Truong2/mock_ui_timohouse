@@ -153,6 +153,7 @@ TH.store = (function () {
     },
     reset: function () {
       TH.db = TH.seed();
+      if (TH.recordActions) TH.recordActions.init();
       state.ui = {}; state.drafts = {}; state.dataState = {};
       state.editing = null; state.reportReturn = null;
       state.building = 'ALL'; state.period = TH.CURRENT_PERIOD; state.role = 'admin';

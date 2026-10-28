@@ -310,7 +310,7 @@
     var errs = {}; if (!name) errs.name = 'Nhập mô tả phí.'; if (!price) errs.price = 'Nhập đơn giá lớn hơn 0.';
     if (!TH.formErrors('mtr-fee', errs)) { TH.modal.rerenderAll(); return; }
     var room = g('room', TH.db.rooms.find(function (r) { return TH.inScope(r.buildingId) && r.status === 'occupied'; }).id);
-    var rec = { id: 'PS-' + Date.now().toString().slice(-6), roomId: room, period: TH.store.state.period, name: name, qty: +g('qty', 1) || 1, price: price, status: TH.has('F021.C') ? 'draft' : 'confirmed', source: g('source', '—') };
+    var rec = { id: TH.recordActions.id('PS'), roomId: room, period: TH.store.state.period, name: name, qty: +g('qty', 1) || 1, price: price, status: TH.has('F021.C') ? 'draft' : 'confirmed', source: g('source', '—') };
     TH.db.extraFees.push(rec);
     TH.log('Thêm phí phát sinh', room, name + ' · ' + F.money(price), 'meter');
     TH.store.clearDraft('mtr-fee'); TH.modal.close('mtrfee', { silent: true }); TH.app.refresh();

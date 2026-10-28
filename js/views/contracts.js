@@ -160,13 +160,13 @@
     var dg = function (x) { return +String(x === undefined || x === null ? '' : x).replace(/\D/g, '') || 0; };
     if (cid === 'OCR' && job) {
       /* Khách mới từ OCR mẫu đầy đủ: Bên B + xe máy khai ở Điều 1 (chờ xác nhận đăng ký, chưa tính phí) */
-      cid = 'KH-' + String(TH.db.customers.length + 1).padStart(3, '0');
+      cid = TH.recordActions.id('KH');
       var veh = [], nMoto = dg(jf.vehicles);
       for (var j = 0; j < nMoto; j++) veh.push({ id: 'XE-' + cid.slice(3) + '-' + (j + 1), type: 'Xe máy', plate: null, brand: '', color: '', status: 'pending', from: d.start, to: null, feeCode: 'PARK_MOTO', note: 'Khai từ HĐ (Điều 1) — cần bổ sung biển số và xác nhận đăng ký' });
       TH.db.customers.push({ id: cid, name: jf.customer, dob: jf.dob || '', phone: jf.phone || '—', idNo: jf.idNo || '—', idType: 'CCCD', idPlace: jf.idPlace || '', hometown: '—', permAddress: jf.permAddress || '', occupation: '', note: '', vehicles: veh, oaLinked: false, oaConsentAt: null, status: 'active', createdAt: TH.TODAY });
     }
     var room = C.room(d.room), bb = C.building(room.buildingId);
-    var id = 'HĐ-' + room.id.replace('-', '') + '/' + d.start.slice(2, 4);
+    var id = TH.recordActions.id('HĐ');
     var ct = { id: id, roomId: room.id, buildingId: room.buildingId, customerId: cid, rent: d.rent, deposit: d.deposit || d.rent, start: d.start, end: d.end, signedAt: jf && jf.signedAt ? jf.signedAt : TH.TODAY, people: jf ? dg(jf.people) || 1 : 1, billingDay: 1, status: 'active', scanFile: job ? job.file : 'scan_' + room.id + '.pdf',
       renewals: [], previousContractId: null, endKind: null, note: '', versions: [{ v: 1, at: TH.TODAY, note: job ? 'Bản ký gốc — tạo từ OCR mẫu đầy đủ (' + job.corrections + ' mục sửa tay)' : 'Bản ký gốc', by: TH.me().id }] };
     if (jv) {
@@ -273,11 +273,17 @@
   TH.act['fu.save'] = function (el) {
     var c = C.contract(el.dataset.id), form = 'fu-' + c.id, g = function (k, d) { return TH.store.draft(form, k, d); };
     var res = g('result', 'no_answer');
-    TH.db.followUps.push({ contractId: c.id, at: g('at', TH.TODAY), by: TH.me().id, result: res, moveOutAt: res === 'move_out' ? g('moveOut', c.end) : null, callbackAt: TH.has('F017.B') && res !== 'move_out' ? g('callback', TH.addDays(TH.TODAY, 3)) : null, note: g('note', '') || '—' });
+    var followupId = TH.recordActions.id('LH');
+    TH.db.followUps.push({ id: followupId, contractId: c.id, at: g('at', TH.TODAY), by: TH.me().id, result: res, moveOutAt: res === 'move_out' ? g('moveOut', c.end) : null, callbackAt: TH.has('F017.B') && res !== 'move_out' ? g('callback', TH.addDays(TH.TODAY, 3)) : null, note: g('note', '') || '—' });
+    var makeRenew = res === 'extend' && TH.has('F017.B') && g('draftRenew', true);
+    if (makeRenew) {
+      TH.recordActions.init(); var start = TH.addDays(c.end, 1);
+      TH.db.contractDrafts.push({ id: TH.recordActions.id('GIA-HẠN'), sourceFollowupId: followupId, previousContractId: c.id, buildingId: c.buildingId, roomId: c.roomId, customerId: c.customerId, rent: TH.recordActions.rateAt(c, start.slice(0, 7)), deposit: c.deposit, start: start, end: TH.addDays(TH.addMonthsYm(start.slice(0, 7), 12) + start.slice(7), -1), status: 'draft', createdBy: TH.me().id, note: 'Nháp gia hạn từ lần liên hệ ' + followupId });
+    }
     TH.log('Ghi kết quả hỏi gia hạn', c.id, TH.statusLabel(res), 'contract', c.buildingId);
     TH.store.clearDraft(form);
     TH.modal.close(TH.modal.top().key);
-    TH.toast('Đã lưu kết quả: ' + TH.statusLabel(res), res === 'extend' && TH.has('F017.C') ? 'Đã gửi duyệt gia hạn — hợp đồng gốc chưa đổi.' : 'Hợp đồng gốc không thay đổi.');
+    TH.toast('Đã lưu kết quả: ' + TH.statusLabel(res), makeRenew ? 'Nháp gia hạn đã lưu trong Quản lý bản ghi → Hợp đồng nháp; mở để sửa và duyệt.' : 'Hợp đồng gốc không thay đổi.');
   };
 
   /* ---------------- OCR-CON (mẫu đầy đủ — định nghĩa field/bảng/scan ở js/views/ocr-contract.js) ---------------- */
@@ -292,7 +298,7 @@
   };
   TH.act['ocrcon.confirm'] = function () {
     var O = TH.CONTRACT_OCR, vals = O.vals(OCR_FORM, O.fields), assets = O.assetsOf(OCR_FORM), corrections = O.corrections(OCR_FORM, O.fields);
-    TH.db.ocrJobs.unshift({ id: 'OCR-' + String(TH.db.ocrJobs.length + 1).padStart(4, '0'), kind: 'contract', target: 'new', file: 'hop_dong_CG401_scan.pdf', status: 'confirmed', fields: vals, assets: assets, by: TH.me().id, at: TH.TODAY, corrections: corrections });
+    TH.db.ocrJobs.unshift({ id: TH.recordActions.id('OCR'), kind: 'contract', target: 'new', file: 'hop_dong_CG401_scan.pdf', status: 'confirmed', fields: vals, assets: assets, by: TH.me().id, at: TH.TODAY, corrections: corrections });
     TH.log('Xác nhận kết quả OCR HĐ', vals.code, corrections + ' mục đã sửa · ' + assets.length + ' tài sản bàn giao', 'contract', 'TH-CG');
     TH.store.clearDraft(OCR_FORM);
     TH.app.guard = null;

@@ -126,6 +126,7 @@ async (host) => {
       const reports=await page.evaluate(()=>['RPT-04','RPT-05'].map(type=>{
         const p=TH.reports.preview({type,period:'2026-09',buildingIds:['TH-CG'],tpl:'MAU-BCKD'});
         if(!p.ok)return {type,error:p.error};
+        TH.reports.reviewState(p.draft).groups.forEach(g=>{TH.reports.markSeen(p.draft.id,g.id);TH.reports.setReview(p.draft.id,g.id,true);});
         const s=TH.reports.confirm(p.draft.id,{acknowledgeWarnings:true});
         const r=s.ok&&TH.reports.run(s.runIds[0]);
         return {type,ok:s.ok,match:r&&JSON.stringify(r.snapshot.vals)===JSON.stringify(p.draft.items[0].vals)};
@@ -162,14 +163,15 @@ async (host) => {
     const salary=await page.evaluate(()=>{
       const a=TH.db.staff.slice(0,2),p='sal-2026-10';a.forEach(s=>TH.store.setDraft(p,s.id+'.base',String(s.base+1000)));
       const before=a.map(s=>s.base);TH.act['sal.saveSetup']({dataset:{id:a[0].id}});
-      return a[0].base===before[0]+1000&&a[1].base===before[1];
+      const saved=TH.calc.payroll('2026-10');
+      return saved.find(r=>r.staff.id===a[0].id).base===before[0]+1000&&saved.find(r=>r.staff.id===a[1].id).base===before[1]&&a.every((s,i)=>s.base===before[i]);
     });
     check('A-SALARY-SINGLE',salary,'Saving one employee leaves other employee drafts untouched');
     const denied=await page.evaluate(()=>{TH.store.state.role='hr';const before=JSON.stringify(TH.db);TH.act['inv.gen']({dataset:{}});TH.zaloSend(TH.db.invoices[0],'TPL-01');return before===JSON.stringify(TH.db);});
     check('ROLE-INDEPENDENT',denied,'A higher tier never grants a role permission');
     await reset('D');
     const scan=await page.evaluate(()=>{const r=TH.qaSmoke(),m=TH.scanMapping();const missing=[];TH.FEATURES.forEach(f=>['B','C','D'].forEach(k=>{if(!m[f.id+'.'+k])missing.push(f.id+'.'+k);}));return {total:r.total,fails:r.fails,missing};});
-    check('SMOKE-MAPPING',scan.total===1088&&!scan.fails.length&&!scan.missing.length,scan);
+    check('SMOKE-MAPPING',scan.total===1168&&!scan.fails.length&&!scan.missing.length,scan);
     for(const width of [375,768,1024,1440])for(const pkg of ['A','B','C','D']){
       await page.setViewportSize({width,height:950});await reset(pkg);
       await page.evaluate(()=>TH.router.go('#/'));await page.waitForSelector('.landing-pricing');

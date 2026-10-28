@@ -1142,7 +1142,7 @@ TH.calc = (function () {
       r.D = r.A - r.A * r.B + r.C;
       var rooms = db().rooms.filter(function (x) { return x.buildingId === bId; });
       r.rooms = rooms.length;
-      r.listed = sum(rooms, function (x) { return x.rent; });
+      r.listed = sum(rooms, function (x) { return TH.recordActions && TH.recordActions.rateAt ? TH.recordActions.rateAt(x, period) : x.rent; });
       r.hs = r.listed ? r.D / r.listed : 0;
       r.Aprov = r.cum15 + r.late;
       r.Dprov = r.Aprov - r.Aprov * r.B + r.C;

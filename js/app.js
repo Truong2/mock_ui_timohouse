@@ -429,7 +429,7 @@ var TH = window.TH = window.TH || {};
       var d = t.dataset.draft.split('.');
       TH.store.setDraft(d[0], d.slice(1).join('.'), t.type === 'checkbox' ? t.checked : t.value);
       // Ô nhập text có data-live đã refresh qua debounce ở sự kiện input; change (kể cả change-khi-blur) chỉ refresh cho select/checkbox/radio.
-      var isText = t.tagName === 'INPUT' && !/checkbox|radio/.test(t.type);
+      var isText = t.tagName === 'TEXTAREA' || t.tagName === 'INPUT' && !/checkbox|radio/.test(t.type);
       if (!isText) app.refresh();
     }
   });
@@ -504,6 +504,7 @@ var TH = window.TH = window.TH || {};
   function boot() {
     TH.packagePolicy.install();
     TH.store.init();
+    TH.recordActions.init();
     app.render();
     if (TH.store.state.invalidQuery) TH.toast('Gói không hợp lệ: “' + TH.store.state.invalidQuery + '”', 'Đã dùng ' + TH.PACKAGES[TH.store.state.pkg].name + ' theo thứ tự ưu tiên (lựa chọn đã lưu → D).', 'warning');
   }

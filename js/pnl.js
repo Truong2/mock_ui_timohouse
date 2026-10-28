@@ -177,7 +177,7 @@ var TH = window.TH = window.TH || {};
     v.pendingRent = sum(db().expenses.filter(function (e) { return e.period === period && e.buildingId === bId && e.category === 'owner_rent' && e.status !== 'approved'; }), function (e) { return e.amount; });
     /* R-07 (đề xuất): chế độ kinh doanh ghi nhận tiền thuê chủ nhà theo tháng sử dụng (HĐ thuê tòa) dù phiếu chi chưa duyệt — nhãn "dự kiến" */
     var lease = (db().leases || []).find(function (l) { return l.buildingId === bId && l.start.slice(0, 7) <= period && l.end.slice(0, 7) >= period; });
-    v.rentAccrual = v.cRent === 0 && lease ? lease.rent : 0;
+    v.rentAccrual = v.cRent === 0 && lease ? (TH.recordActions ? TH.recordActions.rateAt(lease, period) : lease.rent) : 0;
     v.accrualLease = v.rentAccrual ? lease.id : null;
 
     /* Chi phí chung phân bổ theo số phòng */

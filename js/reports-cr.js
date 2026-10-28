@@ -67,5 +67,15 @@ var TH = window.TH = window.TH || {};
     notes: { A: flowNote, B: flowNote, C: flowNote, D: flowNote },
     fields: [], actions: [], rules: ['Chỉ bấm Xác nhận mới sinh bản lưu', 'Bản lưu chỉ đọc, Excel dựng từ bản lưu', 'Phiên bản mới không ghi đè bản cũ'], srcActions: ['Lọc', 'Xem trước', 'Xác nhận', 'Tải Excel', 'Tạo phiên bản mới'], srcFields: 'Loại, kỳ, tòa, phiên bản, người tạo, cảnh báo',
   });
+  /* CR-RPT-03 (28/10/2026): báo cáo gom theo nhóm (Tài chính · Vận hành · Khách hàng) trong màn REPORTS; thêm loại theo gói, bố cục theo docs/bao_cao —
+     C: âm dương điện nước, lấp đầy; D: dự kiến lợi nhuận, phân khúc khách, sửa chữa/vệ sinh (js/views/opsreports.js).
+     Preview có rà soát minh chứng và sửa công thức (thành phần × hệ số, bắt buộc lý do); bản lưu có Sửa (D: phiên bản mới), Tải Excel, Xóa mềm. */
+  TH.CR_RPT3 = { id: 'CR-RPT-03', date: '2026-10-28', title: 'Báo cáo theo nhóm, rà soát minh chứng, sửa công thức' };
+  var rIdx = TH.SCREENS.findIndex(function (s) { return s.id === 'REPORTS'; });
+  if (rIdx > -1) {
+    var rNote = 'Tab nhóm Tài chính / Vận hành / Khách hàng → tạo: chọn loại → kỳ, tòa → xem trước, truy nguồn, rà soát minh chứng, sửa công thức có lý do → xác nhận; bản lưu: xem, tải Excel, sửa, xóa có lý do';
+    TH.SCREENS[rIdx].title = 'Báo cáo';
+    TH.SCREENS[rIdx].notes = { A: rNote + ' · RPT-04, RPT-05', B: rNote + ' · RPT-04, RPT-05', C: rNote + ' · thêm âm dương điện nước, lấp đầy', D: rNote + ' · thêm dự kiến lợi nhuận, phân khúc khách, sửa chữa/vệ sinh; sửa tạo phiên bản mới' };
+  }
   TH.SRS_SCREENS = function () { return TH.SCREENS.filter(function (s) { return !s.cr; }); };
 })();

@@ -15,6 +15,7 @@
     var policy = TH.store.ui(S, 'policy', 'skip');
     var hasPreview = TH.has(cfg.inc.preview), hasUpsert = TH.has(cfg.inc.upsert);
     var classify = function (r) {
+      if (TH.store.ui(S, 'excluded', []).indexOf(r.line) >= 0) return 'skip';
       if (r.errors.length) return 'error';
       if (r.dup) return hasUpsert ? (policy === 'update' ? 'update' : 'skip') : 'error';
       return 'new';
@@ -49,7 +50,7 @@
         body = steps + '<div class="row-between u-mb-12">' + sum + policyCtl + '</div>' +
           '<div class="card card-flush">' + TH.table({
             compact: true, label: 'Xem trước import',
-            cols: [{ key: 'line', label: 'Dòng', render: function (r) { return '<span class="tnum muted">' + r.line + '</span>'; } }].concat(cfg.columns.map(function (c) { return { key: c.key, label: c.label, num: c.num, render: function (r) { var v = r.data[c.key]; return v === '' || v === undefined ? '<span class="neg">(trống)</span>' : c.num ? F.num(v) : esc(v); } }; }))
+            cols: [{ key: 'include', label: 'Ghi dòng', render: function (r) { return '<input type="checkbox" aria-label="Ghi dòng ' + r.line + '" data-act-change="imp.include" data-screen="' + S + '" data-line="' + r.line + '"' + (TH.store.ui(S, 'excluded', []).indexOf(r.line) < 0 ? ' checked' : '') + '>'; } }, { key: 'line', label: 'Dòng', render: function (r) { return '<span class="tnum muted">' + r.line + '</span>'; } }].concat(cfg.columns.map(function (c) { return { key: c.key, label: c.label, num: c.num, render: function (r) { var v = r.data[c.key]; return v === '' || v === undefined ? '<span class="neg">(trống)</span>' : c.num ? F.num(v) : esc(v); } }; }))
               .concat([{ key: 'st', label: 'Kết quả', render: function (r) { var k = classify(r); return k === 'error' ? '<span class="row-flag neg">' + I('xCircle', 'ic-sm') + esc(errText(r)) + '</span>' : k === 'new' ? TH.badge('Hợp lệ · tạo mới', 'success') : k === 'update' ? TH.badge('Cập nhật theo mã', 'info') : TH.badge('Trùng · bỏ qua', 'neutral'); } }]),
             rows: rows,
             rowAttrs: function (r) { return classify(r) === 'error' ? 'class="u-row-alert"' : ''; },
@@ -69,7 +70,7 @@
     } else {
       var res = TH.store.ui(S, 'result', { written: 0, errors: 0, batch: '' });
       body = steps + '<div class="state state-empty" style="padding:28px"><div class="state-ic" style="background:var(--success-soft);color:var(--success)">' + I('checkCircle') + '</div><h3>Đã ghi ' + res.written + ' dòng</h3><p>' + (res.errors ? res.errors + ' dòng lỗi không được ghi. ' : '') + 'Danh sách đã cập nhật. Mã batch <span class="mono">' + esc(res.batch) + '</span>.</p></div>' +
-        TH.gate(cfg.inc.history, '<div class="alert alert-neutral">' + I('history', 'ic-sm') + '<div class="alert-body">' + TH.tierPill('D') + ' Lô nhập được lưu lịch sử, có thể rollback có kiểm soát (mô phỏng) trong 24 giờ. Đối chiếu: ' + rows.length + ' dòng nguồn = ' + res.written + ' ghi + ' + (rows.length - res.written) + ' không ghi.</div></div>', { label: TH.inc(cfg.inc.history).text, lines: 2 });
+        TH.gate(cfg.inc.history, '<div class="alert alert-neutral">' + I('history', 'ic-sm') + '<div class="alert-body">' + TH.tierPill('D') + ' Lô mới lưu ảnh trước/sau để khôi phục dữ liệu. Hoàn tác bị chặn nếu bản ghi đã được sửa hoặc có dữ liệu phụ thuộc. Đối chiếu: ' + rows.length + ' dòng nguồn = ' + res.written + ' ghi + ' + (rows.length - res.written) + ' không ghi.</div></div>', { label: TH.inc(cfg.inc.history).text, lines: 2 });
       foot = '<button type="button" class="btn" data-act="ui.set" data-screen="' + S + '" data-key="step" data-val="upload">Nhập tệp khác</button><span class="spacer"></span><button type="button" class="btn btn-primary" data-close>Xong</button>';
     }
     return { title: esc(TH.screen(S).title) + ' <span class="screen-id">' + S + '</span>', sub: 'Luồng phụ của ' + esc(TH.POPUP_BASE[S]) + ' · ' + esc(TH.screen(S).notes.A), body: body, foot: foot };
@@ -103,9 +104,20 @@
     var c = IMPORTS[el.dataset.screen], S = c.screen;
     var hasUpsert = TH.has(c.inc.upsert), policy = TH.store.ui(S, 'policy', 'skip');
     var rows = c.sample();
-    var ok = rows.filter(function (r) { return !r.errors.length && (!r.dup || (hasUpsert && policy === 'update')); });
+    var ok = rows.filter(function (r) { return TH.store.ui(S, 'excluded', []).indexOf(r.line) < 0 && !r.errors.length && (!r.dup || (hasUpsert && policy === 'update')); });
+    if (!ok.length) { TH.toast('Chưa có dòng để ghi', 'Chọn ít nhất một dòng hợp lệ.', 'warning'); return; }
+    if (TH.recordActions) {
+      var type = { 'OWN-IMP': 'owner', 'BLD-IMP': 'building', 'ROOM-IMP': 'room' }[S], denied = ok.find(function (row) {
+        var id = type === 'room' ? row.data.b.slice(3) + '-' + row.data.code : row.data.id, old = TH.recordActions.get(type, id);
+        if (old) return !TH.recordActions.inspect(type, id, 'edit').allowed;
+        if (type === 'owner') return TH.store.state.role === 'manager';
+        if (type === 'building') return TH.store.state.role === 'manager' || !TH.calc.owner(row.data.ownerId || row.data.owner);
+        var parent = TH.calc.building(row.data.b); return !parent || parent.status === 'inactive' || !TH.inScope(parent.id);
+      });
+      if (denied) { TH.toast('Chưa ghi lô nhập', 'Dòng ' + denied.line + ' không đủ quyền / ngoài phạm vi hoặc hồ sơ cha không hợp lệ. Bỏ dòng này rồi kiểm tra lại.', 'warning'); return; }
+    }
     var written = c.commit(ok, policy);
-    var id = 'IMP-' + String(8 + TH.db.importBatches.length).padStart(4, '0');
+    var id = TH.recordActions.id('IMP');
     TH.db.importBatches.unshift({ id: id, kind: c.kind, file: c.sampleFile, at: TH.TODAY + ' 10:00', by: TH.me().id, rows: rows.length, ok: written, errors: rows.length - ok.length, status: 'done' });
     TH.log('Import ' + c.kind, id, written + ' dòng ghi, ' + (rows.length - ok.length) + ' dòng không ghi', 'import');
     TH.store.setUi(S, 'result', { written: written, errors: rows.length - ok.length, batch: id });

@@ -68,7 +68,7 @@
     if (!TH.formErrors(form, name ? {} : { name: 'Nhập họ tên nhân sự.' })) { TH.modal.rerenderAll(); return; }
     var rec = { name: name, phone: g('phone', s ? s.phone : '') || '—', title: g('title', s ? s.title : ''), team: g('team', s ? s.team : 'T1'), role: g('role', s ? s.role : 'staff'), status: g('status', s ? s.status : 'active') };
     if (s) { if (rec.title !== s.title) TH.db.titleHistory.push({ staffId: s.id, at: TH.TODAY, before: s.title, after: rec.title }); Object.assign(s, rec); TH.log('Sửa nhân sự', s.id, '', 'hr'); }
-    else { s = Object.assign({ id: 'NV-' + String(TH.db.staff.length + 1).padStart(3, '0'), joinedAt: TH.TODAY, base: 7000000, allowance: 500000 }, rec); TH.db.staff.push(s); TH.log('Thêm nhân sự', s.id, name, 'hr'); }
+    else { s = Object.assign({ id: TH.recordActions.id('NV'), joinedAt: TH.TODAY, base: 7000000, allowance: 500000 }, rec); TH.db.staff.push(s); TH.log('Thêm nhân sự', s.id, name, 'hr'); }
     TH.store.clearDraft(form); TH.modal.close('hr-form', { silent: true }); TH.app.refresh(); TH.toast(id === 'new' ? 'Đã thêm nhân sự' : 'Đã lưu', esc(s.id + ' · ' + s.name));
   };
   TH.act['hr.import'] = function () { TH.toast('Nhập từ Excel nhân viên (mô phỏng)', 'Tệp “nhan_vien.xlsx”: 8 dòng, mapping đội T1/T2/BO khớp 8/8.', 'info'); };
@@ -103,7 +103,7 @@
     var from = TH.has('F038.D') ? g('from', TH.TODAY) : TH.TODAY, to = TH.has('F038.D') ? (g('to', '') || null) : null;
     if (!TH.has('F038.C')) TH.db.assignments.forEach(function (a) { if (a.staffId === sid && !a.to) a.to = TH.addDays(from, -1); });
     if (main) { TH.db.assignments.forEach(function (a) { if (a.buildingId === b && a.role === TH.ROLE_MAIN && a.main && !a.to) a.to = TH.addDays(from, -1); }); C.building(b).managerId = sid; }
-    TH.db.assignments.push({ id: 'PC-' + Date.now().toString().slice(-5), staffId: sid, buildingId: b, role: role, main: main || undefined, from: from, to: to });
+    TH.db.assignments.push({ id: TH.recordActions.id('PC'), staffId: sid, buildingId: b, role: role, main: main || undefined, from: from, to: to });
     TH.log('Phân công nhân viên', sid, C.building(b).short + ' · ' + role, 'hr', b);
     TH.store.clearDraft('hr-asg'); TH.app.refresh(); TH.toast('Đã lưu phân công', esc(C.staffName(sid) + ' → ' + C.building(b).short));
   };

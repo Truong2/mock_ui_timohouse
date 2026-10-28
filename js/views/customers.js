@@ -116,7 +116,7 @@
   TH.act['cus.save'] = function () {
     var g = function (k, d) { return TH.store.draft('cus-new', k, d); };
     if (!TH.formErrors('cus-new', String(g('name', '')).trim() ? {} : {name:'Nhập họ tên khách.'})) { TH.modal.rerenderAll(); return; }
-    var id = 'KH-' + String(TH.db.customers.length + 1).padStart(3, '0'), idNo = String(g('idNo', '')).replace(/\D/g, '');
+    var id = TH.recordActions.id('KH'), idNo = String(g('idNo', '')).replace(/\D/g, '');
     TH.db.customers.push({ id: id, name: g('name', ''), dob: g('dob', ''), phone: g('phone', '') || '—', idNo: idNo ? idNo.slice(0, 4) + '•••••' + idNo.slice(-3) : '—', idType: 'CCCD', hometown: g('hometown', '') || '—', occupation: g('occupation', ''), permAddress: '', note: '', vehicles: [], oaLinked: false, oaConsentAt: null, status: 'active', createdAt: TH.TODAY });
     TH.log('Thêm khách', id, g('name', ''), 'customer'); TH.store.clearDraft('cus-new'); TH.modal.close('cus-form', { silent: true }); TH.app.refresh(); TH.toast('Đã thêm khách', esc(id));
   };
@@ -371,7 +371,7 @@
   }
   TH.act['cus.ctUpload'] = function (el) {
     var ct = C.contract(el.dataset.ct), n = TH.db.documents.filter(function (d) { return d.contractId === ct.id && d.kind === 'Hợp đồng thuê phòng'; }).length;
-    TH.db.documents.push({ id: 'TL-' + Date.now().toString().slice(-5), customerId: ct.customerId, contractId: ct.id, roomId: ct.roomId, kind: 'Hợp đồng thuê phòng', file: 'hop_dong_' + ct.roomId + '_' + TH.TODAY.replace(/-/g, '') + (n ? '_v' + (n + 1) : '') + '.pdf', version: n + 1, uploadedAt: TH.TODAY, views: 0 });
+    TH.db.documents.push({ id: TH.recordActions.id('TL'), customerId: ct.customerId, contractId: ct.id, roomId: ct.roomId, kind: 'Hợp đồng thuê phòng', file: 'hop_dong_' + ct.roomId + '_' + TH.TODAY.replace(/-/g, '') + (n ? '_v' + (n + 1) : '') + '.pdf', version: n + 1, uploadedAt: TH.TODAY, views: 0 });
     TH.log('Tải file hợp đồng', ct.id, ct.roomId + ' · ' + ct.buildingId, 'contract', ct.buildingId);
     TH.app.refresh(); TH.toast('Đã lưu file hợp đồng (mô phỏng)', 'Gắn với ' + esc(ct.customerId) + ' · ' + esc(roomCode(ct)) + (TH.has('F012.B') ? '. Chọn “Tự đọc dòng phí” để nhận dạng.' : '. Dòng phí nhập tay ở gói hiện tại.'));
   };
@@ -518,13 +518,13 @@
   TH.act['dep.open'] = function (el) {
     var ct = C.contract(el.dataset.ct), fu = TH.db.followUps.filter(function (f) { return f.contractId === ct.id && f.result === 'move_out'; })[0];
     var at = fu && fu.moveOutAt ? fu.moveOutAt : ct.end;
-    TH.db.depositCases.push({ id: 'HC-' + at.slice(2, 4) + at.slice(5, 7) + '-' + String(TH.db.depositCases.length + 1).padStart(2, '0'), contractId: ct.id, customerId: ct.customerId, amount: ct.deposit, state: 'awaiting_handover', handoverAt: at, dueAt: null, deductions: [], forfeitAmount: 0, forfeitBasis: '', refundAmount: null, proposedBy: TH.me().id, proposedAt: TH.TODAY, approvedBy: null, approvedAt: null, paidBy: null, paidAt: null, txnRef: null, note: 'Mở hồ sơ bàn giao / cọc', planned: true });
+    TH.db.depositCases.push({ id: TH.recordActions.id('HC'), contractId: ct.id, customerId: ct.customerId, amount: ct.deposit, state: 'awaiting_handover', handoverAt: at, dueAt: null, deductions: [], forfeitAmount: 0, forfeitBasis: '', refundAmount: null, proposedBy: TH.me().id, proposedAt: TH.TODAY, approvedBy: null, approvedAt: null, paidBy: null, paidAt: null, txnRef: null, note: 'Mở hồ sơ bàn giao / cọc', planned: true });
     TH.log('Mở hồ sơ cọc', ct.id, roomCode(ct), 'contract', ct.buildingId); TH.app.refresh(); TH.toast('Đã mở hồ sơ cọc', 'Bàn giao dự kiến ' + F.date(at) + '. Hạn hoàn tính khi bàn giao, theo điều khoản HĐ.');
   };
   TH.act['dep.handover'] = function (el) {
     var hc = caseOf(el.dataset.id), ct = C.contract(hc.contractId), T = ct.terms || {};
     TH.confirm({ title: 'Ghi nhận bàn giao phòng ' + esc(ct.roomId) + '?', body: '<p>Hợp đồng ' + esc(ct.id) + ' chuyển <b>Đã kết thúc</b> (lý do: trả phòng — bàn giao), phòng chuyển <b>Trống</b>. ' + (T.refundDays ? 'Hạn hoàn cọc = hôm nay + ' + T.refundDays + ' ngày (Điều 4.3 HĐ).' : 'HĐ không ghi thời hạn hoàn cọc → không đặt hạn, không tự báo quá hạn.') + '</p>', ok: 'Ghi nhận bàn giao' }).then(function (ok) {
-      if (!ok) return;
+      if (!ok || !TH.recordActions.guardLegacy('dep.handover', el)) return;
       Object.assign(hc, { state: 'reconciling', handoverAt: TH.TODAY, dueAt: T.refundDays ? TH.addDays(TH.TODAY, T.refundDays) : null, planned: false });
       if (ct.status === 'active') { ct.status = 'ended'; ct.endedAt = TH.TODAY; ct.endKind = 'handover'; ct.endReason = 'Trả phòng — bàn giao ' + F.date(TH.TODAY); }
       var room = C.room(ct.roomId);
@@ -574,7 +574,7 @@
   TH.act['dep.reject'] = function (el) {
     var hc = caseOf(el.dataset.id), ct = C.contract(hc.contractId);
     TH.confirm({ title: 'Trả lại hồ sơ để bổ sung?', body: '<p>Hồ sơ quay về bước <b>Đối chiếu</b>; người lập cần bổ sung chứng từ/khấu trừ rồi gửi duyệt lại.</p>', ok: 'Trả lại', danger: true }).then(function (ok) {
-      if (!ok) return;
+      if (!ok || !TH.recordActions.guardLegacy('dep.reject', el)) return;
       Object.assign(hc, { state: 'reconciling', rejectNote: 'Yêu cầu bổ sung chứng từ — ' + C.staffName(TH.me().id) + ' ' + F.date(TH.TODAY) });
       TH.log('Trả lại hồ sơ hoàn cọc', ct.id, 'yêu cầu bổ sung', 'contract', ct.buildingId); TH.app.refresh(); TH.toast('Đã trả lại hồ sơ', 'Về bước đối chiếu.');
     });
@@ -593,7 +593,7 @@
     if (hc.state !== 'approved' || hc.depositId || hc.forfeitId) { TH.modal.close('deppay', { silent: true }); TH.toast('Đã ghi nhận trước đó', 'Hồ sơ này đã có bút toán — không ghi lần hai.', 'info'); return; }
     var paidAt = TH.store.draft(form, 'paidAt', TH.TODAY), txn = (TH.store.draft(form, 'txn', defaultTxn(hc)) || '').trim(), p = paidAt.slice(0, 7);
     if (!TH.formErrors(form, txn ? {} : { txn: 'Nhập mã giao dịch / chứng từ chi.' })) { TH.modal.rerenderAll(); return; }
-    var seq = function () { return 'COC-' + p.slice(2, 4) + p.slice(5) + '-' + String(TH.db.deposits.filter(function (d) { return d.period === p; }).length + 1).padStart(2, '0'); };
+    var seq = function () { return TH.recordActions.id('COC'); };
     if (hc.refundAmount > 0) { hc.depositId = seq(); TH.db.deposits.push({ id: hc.depositId, buildingId: ct.buildingId, roomId: ct.roomId, period: p, date: paidAt, type: 'refund', amount: hc.refundAmount, note: 'Hoàn cọc ' + ct.id + ' · ' + txn, status: 'confirmed', contractId: ct.id, customerId: ct.customerId, caseId: hc.id }); }
     if (hc.forfeitAmount > 0) { hc.forfeitId = seq(); TH.db.deposits.push({ id: hc.forfeitId, buildingId: ct.buildingId, roomId: ct.roomId, period: p, date: paidAt, type: 'forfeit', amount: hc.forfeitAmount, breach: C.isEarlyEnd(ct), note: 'Giữ cọc ' + ct.id + ' — ' + hc.forfeitBasis, status: 'confirmed', contractId: ct.id, customerId: ct.customerId, caseId: hc.id }); }
     Object.assign(hc, { state: hc.refundAmount > 0 ? 'refunded' : hc.forfeitAmount > 0 ? 'forfeited' : 'settled', paidBy: TH.me().id, paidAt: paidAt, txnRef: txn, method: TH.store.draft(form, 'method', 'Chuyển khoản') });
@@ -621,7 +621,7 @@
       else if (tab === 'fin') body = finTab(k, ct);
       else if (tab === 'docs') {
         var dq = TH.has('F013.B') ? TH.store.ui(S, 'dq', '') : '';
-        var docs = TH.db.documents.filter(function (x) { return x.customerId === k.id && TH.match(dq, [x.kind, x.file, x.contractId, x.roomId]); });
+        var docs = TH.db.documents.filter(function (x) { return x.status !== 'archived' && x.customerId === k.id && TH.match(dq, [x.kind, x.file, x.contractId, x.roomId]); });
         body = '<div class="card card-flush"><div class="toolbar">' + (TH.has('F013.B') ? '<div class="input-wrap">' + I('search') + '<label class="sr-only" for="dq">Tìm tài liệu</label><input id="dq" class="input input-sm" data-ui="CUS-02.dq" value="' + esc(dq) + '" placeholder="Tìm theo HĐ/khách/phòng…"></div>' + TH.up('F013.B') : TH.gate('F013.B', '', { mode: 'btn', label: 'Tìm theo hợp đồng/khách/phòng', size: 'btn-sm' })) + '<span class="grow"></span><button type="button" class="btn btn-sm" data-act="cus.upload" data-id="' + k.id + '">' + I('upload', 'ic-sm') + 'Tải lên</button></div>' +
           TH.table({ cols: [
             { key: 'f', label: 'Tài liệu', render: function (x) { return TH.fileOf(x.file); } },
@@ -647,7 +647,7 @@
   };
   TH.act['cus.upload'] = function (el) {
     var k = C.customer(el.dataset.id), c = contractOf(k);
-    TH.db.documents.push({ id: 'TL-' + Date.now().toString().slice(-4), customerId: k.id, contractId: (c || {}).id || '—', roomId: (c || {}).roomId || '—', kind: 'Giấy tờ bổ sung', file: 'giay_to_bo_sung_' + k.id + '.pdf', version: 1, uploadedAt: TH.TODAY, views: 0 });
+    TH.db.documents.push({ id: TH.recordActions.id('TL'), customerId: k.id, contractId: (c || {}).id || '—', roomId: (c || {}).roomId || '—', kind: 'Giấy tờ bổ sung', file: 'giay_to_bo_sung_' + k.id + '.pdf', version: 1, uploadedAt: TH.TODAY, views: 0 });
     TH.log('Tải tài liệu', k.id, 'Giấy tờ bổ sung', 'customer'); TH.store.setUi('CUS-02', 'tab', 'docs'); TH.app.refresh(); TH.toast('Đã lưu tài liệu (mô phỏng)', 'Gắn với hồ sơ ' + esc(k.id));
   };
   TH.act['cus.dl'] = function (el) { TH.toast('Tệp minh họa', esc(el.dataset.f) + ' — bản demo không lưu tệp thật.', 'info'); };
@@ -699,9 +699,9 @@
   TH.act['ocrcus.confirm'] = function () {
     var g = function (k) { return TH.store.draft(FORM, k, FIELDS.find(function (f) { return f.key === k; }).ocr); };
     var name = g('name').toLowerCase().replace(/(^|\s)\S/g, function (s) { return s.toUpperCase(); });
-    var id = 'KH-' + String(TH.db.customers.length + 1).padStart(3, '0');
+    var id = TH.recordActions.id('KH');
     TH.db.customers.push({ id: id, name: name, dob: g('dob'), phone: '—', idNo: g('idNo'), idType: 'CCCD', hometown: g('home'), oaLinked: false, oaConsentAt: null, status: 'active', createdAt: TH.TODAY });
-    TH.db.documents.push({ id: 'TL-' + Date.now().toString().slice(-4), customerId: id, contractId: '—', roomId: '—', kind: 'CCCD (đã mask)', file: 'cccd_mat_truoc.jpg', version: 1, uploadedAt: TH.TODAY, views: 0 });
+    TH.db.documents.push({ id: TH.recordActions.id('TL'), customerId: id, contractId: '—', roomId: '—', kind: 'CCCD (đã mask)', file: 'cccd_mat_truoc.jpg', version: 1, uploadedAt: TH.TODAY, views: 0 });
     TH.log('Xác nhận OCR giấy tờ', id, name, 'customer');
     TH.store.clearDraft(FORM); TH.app.guard = null;
     TH.modal.close(TH.modal.top().key, { silent: true });

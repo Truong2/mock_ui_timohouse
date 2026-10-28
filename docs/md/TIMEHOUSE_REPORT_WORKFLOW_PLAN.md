@@ -2,6 +2,18 @@
 
 Ngày: 21/10/2026. Trạng thái: **đã triển khai (CR-RPT-02)** — kết quả ở [Decision log §9.10](TIMEHOUSE_MOCKUP_DECISIONS.md) và [QA §8.9](TIMEHOUSE_MOCKUP_QA.md); kiểm thử `tools/qa-report.playwright.js` 11/11.
 
+> **Cập nhật CR-RPT-03 (28/10/2026)** — thay đổi so với §4.1 "Bản báo cáo bất biến":
+>
+> - **Gom nhóm:** báo cáo gom theo nhóm (Tài chính · Vận hành · Khách hàng) thành tab ở màn danh sách; thêm 5 loại theo gói C/D.
+> - **Rà soát minh chứng trước khi tạo:** preview bắt buộc rà soát từng nhóm minh chứng; nhóm có lỗi đối chiếu tự động thì không tích được.
+> - **Sửa công thức:** sửa được theo thành phần × hệ số, bắt buộc lý do; chỉ kế toán/quản trị.
+> - **Sửa bản ghi:** mở lại preview. Gói A–C ghi đè vào cùng bản ghi kèm nhật ký sửa. Gói D giữ nguyên quy tắc phiên bản mới không ghi đè.
+> - **Xóa mềm:** bắt buộc lý do; bản đã xóa vẫn xem và tải được.
+> - **Bàn làm việc 2 cột:** xem trước và bản lưu có panel dính (Kiểm tra · Nguồn ô · Công thức · Cảnh báo). Truy nguồn hiện ngay trong panel; dưới 1100px vẫn mở hộp thoại.
+> - **Phải mở xem nhóm minh chứng mới tích được "Đã rà soát"** (`markSeen`). Kiểm thử `tools/qa-report.playwright.js` đạt 12/12.
+>
+> Chi tiết ở [TIMEHOUSE_FUNCTIONS_PRICING_MILESTONES.md](TIMEHOUSE_FUNCTIONS_PRICING_MILESTONES.md), mục "Màn Báo cáo".
+
 Bản này thay thế plan báo cáo trong hội thoại, giữ đầy đủ các lựa chọn người dùng đã chốt và bổ sung căn cứ từ working tree **schema 12** sau CR-PAY/CR-BILL. Base commit là `70763e3`; các thay đổi Claude chưa commit nên không coi commit này là toàn bộ baseline.
 
 ## 1. Kết quả theo dõi và phần cần cập nhật

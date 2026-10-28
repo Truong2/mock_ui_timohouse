@@ -198,6 +198,9 @@
   /* Áp kết quả đã xác nhận vào HỒ SƠ THUÊ đã có (CUS-02): khách, điều khoản, bàn giao, tiền đã nộp, dòng phí (hiệu lực kỳ sau), xe khai báo */
   function applyToContract(ct, v, assets, opts) {
     opts = opts || {};
+    var lifecycle = TH.recordActions, check = lifecycle.inspect('contract', ct.id, 'edit');
+    if (!check.allowed) return { error: check.reason };
+    lifecycle.init(); var before = lifecycle.clone(ct);
     var k = C().customer(ct.customerId), me = TH.me().id, today = TH.TODAY, from = TH.addMonthsYm(today.slice(0, 7), 1);
     var labels = { phone: 'Số điện thoại', permAddress: 'Địa chỉ thường trú' };
     Object.keys(labels).forEach(function (f) { var nv = String(v(f) || '').trim(); if (nv && nv !== (k[f] || '')) { TH.db.customerHistory.unshift({ customerId: k.id, at: today, field: labels[f], before: k[f] || '—', after: nv, by: me }); k[f] = nv; } });
@@ -208,12 +211,18 @@
     ct.handover = handoverOf(v, assets, opts.file || ct.scanFile);
     ct.prepaid = prepaidOf(v);
     ct.priceList = buildPriceList(v, from, 'OCR xác nhận ' + today + ' · ' + C().staffName(me));
+    if (!ct.rateBasePriceList) ct.rateBasePriceList = lifecycle.clone(before.priceList);
+    ct.rateChanges = ct.rateChanges || [];
+    var oldRate = ct.rateChanges.find(function (r) { return r.from === from; });
+    if (oldRate) { TH.db.recordVersions.push({ type: 'contract', recordId: ct.id, rate: lifecycle.clone(oldRate) }); ct.rateChanges.splice(ct.rateChanges.indexOf(oldRate), 1); }
+    ct.rateChanges.push({ id: lifecycle.id('RATE'), from: from, rent: lifecycle.rateAt(ct, from), priceList: lifecycle.clone(ct.priceList), reason: 'Xác nhận OCR hợp đồng', by: me });
     TH.syncFees(ct);
     var declared = digits(v('vehicles')), have = (k.vehicles || []).filter(function (x) { return x.type === 'Xe máy' && x.status !== 'ended'; }).length, added = 0;
     k.vehicles = k.vehicles || [];
     for (var j = have; j < declared; j++) { k.vehicles.push({ id: 'XE-' + k.id.slice(3) + '-ocr' + (j + 1), type: 'Xe máy', plate: null, brand: '', color: '', status: 'pending', from: today, to: null, feeCode: 'PARK_MOTO', note: 'Khai từ HĐ (Điều 1) — cần bổ sung biển số và xác nhận đăng ký' }); added++; }
     ct.versions.push({ v: ct.versions.length + 1, at: today, by: me, note: 'Đọc hợp đồng (OCR mẫu đầy đủ) — đã xác nhận, ' + (opts.corrections || 0) + ' mục sửa tay; dòng phí hiệu lực từ kỳ ' + F.period(from) });
-    TH.db.ocrJobs.unshift({ id: 'OCR-' + String(TH.db.ocrJobs.length + 1).padStart(4, '0'), kind: 'contract', target: 'update', contractId: ct.id, file: opts.file || ct.scanFile, status: 'confirmed', fields: opts.vals || {}, assets: assets, by: me, at: today, corrections: opts.corrections || 0, used: true });
+    TH.db.ocrJobs.unshift({ id: lifecycle.id('OCR'), kind: 'contract', target: 'update', contractId: ct.id, file: opts.file || ct.scanFile, status: 'confirmed', fields: opts.vals || {}, assets: assets, by: me, at: today, corrections: opts.corrections || 0, used: true });
+    lifecycle.audit('contract', ct, 'edit', before, 'Xác nhận OCR hợp đồng');
     TH.log('Đọc hợp đồng (OCR) → hồ sơ thuê', ct.id, (opts.corrections || 0) + ' mục sửa tay' + (added ? ' · ' + added + ' xe chờ xác nhận' : ''), 'contract', ct.buildingId);
     return { from: from, added: added };
   }
@@ -229,6 +238,7 @@
     var ct = C().contract(openCt); if (!ct) return;
     var form = 'ocr-con-' + ct.id, fields = fieldsFor(ct), v = reader(form, fields);
     var r = applyToContract(ct, v, assetsOf(form), { vals: vals(form, fields), corrections: corrections(form, fields) });
+    if (r.error) { TH.toast('Chưa thể lưu OCR', esc(r.error), 'warning'); return; }
     TH.store.clearDraft(form); TH.app.guard = null; TH.modal.close('ctocr', { silent: true }); TH.app.refresh();
     TH.toast('Đã áp kết quả OCR vào hồ sơ ' + esc(ct.id), 'Dòng phí hiệu lực từ kỳ ' + F.period(r.from) + '; hóa đơn đã lập không đổi' + (r.added ? '; ' + r.added + ' xe máy chờ xác nhận đăng ký' : '') + '.');
   };

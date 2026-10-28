@@ -83,7 +83,7 @@
     if (!TH.formErrors(form, errs)) { TH.modal.rerenderAll(); return; }
     var rec = { buildingId: g('b', e ? e.buildingId : TH.buildingOptions(false)[0].id), category: g('cat', e ? e.category : 'repair'), description: desc, amount: amount, docNo: g('docNo', e ? e.docNo : '') || '—', status: el.dataset.st };
     if (e) Object.assign(e, rec);
-    else { var p = TH.store.state.period; e = Object.assign({ id: 'CP-' + p.slice(2, 4) + p.slice(5) + '-' + String(TH.db.expenses.length + 1).padStart(3, '0'), period: p, date: TH.TODAY, createdBy: TH.me().id, approvedBy: null, approvedAt: null, file: 'chungtu_moi.jpg', reason: '' }, rec); TH.db.expenses.push(e); }
+    else { var p = TH.store.state.period; e = Object.assign({ id: TH.recordActions.id('CP'), period: p, date: TH.TODAY, createdBy: TH.me().id, approvedBy: null, approvedAt: null, file: 'chungtu_moi.jpg', reason: '' }, rec); TH.db.expenses.push(e); }
     TH.log(el.dataset.st === 'draft' ? 'Lưu nháp chi phí' : 'Gửi duyệt chi phí', e.id, desc + ' · ' + F.money(amount), 'expense', e.buildingId);
     TH.store.clearDraft(form); TH.modal.close('exp-form', { silent: true }); TH.app.refresh(); TH.toast(el.dataset.st === 'draft' ? 'Đã lưu nháp' : 'Đã gửi duyệt', esc(e.id));
   };
@@ -92,14 +92,14 @@
     var e = TH.db.expenses.find(function (x) { return x.id === el.dataset.id; });
     if (!e || e.status !== 'pending' || TH.periodLocked(e.period) || !TH.inScope(e.buildingId)) return;
     var d = dupOf(e);
-    var go = function () { e.status = 'approved'; e.approvedBy = TH.me().id; e.approvedAt = TH.TODAY; if (e.category === 'owner_rent') e.paid = false; TH.log('Duyệt chi phí', e.id, e.description + ' · ' + F.money(e.amount), 'expense', e.buildingId); TH.app.refresh(); TH.toast('Đã duyệt chi phí', esc(e.id) + ' · báo cáo đã cập nhật'); };
+    var go = function () { if (!TH.recordActions.guardLegacy('exp.approve', el)) return; e.status = 'approved'; e.approvedBy = TH.me().id; e.approvedAt = TH.TODAY; if (e.category === 'owner_rent') e.paid = false; TH.log('Duyệt chi phí', e.id, e.description + ' · ' + F.money(e.amount), 'expense', e.buildingId); TH.app.refresh(); TH.toast('Đã duyệt chi phí', esc(e.id) + ' · báo cáo đã cập nhật'); };
     if (d.length && TH.has('F035.C')) TH.confirm({ title: 'Chứng từ nghi trùng', body: '<p>' + esc(e.docNo) + ' trùng với ' + d.map(function (x) { return x.id; }).join(', ') + '. Vẫn duyệt?</p>', ok: 'Vẫn duyệt', danger: true }).then(function (ok) { if (ok) go(); });
     else go();
   };
   TH.act['exp.reject'] = function (el) {
     var e = TH.db.expenses.find(function (x) { return x.id === el.dataset.id; });
     TH.confirm({ title: 'Từ chối chi phí ' + e.id + '?', body: '<p>Lý do được lưu: <b>' + (dupOf(e).length ? 'Trùng chứng từ ' + esc(e.docNo) : 'Chứng từ chưa hợp lệ') + '</b>.</p>', ok: 'Từ chối', danger: true }).then(function (ok) {
-      if (!ok) return; e.status = 'rejected'; e.reason = dupOf(e).length ? 'Trùng chứng từ ' + e.docNo : 'Chứng từ chưa hợp lệ'; e.approvedBy = TH.me().id; TH.log('Từ chối chi phí', e.id, e.reason, 'expense', e.buildingId); TH.app.refresh(); TH.toast('Đã từ chối', esc(e.reason), 'warning');
+      if (!ok || !TH.recordActions.guardLegacy('exp.reject', el)) return; e.status = 'rejected'; e.reason = dupOf(e).length ? 'Trùng chứng từ ' + e.docNo : 'Chứng từ chưa hợp lệ'; e.approvedBy = TH.me().id; TH.log('Từ chối chi phí', e.id, e.reason, 'expense', e.buildingId); TH.app.refresh(); TH.toast('Đã từ chối', esc(e.reason), 'warning');
     });
   };
   TH.act['exp.reverse'] = function (el) {

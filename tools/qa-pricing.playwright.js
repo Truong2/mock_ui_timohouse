@@ -23,7 +23,7 @@ async (page) => {
           overflow: document.documentElement.scrollWidth - innerWidth, bad,
           demo: document.querySelector('[data-offer-demo]').dataset.pkg, screen: document.querySelector('#offer-detail [data-act="landing.open"]').dataset.go,
           scope: document.querySelector('#offer-detail .offer-limits').innerText, foundation: document.querySelector('.plan[data-pkg="' + k + '"] .offer-foundation').textContent,
-          baseEnabled: ['F011.A', 'F012.A', 'F026.A', 'F027.A'].every(id => TH.has(id)), reportTypes: Object.keys(TH.reports.TYPES).sort().join(','),
+          baseEnabled: ['F011.A', 'F012.A', 'F026.A', 'F027.A'].every(id => TH.has(id)), reportTypes: ['RPT-04', 'RPT-05'].filter(t => TH.reports.TYPES[t] && TH.reports.TYPES[t].tier === 'A' && TH.reports.canType(t)).join(','),
           upgradeGates: TH.has('F011.B') === (k !== 'A') && TH.has('F027.B') === (k !== 'A') && TH.has('F045.C') === ('CD'.includes(k)) && TH.has('F045.D') === (k === 'D') };
       }, pkg);
       check('PRICE-' + width + '-' + pkg, r.key === pkg && r.selected === 1 && r.price && r.steps === 6 && r.query === pkg && r.focus && r.visible && r.overflow <= 0 && !r.bad && r.demo === pkg && new URL(r.link).searchParams.get('previewPackage') === pkg && new URL(r.link).hash === '#/', r);
@@ -79,7 +79,7 @@ async (page) => {
   await page.waitForFunction(() => TH.app.route.page === 'REPORTS');
   check('DEMO-ROUTE', await page.evaluate(() => TH.store.state.pkg === 'D'), 'Customer CTA opens the selected package and business screen');
   const smoke = await page.evaluate(() => { const r = TH.qaSmoke(); return { total: r.total, fails: r.fails }; });
-  check('SMOKE', smoke.total === 1088 && !smoke.fails.length, { total: smoke.total, fails: smoke.fails.length });
+  check('SMOKE', smoke.total === 1168 && !smoke.fails.length, { total: smoke.total, fails: smoke.fails.length });
   check('CONSOLE', !errors.length, errors);
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto('http://127.0.0.1:8779/index.html?previewPackage=D#/');

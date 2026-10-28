@@ -11,7 +11,7 @@
     'OA-01': 'Thông báo & nhắc thanh toán', 'OA-02': 'Lịch sử gửi thông báo', 'HR-01': 'Nhân sự & phân công',
     'SAL-01': 'Bảng lương', 'SHARE-01': 'Cổ đông & phân chia lợi nhuận', 'RPT-02': 'Phân tích hiệu quả kinh doanh',
     'RPT-03': 'Tổng hợp lương & lợi nhuận', 'SYS-01': 'Cài đặt & phân quyền', 'AUTH-01': 'Tài khoản & đơn vị quản lý',
-    'REPORTS': 'Báo cáo theo mẫu Excel', 'RPT-04': 'Doanh thu theo tòa', 'RPT-05': 'Báo cáo kinh doanh tháng',
+    'REPORTS': 'Báo cáo', 'RPT-04': 'Doanh thu theo tòa', 'RPT-05': 'Báo cáo kinh doanh tháng',
   };
   var groups = [
     { id: 'overview', label: 'Tổng quan', icon: 'dashboard', sections: [
@@ -45,7 +45,7 @@
       { id: 'equity', label: 'Cổ đông & phân chia lợi nhuận', screen: 'SHARE-01', routes: ['SHARE-01', 'SHARE-RESULT'] },
     ] },
     { id: 'reports', label: 'Báo cáo', icon: 'chart', sections: [
-      { id: 'reports', label: 'Báo cáo theo mẫu Excel', screen: 'REPORTS', fallback: 'RPT-04', routes: ['REPORTS', 'RPT-04', 'RPT-05'] },
+      { id: 'reports', label: 'Báo cáo theo nhóm', screen: 'REPORTS', fallback: 'RPT-04', routes: ['REPORTS', 'RPT-04', 'RPT-05'] },
       { id: 'performance', label: 'Hiệu quả kinh doanh', screen: 'RPT-02', routes: ['RPT-02'] },
       { id: 'summary', label: 'Tổng hợp lương & lợi nhuận', screen: 'RPT-03', routes: ['RPT-03'] },
     ] },

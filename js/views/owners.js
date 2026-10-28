@@ -108,7 +108,7 @@
   TH.docTable = function (screen, docs, opts) {
     opts = opts || {};
     var q = TH.has('F013.B') ? TH.store.ui(screen, 'dq', '') : '';
-    var rows = docs.filter(function (d) { return TH.match(q, [d.kind, d.file, TH.buildingName(d.buildingId), d.leaseId || '']); });
+    var rows = docs.filter(function (d) { return d.status !== 'archived' && TH.match(q, [d.kind, d.file, TH.buildingName(d.buildingId), d.leaseId || '']); });
     var search = TH.gate('F013.B', '<div class="input-wrap">' + I('search') + '<label class="sr-only" for="dq-' + screen + '">Tìm tài liệu</label><input id="dq-' + screen + '" class="input input-sm" type="search" placeholder="Tìm theo loại, tên tệp, tòa, số HĐ…" value="' + esc(q) + '" data-ui="' + screen + '.dq" autocomplete="off"></div>' + TH.up('F013.B'), { mode: 'btn', label: 'Tìm tài liệu theo hợp đồng/tòa', size: 'btn-sm' });
     return '<div class="card card-flush">' + TH.cardHd(I('folder', 'ic-sm') + (opts.title || 'Tài liệu đính kèm'), opts.sub || 'Lưu file gắn hồ sơ (F013.A) · tệp minh họa, không tải thật',
         TH.permBtn('master.edit', '<button type="button" class="btn btn-sm" data-act="bdoc.upload" data-b="' + esc(opts.buildingId || '') + '" data-owner="' + esc(opts.ownerId || '') + '" data-kind="' + esc(opts.kind || '') + '">' + I('upload', 'ic-sm') + 'Tải lên</button>', 'Tải lên · 403')) +
@@ -156,7 +156,7 @@
     var n = TH.db.bldDocs.length + 1;
     var slug = { 'Sổ đỏ': 'so_do', 'HĐ thuê tòa': 'HDT', PCCC: 'PCCC', 'ĐKKD': 'DKKD', 'Khác': 'tai_lieu' }[kind] || 'tai_lieu';
     var lease = TH.leaseOf(bId);
-    var doc = { id: 'TLT-' + String(n).padStart(2, '0'), ownerId: b.ownerId, buildingId: bId, leaseId: kind === 'HĐ thuê tòa' && lease ? lease.id : null, kind: kind, file: slug + '_' + bId.slice(3) + '_' + TH.TODAY.replace(/-/g, '') + (kind === 'Sổ đỏ' ? '.jpg' : '.pdf'), uploadedAt: TH.TODAY, by: TH.me().id, version: 1, access: 'Admin, Kế toán' };
+    var doc = { id: TH.recordActions.id('TLT'), ownerId: b.ownerId, buildingId: bId, leaseId: kind === 'HĐ thuê tòa' && lease ? lease.id : null, kind: kind, file: slug + '_' + bId.slice(3) + '_' + TH.TODAY.replace(/-/g, '') + (kind === 'Sổ đỏ' ? '.jpg' : '.pdf'), uploadedAt: TH.TODAY, by: TH.me().id, version: 1, access: 'Admin, Kế toán' };
     TH.db.bldDocs.push(doc);
     if (kind === 'PCCC') { b.fire.file = doc.file; }
     if (kind === 'ĐKKD') { b.bizReg.file = doc.file; }
@@ -216,7 +216,7 @@
       sub: 'Trường theo mẫu HĐ thuê nhà (Bên cho thuê) · bắt buộc chờ Data Dictionary (D-01)',
       body: '<div class="stack">' + (err ? '<div class="alert alert-danger">' + I('xCircle', 'ic-sm') + '<div class="alert-body">' + esc(err) + '</div></div>' : '') +
         '<div class="form-grid">' +
-        TH.field({ form: form, name: 'id', label: 'Mã chủ nhà', def: o ? o.id : 'CN-' + String(TH.db.owners.length + 1).padStart(3, '0'), readonly: true, hint: 'Sinh tự động' }) +
+        TH.field({ form: form, name: 'id', label: 'Mã chủ nhà', def: o ? o.id : TH.recordActions.id('CN'), readonly: true, hint: 'Sinh tự động' }) +
         TH.field({ form: form, name: 'kind', label: 'Loại', type: 'select', def: o ? o.kind : 'person', options: [{ id: 'person', label: 'Cá nhân' }, { id: 'org', label: 'Pháp nhân' }] }) +
         TH.field({ form: form, name: 'name', label: 'Họ tên / tên pháp nhân', def: o ? o.name : '', required: true, invalid: err && !d.name, live: true }) +
         TH.field({ form: form, name: 'phone', label: 'Số điện thoại', def: o ? o.phone : '', required: true, placeholder: '09xx xxx xxx', live: true }) +
@@ -238,7 +238,7 @@
     var name = (g('name', '') || '').trim(), phone = (g('phone', '') || '').trim();
     if (!name || !phone) { TH.store.setDraft(form, '_err', 'Nhập đủ họ tên và số điện thoại.'); TH.app.refresh(); return; }
     var addr = g('permAddress', '') || '—';
-    var o = { id: g('id', 'CN-' + String(TH.db.owners.length + 1).padStart(3, '0')), kind: g('kind', 'person'), name: name, phone: phone, email: g('email', '') || '—', address: addr, permAddress: addr, idNo: g('idNo', ''), idDate: g('idDate', ''), idPlace: '', taxCode: g('taxCode', '') || '—', bank: { no: '', name: '', holder: '' }, status: 'active', note: g('note', ''), createdAt: TH.TODAY };
+    var o = { id: g('id', TH.recordActions.id('CN')), kind: g('kind', 'person'), name: name, phone: phone, email: g('email', '') || '—', address: addr, permAddress: addr, idNo: g('idNo', ''), idDate: g('idDate', ''), idPlace: '', taxCode: g('taxCode', '') || '—', bank: { no: '', name: '', holder: '' }, status: 'active', note: g('note', ''), createdAt: TH.TODAY };
     if (TH.db.owners.some(function (x) { return x.id === o.id; })) { TH.toast('Mã chủ nhà đã tồn tại', 'Chọn mã duy nhất trước khi lưu.', 'danger'); return; }
     TH.db.owners.push(o); TH.log('Thêm chủ nhà', o.id, o.name, 'owner');
     TH.store.clearDraft(form);
@@ -422,7 +422,7 @@
       var n = 0;
       rows.forEach(function (r) {
         var ex = C.owner(r.data.id);
-        if (ex) { if (policy === 'update') { ex.address = r.data.address; n++; } return; }
+        if (ex) { if (policy === 'update') { ex.name = r.data.name; ex.phone = r.data.phone; ex.address = r.data.address; n++; } return; }
         if (TH.db.owners.some(function (o) { return o.id === r.data.id; })) return;
         TH.db.owners.push({ id: r.data.id, kind: 'person', name: r.data.name, phone: r.data.phone, email: '—', address: r.data.address, permAddress: r.data.address, idNo: '', idDate: '', idPlace: '', taxCode: '—', bank: { no: '', name: '', holder: '' }, status: 'active', note: 'Nhập từ Excel mẫu', createdAt: TH.TODAY });
         n++;
