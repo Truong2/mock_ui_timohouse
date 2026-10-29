@@ -245,7 +245,7 @@
       var invoice = TH.db.invoices.find(function (i) { return i.roomId === roomId && i.period === TH.store.state.period && i.status === 'confirmed' && !i.isCorrection; });
       if (invoice) {
         var price = +String(TH.store.draft('mtr-fee', 'price', '')).replace(/\D/g, ''), qty = +TH.store.draft('mtr-fee', 'qty', 1), title = TH.store.draft('mtr-fee', 'name', '');
-        if (!price || !(qty > 0) || !title) return done(fail('Nhập mô tả, số lượng và đơn giá dương.'));
+        if (!price || !(qty > 0) || !title) return fn.apply(this, arguments); // thiếu dữ liệu → form gốc báo lỗi tại từng trường
         R.open('invoice', invoice.id, 'correct'); var form = 'rec-invoice-' + invoice.id + '-correct'; TH.store.setDraft(form, 'amount', R.effectiveAmount('invoice', invoice) + qty * price); TH.store.setDraft(form, 'lineIndex', '-1'); TH.store.setDraft(form, 'lineName', title); TH.store.setDraft(form, 'reason', 'Bổ sung phí: ' + title); TH.modal.rerenderAll(); return;
       }
     }

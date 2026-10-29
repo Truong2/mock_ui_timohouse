@@ -255,8 +255,13 @@
   TH.exportBtn = function (act, label, extra) {
     return '<button type="button" class="btn" data-act="' + act + '"' + (extra || '') + '>' + I('download', 'ic-sm') + esc(label) + '</button>';
   };
+  /* Tiêu đề card: phụ đề dài → icon ⓘ cạnh tiêu đề; ghi chú phạm vi gói ("Gói A: …") chỉ hiện ở chế độ review;
+     nút ở đầu card → icon + tooltip (nút chính giữ chữ), quá 2 nút → menu ⋯ */
   TH.cardHd = function (title, sub, right) {
-    return '<div class="card-hd"><div><div class="card-title">' + title + '</div>' + (sub ? '<div class="card-sub">' + sub + '</div>' : '') + '</div>' + (right ? '<div class="row u-gap-8">' + right + '</div>' : '') + '</div>';
+    var pkgNote = sub && /^Gói [A-D]\b/.test(TH.plainText(sub)), sh = pkgNote ? { sub: sub, hint: '' } : TH.subOrHint(sub);
+    var nBtn = right ? (right.match(/class="(btn[ "]|gate-inline)/g) || []).length : 0;
+    if (nBtn >= 1 && right.indexOf('data-action-group') < 0) right = TH.actionGroup({ context: 'card', html: right });
+    return '<div class="card-hd"><div><div class="card-title">' + title + sh.hint + '</div>' + (sh.sub ? '<div class="card-sub' + (pkgNote ? ' review-only' : '') + '">' + sh.sub + '</div>' : '') + '</div>' + (right ? '<div class="row u-gap-8">' + right + '</div>' : '') + '</div>';
   };
   TH.scopeLabel = function () {
     var s = TH.scope();

@@ -29,6 +29,7 @@ async (page) => {
   await page.locator('[data-act="sec.edit"][data-key="cusInfo"]').click();
   await page.getByLabel('Nghề nghiệp', { exact: true }).fill('Bản nháp QA');
   await page.locator('#view [role="tab"]').nth(1).focus(); await page.keyboard.press('Enter');
+  await page.getByRole('dialog').first().waitFor({ timeout: 2000 }).catch(() => {});
   check('TABS-UNSAVED-GUARD', await page.getByRole('dialog').count() === 1, 'Activation keeps the existing save/discard guard');
   await page.getByRole('button', { name: 'Tiếp tục chỉnh sửa', exact: true }).click();
   await page.locator('[data-act="sec.cancel"]').click();
@@ -61,6 +62,7 @@ async (page) => {
   check('MENU-ESCAPE', await page.locator('#qa-component-fixture [data-act="amenu.toggle"]').evaluate(e => e === document.activeElement && e.getAttribute('aria-expanded') === 'false'), 'Escape restores trigger focus');
   await page.locator('#qa-component-fixture [data-act="amenu.toggle"]').click();
   await page.getByRole('menuitem', { name: 'Mở biểu mẫu QA', exact: true }).click();
+  await page.waitForFunction(() => TH.modal.top() && TH.modal.top().el.contains(document.activeElement)); // chờ focus ban đầu của dialog (requestAnimationFrame)
   await page.getByLabel('Tên QA', { exact: true }).focus();
   await page.locator('[role="dialog"] .dialog-hd [data-close]').focus(); await page.keyboard.press('Shift+Tab');
   check('MODAL-FOCUS-TRAP', await page.getByRole('button', { name: 'Đóng QA', exact: true }).evaluate(e => e === document.activeElement), 'Shift+Tab wraps within the dialog');

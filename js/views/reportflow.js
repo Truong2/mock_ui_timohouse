@@ -941,7 +941,7 @@
     CELL = { snap: snap, eff: snap.formulas || stdFormulas(snap.type), hl: hl, changed: changed, sel: top && top.id === id && (top.item || 0) === item && TH.store.ui(S, opt.paneKey || 'pane', '') === 'trace' ? top : null };
     var html;
     try { html = sheetHtml(where, id, item, snap, sh, nz); } finally { CELL = null; }
-    var tools = num ? '<div class="rptf-sheet-tools">' + legend(opt) + '<span class="spacer"></span>' + (sh.kind === 'stmt' ? '<button type="button" class="btn btn-xs" aria-pressed="' + nz + '" data-act="ui.set" data-screen="' + S + '" data-key="nz" data-val="' + (nz ? '' : '1') + '">' + I('filter', 'ic-sm') + (nz ? 'Hiện đủ các dòng' : 'Ẩn dòng bằng 0') + '</button>' : '') + '</div>' : '';
+    var tools = num ? '<div class="rptf-sheet-tools">' + legend(opt) + '<span class="spacer"></span>' + (sh.kind === 'stmt' ? TH.switchCtl(S, 'nz', 'Ẩn dòng bằng 0', nz) : '') + '</div>' : '';
     return '<div class="card card-flush u-mb-16">' + TH.cardHd(I('sheet', 'ic-sm') + esc(sh.title), (num ? 'Bấm số để xem nguồn và cách tính' + (sh.mode ? ' · ' + esc(modeTxt) : '') : 'Sheet ' + esc(sh.name)) + ' · ' + snap.sheets.length + ' sheet sẽ xuất') +
       '<div class="rptf-sheet-tabs">' + tabs + '</div>' + tools + TH.tabPanel(S, cur, '<div data-document>' + html + '</div>', key) + '</div>';
   }
@@ -1084,7 +1084,8 @@
       function () { var r = TH.reports.preview({ type: 'RPT-04', period: TH.store.state.period, buildingIds: [allowedIds()[0]] }, { transient: true }); if (r.ok) { TH._transientDraft = r.draft; sheetsBlock('draft', r.draft.id, 0, r.draft.items[0], 'sheet'); return traceRender({ where: 'draft', id: r.draft.id, item: 0, mode: 'tong', col: '', metric: 'share:0:total' }); } },
       /* Loại bổ sung: dựng preview (sheet bảng + rà soát), truy nguồn chỉ tiêu dẫn xuất và hộp sửa công thức — chỉ ở gói có loại đó */
       function () {
-        Object.keys(TYPES).filter(function (t) { return BASE_TYPES.indexOf(t) === -1 && canType(t); }).forEach(function (t) {
+        var extraTypes = Object.keys(TYPES).filter(function (t) { return BASE_TYPES.indexOf(t) === -1 && canType(t); });
+        extraTypes.forEach(function (t) {
           var r = TH.reports.preview({ type: t, period: TH.store.state.period, buildingIds: allowedIds() }, { transient: true });
           if (!r.ok) throw new Error(t + ': ' + r.error);
           if (r.draft.errors.length) throw new Error(t + ': ' + r.draft.errors[0]);
@@ -1096,6 +1097,7 @@
           traceRender({ where: 'draft', id: r.draft.id, item: 0, mode: Object.keys(it.vals)[0], col: keyOf(it.buildingIds), metric: k });
           formulaModal(r.draft, k);
         });
+        return { title: 'Loại báo cáo bổ sung', body: '<p>Đã dựng xem trước, truy nguồn và hộp sửa công thức cho ' + extraTypes.length + ' loại báo cáo của gói.</p>', foot: '<button type="button" class="btn" data-close>Đóng</button>' };
       },
       /* Bàn làm việc xem trước: panel Kiểm tra (mọi nhóm mở), Nguồn ô (inline), Công thức, Cảnh báo; sheet có tô nhóm + ẩn dòng 0 */
       function () {

@@ -664,3 +664,29 @@ body:not(.is-review) .screen-id, body:not(.is-review) .up-tag, body:not(.is-revi
   .dialog-hd, .dialog-bd, .dialog-ft { padding: var(--s-4); }
   .dialog-ft > .btn { flex: 1 1 auto; }
 }
+
+/* ---------- Gọn thao tác & chú thích (CR-UI-COMPACT) ----------
+   Mô tả/công thức dài → icon ⓘ (hover/focus/chạm); nút phụ → icon + tooltip; nhóm thao tác card; bộ lọc "Lọc thêm". */
+.hint-btn { display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-width: 22px; height: 22px; padding: 0 3px; margin-left: 4px; border: 0; border-radius: var(--r-sm); background: transparent; color: var(--text-3); cursor: help; vertical-align: middle; font: inherit; font-size: var(--fs-13); font-weight: 400; }
+.hint-btn:hover, .hint-btn[aria-describedby] { color: var(--primary); background: var(--n-100); }
+.hint-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+.hint-btn .ic { width: 15px; height: 15px; }
+.hint-btn-text { margin-left: 0; padding: 0 6px 0 4px; color: var(--text-2); }
+.help-line { margin: 4px 0; }
+.page-title .hint-btn { margin-left: 6px; vertical-align: 2px; }
+.card-title .hint-btn { margin-left: 4px; vertical-align: -1px; }
+label .hint-btn { height: 18px; min-width: 18px; margin-left: 2px; vertical-align: -3px; }
+.tip-pop { white-space: normal; }
+.tip-pop.is-wide { max-width: 360px; }
+.card-actions { flex-wrap: nowrap; align-items: center; }
+.gate-inline.is-compact { gap: 4px; padding-left: 8px; padding-right: 6px; }
+.chip-more { width: auto; min-width: 120px; }
+.chip-more.is-on { border-color: var(--primary); color: var(--primary); }
+@media (max-width: 640px) {
+  .hint-btn { min-width: var(--touch-h); height: var(--touch-h); margin-left: 0; }
+  label .hint-btn, .card-title .hint-btn, .page-title .hint-btn { min-width: 32px; height: 32px; }
+}
+
+.help-line-block { margin: 6px 0; }
+.field-label-row { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; }
+.field-label-row > label { font-size: var(--fs-14); color: var(--text); display: flex; align-items: center; gap: 6px; }

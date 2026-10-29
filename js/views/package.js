@@ -111,7 +111,7 @@
           headExtra: '<div class="seg">' + TH.PKG_KEYS.map(function (k) { return '<button type="button" aria-pressed="' + (k === pkg) + '" data-act="pkg.seg" data-pkg="' + k + '">' + k + '</button>'; }).join('') + '</div>',
           flush: true,
           body: '<div class="toolbar" style="position:sticky;top:0;background:var(--surface);z-index:5">' + TH.searchBox('CMP', review ? 'Tìm mã/tên chức năng, ví dụ F012 hoặc OCR…' : 'Tìm chức năng: hóa đơn, công nợ, OCR…') + '<span class="small muted tnum">' + rows.length + ' / 52 dòng</span></div>' +
-            '<div class="toolbar u-gap-6">' + TH.chips('CMP', 'mod', chipOpts, mod) + '</div>' +
+            '<div class="toolbar u-gap-6">' + TH.chips('CMP', 'mod', chipOpts, mod, { max: 0 }) + '</div>' +
             '<div class="table-wrap"><table class="table cmp-table" aria-label="So sánh 52 chức năng"><thead><tr>' + (review ? '<th>Mã</th>' : '') + '<th>Nhóm / chức năng</th>' + TH.PKG_KEYS.map(function (k) { return '<th>' + k + ' · ' + TH.PACKAGES[k].price + '</th>'; }).join('') + (review ? '<th>UI-ID</th>' : '') + '</tr></thead><tbody>' +
             (body || '<tr><td colspan="' + columns + '">' + TH.state('empty', { title: 'Không có chức năng khớp', text: 'Thử từ khóa khác hoặc chọn lại phân hệ.' }) + '</td></tr>') + '</tbody></table></div>',
           foot: '<span class="small muted">' + TH.badge('Có trong gói', 'success', { icon: 'check' }) + ' ' + TH.badge('Có từ C', 'neutral', { icon: 'lock' }) + ' ' + TH.badge('Cần thống nhất quy tắc', 'draft') + '</span><span class="spacer"></span><button type="button" class="btn" data-close>Đóng</button>',

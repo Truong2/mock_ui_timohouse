@@ -2,11 +2,11 @@
 (function () {
   'use strict';
   var R = TH.recordActions, C = TH.calc, F = TH.fmt, esc = TH.esc;
-  var labels = { name: 'Tên', phone: 'Số điện thoại', email: 'Email', address: 'Địa chỉ', permAddress: 'Địa chỉ thường trú', taxCode: 'Mã số thuế', note: 'Ghi chú', short: 'Tên ngắn', area: 'Khu vực / diện tích', floors: 'Số tầng', landArea: 'Diện tích đất (m²)', buildArea: 'Diện tích xây dựng (m²)', floorArea: 'Diện tích sàn (m²)', floor: 'Tầng', dob: 'Ngày sinh', occupation: 'Nghề nghiệp', hometown: 'Quê quán', scanFile: 'Tên file hợp đồng', file: 'Tên file', referrer: 'Người giới thiệu', result: 'Kết quả liên hệ', moveOutAt: 'Ngày chuyển đi', callbackAt: 'Ngày gọi lại', from: 'Hiệu lực từ', to: 'Hiệu lực đến', role: 'Vai trò', qty: 'Số lượng', unit: 'Đơn vị', location: 'Vị trí', condition: 'Tình trạng', kind: 'Loại', dueAt: 'Hạn thanh toán', amount: 'Số tiền (đ)', docNo: 'Số chứng từ', elecPrev: 'Điện kỳ trước', elecCur: 'Điện kỳ này', waterPrev: 'Nước kỳ trước', waterCur: 'Nước kỳ này', price: 'Đơn giá (đ)', source: 'Căn cứ', receivedAt: 'Ngày thực nhận', method: 'Phương thức', evidence: 'Chứng từ / mã giao dịch', refundAmount: 'Số tiền hoàn (đ)', forfeitAmount: 'Số tiền giữ (đ)', description: 'Mô tả', category: 'Nhóm chi / khoản', date: 'Ngày', title: 'Chức vụ', team: 'Đội nhóm', leaderId: 'Trưởng nhóm', reason: 'Lý do / căn cứ', type: 'Loại', ratio: 'Tỷ lệ (%)', capital: 'Vốn (đ)', templateId: 'Mẫu tin', day: 'Ngày nhắc trong tháng', body: 'Nội dung mẫu tin', username: 'Tên đăng nhập', plate: 'Biển số', brand: 'Hãng xe', color: 'Màu xe' };
+  var labels = { name: 'Tên', phone: 'Số điện thoại', email: 'Email', address: 'Địa chỉ', permAddress: 'Địa chỉ thường trú', taxCode: 'Mã số thuế', note: 'Ghi chú', short: 'Tên ngắn', area: 'Khu vực / diện tích', floors: 'Số tầng', landArea: 'Diện tích đất (m²)', buildArea: 'Diện tích xây dựng (m²)', floorArea: 'Diện tích sàn (m²)', floor: 'Tầng', dob: 'Ngày sinh', idNo: 'Số giấy tờ', relation: 'Quan hệ với khách đứng tên', occupation: 'Nghề nghiệp', hometown: 'Quê quán', scanFile: 'Tên file hợp đồng', file: 'Tên file', referrer: 'Người giới thiệu', result: 'Kết quả liên hệ', moveOutAt: 'Ngày chuyển đi', callbackAt: 'Ngày gọi lại', from: 'Hiệu lực từ', to: 'Hiệu lực đến', role: 'Vai trò', qty: 'Số lượng', unit: 'Đơn vị', location: 'Vị trí', condition: 'Tình trạng', kind: 'Loại', dueAt: 'Hạn thanh toán', amount: 'Số tiền (đ)', docNo: 'Số chứng từ', elecPrev: 'Điện kỳ trước', elecCur: 'Điện kỳ này', waterPrev: 'Nước kỳ trước', waterCur: 'Nước kỳ này', price: 'Đơn giá (đ)', source: 'Căn cứ', receivedAt: 'Ngày thực nhận', method: 'Phương thức', evidence: 'Chứng từ / mã giao dịch', refundAmount: 'Số tiền hoàn (đ)', forfeitAmount: 'Số tiền giữ (đ)', description: 'Mô tả', category: 'Nhóm chi / khoản', date: 'Ngày', title: 'Chức vụ', team: 'Đội nhóm', leaderId: 'Trưởng nhóm', reason: 'Lý do / căn cứ', type: 'Loại', ratio: 'Tỷ lệ (%)', capital: 'Vốn (đ)', templateId: 'Mẫu tin', day: 'Ngày nhắc trong tháng', body: 'Nội dung mẫu tin', username: 'Tên đăng nhập', plate: 'Biển số', brand: 'Hãng xe', color: 'Màu xe' };
   var names = { view: 'Xem', edit: 'Sửa', delete: 'Xóa nhập nhầm', restore: 'Khôi phục', archive: 'Ngừng hoạt động', activate: 'Kích hoạt lại', cancel: 'Hủy', withdraw: 'Rút yêu cầu', submit: 'Gửi duyệt', approve: 'Duyệt điều chỉnh', reject: 'Trả lại', correct: 'Lập điều chỉnh', end: 'Kết thúc', invalidate: 'Đánh dấu hết hiệu lực', terms: 'Điều chỉnh giá theo kỳ' };
   var screenTypes = {
     'OWN-01': ['owner'], 'OWN-02': ['owner', 'lease', 'leaseDraft', 'document'], 'BLD-01': ['building', 'leaseDraft'], 'BLD-02': ['building', 'lease', 'leaseDraft', 'assignment', 'asset', 'document', 'landlordPay'],
-    'ROOM-01': ['room'], 'ROOM-02': ['room', 'reading'], 'CUS-01': ['customer'], 'CUS-02': ['customer', 'vehicle', 'contract', 'depositCase', 'deposit', 'customerDocument'],
+    'ROOM-01': ['room'], 'ROOM-02': ['room', 'reading'], 'CUS-01': ['customer'], 'CUS-02': ['customer', 'occupant', 'vehicle', 'contract', 'depositCase', 'deposit', 'customerDocument'],
     'CON-01': ['contract', 'contractDraft'], 'CON-02': ['contract', 'contractDraft'], 'CON-03': ['followup'], 'CON-FOLLOW': ['followup'], 'METER-01': ['reading', 'fee'],
     'INV-01': ['invoice', 'billAdjustment'], 'INV-02': ['invoice'], 'INV-03': ['invoice'], 'PAY-01': ['receipt'], 'PAY-APP': ['receipt'], 'PAY-02': ['receipt'],
     'EXP-01': ['expense', 'landlordPay'], 'HR-01': ['staff', 'team', 'assignment'], 'HR-ASSIGN': ['assignment'], 'SAL-01': ['salaryInput', 'salaryAdjustment'], 'SAL-ADJ': ['salaryAdjustment'],
@@ -37,9 +37,11 @@
     if (['receipt', 'expense', 'billAdjustment'].indexOf(type) >= 0 && ['draft', 'rejected'].indexOf(r.status) >= 0) arr.push('submit');
     arr.push('delete'); return arr;
   };
+  /* Thao tác dòng hiển thị dạng icon (nhãn ở tooltip); thứ tự ưu tiên: Sửa → Xem → menu ⋯ */
+  var ICONS = { view: 'eye', edit: 'edit', delete: 'trash', restore: 'rotateCcw', archive: 'ban', activate: 'rotateCcw', cancel: 'xCircle', withdraw: 'rotateCcw', submit: 'send', approve: 'check', reject: 'x', correct: 'sliders', terms: 'contract', end: 'ban', invalidate: 'ban', run: 'play', transfer: 'arrowRight', unlink: 'link', draft: 'edit', rejected: 'x' };
   function button(type, r, action, text) {
     var check = R.inspect(type, r.id, action);
-    return '<button type="button" class="btn btn-sm' + (['delete', 'cancel', 'archive', 'end', 'invalidate'].indexOf(action) >= 0 ? ' btn-danger' : '') + '" data-act="rec.open" data-type="' + type + '" data-id="' + esc(r.id) + '" data-action="' + action + '"' + (action === 'edit' ? ' data-priority="primary"' : '') + (!check.allowed ? ' data-tip="' + esc(check.reason) + '"' : '') + '>' + esc(text || names[action]) + '</button>';
+    return '<button type="button" class="btn btn-sm' + (['delete', 'cancel', 'archive', 'end', 'invalidate'].indexOf(action) >= 0 ? ' btn-danger' : '') + '" data-act="rec.open" data-type="' + type + '" data-id="' + esc(r.id) + '" data-action="' + action + '"' + (action === 'edit' ? ' data-priority="60"' : action === 'view' ? ' data-priority="50"' : '') + (!check.allowed ? ' data-tip="' + esc(check.reason) + '"' : '') + '>' + TH.icon(ICONS[action] || 'more', 'ic-sm') + esc(text || names[action]) + '</button>';
   }
   R.rowButtons = function (type, r) { return R.availableActions(type, r).map(function (action) { return button(type, r, action); }).join(''); };
   var originalTable = TH.table;
@@ -50,7 +52,7 @@
     function ref(row) { return refs.get(row) || (row.k && refs.get(row.k)) || (row.id && types.map(function (t) { var r = R.get(t, row.id); return r && { type: t, record: r }; }).find(Boolean)); }
     if (!o.rows.every(function (row) { return !!ref(row); })) return originalTable(o);
     var opts = Object.assign({}, o, { cols: o.cols.slice() });
-    var ix = opts.cols.findIndex(function (c) { return c.kind === 'actions' || (!c.label && /^(x|go|act|actions)$/.test(c.key)); });
+    var ix = opts.cols.findIndex(function (c, i, all) { return c.kind === 'actions' || (!c.label && (/^(x|go|act|actions)$/.test(c.key) || i === all.length - 1)); });
     var col = { key: '_record', kind: 'actions', label: 'Thao tác', render: function (row) { var x = ref(row); return R.rowButtons(x.type, x.record); } };
     if (ix >= 0) { var old = opts.cols[ix]; col.key = old.key; col.render = function (row) { var x = ref(row); return R.rowButtons(x.type, x.record) + (old.render ? old.render(row) : ''); }; opts.cols[ix] = col; } else opts.cols.push(col);
     if (opts.mobile) opts.mobile = Object.assign({}, opts.mobile, { visible: opts.mobile.visible.concat([col.key]) });
@@ -160,12 +162,25 @@
     TH.modal.open({ key: form, size: 'md', recordForm: form, render: function () { return { title: 'Thêm ' + d.label, body: '<div class="form-grid">' + d.fields.map(function (k) { return input(form, type, {}, k); }).join('') + '</div><p role="alert" class="neg">' + esc(TH.store.draft(form, '_error', '')) + '</p>', foot: '<button type="button" class="btn" data-close>Hủy</button><button type="button" class="btn btn-primary" data-act="rec.createSave" data-type="' + type + '">Lưu</button>' }; } });
   };
   TH.act['rec.createSave'] = function (el) { var values = Object.assign({}, TH.store.draft('rec-create') || {}); document.querySelectorAll('[data-draft^="rec-create."]').forEach(function (input) { var k = input.dataset.draft.slice(11); if (values[k] === undefined) values[k] = input.value; }); var result = R.create(el.dataset.type, values); if (!result.ok) { TH.store.setDraft('rec-create', '_error', result.error); TH.modal.rerenderAll(); return; } TH.store.clearDraft('rec-create'); TH.modal.close('rec-create', { silent: true }); TH.app.refresh(); TH.toast('Đã tạo', esc(result.record.id)); };
+  var toolsUsed = {};
+  function toolButtons(screen) {
+    var b = function (mode, icon, label) { return '<button type="button" class="btn" data-overflow="1" data-act="rec.list" data-screen="' + screen + '" data-mode="' + mode + '">' + TH.icon(icon, 'ic-sm') + label + '</button>'; };
+    return b('records', 'database', 'Quản lý bản ghi') + b('trash', 'trash', 'Đã xóa') + b('corrections', 'fileClock', 'Phiếu điều chỉnh') +
+      (screen === 'SHARE-01' && TH.can('share.edit') ? '<button type="button" class="btn" data-overflow="1" data-act="rec.shareTable">' + TH.icon('pie', 'ic-sm') + 'Thêm / sửa bảng tỷ lệ</button>' : '');
+  }
+  /* Gọi từ TH.pageHeader: đưa thao tác dữ liệu của màn đang render vào menu ⋯ của tiêu đề trang */
+  TH.recordTools = function (screen) {
+    if (!screen || screen !== currentScreen || !screenTypes[screen]) return '';
+    toolsUsed[screen] = true; return toolButtons(screen);
+  };
   Object.keys(screenTypes).forEach(function (screen) {
     var view = TH.views[screen]; if (!view) return; var render = view.render;
     view.render = function () {
       var prev = currentScreen; currentScreen = screen; var result;
       try { result = render.apply(this, arguments); } finally { currentScreen = prev; }
-      var bar = '<div class="record-tools row u-gap-8" aria-label="Thao tác dữ liệu"><button type="button" class="btn btn-sm" data-act="rec.list" data-screen="' + screen + '" data-mode="records">Quản lý bản ghi</button><button type="button" class="btn btn-sm" data-act="rec.list" data-screen="' + screen + '" data-mode="trash">Đã xóa</button><button type="button" class="btn btn-sm" data-act="rec.list" data-screen="' + screen + '" data-mode="corrections">Phiếu điều chỉnh</button>' + (screen === 'SHARE-01' && TH.can('share.edit') ? '<button type="button" class="btn btn-sm" data-act="rec.shareTable">Thêm / sửa bảng tỷ lệ</button>' : '') + '</div>';
+      /* Màn có tiêu đề trang: các thao tác dữ liệu đã nằm trong menu ⋯ của tiêu đề. Màn không có (hộp thoại) → một nút ⋯ gọn */
+      var bar = toolsUsed[screen] ? '' : '<div class="record-tools" aria-label="Thao tác dữ liệu">' + TH.actionGroup({ context: 'card', html: toolButtons(screen) }) + '</div>';
+      delete toolsUsed[screen];
       if (typeof result === 'string') return bar + result;
       if (result && result.body) return Object.assign({}, result, { body: bar + result.body }); return result;
     };

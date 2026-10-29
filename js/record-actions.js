@@ -8,6 +8,7 @@
     building: ['buildings', 'Tòa nhà', 'master.edit', 'BLD-01', 'BLD-02', 'name short area address floors landArea buildArea floorArea note'],
     room: ['rooms', 'Phòng', 'master.edit', 'ROOM-01', 'ROOM-02', 'floor area note'],
     customer: ['customers', 'Khách thuê', 'contract.edit', 'CUS-01', 'CUS-02', 'name phone dob occupation permAddress hometown note'],
+    occupant: ['occupants', 'Người ở cùng', 'contract.edit', 'CUS-02', '', 'name dob idNo phone relation from to note'],
     contract: ['contracts', 'Hợp đồng khách', 'contract.edit', 'CON-01', 'CON-02', 'note scanFile'],
     lease: ['leases', 'Hợp đồng thuê tòa', 'lease.edit', 'BLD-02', '', 'note file referrer'],
     followup: ['followUps', 'Lần liên hệ', 'contract.edit', 'CON-03', '', 'result moveOutAt callbackAt note'],
@@ -175,6 +176,7 @@
     }
     if (action === 'restore') {
       if (R.get(type, id)) return no('Mã bản ghi đã tồn tại.');
+      if (type === 'occupant' && r.idNo && R.list('occupant').some(function (x) { return x.contractId === r.contractId && x.idNo === r.idNo; })) return no('Giấy tờ đã được khai trong hợp đồng này.');
       var parentChecks = { buildingId: 'building', ownerId: 'owner', customerId: 'customer', roomId: 'room', invoiceId: 'invoice', contractId: 'contract', staffId: 'staff' };
       for (var key in parentChecks) if (r[key] && r[key] !== '—' && !R.get(parentChecks[key], r[key])) return no('Đối tượng liên quan ' + r[key] + ' không còn tồn tại.');
     }
@@ -202,6 +204,14 @@
     }
     if (type === 'depositCase') assert(+n.refundAmount >= 0 && +n.forfeitAmount >= 0 && +n.refundAmount + +n.forfeitAmount + C.sum(n.deductions || [], function (x) { return x.amount; }) === +n.amount, 'Hoàn + giữ + khấu trừ phải bằng đúng tiền cọc.');
     if (type === 'receipt') { assert(+n.amount > 0 && /^\d{4}-\d{2}-\d{2}$/.test(n.receivedAt), 'Nhập số tiền dương và ngày thực nhận hợp lệ.'); assert(!TH.periodLocked(n.receivedAt.slice(0, 7)), 'Ngày thực nhận thuộc kỳ đã khóa.'); }
+    if (type === 'occupant') {
+      var ct = C.contract(n.contractId);
+      assert(ct && ct.customerId === n.customerId && ct.roomId === n.roomId && ct.buildingId === n.buildingId, 'Hợp đồng của người ở cùng không còn hợp lệ.');
+      assert(n.from && R.validDate(n.from) && n.from >= ct.start, 'Ngày bắt đầu ở phải thuộc thời gian hợp đồng.');
+      assert(!n.to || n.to >= n.from, 'Ngày rời đi phải từ ngày bắt đầu ở trở đi.');
+      assert(!n.dob || n.dob < n.from, 'Ngày sinh phải trước ngày bắt đầu ở.');
+      assert(!n.idNo || !R.list('occupant').some(function (x) { return x !== r && x.contractId === n.contractId && x.idNo === n.idNo; }), 'Giấy tờ đã được khai trong hợp đồng này.');
+    }
     if (type === 'oaSchedule') assert(Number.isInteger(+n.day) && +n.day >= 1 && +n.day <= 31 && TH.db.oaTemplates.some(function (t) { return t.id === n.templateId; }), 'Chọn mẫu tin và ngày nhắc từ 1 đến 31.');
     if (n.from && n.to) assert(n.to >= n.from, 'Ngày kết thúc phải sau ngày bắt đầu.');
     if (type === 'user') {
@@ -321,6 +331,18 @@
   };
   R.create = function (type, values) {
     R.init(); var d = R.definitions[type]; if (!d || !TH.can(d.permission)) return { ok: false, error: 'Không có quyền tạo.' };
+    if (type === 'occupant') {
+      try {
+        var ct = C.contract(values.contractId);
+        assert(ct && ct.status === 'active' && TH.inScope(ct.buildingId) && C.customer(ct.customerId), 'Chỉ thêm người ở cùng vào hợp đồng đang hiệu lực trong phạm vi tòa được giao.');
+        var person = { id: R.id('NO'), contractId: ct.id, customerId: ct.customerId, roomId: ct.roomId, buildingId: ct.buildingId, status: 'active', createdBy: TH.me().id, createdAt: TH.TODAY };
+        d.fields.forEach(function (k) { if (values[k] !== undefined) person[k] = String(values[k]).trim(); });
+        assert(person.name, 'Nhập họ tên người ở cùng.');
+        validate(type, person, person);
+        R.list(type).push(person); audit(type, person, 'create', null, ''); TH.store.persist();
+        return { ok: true, record: person };
+      } catch (e) { return { ok: false, error: e.message }; }
+    }
     if (['team', 'oaSchedule', 'oaTemplate', 'shareholder'].indexOf(type) < 0) return { ok: false, error: 'Dùng biểu mẫu tạo nghiệp vụ hiện có.' };
     try { var r = { id: R.id(type), createdBy: TH.me().id, status: type === 'oaTemplate' ? 'draft' : 'active' }; d.fields.forEach(function (k) { if (values[k] !== undefined) r[k] = values[k]; }); assert(r.name, 'Nhập tên.'); validate(type, r, r); R.list(type).push(r); audit(type, r, 'create', null, ''); TH.store.persist(); return { ok: true, record: r }; } catch (e) { return { ok: false, error: e.message }; }
   };

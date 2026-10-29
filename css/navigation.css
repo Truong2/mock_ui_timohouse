@@ -477,3 +477,10 @@ body.nav-drawer-open { overflow: hidden; }
   .overview-rail { display: none; }
   .overview-chart .chart { max-height: none; }
 }
+/* CR-UI-COMPACT: nút icon / menu ⋯ ở đầu trang giữ kích thước vuông trên mobile; nút chính chiếm phần còn lại */
+@media (max-width: 640px) {
+  .page-actions { justify-content: flex-end; flex-wrap: wrap; }
+  .page-actions .btn.btn-icon, .content:has(.table-records) .page-actions .btn.btn-icon { flex: 0 0 var(--touch-h); width: var(--touch-h); }
+  .page-actions .action-menu { flex: 0 0 auto; }
+  .page-actions > .btn-primary { flex: 1 1 100%; }
+}

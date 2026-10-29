@@ -70,7 +70,7 @@
           { key: 'oa', label: 'Liên kết Zalo', render: function (x) { return x.k.oaLinked ? TH.badge('Đã liên kết', 'success') : TH.badge('Chưa liên kết', 'neutral'); } },
           { key: 's', label: 'Trạng thái', render: function (x) { return stateHtml(x.s, { compact: true, skipDebt: true }); } },
           { key: 'v', label: 'Phiên bản định danh', gate: 'F010.D', render: function (x) { return 'v' + (1 + TH.db.customerHistory.filter(function (h) { return h.customerId === x.k.id; }).length); } },
-          { key: 'a', label: '', render: function (x) { return '<button type="button" class="btn btn-xs" data-act="cus.open" data-id="' + esc(rowParam(x)) + '">Xem chi tiết</button>'; } },
+          { key: 'a', label: '', kind: 'actions', render: function (x) { return '<button type="button" class="btn btn-xs" data-act="cus.open" data-priority="70" data-id="' + esc(rowParam(x)) + '">' + I('external', 'ic-sm') + 'Mở hồ sơ thuê</button>'; } },
         ],
         rows: pg.rows,
         rowAttrs: function (x) { return 'class="is-clickable" tabindex="0" data-href="' + TH.router.href('CUS-02', rowParam(x)) + '"'; },
@@ -302,7 +302,7 @@
   function ctLink(id, tab) { return '<a class="mono" href="#" data-act="cus.open" data-id="' + esc(id) + '"' + (tab ? ' data-tab="' + tab + '"' : '') + '>' + esc(id) + '</a>'; }
   function termsBlock(c) {
     var T = c.terms || {};
-    return '<div class="section-title u-mt-16">Điều khoản áp dụng (theo HĐ đã ký)</div>' + TH.kv([
+    return TH.kv([
       ['Mẫu HĐ', esc(T.templateName || 'Chưa xác định') + (T.source ? ' <span class="small muted" data-tip="' + esc(T.source) + '">' + I('info', 'ic-sm') + '</span>' : '')],
       ['Gia hạn', T.autoRenew ? 'Mặc nhiên ' + T.autoRenewMonths + ' tháng nếu không báo trước ' + T.noticeDays + ' ngày (Điều 3.4) — chỉ áp dụng khi đã kiểm tra thông báo chấm dứt' : '<b>Phải xác nhận bằng văn bản</b> trước khi hết hạn — không tự gia hạn'],
       ['Khách báo trước', T.noticeDays ? T.noticeDays + ' ngày <span class="small muted">(nghĩa vụ theo HĐ)</span>' : '<span class="muted">HĐ không ghi</span>'],
@@ -315,6 +315,19 @@
       ['Bảo hành thiết bị', T.warrantyDays ? T.warrantyDays + ' ngày kể từ bàn giao (Điều 5.2.4)' : '<span class="muted">HĐ không ghi</span>'],
     ]);
   }
+  function occupantsCard(ct) {
+    if (!ct) return '';
+    var rows = TH.recordActions.list('occupant').filter(function (p) { return p.contractId === ct.id; });
+    return '<div class="card card-flush">' + TH.cardHd('Người ở cùng', rows.length + ' hồ sơ · hợp đồng ' + esc(ct.id),
+      ct.status === 'active' ? TH.permBtn('contract.edit', '<button type="button" class="btn btn-sm" data-act="cus.occupantAdd" data-ct="' + esc(ct.id) + '">' + I('plus', 'ic-sm') + 'Thêm người</button>', 'Thêm người · 403') : '') +
+      TH.table({ compact: true, mobile: { identity: 'name', primary: 'dates', visible: ['name', 'relation', 'dates'] }, cols: [
+        { key: 'name', label: 'Họ tên', render: function (p) { return '<b>' + esc(p.name) + '</b><div class="cell-sub">' + (p.dob ? F.date(p.dob) : 'Chưa có ngày sinh') + (p.idNo ? ' · Giấy tờ ••••' + esc(String(p.idNo).slice(-4)) : '') + '</div>'; } },
+        { key: 'relation', label: 'Quan hệ', render: function (p) { return esc(p.relation || '—'); } },
+        { key: 'phone', label: 'Điện thoại', render: function (p) { return esc(p.phone || '—'); } },
+        { key: 'dates', label: 'Thời gian ở', render: function (p) { return F.date(p.from) + (p.to ? ' → ' + F.date(p.to) : ' → nay'); } },
+      ], rows: rows, empty: { title: 'Chưa khai báo người ở cùng', text: 'Thêm hồ sơ để lưu thông tin từng người ở cùng theo hợp đồng này.' } }) +
+      '<div class="card-bd"><p class="small muted u-m-0">Hồ sơ người ở cùng không tự thay đổi số người tính phí. Khai báo số người theo kỳ tại màn Điện nước để áp dụng cho kỳ mới.</p></div></div>';
+  }
   function stayTab(k, c) {
     var left = TH.section('cusInfo', k.id);
     var term = c ? '<div class="card"><div class="card-hd"><div class="card-title">' + I('calendar', 'ic-sm') + 'Thời gian hợp đồng</div>' + signLabel(c) + '</div><div class="card-bd">' +
@@ -325,9 +338,9 @@
       '<div class="section-title u-mt-16">Lần ký / gia hạn</div><ul class="timeline"><li>' + (c.previousContractId ? 'Ký HĐ mới (mã mới) nối tiếp ' + esc(c.previousContractId) : 'Ký hợp đồng lần đầu') + '<div class="when">' + F.date(c.signedAt) + ' · hiệu lực từ ' + F.date(c.start) + '</div></li>' +
       (c.renewals || []).map(function (r) { return '<li><b>Gia hạn lần ' + r.n + '</b>: ' + F.date(r.from) + ' → ' + F.date(r.to) + ' · ' + esc(TH.RENEWAL_MODES[r.mode] || r.mode) + (r.evidence ? '<div class="small muted">' + esc(r.evidence) + '</div>' : '') + (r.file ? '<div>' + TH.fileOf(r.file) + '</div>' : '') + '<div class="when">' + esc(C.staffName(r.by)) + ' · ' + F.date(r.at) + '</div></li>'; }).join('') +
       (c.status !== 'active' ? '<li><b>' + (C.isEarlyEnd(c) ? 'Kết thúc trước hạn' : 'Kết thúc hợp đồng') + '</b> · ' + esc(TH.END_KINDS[c.endKind] || '') + '<div class="when">' + F.date(c.endedAt) + '</div></li>' : '') + '</ul>' +
-      termsBlock(c) +
+      '<div class="row u-mt-16 u-gap-8"><span class="section-title u-m-0">Điều khoản áp dụng (theo HĐ đã ký)</span><button type="button" class="btn btn-xs btn-ghost" data-act="cus.terms" data-ct="' + esc(c.id) + '" aria-label="Xem điều khoản áp dụng của hợp đồng ' + esc(c.id) + '">' + I('eye', 'ic-sm') + 'Xem</button></div>' +
       '<p class="small muted u-m-t8">Ngày/thời hạn của bản đã xác nhận chỉ đổi qua phụ lục, gia hạn có chứng từ hoặc HĐ mới (F014, K-09).</p>' +
-      (c.status === 'active' ? '<div class="row u-mt-12"><a class="btn btn-sm" href="' + TH.router.href('CON-FOLLOW', c.id) + '">' + I('phone', 'ic-sm') + 'Ghi kết quả hỏi gia hạn</a><a class="btn btn-sm" href="' + TH.router.href('CON-02', c.id) + '">Mở hợp đồng</a></div>' : '') +
+      (c.status === 'active' ? '<div class="u-mt-12">' + TH.actionGroup({ context: 'card', html: '<a class="btn btn-sm" href="' + TH.router.href('CON-FOLLOW', c.id) + '">' + I('phone', 'ic-sm') + 'Ghi kết quả hỏi gia hạn</a><a class="btn btn-sm" href="' + TH.router.href('CON-02', c.id) + '">' + I('external', 'ic-sm') + 'Mở hợp đồng</a>' }) + '</div>' : '') +
       '</div></div>' : '<div class="card"><div class="card-bd">' + TH.state('empty', { title: 'Chưa gán hợp đồng', action: '<a class="btn btn-sm" href="' + TH.router.href('CON-02', 'new') + '">Tạo hợp đồng</a>' }) + '</div></div>';
     var full = TH.can('vehicle.view');
     var dups = (k.vehicles || []).map(function (v) { return { v: v, d: C.plateDup(k, v) }; }).filter(function (x) { return x.d; });
@@ -346,7 +359,7 @@
       (full ? '' : '<div class="small muted">' + I('shield', 'ic-sm') + ' Biển số che một phần — vai trò hiện tại không có quyền xem đầy đủ.</div>') +
       TH.gate('F010.B', dups.length ? '<div class="alert alert-warning">' + I('alert', 'ic-sm') + '<div class="alert-body"><b>Trùng biển số trong khoảng đăng ký ' + TH.up('F010.B') + '</b><span>' + dups.map(function (x) { return esc(TH.maskPlate(x.v.plate) + ' — đang đăng ký ở ' + x.d.customer.id + ' (' + F.date(x.d.vehicle.from) + (x.d.vehicle.to ? ' → ' + F.date(x.d.vehicle.to) : ' → nay') + ')'); }).join('; ') + '</span></div></div>' : '<div class="small muted row u-gap-6">' + I('checkCircle', 'ic-sm') + ' Kiểm trùng biển số ' + TH.up('F010.B') + ': không có khoảng đăng ký chồng lấn (xe bán lại giữa hai hồ sơ liên tiếp không báo trùng).</div>', { mode: 'mini', label: 'Kiểm trùng biển số theo khoảng đăng ký' }) +
       (mm ? TH.gate('F012.C', '<div class="alert alert-warning">' + I('alert', 'ic-sm') + '<div class="alert-body"><b>Lệch với dòng phí HĐ ' + TH.up('F012.C') + '</b><span>' + esc(mm) + '.</span></div></div>', { mode: 'mini', label: 'So khớp số xe ↔ dòng phí' }) : '') + '</div></div>';
-    return '<div class="grid-2">' + left + '<div class="stack">' + term + veh + '</div></div>';
+    return '<div class="grid-2">' + left + '<div class="stack">' + term + occupantsCard(c) + veh + '</div></div>';
   }
   function contractTab(k, all, ct) {
     if (!ct) return '<div class="card"><div class="card-bd">' + TH.state('empty', { title: 'Chưa có hợp đồng', action: '<a class="btn btn-sm" href="' + TH.router.href('CON-02', 'new') + '">Tạo hợp đồng</a>' }) + '</div></div>';
@@ -649,6 +662,41 @@
     var k = C.customer(el.dataset.id), c = contractOf(k);
     TH.db.documents.push({ id: TH.recordActions.id('TL'), customerId: k.id, contractId: (c || {}).id || '—', roomId: (c || {}).roomId || '—', kind: 'Giấy tờ bổ sung', file: 'giay_to_bo_sung_' + k.id + '.pdf', version: 1, uploadedAt: TH.TODAY, views: 0 });
     TH.log('Tải tài liệu', k.id, 'Giấy tờ bổ sung', 'customer'); TH.store.setUi('CUS-02', 'tab', 'docs'); TH.app.refresh(); TH.toast('Đã lưu tài liệu (mô phỏng)', 'Gắn với hồ sơ ' + esc(k.id));
+  };
+  function occupantForm(ctId) {
+    var ct = C.contract(ctId), form = 'occupant-new-' + ctId;
+    return { title: 'Thêm người ở cùng', sub: 'Phòng ' + esc(ct.roomId) + ' · ' + esc(ct.id),
+      body: '<div class="form-grid">' +
+        TH.field({ form: form, name: 'name', label: 'Họ và tên', required: true }) +
+        TH.field({ form: form, name: 'relation', label: 'Quan hệ với khách đứng tên', placeholder: 'VD: Bạn cùng phòng, người thân' }) +
+        TH.field({ form: form, name: 'dob', label: 'Ngày sinh', type: 'date' }) +
+        TH.field({ form: form, name: 'idNo', label: 'Số CCCD / hộ chiếu', placeholder: 'Nếu có' }) +
+        TH.field({ form: form, name: 'phone', label: 'Số điện thoại' }) +
+        TH.field({ form: form, name: 'from', label: 'Ngày bắt đầu ở', type: 'date', required: true, def: TH.TODAY }) +
+        TH.field({ form: form, name: 'to', label: 'Ngày rời đi', type: 'date' }) +
+        TH.field({ form: form, name: 'note', label: 'Ghi chú', type: 'textarea', span: true }) +
+        '</div><p class="neg small" role="alert">' + esc(TH.store.draft(form, '_error', '')) + '</p>',
+      foot: '<button type="button" class="btn" data-close>Hủy</button><button type="button" class="btn btn-primary" data-act="cus.occupantSave" data-ct="' + esc(ctId) + '">Lưu người ở cùng</button>' };
+  }
+  TH.act['cus.occupantAdd'] = function (el) {
+    var ct = C.contract(el.dataset.ct);
+    if (!ct || ct.status !== 'active' || !TH.can('contract.edit') || !TH.inScope(ct.buildingId)) { TH.toast('Không thể thêm người ở cùng', 'Hợp đồng không còn hiệu lực hoặc không thuộc phạm vi thao tác.', 'warning'); return; }
+    var form = 'occupant-new-' + ct.id; TH.store.clearDraft(form);
+    TH.modal.open({ key: form, size: 'md', recordForm: form, render: function () { return occupantForm(ct.id); } });
+  };
+  TH.act['cus.occupantSave'] = function (el) {
+    var ctId = el.dataset.ct, form = 'occupant-new-' + ctId, draft = TH.store.draft(form), values = { contractId: ctId };
+    ['name', 'relation', 'dob', 'idNo', 'phone', 'from', 'to', 'note'].forEach(function (k) { values[k] = draft[k] === undefined ? (k === 'from' ? TH.TODAY : '') : draft[k]; });
+    var result = TH.recordActions.create('occupant', values);
+    if (!result.ok) { TH.store.setDraft(form, '_error', result.error); TH.modal.rerenderAll(); return; }
+    TH.store.clearDraft(form); TH.modal.close(form, { silent: true }); TH.app.refresh(); TH.store.flushChecked(); TH.toast('Đã thêm người ở cùng', esc(result.record.name));
+  };
+  TH.act['cus.terms'] = function (el) {
+    var id = el.dataset.ct, ct = C.contract(id);
+    if (!ct) return;
+    TH.modal.open({ key: 'cus-terms', size: 'lg', render: function () {
+      return { title: 'Điều khoản áp dụng (theo HĐ đã ký)', sub: 'Hợp đồng ' + esc(id), body: termsBlock(ct), foot: '<button type="button" class="btn" data-close>Đóng</button>' };
+    } });
   };
   TH.act['cus.dl'] = function (el) { TH.toast('Tệp minh họa', esc(el.dataset.f) + ' — bản demo không lưu tệp thật.', 'info'); };
 

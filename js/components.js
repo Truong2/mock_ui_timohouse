@@ -90,8 +90,7 @@ var TH = window.TH = window.TH || {};
     var lines = opts.lines || 3, out = '';
     for (var i = 0; i < lines; i++) out += '<div class="gate-line" style="width:' + (90 - i * 17) + '%"></div>';
     return '<div class="card" style="box-shadow:none;background:transparent;border:0"><div class="card-bd">' +
-      '<div class="card-title" style="margin-bottom:6px">' + esc(opts.title || inc.feature.name) + '</div>' +
-      '<div class="small muted u-mb-8">Placeholder — số liệu nâng cấp không hiển thị như dữ liệu đã duyệt ở gói thấp hơn.</div>' + out + '</div></div>';
+      '<div class="card-title" style="margin-bottom:6px">' + esc(opts.title || inc.feature.name) + '</div>' + out + '</div></div>';
   }
   /**
    * gate(incId, html, opts)
@@ -151,9 +150,35 @@ var TH = window.TH = window.TH || {};
       if (interactive) el.setAttribute('role', 'menuitem');
       return el.outerHTML;
     }).join('');
-    var label = context === 'row' ? 'Thao tác khác' : 'Thêm';
-    return '<div class="action-menu"><button type="button" class="btn' + (context === 'row' ? ' btn-sm btn-ghost btn-icon' : '') + '" data-act="amenu.toggle" aria-haspopup="menu" aria-expanded="false" aria-controls="' + id + '" aria-label="' + label + '">' +
-      (context === 'row' ? I('more', 'ic-sm') : label + I('chevronDown', 'ic-sm')) + '</button><div id="' + id + '" class="action-pop" role="menu" aria-label="' + label + '" popover="manual" hidden>' + items + '</div></div>';
+    var label = 'Thao tác khác';
+    return '<div class="action-menu"><button type="button" class="btn btn-icon' + (context === 'page' ? '' : ' btn-sm btn-ghost') + '" data-act="amenu.toggle" aria-haspopup="menu" aria-expanded="false" aria-controls="' + id + '" aria-label="' + label + '" data-tip="' + label + '">' +
+      I('more', context === 'page' ? '' : 'ic-sm') + '</button><div id="' + id + '" class="action-pop" role="menu" aria-label="' + label + '" popover="manual" hidden>' + items + '</div></div>';
+  }
+  /* Nút phụ hiển thị: chỉ còn icon, nhãn chuyển sang tooltip + aria-label. Nút chính, nút khóa gói có nhãn ngắn vẫn giữ chữ */
+  var AUTO_ICON = [
+    [/^(Xem|Mở|Chi tiết)/i, 'eye'], [/^Sửa|Chỉnh/i, 'edit'], [/^Xóa|Hủy (hóa đơn|phiếu)/i, 'trash'], [/Xuất|Tải (xuống|Excel)|\.xlsx|\.csv/i, 'download'], [/^In |PDF|Mẫu hóa đơn|Phiếu hoàn/i, 'printer'],
+    [/^Tải lên|Nhập (từ )?Excel|Import/i, 'upload'], [/^Gửi/i, 'send'], [/^Duyệt|Xác nhận|Đánh dấu/i, 'check'], [/^Từ chối|Trả lại/i, 'x'], [/^Thêm|Bổ sung|Tạo|Lập/i, 'plus'],
+    [/Lịch sử|Phiên bản/i, 'history'], [/Phân công/i, 'userCheck'], [/Tính lại|Chạy lại|Làm mới/i, 'refresh'], [/Ngừng|Vô hiệu|Kết thúc|Gỡ/i, 'ban'], [/Kích hoạt|Khôi phục/i, 'rotateCcw'],
+    [/Giảm trừ|Phụ thu|Điều chỉnh/i, 'sliders'], [/Lưu/i, 'check'], [/Đọc|OCR/i, 'scan'], [/Sao chép/i, 'copy'], [/Chuyển/i, 'arrowRight'], [/Ghi nhận/i, 'fileCheck'], [/Đơn giá|Quy tắc|Cấu hình/i, 'settings']
+  ];
+  function compact(el, context) {
+    if (el.matches('.btn') && !el.classList.contains('btn-primary') && !el.classList.contains('btn-icon')) {
+      var label = (el.getAttribute('aria-label') || el.textContent || '').replace(/\s+/g, ' ').trim();
+      var svg = el.querySelector('svg.ic');
+      if (!svg) { var hit = AUTO_ICON.find(function (r) { return r[0].test(label); }); if (!hit) return; var t = document.createElement('template'); t.innerHTML = I(hit[1], 'ic-sm'); svg = t.content.firstChild; }
+      if (!label) return;
+      el.textContent = ''; el.appendChild(svg);
+      el.classList.add('btn-icon'); if (context !== 'page' && !el.classList.contains('btn-sm') && !el.classList.contains('btn-xs')) el.classList.add('btn-sm');
+      el.classList.remove('btn-link');
+      if (!el.classList.contains('btn-danger')) el.classList.add('btn-ghost');
+      el.setAttribute('aria-label', label);
+      if (!el.hasAttribute('data-tip')) el.setAttribute('data-tip', label); else el.setAttribute('data-tip', label + ' — ' + el.getAttribute('data-tip'));
+    } else if (el.matches('.gate-inline') && !el.classList.contains('is-compact')) {
+      /* Khóa gói: giữ biểu tượng khóa + nhãn gói (khác hẳn 403), tên tính năng chuyển vào tooltip */
+      var name = Array.prototype.filter.call(el.childNodes, function (n) { return n.nodeType === 3; }).map(function (n) { return n.textContent; }).join(' ').trim();
+      Array.prototype.slice.call(el.childNodes).forEach(function (n) { if (n.nodeType === 3) n.remove(); });
+      el.classList.add('is-compact'); el.setAttribute('aria-label', name + ' — ' + (el.getAttribute('data-tip') || ''));
+    }
   }
   TH.actionGroup = function (options) {
     options = options || {};
@@ -165,33 +190,37 @@ var TH = window.TH = window.TH || {};
         var cls = 'btn' + (a.primary ? ' btn-primary' : '') + (a.danger ? ' btn-danger' : '');
         var tag = a.href && !a.disabled ? 'a' : 'button';
         var html = '<' + tag + ' class="' + cls + '"' + (tag === 'a' ? ' href="' + esc(a.href) + '"' : ' type="button"') +
-          (a.act ? ' data-act="' + esc(a.act) + '"' : '') + attrs + (a.priority !== undefined || a.primary ? ' data-priority="' + esc(a.priority !== undefined ? a.priority : 'primary') + '"' : '') +
+          (a.act ? ' data-act="' + esc(a.act) + '"' : '') + attrs + (a.overflow ? ' data-overflow="1"' : '') + (a.priority !== undefined || a.primary ? ' data-priority="' + esc(a.priority !== undefined ? a.priority : 'primary') + '"' : '') +
           (a.disabled ? ' disabled aria-disabled="true"' : '') + (a.disabledReason ? ' aria-description="' + esc(a.disabledReason) + '" title="' + esc(a.disabledReason) + '" data-tip="' + esc(a.disabledReason) + '"' : '') + '>' +
           (a.icon ? I(a.icon, 'ic-sm') : '') + esc(a.label) + '</' + tag + '>';
         if (a.permission) html = TH.permBtn(a.permission, html, a.label);
         return a.gate ? TH.gate(a.gate, html, { mode: 'btn', label: a.label }) : html;
       }).join('');
     } else holder.innerHTML = options.html || '';
+    if (options.extraHtml) holder.innerHTML += options.extraHtml;
     var box = holder.content;
     // The compatibility adapter unwraps layout-only rows, preserving controls and gates.
     Array.prototype.slice.call(box.children).forEach(function (el) {
       if (el.matches('.row,.row-actions') && !el.hasAttribute('data-act')) el.replaceWith.apply(el, Array.prototype.slice.call(el.childNodes));
     });
     var controls = Array.prototype.filter.call(box.children, function (el) { return el.matches('.btn,.gate-inline,.forbidden-chip'); });
-    var max = options.maxVisible || (context === 'row' ? 1 : 3);
+    var max = options.maxVisible || (context === 'row' ? 1 : context === 'card' ? 2 : 3);
     var ranked = controls.slice().sort(function (a, b) { return actionScore(b) - actionScore(a); });
-    var main = ranked[0], primary = main && actionScore(main) > 0 ? main : null;
+    /* Card: chỉ nút chính thật sự (btn-primary / thao tác nghiệp vụ) giữ chữ; Sửa, Thêm… thành icon */
+    var main = ranked[0], primary = main && actionScore(main) > (context === 'card' ? 79 : 0) ? main : null;
     controls.forEach(function (el) { if (el !== primary) el.classList.remove('btn-primary'); });
     var keep = primary ? [primary] : [];
-    controls.forEach(function (el) { if (keep.length < max && keep.indexOf(el) < 0) keep.push(el); });
+    controls.forEach(function (el) { if (keep.length < max && keep.indexOf(el) < 0 && !el.hasAttribute('data-overflow')) keep.push(el); });
     var more = controls.filter(function (el) { return keep.indexOf(el) < 0; });
+    /* Chỉ nút chính của trang/card giữ chữ; ở dòng bảng mọi thao tác là icon + tooltip (thứ tự ưu tiên giữ nguyên) */
+    if (options.compact !== false) keep.forEach(function (el) { if (el === primary && context !== 'row') return; compact(el, context); });
     if (more.length) {
       var menu = document.createElement('template'); menu.innerHTML = menuHtml(more, context);
       more.forEach(function (el) { el.remove(); }); box.appendChild(menu.content);
     }
     if (primary && context === 'page') box.appendChild(primary);
     var out = document.createElement('div'); out.appendChild(box);
-    return context === 'row' ? '<div class="row-actions" data-action-group="row">' + out.innerHTML + '</div>' : out.innerHTML;
+    return context === 'row' ? '<div class="row-actions" data-action-group="row">' + out.innerHTML + '</div>' : context === 'card' ? '<div class="row u-gap-6 card-actions" data-action-group="card">' + out.innerHTML + '</div>' : out.innerHTML;
   };
 
   /* ---------- Table ---------- */
@@ -340,11 +369,28 @@ var TH = window.TH = window.TH || {};
   TH.tabPanel = function (screen, cur, html, key) {
     return '<div class="tab-panel" id="' + TH.tabId(screen, key, 'panel') + '" role="tabpanel" aria-labelledby="' + TH.tabId(screen, key || 'tab', cur) + '" tabindex="0">' + html + '</div>';
   };
-  TH.chips = function (screen, key, opts, cur) {
+  TH.chips = function (screen, key, opts, cur, o2) {
+    /* Mặc định: hơn 5 lựa chọn → 4 chip nhanh + ô "Lọc thêm"; truyền { max: 0 } để giữ nguyên tất cả chip */
+    var max = o2 && o2.max !== undefined ? o2.max : (opts.length > 5 ? 4 : 0);
+    if (max && opts.length > max + 1) {
+      /* Bộ lọc nhiều lựa chọn: vài chip nhanh + ô chọn "Lọc thêm" cùng khóa UI */
+      var quick = opts.slice(0, max), rest = opts.slice(max), inRest = rest.some(function (x) { return x.id === cur; });
+      var sel = '<label class="sr-only" for="chip-more-' + screen + '-' + key + '">Lọc thêm</label><select id="chip-more-' + screen + '-' + key + '" class="select select-sm chip-more' + (inRest ? ' is-on' : '') + '" data-ui="' + screen + '.' + key + '" data-reset-page="1">' +
+        '<option value="' + esc(quick[0].id) + '"' + (inRest ? '' : ' selected') + '>Lọc thêm…</option>' +
+        rest.map(function (x) { return '<option value="' + esc(x.id) + '"' + (x.id === cur ? ' selected' : '') + '>' + esc(x.label) + (x.count !== undefined ? ' (' + x.count + ')' : '') + '</option>'; }).join('') + '</select>';
+      return TH.chips(screen, key, quick, cur) + sel;
+    }
     return opts.map(function (o) {
       return '<button type="button" class="filter-chip" aria-pressed="' + (o.id === cur) + '" data-act="ui.set" data-screen="' + screen + '" data-key="' + key + '" data-val="' + esc(o.id) + '" data-reset-page="1">' + esc(o.label) + (o.count !== undefined ? '<span class="count">' + o.count + '</span>' : '') + '</button>';
     }).join('');
   };
+  /* Công tắc bật/tắt (thay nút dạng "Hiện/Ẩn …") — lưu vào UI state của màn */
+  TH.switchCtl = function (screen, key, label, on) {
+    var id = 'sw-' + screen + '-' + key;
+    return '<label class="switch" for="' + id + '"><input id="' + id + '" type="checkbox" role="switch"' + (on ? ' checked' : '') + ' data-act-change="ui.toggle" data-screen="' + screen + '" data-key="' + key + '"><span class="switch-track" aria-hidden="true"></span><span>' + esc(label) + '</span></label>';
+  };
+  TH.onChange = TH.onChange || {};
+  TH.onChange['ui.toggle'] = function (el) { TH.store.setUi(el.dataset.screen, el.dataset.key, el.checked); TH.app.refresh(); if (TH.modal.rerenderAll) TH.modal.rerenderAll(); };
   TH.searchBox = function (screen, placeholder) {
     var id = 'q-' + screen;
     return '<div class="input-wrap">' + I('search') + '<label class="sr-only" for="' + id + '">Tìm kiếm</label><input id="' + id + '" class="input input-sm" type="search" placeholder="' + esc(placeholder || 'Tìm kiếm…') + '" value="' + esc(TH.store.ui(screen, 'q', '')) + '" data-ui="' + screen + '.q" data-reset-page="1" autocomplete="off"></div>';
@@ -374,9 +420,10 @@ var TH = window.TH = window.TH || {};
       return (c[1] ? '<a href="' + c[1] + '">' + esc(c[0]) + '</a>' : '<span>' + esc(c[0]) + '</span>') + (i < arr.length - 1 ? I('chevronRight') : '');
     }).join('');
     return '<div class="page-hd"><div class="u-minw-0"><nav class="crumbs" aria-label="Breadcrumb">' + crumbs + '</nav>' +
-      '<h1 class="page-title" id="page-title" tabindex="-1">' + esc(o.title || sc.title) + ' <span class="screen-id" data-tip="Screen ID theo SRS §4' + (sc.no ? ' · Screen ' + sc.no : '') + ' · ' + esc(sc.kind || '') + '">' + esc(o.screen) + '</span>' + (o.status || '') + '</h1>' +
-      (o.desc ? '<p class="page-desc">' + o.desc + '</p>' : '') + (o.facts || '') + '</div>' +
-      '<div class="page-actions" data-action-group="page">' + TH.actionGroup(Array.isArray(o.actions) ? { items: o.actions } : { html: o.actions || '' }) + '</div></div>';
+      '<h1 class="page-title" id="page-title" tabindex="-1">' + esc(o.title || sc.title) + ' <span class="screen-id" data-tip="Screen ID theo SRS §4' + (sc.no ? ' · Screen ' + sc.no : '') + ' · ' + esc(sc.kind || '') + '">' + esc(o.screen) + '</span>' + (o.status || '') +
+      (o.desc && !o.descVisible ? TH.hint(o.desc, { label: 'Giới thiệu màn hình', cls: 'page-hint' }) : '') + '</h1>' +
+      (o.desc && o.descVisible ? '<p class="page-desc">' + o.desc + '</p>' : '') + (o.facts || '') + '</div>' +
+      '<div class="page-actions" data-action-group="page">' + TH.actionGroup(Object.assign(Array.isArray(o.actions) ? { items: o.actions } : { html: o.actions || '' }, { extraHtml: TH.recordTools ? TH.recordTools(o.screen) : '' })) + '</div></div>';
   };
   /* ---------- Data states ---------- */
   TH.state = function (kind, o) {
@@ -523,14 +570,17 @@ var TH = window.TH = window.TH || {};
   };
 
   /* ---------- Tooltip ---------- */
-  var tipEl = null, tipFor = null;
+  var tipEl = null, tipFor = null, tipPinned = false, tipTimer = null;
   function showTip(target) {
     var text = target.getAttribute('data-tip');
     if (!text) return;
     text = TH.cleanCodes(text);
-    if (!tipEl) { tipEl = document.createElement('div'); tipEl.className = 'tip-pop'; tipEl.setAttribute('role', 'tooltip'); document.body.appendChild(tipEl); }
+    if (!tipEl) { tipEl = document.createElement('div'); tipEl.className = 'tip-pop'; tipEl.id = 'tip-pop'; tipEl.setAttribute('role', 'tooltip'); document.body.appendChild(tipEl); }
+    if (tipFor && tipFor !== target) tipFor.removeAttribute('aria-describedby');
     tipEl.textContent = text;
+    tipEl.classList.toggle('is-wide', text.length > 120);
     tipFor = target;
+    if (target.classList.contains('hint-btn')) target.setAttribute('aria-describedby', 'tip-pop');
     var r = target.getBoundingClientRect();
     tipEl.style.left = '0px'; tipEl.style.top = '0px';
     tipEl.classList.add('is-on');
@@ -540,12 +590,61 @@ var TH = window.TH = window.TH || {};
     if (top < 8) top = r.bottom + 8;
     tipEl.style.left = left + 'px'; tipEl.style.top = top + 'px';
   }
-  function hideTip() { if (tipEl) tipEl.classList.remove('is-on'); tipFor = null; }
-  document.addEventListener('mouseover', function (e) { var t = e.target.closest && e.target.closest('[data-tip]'); if (t && t !== tipFor) showTip(t); else if (!t && tipFor) hideTip(); });
-  document.addEventListener('focusin', function (e) { var t = e.target.closest && e.target.closest('[data-tip]'); if (t && e.target.matches(':focus-visible')) showTip(t); });
-  document.addEventListener('focusout', hideTip);
-  document.addEventListener('scroll', hideTip, true);
+  function hideTip() { clearTimeout(tipTimer); if (tipEl) tipEl.classList.remove('is-on'); if (tipFor) tipFor.removeAttribute('aria-describedby'); tipFor = null; tipPinned = false; }
+  /* Hover có trễ ngắn; icon ⓘ (hint-btn) chạm/click để ghim, chạm ra ngoài hoặc Escape để đóng — dùng được trên mobile */
+  document.addEventListener('mouseover', function (e) {
+    if (tipPinned) return;
+    var t = e.target.closest && e.target.closest('[data-tip]');
+    clearTimeout(tipTimer);
+    if (t && t !== tipFor) tipTimer = setTimeout(function () { showTip(t); }, t.classList.contains('hint-btn') ? 120 : 60);
+    else if (!t && tipFor) hideTip();
+  });
+  document.addEventListener('focusin', function (e) { var t = e.target.closest && e.target.closest('[data-tip]'); if (t && !tipPinned && (e.target.matches(':focus-visible') || t.classList.contains('hint-btn'))) showTip(t); });
+  document.addEventListener('focusout', function () { if (!tipPinned) hideTip(); });
+  document.addEventListener('scroll', function () { if (!tipPinned) hideTip(); }, true);
+  document.addEventListener('click', function (e) { if (tipPinned && !(e.target.closest && e.target.closest('.hint-btn'))) hideTip(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape' || !tipFor || !tipEl || !tipEl.classList.contains('is-on')) return;
+    var pinned = tipPinned; hideTip();
+    if (pinned) { e.stopImmediatePropagation(); e.preventDefault(); }
+  }, true);
+  TH.act = TH.act || {};
+  TH.act['hint.toggle'] = function (el) {
+    if (tipPinned && tipFor === el) { hideTip(); return; }
+    showTip(el); tipPinned = true;
+  };
   TH.hideTip = hideTip;
+
+  /* ---------- Gợi ý ⓘ / nút icon ----------
+     Mô tả, chú thích, công thức dài không in thành đoạn văn: gom vào icon ⓘ, hover/focus/chạm để xem.
+     Cảnh báo, lỗi, quá hạn KHÔNG dùng các helper này — phải luôn hiển thị. */
+  TH.HINT_MAX = 64;
+  TH.plainText = function (html) {
+    var t = document.createElement('template'); t.innerHTML = String(html === undefined || html === null ? '' : html);
+    return (t.content.textContent || '').replace(/\s+/g, ' ').trim();
+  };
+  TH.hint = function (text, o) {
+    o = o || {};
+    var t = TH.plainText(text);
+    if (!t) return '';
+    return '<button type="button" class="hint-btn' + (o.cls ? ' ' + o.cls : '') + '" data-act="hint.toggle" data-tip="' + esc(t) + '" aria-label="' + esc(o.label || 'Giải thích') + '">' + I('info', 'ic-sm') + '</button>';
+  };
+  TH.helpLine = function (label, text, o) {
+    o = o || {};
+    var t = TH.plainText(text);
+    if (!t) return '';
+    return '<div class="help-line' + (o.cls ? ' ' + o.cls : '') + '"><button type="button" class="hint-btn hint-btn-text" data-act="hint.toggle" data-tip="' + esc(t) + '">' + I('info', 'ic-sm') + '<span>' + esc(label || 'Giải thích') + '</span></button></div>';
+  };
+  /* Phụ đề / mô tả: ngắn thì hiện, dài thì thành ⓘ */
+  TH.subOrHint = function (sub, o) {
+    if (!sub) return { sub: '', hint: '' };
+    return TH.plainText(sub).length > ((o && o.max) || TH.HINT_MAX) ? { sub: '', hint: TH.hint(sub) } : { sub: sub, hint: '' };
+  };
+  TH.iconBtn = function (o) {
+    var attrs = Object.keys(o.dataset || {}).map(function (k) { return ' data-' + k.replace(/[A-Z]/g, function (c) { return '-' + c.toLowerCase(); }) + '="' + esc(o.dataset[k]) + '"'; }).join('');
+    return '<button type="button" class="btn btn-sm btn-ghost btn-icon' + (o.danger ? ' btn-danger' : '') + (o.cls ? ' ' + o.cls : '') + '"' + (o.act ? ' data-act="' + esc(o.act) + '"' : '') + attrs +
+      ' data-tip="' + esc(o.label) + '" aria-label="' + esc(o.label) + '"' + (o.disabled ? ' disabled aria-disabled="true"' : '') + '>' + I(o.icon, 'ic-sm') + '</button>';
+  };
 
   /* ---------- Charts (SVG) ---------- */
   var COLORS = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)'];
@@ -666,7 +765,7 @@ var TH = window.TH = window.TH || {};
     } else body = def.view(id, vals);
     return '<div class="card sec-card' + (on ? ' is-editing' : '') + (opts.cls ? ' ' + opts.cls : '') + '" id="sec-' + key + '-' + esc(id) + '">' + TH.cardHd(title, sub, on ? TH.badge('Đang chỉnh sửa', 'draft', { dot: true }) : btnEdit) +
       '<div class="card-bd">' + body + '</div>' +
-      (on ? '<div class="card-ft sec-ft"><span class="small muted">' + I('info', 'ic-sm') + ' Lưu để cập nhật trang chi tiết và danh sách liên quan; Hủy giữ dữ liệu đã lưu.</span><span class="spacer"></span><div class="row u-gap-8">' + btnsOn + '</div></div>' : '') + '</div>';
+      (on ? '<div class="card-ft sec-ft"><span class="spacer"></span><div class="row u-gap-8">' + btnsOn + '</div></div>' : '') + '</div>';
   };
   TH.editGuard = {
     dirty: function () {
@@ -776,8 +875,11 @@ var TH = window.TH = window.TH || {};
     } else {
       ctl = '<input id="' + id + '" class="input' + (o.num ? ' num' : '') + (o.invalid ? ' is-invalid' : '') + (o.warn ? ' is-warn' : '') + '" type="' + (o.type || 'text') + '"' + bind + aria + ' value="' + esc(val) + '"' + (o.placeholder ? ' placeholder="' + esc(o.placeholder) + '"' : '') + (o.readonly ? ' readonly' : '') + (o.disabled ? ' disabled' : '') + (o.inputmode ? ' inputmode="' + o.inputmode + '"' : '') + ' autocomplete="off">';
     }
-    return '<div class="field' + (o.span ? ' span-2' : '') + '"><label for="' + id + '">' + req + esc(o.label) + (o.labelExtra || '') + '</label>' + ctl +
-      (o.hint ? '<div class="field-hint" id="' + id + '-hint">' + o.hint + '</div>' : '') +
+    var longHint = o.hint && !o.hintVisible && TH.plainText(o.hint).length > TH.HINT_MAX;
+    /* ⓘ đặt cạnh (không nằm trong) <label> để tên truy cập của ô nhập giữ nguyên nhãn */
+    var lab = '<label for="' + id + '">' + req + esc(o.label) + (o.labelExtra || '') + '</label>';
+    return '<div class="field' + (o.span ? ' span-2' : '') + '">' + (longHint ? '<div class="field-label-row">' + lab + TH.hint(o.hint, { label: 'Giải thích: ' + o.label }) + '</div>' : lab) + ctl +
+      (o.hint ? '<div class="field-hint' + (longHint ? ' sr-only' : '') + '" id="' + id + '-hint">' + o.hint + '</div>' : '') +
       (o.error ? '<div class="field-error" id="' + id + '-err">' + TH.icon('alertCircle', 'ic-sm') + esc(o.error) + '</div>' : '') + '</div>';
   };
   TH.fileOf = function (name) {
@@ -836,11 +938,43 @@ var TH = window.TH = window.TH || {};
     });
   };
   /* Header trang: tối đa 1 nút chính + 2 nút phụ; phần còn lại vào menu "Thêm". Cột thao tác bảng: >2 nút → "⋯". */
+  /* Chú thích dài → ⓘ (CR-UI-COMPACT). Chỉ áp cho đoạn giải thích thuần: không có nút/link/ô nhập, không nằm trong
+     bản in (hóa đơn, hợp đồng), bảng, cảnh báo/lỗi. Cảnh báo (warning/danger/success, role=alert) luôn giữ hiển thị. */
+  var HELP_MIN = 110, KEEP = '.doc-page, .print-doc, .doc, table, details, .alert-danger, .alert-warning, .alert-success, [role="alert"], .state, .ocr-ws, .tip-keep, [data-keep], .tour, .landing';
+  function helpLabel(text, el) {
+    var b = el.querySelector('b, strong');
+    if (b && b.textContent.trim().length <= 40 && el.matches('.alert')) return b.textContent.trim().replace(/[:.]$/, '');
+    if (/=|×|÷|công thức|cách tính|HS%|mốc/i.test(text)) return 'Cách tính';
+    if (/đề xuất|chờ duyệt|chờ khách|PROPOSED|mâu thuẫn|chưa chốt|D-0\d|K-0\d|G-0\d/i.test(text)) return 'Ghi chú nghiệp vụ';
+    return 'Giải thích';
+  }
+  function compactHelp(root) {
+    root.querySelectorAll('p.small, p.muted, div.small.muted, span.small.muted, .card-bd.small, .field-hint, .alert-neutral, .alert-draft, .card-sub, .page-desc').forEach(function (el) {
+      if (!el.isConnected && !root.contains(el)) return;
+      if (el.closest(KEEP) || el.querySelector('a, button, input, select, textarea, .badge, .status') || el.classList.contains('sr-only')) return;
+      if (el.matches('.card-bd, span') && el.querySelector('div, ul, ol, dl, p, table')) return;
+      var text = TH.plainText(el.innerHTML);
+      if (text.length < (el.matches('.card-sub') ? 80 : HELP_MIN)) return;
+      var holder = document.createElement('template');
+      if (el.matches('.card-sub')) {
+        var title = el.parentElement && el.parentElement.querySelector('.card-title');
+        if (title) { holder.innerHTML = TH.hint(text); title.appendChild(holder.content); el.remove(); return; }
+      }
+      if (el.matches('.field-hint') && el.id) {
+        var lab = el.parentElement && el.parentElement.querySelector(':scope > label');
+        if (lab) { var row = document.createElement('div'); row.className = 'field-label-row'; lab.replaceWith(row); row.appendChild(lab); holder.innerHTML = TH.hint(text, { label: 'Giải thích' }); row.appendChild(holder.content); el.classList.add('sr-only'); return; }
+      }
+      holder.innerHTML = TH.helpLine(helpLabel(text, el), text, { cls: el.matches('.alert') ? 'help-line-block' : '' });
+      el.replaceWith(holder.content);
+    });
+  }
+  TH.compactHelp = compactHelp;
   TH.prepareView = function (html) {
     var t = document.createElement('template'); t.innerHTML = html || '';
     t.content.querySelectorAll('.table .row-actions:not([data-action-group])').forEach(function (host) {
       host.outerHTML = TH.actionGroup({ context: 'row', html: host.innerHTML });
     });
+    compactHelp(t.content);
     return t.innerHTML;
   };
   TH.formSummaries = function (root) {

@@ -657,6 +657,17 @@ TH.seed = function () {
     var ct = db.contracts.find(function (c) { return c.customerId === k.id; });
     seedCustomerExtra(k, i, ct ? ct.people : 1, ct);
   });
+  /* Hồ sơ người ở cùng thuộc từng hợp đồng, tách khỏi số người dùng tính phí theo kỳ. */
+  db.occupants = [];
+  var coNames = ['Phạm Thị Hà', 'Lê Minh Quân', 'Đỗ Ngọc Mai', 'Nguyễn Đức Anh', 'Trần Thu Trang', 'Bùi Hoàng Nam', 'Vũ Thị Lan', 'Hoàng Gia Bảo', 'Lương Ngọc Anh', 'Đặng Minh Khoa', 'Tạ Phương Linh', 'Phan Quốc Huy'];
+  var coIndex = 0;
+  db.contracts.filter(function (c) { return c.status === 'active' && c.people > 1; }).forEach(function (c) {
+    for (var oi = 1; oi < c.people; oi++) {
+      var n = coIndex++;
+      db.occupants.push({ id: 'NO-DEMO-' + String(n + 1).padStart(3, '0'), contractId: c.id, customerId: c.customerId, roomId: c.roomId, buildingId: c.buildingId,
+        name: coNames[n % coNames.length], dob: (1994 + n % 10) + '-0' + (1 + n % 9) + '-12', idNo: '001' + String(100 + n) + '••••' + String(200 + n), phone: '09•• ••• ' + String(300 + n), relation: oi === 1 ? 'Bạn cùng phòng' : 'Người thân', from: c.start, to: '', note: '', status: 'active', createdBy: 'NV-001', createdAt: c.start });
+    }
+  });
   /* KH-005: 2 xe đạp điện đã xác nhận nhưng HĐ ghi 1 xe → cảnh báo so khớp (F012.C). KH-001: xe điện SM mới khai, CHƯA xác nhận → chưa tính phí (K-08) */
   db.customers[4].vehicles.push({ id: 'XE-005-9', type: 'Xe đạp điện', plate: null, brand: 'Yadea', color: 'Xanh', status: 'active', from: '2026-09-01', to: null, feeCode: 'PARK_EBIKE', note: 'Khách khai thêm 09/2026 — HĐ chưa cập nhật số xe' });
   db.customers[0].vehicles.push({ id: 'XE-001-9', type: 'Xe điện (dịch vụ SM)', plate: '29E2-456.78', brand: 'VinFast Feliz S', color: 'Trắng', status: 'pending', from: '2026-10-18', to: null, feeCode: 'PARK_EV', note: 'Khai báo 18/10 — chờ xác nhận đăng ký, chưa tính phí' });
