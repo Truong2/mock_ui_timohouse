@@ -33,9 +33,9 @@ async (page) => {
     check('COMPARE-' + width, ui.mobile === (width <= 900) && ui.rows === 8 && ui.localRows === 8 && ui.minTargets >= 44, ui);
     if (width === 375 || width === 1440) {
       await page.locator('#pham-vi-goi').scrollIntoViewIfNeeded();
-      await page.screenshot({ path: 'D:/mock_ui_timohouse/docs/qa/pricing/detail-' + width + '.png' });
+      await page.screenshot({ path: 'C:/Users/truon/Downloads/mockup/docs/qa/pricing/detail-' + width + '.png' });
       await page.evaluate(() => document.getElementById('moc-ban-giao').scrollIntoView({ block: 'start' }));
-      await page.screenshot({ path: 'D:/mock_ui_timohouse/docs/qa/pricing/milestones-' + width + '.png' });
+      await page.screenshot({ path: 'C:/Users/truon/Downloads/mockup/docs/qa/pricing/milestones-' + width + '.png' });
     }
   }
   check('DATA-UNCHANGED', await page.evaluate(before => before === JSON.stringify({ db: TH.db, role: TH.store.state.role, drafts: TH.store.state.drafts, building: TH.store.state.building }), baseline), 'Package selection preserves business data, role, scope and drafts');

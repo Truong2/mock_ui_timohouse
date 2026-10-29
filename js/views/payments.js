@@ -457,7 +457,7 @@
       '<div class="grid-2">' + backdate + alloc + '</div>';
   }
   TH.views['PAY-02'] = {
-    scan: function () { return P2_TABS.map(function (t) { return { ui: { tab: t.id } }; }).concat([{ ui: { tab: 'room', st: 'short' } }, { ui: { tab: 'room', b: 'TH-DD' } }]); },
+    scan: function () { return P2_TABS.map(function (t) { return { ui: { tab: t.id } }; }).concat([{ ui: { tab: 'room', st: 'short' } }, { ui: { tab: 'room', b: 'S9' } }]); },
     dialogs: [function () { var ct = TH.db.contracts.find(function (c) { return c.status === 'active' && TH.inScope(c.buildingId); }); if (ct) return breakForm(ct.id); }],
     render: function () {
       var S = P2, p = TH.store.state.period, bs = p2Buildings();

@@ -156,7 +156,7 @@
     var n = TH.db.bldDocs.length + 1;
     var slug = { 'Sổ đỏ': 'so_do', 'HĐ thuê tòa': 'HDT', PCCC: 'PCCC', 'ĐKKD': 'DKKD', 'Khác': 'tai_lieu' }[kind] || 'tai_lieu';
     var lease = TH.leaseOf(bId);
-    var doc = { id: TH.recordActions.id('TLT'), ownerId: b.ownerId, buildingId: bId, leaseId: kind === 'HĐ thuê tòa' && lease ? lease.id : null, kind: kind, file: slug + '_' + bId.slice(3) + '_' + TH.TODAY.replace(/-/g, '') + (kind === 'Sổ đỏ' ? '.jpg' : '.pdf'), uploadedAt: TH.TODAY, by: TH.me().id, version: 1, access: 'Admin, Kế toán' };
+    var doc = { id: TH.recordActions.id('TLT'), ownerId: b.ownerId, buildingId: bId, leaseId: kind === 'HĐ thuê tòa' && lease ? lease.id : null, kind: kind, file: slug + '_' + TH.bTag(bId) + '_' + TH.TODAY.replace(/-/g, '') + (kind === 'Sổ đỏ' ? '.jpg' : '.pdf'), uploadedAt: TH.TODAY, by: TH.me().id, version: 1, access: 'Admin, Kế toán' };
     TH.db.bldDocs.push(doc);
     if (kind === 'PCCC') { b.fire.file = doc.file; }
     if (kind === 'ĐKKD') { b.bizReg.file = doc.file; }
@@ -369,11 +369,11 @@
     dialogs: [function () { return linkForm('CN-001'); }],
   };
   function linkForm(ownerId) {
-    var form = 'own-link-' + ownerId, bId = TH.store.draft(form, 'b', 'TH-DD');
+    var form = 'own-link-' + ownerId, bId = TH.store.draft(form, 'b', 'S9');
     var b = C.building(bId), cur = b && C.owner(b.ownerId);
     return {
       title: 'Gắn tòa cho ' + esc(C.owner(ownerId).name), sub: 'OWN-02 · Gắn chủ nhà với tòa (F003)',
-      body: '<div class="stack">' + TH.field({ form: form, name: 'b', label: 'Tòa', type: 'select', def: 'TH-DD', options: TH.db.buildings.map(function (x) { return { id: x.id, label: x.name }; }) }) +
+      body: '<div class="stack">' + TH.field({ form: form, name: 'b', label: 'Tòa', type: 'select', def: 'S9', options: TH.db.buildings.map(function (x) { return { id: x.id, label: x.name }; }) }) +
         TH.field({ form: form, name: 'from', label: 'Ngày hiệu lực', type: 'date', def: TH.TODAY }) +
         TH.gate('F003.C', TH.field({ form: form, name: 'role', label: 'Vai trò', type: 'select', def: 'Chủ sở hữu', options: ['Chủ sở hữu', 'Đại diện ủy quyền', 'Đồng sở hữu'], labelExtra: TH.up('F003.C') + ' ' + TH.openBadge('', 'nếu chốt') }), { ghost: 'self', label: 'Nhiều vai trò sở hữu/đại diện' }) +
         (cur && cur.id !== ownerId ? '<div class="alert alert-warning">' + I('alert', 'ic-sm') + '<div class="alert-body"><b>Tòa đang có chủ chính: ' + esc(cur.name) + '.</b><span>Gói A cho phép 1 chủ nhà chính/tòa. Đổi liên kết đóng liên kết và hợp đồng thuê cũ tại ngày hiệu lực, tạo hợp đồng mới để cập nhật điều khoản — <b>không sửa lịch sử</b>.</span></div></div>' : '') + '</div>',
@@ -382,14 +382,14 @@
   }
   TH.act['own.link'] = function (el) { var id = el.dataset.id; TH.modal.open({ key: 'own-link', size: 'sm', render: function () { return linkForm(id); } }); };
   TH.act['own.link.save'] = function (el) {
-    var id = el.dataset.id, form = 'own-link-' + id, bId = TH.store.draft(form, 'b', 'TH-DD'), from = TH.store.draft(form, 'from', TH.TODAY);
+    var id = el.dataset.id, form = 'own-link-' + id, bId = TH.store.draft(form, 'b', 'S9'), from = TH.store.draft(form, 'from', TH.TODAY);
     var b = C.building(bId);
     if (b.ownerId === id) { TH.toast('Không có thay đổi', 'Tòa đã gắn với chủ nhà này.', 'info'); TH.modal.close('own-link', { silent: true }); return; }
     TH.db.ownerLinks.forEach(function (l) { if (l.buildingId === bId && !l.to) l.to = TH.addDays(from, -1); });
     TH.db.ownerLinks.push({ buildingId: bId, ownerId: id, role: TH.has('F003.C') ? TH.store.draft(form, 'role', 'Chủ sở hữu') : 'Chủ sở hữu', from: from, to: null });
     var old = TH.leaseOf(bId);
     if (old) { old.status = 'ended'; old.end = TH.addDays(from, -1); old.versions.push({ v: old.versions.length + 1, at: TH.TODAY, by: TH.me().id, note: 'Kết thúc do đổi chủ nhà' }); }
-    TH.db.leases.push({ id: 'HĐT-' + bId.slice(3) + '-' + from.slice(0, 4) + (old && old.id.slice(-4) === from.slice(0, 4) ? 'b' : ''), buildingId: bId, ownerId: id, rent: b.ownerRent, deposit: b.ownerRent, handover: from, start: from, end: TH.addDays(from.slice(0, 4) * 1 + 5 + from.slice(4), -1), termMonths: 60, holdFrom: from, holdTo: from, payCycle: old ? old.payCycle : 3, payFrom: 1, payTo: 10, referrer: '', enteredBy: TH.me().id, enteredAt: TH.TODAY, note: 'Tạo khi đổi chủ nhà — cập nhật điều khoản theo HĐ mới.', file: null, status: 'active', versions: [{ v: 1, at: TH.TODAY, by: TH.me().id, note: 'Tạo khi đổi chủ nhà (kế thừa giá thuê)' }] });
+    TH.db.leases.push({ id: 'HĐT-' + TH.bTag(bId) + '-' + from.slice(0, 4) + (old && old.id.slice(-4) === from.slice(0, 4) ? 'b' : ''), buildingId: bId, ownerId: id, rent: b.ownerRent, deposit: b.ownerRent, handover: from, start: from, end: TH.addDays(from.slice(0, 4) * 1 + 5 + from.slice(4), -1), termMonths: 60, holdFrom: from, holdTo: from, payCycle: old ? old.payCycle : 3, payFrom: 1, payTo: 10, referrer: '', enteredBy: TH.me().id, enteredAt: TH.TODAY, note: 'Tạo khi đổi chủ nhà — cập nhật điều khoản theo HĐ mới.', file: null, status: 'active', versions: [{ v: 1, at: TH.TODAY, by: TH.me().id, note: 'Tạo khi đổi chủ nhà (kế thừa giá thuê)' }] });
     b.ownerId = id;
     TH.log('Đổi liên kết chủ nhà', id, b.name + ' từ ' + F.date(from), 'owner', bId);
     TH.store.clearDraft(form); TH.modal.close('own-link', { silent: true }); TH.app.refresh();

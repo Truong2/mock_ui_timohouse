@@ -39,9 +39,9 @@ async (page) => {
     await page.screenshot({ path: 'docs/qa/ui-enterprise/navigation-desktop-expanded.png' });
 
     const routes = [
-      ['ROOM-02', 'CG-101', 'properties', 'Phòng'], ['OWN-02', 'CN-001', 'properties', 'Chủ nhà'],
+      ['ROOM-02', '101T17', 'properties', 'Phòng'], ['OWN-02', 'CN-001', 'properties', 'Chủ nhà'],
       ['CON-03', null, 'tenancies', 'Hợp đồng thuê phòng'], ['INV-01', null, 'billing', 'Hóa đơn'],
-      ['INV-03', 'INV-2610-CG202', 'billing', 'Hóa đơn'], ['PAY-01', null, 'billing', 'Thu tiền & công nợ'],
+      ['INV-03', 'INV-2610-202T17', 'billing', 'Hóa đơn'], ['PAY-01', null, 'billing', 'Thu tiền & công nợ'],
       ['OA-02', null, 'billing', 'Nhắc thanh toán'], ['SAL-01', null, 'people', 'Bảng lương'],
     ];
     const routeResults = [];
@@ -85,7 +85,7 @@ async (page) => {
     await page.waitForFunction(() => TH.app.route.screen === 'REPORTS');
     check('NAV-07-REPORT-HUB', await read(() => !!TH.reports && document.querySelector('#nav [aria-current="page"]').dataset.workspace === 'reports'), 'Mục Báo cáo mở luồng REPORTS hiện có');
     await read(() => { TH.store.state.reportReturn = { hash: '#/demo/reports', label: 'preview kiểm tra điều hướng' }; });
-    await go('INV-03', 'INV-2610-CG202');
+    await go('INV-03', 'INV-2610-202T17');
     const banner = await read(() => ({ exists: !!document.querySelector('.rptf-return'), first: document.querySelector('#view').firstElementChild.classList.contains('rptf-return') }));
     check('NAV-07-RETURN', banner.exists && banner.first, banner);
     await page.locator('[data-act="rptf.return"]').click();

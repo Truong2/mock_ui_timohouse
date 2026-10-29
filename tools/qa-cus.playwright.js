@@ -44,18 +44,19 @@ async (page) => {
     total09: TH.calc.pnl('2026-09', 'ALL', 'tong').lnr,
     kd10: TH.calc.pnl('2026-10', 'ALL', 'kd').lnr,
     total10: TH.calc.pnl('2026-10', 'ALL', 'tong').lnr,
-    invoice: TH.calc.invoice('INV-2610-CG202').total,
-    hs: TH.calc.perfBuilding('2026-09', 'TH-CG').hs,
+    invoice: TH.calc.invoice('INV-2610-202T17').total,
+    hs: TH.calc.perfBuilding('2026-09', 'T17').hs,
   }));
   // New totals independently verified in docs/qa/dataset/decimal-results.json.
-  const expected = initial.datasetVersion === 'excel-demo-v1' ? [23643400, 14243400, 11430000, 54930000] : [16682599, 7282599, 9655000, 53155000];
-  check('REGRESSION', initial.schema >= 9 && initial.kd09 === expected[0] && initial.total09 === expected[1] && initial.kd10 === expected[2] && initial.total10 === expected[3] && initial.invoice === 6069800 && Math.round(initial.hs * 1000) === 723, initial);
-  const heads = await read(() => ({ head: TH.calc.areaHead('TH-CG'), lead: TH.calc.teamLead('TH-CG'), tx: TH.calc.areaHead('TH-TX') }));
+  // excel-demo-v2 (schema 13, biểu phí theo tòa T17/S9/G1) — khớp tools/verify-dataset-decimal.py
+  const expected = [22389800, 12989800, 10493000, 53993000];
+  check('REGRESSION', initial.schema === 13 && initial.kd09 === expected[0] && initial.total09 === expected[1] && initial.kd10 === expected[2] && initial.total10 === expected[3] && initial.invoice === 6064000 && Math.round(initial.hs * 1000) === 721, initial);
+  const heads = await read(() => ({ head: TH.calc.areaHead('T17'), lead: TH.calc.teamLead('T17'), tx: TH.calc.areaHead('G1') }));
   check('QA-CUS-01', heads.head && heads.head !== heads.lead && !heads.tx, heads);
-  const states = await read(() => TH.calc.tenancyStates(TH.calc.contract('HĐ-DD102/25')));
+  const states = await read(() => TH.calc.tenancyStates(TH.calc.contract('HĐ-102S9/25')));
   check('QA-CUS-02', states.main.id === 'renting' && states.tags.some(t => t.id === 'expiring') && states.tags.some(t => /bàn giao/.test(t.label)), states.tags.map(t => t.label));
 
-  await go('CUS-02', 'HĐ-DD302/25', 'fin');
+  await go('CUS-02', 'HĐ-302S9/25', 'fin');
   await click('dep.review');
   await page.getByLabel('Thấm trần — chờ xác định lỗi bên nào', { exact: true }).fill('500000');
   await click('dep.submit');
@@ -77,16 +78,16 @@ async (page) => {
   check('QA-CUS-04/17', paid.state === 'refunded' && paid.refund === 3990000 && paid.paidBy === 'NV-002' && paid.rows === 1 && paid.kd === initial.kd10 && paid.total === initial.total10 - 3990000, paid);
 
   await role('admin');
-  await go('CUS-02', 'HĐ-TX202/25', 'fin');
+  await go('CUS-02', 'HĐ-202G1/25', 'fin');
   const early = await read(() => {
-    const ct = TH.calc.contract('HĐ-TX202/25');
+    const ct = TH.calc.contract('HĐ-202G1/25');
     const hc = TH.calc.depositCase(ct.id);
     return { labels: TH.calc.tenancyStates(ct).tags.map(t => t.label), basis: hc.forfeitBasis, approver: hc.approvedBy };
   });
   check('QA-CUS-05-seed', early.labels.includes('Phá HĐ') && early.labels.includes('Mất cọc') && early.basis && early.approver, early);
   // Independent hypothetical agreement: partial forfeiture must leave a refundable balance.
   await page.evaluate(() => {
-    const hc = TH.db.depositCases.find(c => c.contractId === 'HĐ-TX202/25');
+    const hc = TH.db.depositCases.find(c => c.contractId === 'HĐ-202G1/25');
     Object.assign(hc, { state: 'reconciling', forfeitAmount: 0, forfeitBasis: '', refundAmount: null, depositId: null, forfeitId: null });
     TH.app.refresh();
   });
@@ -96,28 +97,28 @@ async (page) => {
   await click('dep.submit');
   await role('accountant');
   await click('dep.approve');
-  check('QA-CUS-05-partial', await read(() => TH.db.depositCases.find(c => c.contractId === 'HĐ-TX202/25').refundAmount) === 3000000, 'Giữ 1.000.000; duyệt hoàn 3.000.000 / cọc 4.000.000');
+  check('QA-CUS-05-partial', await read(() => TH.db.depositCases.find(c => c.contractId === 'HĐ-202G1/25').refundAmount) === 3000000, 'Giữ 1.000.000; duyệt hoàn 3.000.000 / cọc 4.000.000');
 
   await role('admin');
-  await go('CUS-02', 'HĐ-DD102/25', 'contract');
+  await go('CUS-02', 'HĐ-102S9/25', 'contract');
   const oldInvoice = await read(() => JSON.stringify(TH.db.invoices));
   // CR-CUS-02: đọc dòng phí qua OCR hợp đồng mẫu đầy đủ (cus.ctOcr thay cho cus.priceOcr)
   await click('cus.ctOcr');
   await click('ocr.all');
   await click('ctocr.confirm');
   const pricing = await read(() => {
-    const ct = TH.calc.contract('HĐ-DD102/25');
+    const ct = TH.calc.contract('HĐ-102S9/25');
     const invoice = buildInvoice(TH.db, ct, '2026-11', 'draft');
     return { water: invoice.lines.find(l => l.type === 'water'), sm: ct.priceList.find(l => l.code === 'PARK_EV'), charge: ct.priceList.find(l => l.code === 'EVCHG'), methods: ct.priceList.map(l => l.from), unchanged: JSON.stringify(TH.db.invoices) };
   });
-  check('QA-CUS-06/08/09', pricing.water.qty === 2 && pricing.water.price === 120000 && pricing.sm.price === 400000 && pricing.charge.code !== pricing.sm.code && pricing.methods.every(p => p === '2026-11') && pricing.unchanged === oldInvoice, { water: pricing.water, sm: pricing.sm.price, charging: pricing.charge.method, effective: pricing.methods[0], oldInvoicesUnchanged: pricing.unchanged === oldInvoice });
+  check('QA-CUS-06/08/09', pricing.water.qty === 2 && pricing.water.price === 120000 && pricing.sm.price === 0 && /* S9 không có xe điện SM trong biểu phí tòa — HĐ đọc lại giữ đúng biểu phí HĐ */  pricing.charge.code !== pricing.sm.code && pricing.methods.every(p => p === '2026-11') && pricing.unchanged === oldInvoice, { water: pricing.water, sm: pricing.sm.price, charging: pricing.charge.method, effective: pricing.methods[0], oldInvoicesUnchanged: pricing.unchanged === oldInvoice });
   const vehicles = await read(() => {
-    const ct = TH.calc.contract('HĐ-CG101/25');
+    const ct = TH.calc.contract('HĐ-101T17/25');
     return { moto: ct.priceList.find(l => l.code === 'PARK_MOTO'), pending: TH.vehiclesOf(ct, 'Xe điện (dịch vụ SM)', 'pending').length, smQty: TH.priceQty(ct, { code: 'PARK_EV', method: 'per_vehicle', qtySource: 'vehicles' }) };
   });
   check('QA-CUS-07', vehicles.moto.price === 0 && vehicles.moto.active && vehicles.smQty === 0, vehicles);
 
-  await go('CUS-02', 'HĐ-CG101/25', 'stay');
+  await go('CUS-02', 'HĐ-101T17/25', 'stay');
   const pendingVehicle = await read(() => TH.calc.customer('KH-001').vehicles.find(v => v.status === 'pending').id);
   await page.locator('[data-act="veh.confirm"][data-id="' + pendingVehicle + '"]').click();
   check('VEHICLE-CONFIRM', await read(() => TH.calc.customer('KH-001').vehicles.filter(v => v.status === 'pending').length) === 0, pendingVehicle);
@@ -129,14 +130,14 @@ async (page) => {
 
   const terms = await read(() => {
     // CR-CUS-02: bỏ mẫu P302 — mọi HĐ theo mẫu đầy đủ (DAYDU): gia hạn mặc nhiên, hoàn cọc trong 10 ngày
-    const p302 = TH.calc.contract('HĐ-DD102/25'), amendment = TH.calc.contract('HĐ-CG102/25'), current = TH.calc.contract('HĐ-CG201/25');
-    return { p302: p302.terms, amendment: amendment.renewals[0], previous: current.previousContractId, transfer: TH.calc.depositCase('HĐ-CG201/24').state, count: TH.calc.customerContracts('KH-003').length, notice: TH.calc.contract('HĐ-CG101/25').terms.noticeDays, alert: TH.expiryDays() };
+    const p302 = TH.calc.contract('HĐ-102S9/25'), amendment = TH.calc.contract('HĐ-102T17/25'), current = TH.calc.contract('HĐ-201T17/25');
+    return { p302: p302.terms, amendment: amendment.renewals[0], previous: current.previousContractId, transfer: TH.calc.depositCase('HĐ-201T17/24').state, count: TH.calc.customerContracts('KH-003').length, notice: TH.calc.contract('HĐ-101T17/25').terms.noticeDays, alert: TH.expiryDays() };
   });
-  check('QA-CUS-10/11/12/13/14', terms.p302.template === 'DAYDU' && terms.p302.autoRenew && terms.p302.refundDays === 10 && terms.amendment.mode === 'amendment' && terms.amendment.file && terms.previous === 'HĐ-CG201/24' && terms.transfer === 'transferred' && terms.count === 2 && terms.notice === 30 && terms.alert === 35, terms);
+  check('QA-CUS-10/11/12/13/14', terms.p302.template === 'DAYDU' && terms.p302.autoRenew && terms.p302.refundDays === 10 && terms.amendment.mode === 'amendment' && terms.amendment.file && terms.previous === 'HĐ-201T17/24' && terms.transfer === 'transferred' && terms.count === 2 && terms.notice === 30 && terms.alert === 35, terms);
   const historical = await read(() => {
     const k = TH.calc.customer('KH-018');
     const old = k.vehicles.find(v => v.plate);
-    return { duplicate: !!TH.calc.plateDup(k, old), nullable: TH.calc.customer('KH-003').vehicles.some(v => !v.plate), masked: TH.maskPlate(old.plate) !== old.plate };
+    return { duplicate: !!TH.calc.plateDup(k, old), nullable: TH.calc.customer('KH-005').vehicles.some(v => !v.plate), masked: TH.maskPlate(old.plate) !== old.plate };
   });
   check('VEHICLE-HISTORY/MASK', !historical.duplicate && historical.nullable && historical.masked, historical);
   await go('CUS-01');
@@ -163,11 +164,11 @@ async (page) => {
   await page.locator('#sys-expiry').fill('35');
   await click('settings.expiry');
   await role('manager');
-  await go('CUS-02', 'HĐ-CG101/25', 'fin');
+  await go('CUS-02', 'HĐ-101T17/25', 'fin');
   await click('dep.open');
   check('MANAGER-PERMISSIONS', await page.locator('[data-act="dep.handover"]').count() === 1 && await page.locator('[data-act="dep.approve"],[data-act="dep.pay"]').count() === 0, 'QL tòa mở hồ sơ được; không có thao tác duyệt/thực chi');
-  await go('CUS-02', 'HĐ-DD302/25', 'fin');
-  check('MANAGER-SCOPE', await page.locator('body').innerText().then(t => /ngoài phạm vi/.test(t)), 'DD-302 nằm ngoài phạm vi Cầu Giấy');
+  await go('CUS-02', 'HĐ-302S9/25', 'fin');
+  check('MANAGER-SCOPE', await page.locator('body').innerText().then(t => /ngoài phạm vi/.test(t)), '302S9 nằm ngoài phạm vi Cầu Giấy');
   await role('admin');
 
   const smoke = await read(() => { TH.db = TH.seed(); Object.assign(TH.store.state, { building: 'ALL', ui: {}, drafts: {}, editing: null }); const r = TH.qaSmoke(); TH.store.flush(); TH.app.refresh(); return { total: r.total, fails: r.fails, counts: TH.qaCounts() }; });

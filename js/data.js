@@ -9,7 +9,23 @@ var TH = window.TH = window.TH || {};
 TH.TODAY = '2026-10-20';
 TH.CURRENT_PERIOD = '2026-10';
 TH.PERIODS = ['2026-05', '2026-06', '2026-07', '2026-08', '2026-09', '2026-10'];
-TH.DATA_SCHEMA = 12;
+TH.DATA_SCHEMA = 13;
+
+/* Mã theo file Excel của khách: tòa = loại nhà T/S/G + số (T17, S9, G1, S25A); phòng = số phòng + mã tòa (302S9, 101T17). */
+TH.BUILDING_CODE_RE = /^[TSG]\d+[A-Z]?$/;
+TH.bTag = function (id) { return String(id || '').replace(/^TH-/, ''); };
+TH.roomIdOf = function (bId, no) { return String(no || '').trim().toUpperCase() + TH.bTag(bId); };
+TH.roomNo = function (room) { return room && (room.no || String(room.id).replace(TH.bTag(room.buildingId), '')) || ''; };
+/* Đội vận hành (kind ops) mới có thưởng trưởng nhóm theo phòng; khối văn phòng / kinh doanh không tính */
+TH.isOpsTeam = function (t) { return !!t && t.kind === 'ops'; };
+/* Bản ghi neo cho kịch bản demo — view, dataset và QA đọc mã từ đây, không gõ cứng */
+TH.DEMO = {
+  building: { main: 'T17', ownerChange: 'S9', unbilled: 'G1' },
+  room: { detail: '201T17', ocrVacant: '401T17', backwardsWater: '102G1', missingReading: '201G1', spike: '301S9', meterChange: '102T17', maintenance: '302S9', terminated: '201S9', newTenant: '202G1', perPersonWater: '101G1', prepay3: '301G1', overpay: '101T17', partial: '302T17' },
+  staff: { manager: 'NV-003', transferFrom: 'NV-006', transferTo: 'NV-005' },
+  team: { main: 'VH1' },
+  managerScope: ['T17'],
+};
 
 /* Vai trò phụ trách tòa (CR-BLD-01, note.md §3.2 · cột NVVH/Lead/NVVS/NSKT trong docs/Thông tin nhà.xlsx).
    tier: gói bắt đầu được phân công vai trò này (A: một NV vận hành chính — F006.A; B: nhiều người theo vai trò — F006.B). */
@@ -57,6 +73,8 @@ TH.FEE_TYPES = [
   { code: 'NET', name: 'Internet', methods: ['per_room', 'per_person', 'na'] },
   { code: 'ELEV', name: 'Thang máy', methods: ['per_person', 'per_room', 'na'], hint: 'Chỉ tách dòng thu riêng khi HĐ/biểu phí quy định; mặc định chỉ diễn giải trong Dịch vụ chung' },
   { code: 'SVC', name: 'Dịch vụ chung', methods: ['per_person', 'per_room', 'na'] },
+  { code: 'CLEAN', name: 'Vệ sinh', methods: ['per_person', 'per_room', 'na'] },
+  { code: 'WASH', name: 'Máy giặt', methods: ['per_person', 'per_room', 'na'] },
   { code: 'PARK_MOTO', name: 'Gửi xe máy', methods: ['per_vehicle', 'na'], vehicleType: 'Xe máy' },
   { code: 'PARK_EBIKE', name: 'Gửi xe đạp điện', methods: ['per_vehicle', 'na'], vehicleType: 'Xe đạp điện' },
   { code: 'PARK_EV', name: 'Xe điện dịch vụ SM (theo xe)', methods: ['per_vehicle', 'na'], vehicleType: 'Xe điện (dịch vụ SM)' },
@@ -158,91 +176,91 @@ TH.seed = function () {
 
   /* ---------- Tòa ---------- */
   db.buildings = [
-    { id: 'TH-CG', name: 'TimeHouse Cầu Giấy', short: 'Cầu Giấy', area: 'Cầu Giấy', address: 'Số 18, ngõ 75 đường Minh Họa, Cầu Giấy, Hà Nội', ownerId: 'CN-001', managerId: 'NV-003', floors: 4, elecPrice: 3800, waterPrice: 30000, waterMethod: 'meter_m3', elecBuyPrice: 2500, ownerRent: 18000000, openedAt: '2024-04-01', status: 'active', evnCode: 'PD05•••2909', waterCode: 'NS•••0417', netCode: 'FPT•••88', landArea: 120, buildArea: 110, floorArea: 440, condition: 'Mới', conditionAt: '2026-06-15', conditionBy: 'NV-003', conditionNote: 'Sơn sửa 2024, kết cấu tốt', elevator: true, gcn: { no: 'CS 05•••18', issuer: 'UBND quận Cầu Giấy', date: '2015-06-12' }, fire: { status: 'verified', docType: 'Biên bản nghiệm thu PCCC', docNo: 'NT-PCCC 12/2024', issuedAt: '2024-03-18', issuer: 'Phòng CS PCCC & CNCH (minh họa)', validTo: null, holder: 'Nguyễn Văn An (chủ nhà)', file: 'PCCC_nghiem_thu_CG_2024.pdf', note: 'Đã đối chiếu bản gốc 03/2024' }, bizReg: { status: 'verified', holder: 'Hộ kinh doanh Vũ Quang Huy (minh họa)', regNo: '01A8•••512', issuer: 'UBND quận Cầu Giấy', issuedAt: '2024-04-08', file: 'DKKD_ho_kinh_doanh_CG.pdf', note: 'Chủ thể đứng tên khác chủ nhà' }, opFrom: '2024-04-01', opTo: null },
-    { id: 'TH-DD', name: 'TimeHouse Đống Đa', short: 'Đống Đa', area: 'Đống Đa', address: 'Số 46 phố Mẫu Thử, Đống Đa, Hà Nội', ownerId: 'CN-002', managerId: 'NV-004', floors: 3, elecPrice: 3800, waterPrice: 28000, waterMethod: 'meter_m3', elecBuyPrice: 2500, ownerRent: 12500000, openedAt: '2024-08-01', status: 'active', evnCode: 'PD05•••8589', waterCode: 'NS•••1122', netCode: 'VNPT•••31', landArea: 85, buildArea: null, floorArea: 255, condition: 'Trung bình', conditionAt: '2025-07-01', conditionBy: 'NV-004', conditionNote: 'Đánh giá khi tiếp nhận chủ mới; máy bơm cần thay', elevator: false, gcn: { no: 'BĐ 11•••46', issuer: 'UBND quận Đống Đa', date: '2011-09-30' }, fire: { status: 'has', docType: 'Giấy chứng nhận thẩm duyệt thiết kế PCCC', docNo: '', issuedAt: '', issuer: '', validTo: null, holder: '', file: 'PCCC_tham_duyet_DD.pdf', note: 'Đã có bản scan, chưa đối chiếu bản gốc' }, bizReg: { status: 'na', holder: '', regNo: '', issuer: '', issuedAt: '', file: null, note: 'Cần làm rõ chủ thể đứng tên sau khi đổi chủ nhà' }, opFrom: '2024-08-01', opTo: null },
-    { id: 'TH-TX', name: 'TimeHouse Thanh Xuân', short: 'Thanh Xuân', area: 'Thanh Xuân', address: 'Số 9 ngách 4 đường Ví Dụ, Thanh Xuân, Hà Nội', ownerId: 'CN-003', managerId: 'NV-005', floors: 3, elecPrice: 4000, waterPrice: 30000, waterMethod: 'meter_m3', elecBuyPrice: 2500, ownerRent: 9000000, openedAt: '2025-02-01', status: 'active', evnCode: 'PD05•••5868', waterCode: 'NS•••0930', netCode: 'FPT•••14', landArea: null, buildArea: null, floorArea: 210, condition: 'Cũ', conditionAt: '2025-02-01', conditionBy: 'NV-001', conditionNote: 'Nhà xây 2009, thấm tầng 3', elevator: false, gcn: { no: 'CT 02•••09', issuer: 'UBND quận Thanh Xuân', date: '2009-03-18' }, fire: { status: 'none', docType: '', docNo: '', issuedAt: '', issuer: '', validTo: null, holder: '', file: null, note: 'Đang làm hồ sơ — hạn bổ sung 30/11/2026' }, bizReg: { status: 'has', holder: 'Công ty TNHH Minh Phát (minh họa)', regNo: '0109•••037', issuer: 'Sở KH&ĐT Hà Nội', issuedAt: '2024-11-02', file: 'DKKD_TX.pdf', note: 'Chưa kiểm tra ngành nghề cho thuê lưu trú' }, opFrom: '2025-02-01', opTo: null },
+    { id: 'T17', type: 'T', name: 'Tòa T17 · Cầu Giấy', short: 'T17', area: 'Cầu Giấy', zone: 'CG', address: 'Số 18 ngõ 75 Phố Minh Họa-CG-HN', source: 'CTV nguồn nhà', elevatorState: 'Còn BH', landlordAccount: 'Tech-Nguyen V. A (minh họa)', ownerId: 'CN-001', managerId: 'NV-003', floors: 4, elecPrice: 4000, waterPrice: 120000, waterMethod: 'per_person', elecBuyPrice: 2500, ownerRent: 18000000, openedAt: '2024-04-01', status: 'active', evnCode: 'PD05•••2909', waterCode: '51•••0417 (Viwaco)', netCode: 'HNAAM•••88', landArea: 120, buildArea: 110, floorArea: 440, condition: 'Mới', conditionAt: '2026-06-15', conditionBy: 'NV-003', conditionNote: 'Sơn sửa 2024, kết cấu tốt', elevator: true, gcn: { no: 'CS 05•••18', issuer: 'UBND quận Cầu Giấy', date: '2015-06-12' }, fire: { status: 'verified', docType: 'Biên bản nghiệm thu PCCC', docNo: 'NT-PCCC 12/2024', issuedAt: '2024-03-18', issuer: 'Phòng CS PCCC & CNCH (minh họa)', validTo: null, holder: 'Nguyễn Văn An (chủ nhà)', file: 'PCCC_nghiem_thu_T17_2024.pdf', note: 'Đã đối chiếu bản gốc 03/2024' }, bizReg: { status: 'verified', holder: 'Hộ kinh doanh Vũ Quang Huy (minh họa)', regNo: '01A8•••512', issuer: 'UBND quận Cầu Giấy', issuedAt: '2024-04-08', file: 'DKKD_ho_kinh_doanh_T17.pdf', note: 'Chủ thể đứng tên khác chủ nhà' }, opFrom: '2024-04-01', opTo: null },
+    { id: 'S9', type: 'S', name: 'Tòa S9 · Đống Đa', short: 'S9', area: 'Đống Đa', zone: 'Láng', address: 'Số 46 Phố Mẫu Thử-Láng-HN', source: 'NV kinh doanh', elevatorState: 'K', landlordAccount: 'VietinBank-Tran T. B (minh họa)', ownerId: 'CN-002', managerId: 'NV-004', floors: 3, elecPrice: 3800, waterPrice: 35000, waterMethod: 'meter_m3', elecBuyPrice: 2500, ownerRent: 12500000, openedAt: '2024-08-01', status: 'active', evnCode: 'PD05•••8589', waterCode: 'Hóa đơn chủ nhà', netCode: 'HNH•••31', landArea: 85, buildArea: null, floorArea: 255, condition: 'Trung bình', conditionAt: '2025-07-01', conditionBy: 'NV-004', conditionNote: 'Đánh giá khi tiếp nhận chủ mới; máy bơm cần thay', elevator: false, gcn: { no: 'BĐ 11•••46', issuer: 'UBND quận Đống Đa', date: '2011-09-30' }, fire: { status: 'has', docType: 'Giấy chứng nhận thẩm duyệt thiết kế PCCC', docNo: '', issuedAt: '', issuer: '', validTo: null, holder: '', file: 'PCCC_tham_duyet_S9.pdf', note: 'Đã có bản scan, chưa đối chiếu bản gốc' }, bizReg: { status: 'na', holder: '', regNo: '', issuer: '', issuedAt: '', file: null, note: 'Cần làm rõ chủ thể đứng tên sau khi đổi chủ nhà' }, opFrom: '2024-08-01', opTo: null },
+    { id: 'G1', type: 'G', name: 'Tòa G1 · Thanh Xuân', short: 'G1', area: 'Thanh Xuân', zone: 'TX', address: 'Số 9 ngách 4 Phố Ví Dụ-TX-HN', source: 'CTV nguồn nhà', elevatorState: 'Còn BH', landlordAccount: 'BIDV-Cong ty Minh Phat (minh họa)', ownerId: 'CN-003', managerId: 'NV-005', floors: 3, elecPrice: 4000, waterPrice: 35000, waterMethod: 'meter_m3', elecBuyPrice: 2500, ownerRent: 9000000, openedAt: '2025-02-01', status: 'active', evnCode: 'PD05•••5868', waterCode: '51•••0930 (Viwaco)', netCode: 'HNJ•••14', landArea: null, buildArea: null, floorArea: 210, condition: 'Cũ', conditionAt: '2025-02-01', conditionBy: 'NV-001', conditionNote: 'Nhà xây 2009, thấm tầng 3; lắp thang máy khi cải tạo 01/2025', elevator: true, gcn: { no: 'CT 02•••09', issuer: 'UBND quận Thanh Xuân', date: '2009-03-18' }, fire: { status: 'none', docType: '', docNo: '', issuedAt: '', issuer: '', validTo: null, holder: '', file: null, note: 'Đang làm hồ sơ — hạn bổ sung 30/11/2026' }, bizReg: { status: 'has', holder: 'Công ty TNHH Minh Phát (minh họa)', regNo: '0109•••037', issuer: 'Sở KH&ĐT Hà Nội', issuedAt: '2024-11-02', file: 'DKKD_G1.pdf', note: 'Chưa kiểm tra ngành nghề cho thuê lưu trú' }, opFrom: '2025-02-01', opTo: null },
   ];
   db.ownerLinks = [
-    { buildingId: 'TH-CG', ownerId: 'CN-001', role: 'Chủ sở hữu', from: '2024-04-01', to: null },
-    { buildingId: 'TH-DD', ownerId: 'CN-004', role: 'Chủ sở hữu', from: '2024-08-01', to: '2025-06-30' },
-    { buildingId: 'TH-DD', ownerId: 'CN-002', role: 'Chủ sở hữu', from: '2025-07-01', to: null },
-    { buildingId: 'TH-TX', ownerId: 'CN-003', role: 'Chủ sở hữu', from: '2025-02-01', to: null },
+    { buildingId: 'T17', ownerId: 'CN-001', role: 'Chủ sở hữu', from: '2024-04-01', to: null },
+    { buildingId: 'S9', ownerId: 'CN-004', role: 'Chủ sở hữu', from: '2024-08-01', to: '2025-06-30' },
+    { buildingId: 'S9', ownerId: 'CN-002', role: 'Chủ sở hữu', from: '2025-07-01', to: null },
+    { buildingId: 'G1', ownerId: 'CN-003', role: 'Chủ sở hữu', from: '2025-02-01', to: null },
   ];
 
   /* ---------- Hợp đồng thuê tòa với chủ nhà (CR-BLD-01) ----------
      Trường theo docs/Hợp đồng thuê nhà 2026(Mẫu) tùng sói.doc: tiền thuê/tháng, đặt cọc, ngày giao nhà, thời hạn 60 tháng từ–đến,
      thanh toán theo kỳ 03 tháng/lần vào ngày 01–10 tháng đầu kỳ; giữ giá, người giới thiệu nguồn nhà ≠ người nhập dữ liệu (ques.md §3). */
   db.leases = [
-    { id: 'HĐT-CG-2024', buildingId: 'TH-CG', ownerId: 'CN-001', rent: 18000000, deposit: 18000000, handover: '2024-03-25', start: '2024-04-01', end: '2029-03-31', termMonths: 60, holdFrom: '2024-04-01', holdTo: '2027-03-31', payCycle: 3, payFrom: 1, payTo: 10, referrer: 'Trần Văn Điệp (CTV nguồn nhà)', enteredBy: 'NV-001', enteredAt: '2024-03-20', note: 'Bên thuê được cải tạo, nâng cấp khi chủ nhà đồng ý bằng văn bản; đơn phương chấm dứt bồi thường 03 tháng tiền thuê.', file: 'HDT_CG_2024_scan.pdf', status: 'active', versions: [{ v: 1, at: '2024-03-20', by: 'NV-001', note: 'Ký mới 60 tháng, giữ giá 36 tháng đầu' }] },
-    { id: 'HĐT-DD-2024', buildingId: 'TH-DD', ownerId: 'CN-004', rent: 11800000, deposit: 23600000, handover: '2024-07-28', start: '2024-08-01', end: '2025-06-30', termMonths: 11, holdFrom: '2024-08-01', holdTo: '2025-06-30', payCycle: 6, payFrom: 1, payTo: 10, referrer: 'Ngô Thị Mai (NV kinh doanh)', enteredBy: 'NV-001', enteredAt: '2024-07-25', note: 'Thanh lý khi chủ nhà chuyển nhượng tòa 06/2025, hoàn cọc đủ.', file: 'HDT_DD_2024_scan.pdf', status: 'ended', versions: [{ v: 1, at: '2024-07-25', by: 'NV-001', note: 'Ký mới' }, { v: 2, at: '2025-06-30', by: 'NV-002', note: 'Thanh lý — chủ mới tiếp nhận' }] },
-    { id: 'HĐT-DD-2025', buildingId: 'TH-DD', ownerId: 'CN-002', rent: 12500000, deposit: 25000000, handover: '2025-07-01', start: '2025-07-01', end: '2030-06-30', termMonths: 60, holdFrom: '2025-07-01', holdTo: '2026-12-31', payCycle: 6, payFrom: 1, payTo: 10, referrer: 'Ngô Thị Mai (NV kinh doanh)', enteredBy: 'NV-002', enteredAt: '2025-06-26', note: 'Kế thừa từ HĐ chủ cũ; cọc 02 tháng. Sau giữ giá điều chỉnh theo thị trường, tối đa 5%/năm.', file: 'HDT_DD_2025_scan.pdf', status: 'active', versions: [{ v: 1, at: '2025-06-26', by: 'NV-002', note: 'Ký mới với chủ nhà mới' }] },
-    { id: 'HĐT-TX-2025', buildingId: 'TH-TX', ownerId: 'CN-003', rent: 9000000, deposit: 9000000, handover: '2025-01-25', start: '2025-02-01', end: '2030-01-31', termMonths: 60, holdFrom: '2025-02-01', holdTo: '2028-01-31', payCycle: 3, payFrom: 1, payTo: 10, referrer: 'Lê Quốc Ước (CTV nguồn nhà)', enteredBy: 'NV-001', enteredAt: '2025-01-20', note: 'Ký với pháp nhân; xuất hóa đơn VAT tiền thuê theo kỳ.', file: 'HDT_TX_2025_scan.pdf', status: 'active', versions: [{ v: 1, at: '2025-01-20', by: 'NV-001', note: 'Ký mới 60 tháng' }] },
+    { id: 'HĐT-T17-2024', buildingId: 'T17', ownerId: 'CN-001', rent: 18000000, deposit: 18000000, handover: '2024-03-25', start: '2024-04-01', end: '2029-03-31', termMonths: 60, holdFrom: '2024-04-01', holdTo: '2027-03-31', payCycle: 3, payFrom: 1, payTo: 10, referrer: 'Trần Văn Điệp (CTV nguồn nhà)', enteredBy: 'NV-001', enteredAt: '2024-03-20', note: 'Bên thuê được cải tạo, nâng cấp khi chủ nhà đồng ý bằng văn bản; đơn phương chấm dứt bồi thường 03 tháng tiền thuê.', file: 'HDT_T17_2024_scan.pdf', status: 'active', versions: [{ v: 1, at: '2024-03-20', by: 'NV-001', note: 'Ký mới 60 tháng, giữ giá 36 tháng đầu' }] },
+    { id: 'HĐT-S9-2024', buildingId: 'S9', ownerId: 'CN-004', rent: 11800000, deposit: 23600000, handover: '2024-07-28', start: '2024-08-01', end: '2025-06-30', termMonths: 11, holdFrom: '2024-08-01', holdTo: '2025-06-30', payCycle: 6, payFrom: 1, payTo: 10, referrer: 'Ngô Thị Mai (NV kinh doanh)', enteredBy: 'NV-001', enteredAt: '2024-07-25', note: 'Thanh lý khi chủ nhà chuyển nhượng tòa 06/2025, hoàn cọc đủ.', file: 'HDT_S9_2024_scan.pdf', status: 'ended', versions: [{ v: 1, at: '2024-07-25', by: 'NV-001', note: 'Ký mới' }, { v: 2, at: '2025-06-30', by: 'NV-002', note: 'Thanh lý — chủ mới tiếp nhận' }] },
+    { id: 'HĐT-S9-2025', buildingId: 'S9', ownerId: 'CN-002', rent: 12500000, deposit: 25000000, handover: '2025-07-01', start: '2025-07-01', end: '2030-06-30', termMonths: 60, holdFrom: '2025-07-01', holdTo: '2026-12-31', payCycle: 6, payFrom: 1, payTo: 10, referrer: 'Ngô Thị Mai (NV kinh doanh)', enteredBy: 'NV-002', enteredAt: '2025-06-26', note: 'Kế thừa từ HĐ chủ cũ; cọc 02 tháng. Sau giữ giá điều chỉnh theo thị trường, tối đa 5%/năm.', file: 'HDT_S9_2025_scan.pdf', status: 'active', versions: [{ v: 1, at: '2025-06-26', by: 'NV-002', note: 'Ký mới với chủ nhà mới' }] },
+    { id: 'HĐT-G1-2025', buildingId: 'G1', ownerId: 'CN-003', rent: 9000000, deposit: 9000000, handover: '2025-01-25', start: '2025-02-01', end: '2030-01-31', termMonths: 60, holdFrom: '2025-02-01', holdTo: '2028-01-31', payCycle: 3, payFrom: 1, payTo: 10, referrer: 'Lê Quốc Ước (CTV nguồn nhà)', enteredBy: 'NV-001', enteredAt: '2025-01-20', note: 'Ký với pháp nhân; xuất hóa đơn VAT tiền thuê theo kỳ.', file: 'HDT_G1_2025_scan.pdf', status: 'active', versions: [{ v: 1, at: '2025-01-20', by: 'NV-001', note: 'Ký mới 60 tháng' }] },
   ];
 
   /* Lịch thanh toán cho chủ nhà (note.md §5.4) — mỗi kỳ = tiền thuê × chu kỳ, hạn ngày 10 tháng đầu kỳ.
-     Kỳ 10/2026: CG đã trả, DD trả một phần (quá hạn phần còn lại), TX chưa trả (quá hạn). */
+     Kỳ 10/2026: T17 đã trả, S9 trả một phần (quá hạn phần còn lại), G1 chưa trả (quá hạn). */
   db.landlordPays = [];
   function addPay(leaseId, from, paid, paidAt, extra) {
     var l = db.leases.find(function (x) { return x.id === leaseId; });
     var amount = l.rent * l.payCycle;
     db.landlordPays.push(Object.assign({
-      id: 'LT-' + l.buildingId.slice(3) + '-' + from.slice(2, 4) + from.slice(5), leaseId: l.id, buildingId: l.buildingId, ownerId: l.ownerId,
+      id: 'LT-' + TH.bTag(l.buildingId) + '-' + from.slice(2, 4) + from.slice(5), leaseId: l.id, buildingId: l.buildingId, ownerId: l.ownerId,
       from: from, to: addMonthsYm(from, l.payCycle - 1), dueAt: from + '-' + String(l.payTo).padStart(2, '0'), amount: amount,
-      paid: paid === true ? amount : paid || 0, paidAt: paidAt || null, docNo: paidAt ? 'UNC-' + l.buildingId.slice(3) + '-' + from.slice(2, 4) + from.slice(5) : '', note: '', source: 'manual',
+      paid: paid === true ? amount : paid || 0, paidAt: paidAt || null, docNo: paidAt ? 'UNC-' + TH.bTag(l.buildingId) + '-' + from.slice(2, 4) + from.slice(5) : '', note: '', source: 'manual',
     }, extra || {}));
   }
-  addPay('HĐT-CG-2024', '2026-01', true, '2026-01-07');
-  addPay('HĐT-CG-2024', '2026-04', true, '2026-04-08');
-  addPay('HĐT-CG-2024', '2026-07', true, '2026-07-09');
-  addPay('HĐT-CG-2024', '2026-10', true, '2026-10-08');
-  addPay('HĐT-DD-2025', '2026-02', true, '2026-02-06');
-  addPay('HĐT-DD-2025', '2026-08', 50000000, '2026-08-09', { note: 'Trả trước 50 tr, phần còn lại hẹn chủ nhà cuối tháng 10' });
-  addPay('HĐT-TX-2025', '2026-01', true, '2026-01-09');
-  addPay('HĐT-TX-2025', '2026-04', true, '2026-04-10');
-  addPay('HĐT-TX-2025', '2026-07', true, '2026-07-08');
-  addPay('HĐT-TX-2025', '2026-10', 0, null, { note: 'Chờ duyệt chi — pháp nhân chưa gửi hóa đơn VAT' });
+  addPay('HĐT-T17-2024', '2026-01', true, '2026-01-07');
+  addPay('HĐT-T17-2024', '2026-04', true, '2026-04-08');
+  addPay('HĐT-T17-2024', '2026-07', true, '2026-07-09');
+  addPay('HĐT-T17-2024', '2026-10', true, '2026-10-08');
+  addPay('HĐT-S9-2025', '2026-02', true, '2026-02-06');
+  addPay('HĐT-S9-2025', '2026-08', 50000000, '2026-08-09', { note: 'Trả trước 50 tr, phần còn lại hẹn chủ nhà cuối tháng 10' });
+  addPay('HĐT-G1-2025', '2026-01', true, '2026-01-09');
+  addPay('HĐT-G1-2025', '2026-04', true, '2026-04-10');
+  addPay('HĐT-G1-2025', '2026-07', true, '2026-07-08');
+  addPay('HĐT-G1-2025', '2026-10', 0, null, { note: 'Chờ duyệt chi — pháp nhân chưa gửi hóa đơn VAT' });
 
   /* Tài liệu tòa/chủ nhà: hình ảnh sổ đỏ (GCN), HĐ thuê tòa, minh chứng PCCC, ĐKKD */
   db.bldDocs = [
-    { id: 'TLT-01', ownerId: 'CN-001', buildingId: 'TH-CG', kind: 'Sổ đỏ', file: 'so_do_CG_trang1.jpg', uploadedAt: '2024-03-20', by: 'NV-001', version: 1, access: 'Admin, Kế toán' },
-    { id: 'TLT-02', ownerId: 'CN-001', buildingId: 'TH-CG', kind: 'Sổ đỏ', file: 'so_do_CG_trang2.jpg', uploadedAt: '2024-03-20', by: 'NV-001', version: 1, access: 'Admin, Kế toán' },
-    { id: 'TLT-03', ownerId: 'CN-001', buildingId: 'TH-CG', leaseId: 'HĐT-CG-2024', kind: 'HĐ thuê tòa', file: 'HDT_CG_2024_scan.pdf', uploadedAt: '2024-03-20', by: 'NV-001', version: 1, access: 'Admin, Kế toán' },
-    { id: 'TLT-04', ownerId: 'CN-001', buildingId: 'TH-CG', kind: 'PCCC', file: 'PCCC_nghiem_thu_CG_2024.pdf', uploadedAt: '2024-03-28', by: 'NV-003', version: 1, access: 'Admin, Kế toán, QL tòa' },
-    { id: 'TLT-05', ownerId: 'CN-001', buildingId: 'TH-CG', kind: 'ĐKKD', file: 'DKKD_ho_kinh_doanh_CG.pdf', uploadedAt: '2024-04-10', by: 'NV-002', version: 2, access: 'Admin, Kế toán' },
-    { id: 'TLT-06', ownerId: 'CN-002', buildingId: 'TH-DD', kind: 'Sổ đỏ', file: 'so_do_DD.jpg', uploadedAt: '2025-06-26', by: 'NV-002', version: 1, access: 'Admin, Kế toán' },
-    { id: 'TLT-07', ownerId: 'CN-002', buildingId: 'TH-DD', leaseId: 'HĐT-DD-2025', kind: 'HĐ thuê tòa', file: 'HDT_DD_2025_scan.pdf', uploadedAt: '2025-06-26', by: 'NV-002', version: 1, access: 'Admin, Kế toán' },
-    { id: 'TLT-08', ownerId: 'CN-002', buildingId: 'TH-DD', kind: 'PCCC', file: 'PCCC_tham_duyet_DD.pdf', uploadedAt: '2024-08-05', by: 'NV-004', version: 1, access: 'Admin, Kế toán, QL tòa' },
-    { id: 'TLT-09', ownerId: 'CN-004', buildingId: 'TH-DD', leaseId: 'HĐT-DD-2024', kind: 'HĐ thuê tòa', file: 'HDT_DD_2024_scan.pdf', uploadedAt: '2024-07-25', by: 'NV-001', version: 2, access: 'Admin, Kế toán' },
-    { id: 'TLT-10', ownerId: 'CN-003', buildingId: 'TH-TX', kind: 'Sổ đỏ', file: 'GCN_TX_ban_sao.pdf', uploadedAt: '2025-01-20', by: 'NV-001', version: 1, access: 'Admin, Kế toán' },
-    { id: 'TLT-11', ownerId: 'CN-003', buildingId: 'TH-TX', leaseId: 'HĐT-TX-2025', kind: 'HĐ thuê tòa', file: 'HDT_TX_2025_scan.pdf', uploadedAt: '2025-01-20', by: 'NV-001', version: 1, access: 'Admin, Kế toán' },
-    { id: 'TLT-12', ownerId: 'CN-003', buildingId: 'TH-TX', kind: 'ĐKKD', file: 'DKKD_TX.pdf', uploadedAt: '2025-02-12', by: 'NV-002', version: 1, access: 'Admin, Kế toán' },
+    { id: 'TLT-01', ownerId: 'CN-001', buildingId: 'T17', kind: 'Sổ đỏ', file: 'so_do_T17_trang1.jpg', uploadedAt: '2024-03-20', by: 'NV-001', version: 1, access: 'Admin, Kế toán' },
+    { id: 'TLT-02', ownerId: 'CN-001', buildingId: 'T17', kind: 'Sổ đỏ', file: 'so_do_T17_trang2.jpg', uploadedAt: '2024-03-20', by: 'NV-001', version: 1, access: 'Admin, Kế toán' },
+    { id: 'TLT-03', ownerId: 'CN-001', buildingId: 'T17', leaseId: 'HĐT-T17-2024', kind: 'HĐ thuê tòa', file: 'HDT_T17_2024_scan.pdf', uploadedAt: '2024-03-20', by: 'NV-001', version: 1, access: 'Admin, Kế toán' },
+    { id: 'TLT-04', ownerId: 'CN-001', buildingId: 'T17', kind: 'PCCC', file: 'PCCC_nghiem_thu_T17_2024.pdf', uploadedAt: '2024-03-28', by: 'NV-003', version: 1, access: 'Admin, Kế toán, QL tòa' },
+    { id: 'TLT-05', ownerId: 'CN-001', buildingId: 'T17', kind: 'ĐKKD', file: 'DKKD_ho_kinh_doanh_T17.pdf', uploadedAt: '2024-04-10', by: 'NV-002', version: 2, access: 'Admin, Kế toán' },
+    { id: 'TLT-06', ownerId: 'CN-002', buildingId: 'S9', kind: 'Sổ đỏ', file: 'so_do_S9.jpg', uploadedAt: '2025-06-26', by: 'NV-002', version: 1, access: 'Admin, Kế toán' },
+    { id: 'TLT-07', ownerId: 'CN-002', buildingId: 'S9', leaseId: 'HĐT-S9-2025', kind: 'HĐ thuê tòa', file: 'HDT_S9_2025_scan.pdf', uploadedAt: '2025-06-26', by: 'NV-002', version: 1, access: 'Admin, Kế toán' },
+    { id: 'TLT-08', ownerId: 'CN-002', buildingId: 'S9', kind: 'PCCC', file: 'PCCC_tham_duyet_S9.pdf', uploadedAt: '2024-08-05', by: 'NV-004', version: 1, access: 'Admin, Kế toán, QL tòa' },
+    { id: 'TLT-09', ownerId: 'CN-004', buildingId: 'S9', leaseId: 'HĐT-S9-2024', kind: 'HĐ thuê tòa', file: 'HDT_S9_2024_scan.pdf', uploadedAt: '2024-07-25', by: 'NV-001', version: 2, access: 'Admin, Kế toán' },
+    { id: 'TLT-10', ownerId: 'CN-003', buildingId: 'G1', kind: 'Sổ đỏ', file: 'GCN_G1_ban_sao.pdf', uploadedAt: '2025-01-20', by: 'NV-001', version: 1, access: 'Admin, Kế toán' },
+    { id: 'TLT-11', ownerId: 'CN-003', buildingId: 'G1', leaseId: 'HĐT-G1-2025', kind: 'HĐ thuê tòa', file: 'HDT_G1_2025_scan.pdf', uploadedAt: '2025-01-20', by: 'NV-001', version: 1, access: 'Admin, Kế toán' },
+    { id: 'TLT-12', ownerId: 'CN-003', buildingId: 'G1', kind: 'ĐKKD', file: 'DKKD_G1.pdf', uploadedAt: '2025-02-12', by: 'NV-002', version: 1, access: 'Admin, Kế toán' },
   ];
 
   /* ---------- Phòng ---------- */
   var R = [
-    ['TH-CG', '101', 1, 22, 4200000, 'occupied'], ['TH-CG', '102', 1, 24, 4500000, 'occupied'],
-    ['TH-CG', '201', 2, 28, 5200000, 'occupied'], ['TH-CG', '202', 2, 26, 5000000, 'occupied'],
-    ['TH-CG', '301', 3, 30, 5800000, 'occupied'], ['TH-CG', '302', 3, 28, 5500000, 'occupied'],
-    ['TH-CG', '401', 4, 34, 6500000, 'vacant'],
-    ['TH-DD', '101', 1, 20, 3800000, 'occupied'], ['TH-DD', '102', 1, 20, 3900000, 'occupied'],
-    ['TH-DD', '201', 2, 25, 4600000, 'occupied'], ['TH-DD', '202', 2, 24, 4400000, 'occupied'],
-    ['TH-DD', '301', 3, 30, 5200000, 'occupied'], ['TH-DD', '302', 3, 27, 4800000, 'maintenance'],
-    ['TH-TX', '101', 1, 18, 3500000, 'occupied'], ['TH-TX', '102', 1, 19, 3600000, 'occupied'],
-    ['TH-TX', '201', 2, 23, 4200000, 'occupied'], ['TH-TX', '202', 2, 22, 4000000, 'vacant'],
-    ['TH-TX', '301', 3, 27, 4900000, 'occupied'],
+    ['T17', '101', 1, 22, 4200000, 'occupied'], ['T17', '102', 1, 24, 4500000, 'occupied'],
+    ['T17', '201', 2, 28, 5200000, 'occupied'], ['T17', '202', 2, 26, 5000000, 'occupied'],
+    ['T17', '301', 3, 30, 5800000, 'occupied'], ['T17', '302', 3, 28, 5500000, 'occupied'],
+    ['T17', '401', 4, 34, 6500000, 'vacant'],
+    ['S9', '101', 1, 20, 3800000, 'occupied'], ['S9', '102', 1, 20, 3900000, 'occupied'],
+    ['S9', '201', 2, 25, 4600000, 'occupied'], ['S9', '202', 2, 24, 4400000, 'occupied'],
+    ['S9', '301', 3, 30, 5200000, 'occupied'], ['S9', '302', 3, 27, 4800000, 'maintenance'],
+    ['G1', '101', 1, 18, 3500000, 'occupied'], ['G1', '102', 1, 19, 3600000, 'occupied'],
+    ['G1', '201', 2, 23, 4200000, 'occupied'], ['G1', '202', 2, 22, 4000000, 'vacant'],
+    ['G1', '301', 3, 27, 4900000, 'occupied'],
   ];
   db.rooms = R.map(function (r) {
-    var p = r[0].slice(3);
-    return { id: p + '-' + r[1], code: p + '-' + r[1], buildingId: r[0], floor: r[2], area: r[3], rent: r[4], status: r[5], meters: [{ type: 'elec', code: 'Đ-' + p + r[1] }, { type: 'water', code: 'N-' + p + r[1] }] };
+    var id = TH.roomIdOf(r[0], r[1]);
+    return { id: id, code: id, no: r[1], buildingId: r[0], floor: r[2], area: r[3], rent: r[4], status: r[5], meters: [{ type: 'elec', code: 'Đ-' + id }, { type: 'water', code: 'N-' + id }] };
   });
   db.roomEvents = [
-    { roomId: 'DD-302', at: '2026-09-28', from: 'occupied', to: 'maintenance', by: 'NV-004', note: 'Thấm trần, sửa chữa đến 31/10' },
-    { roomId: 'CG-401', at: '2026-08-31', from: 'occupied', to: 'vacant', by: 'NV-003', note: 'Khách thanh lý đúng hạn' },
-    { roomId: 'TX-202', at: '2026-07-15', from: 'occupied', to: 'vacant', by: 'NV-005', note: 'Khách chuyển đi' },
+    { roomId: '302S9', at: '2026-09-28', from: 'occupied', to: 'maintenance', by: 'NV-004', note: 'Thấm trần, sửa chữa đến 31/10' },
+    { roomId: '401T17', at: '2026-08-31', from: 'occupied', to: 'vacant', by: 'NV-003', note: 'Khách thanh lý đúng hạn' },
+    { roomId: '202G1', at: '2026-07-15', from: 'occupied', to: 'vacant', by: 'NV-005', note: 'Khách chuyển đi' },
   ];
   db.priceHistory = [
-    { roomId: 'CG-301', from: '2025-04-01', rent: 5500000 }, { roomId: 'CG-301', from: '2026-04-01', rent: 5800000 },
-    { roomId: 'DD-201', from: '2024-08-01', rent: 4400000 }, { roomId: 'DD-201', from: '2026-01-01', rent: 4600000 },
+    { roomId: '301T17', from: '2025-04-01', rent: 5500000 }, { roomId: '301T17', from: '2026-04-01', rent: 5800000 },
+    { roomId: '201S9', from: '2024-08-01', rent: 4400000 }, { roomId: '201S9', from: '2026-01-01', rent: 4600000 },
   ];
 
   /* ---------- Khách thuê ---------- */
@@ -266,15 +284,16 @@ TH.seed = function () {
 
   /* ---------- Hợp đồng ---------- */
   var occupied = db.rooms.filter(function (r) { return r.status === 'occupied'; });
-  var ends = { 'CG-202': '2026-11-05', 'DD-102': '2026-11-15', 'TX-101': '2026-11-30', 'CG-301': '2026-12-20' };
+  var ends = { '202T17': '2026-11-05', '102S9': '2026-11-15', '101G1': '2026-11-30', '301T17': '2026-12-20' };
   db.contracts = occupied.map(function (room, i) {
     var start = ['2025-05-01', '2025-06-01', '2025-07-01', '2025-11-06', '2025-12-21', '2026-01-01', '2025-09-01', '2025-11-16', '2026-02-01', '2026-03-01', '2025-10-01', '2025-12-01', '2026-04-01', '2026-05-01', '2026-06-01'][i];
     var end = ends[room.id] || addMonths(start, 12, -1), renewed = false;
     if (end < TH.TODAY) { end = addMonths(start, 24, -1); renewed = true; } // đã gia hạn thêm 12 tháng
-    var people = 1 + (i % 2);
+    /* Số người 1/2 như sheet NHÀ T/S/G (~45% mỗi loại), 1 phòng 3 người; xe đạp điện ~1/5 HĐ (cột XE ĐIỆN), còn lại xe máy gửi miễn phí */
+    var people = i === 9 ? 3 : 1 + (i % 2), ebikes = i % 5 === 4 ? 1 : 0;
     var bb = db.buildings.find(function (x) { return x.id === room.buildingId; });
-    var pl = seedPriceList(bb, start, people);
-    if (room.id === 'CG-301') Object.assign(pl.find(function (l) { return l.code === 'EVCHG'; }), { price: 3500, method: 'per_kwh', active: true, note: 'Công tơ phụ ổ sạc — chưa có chỉ số xác nhận nên chưa vào hóa đơn (K-05 PENDING_APPROVAL)' });
+    var pl = seedPriceList(bb, start, ebikes);
+    if (room.id === '301T17') Object.assign(pl.find(function (l) { return l.code === 'EVCHG'; }), { price: 3500, method: 'per_kwh', active: true, note: 'Công tơ phụ ổ sạc — chưa có chỉ số xác nhận nên chưa vào hóa đơn (K-05 PENDING_APPROVAL)' });
     /* K-03/K-04/K-09: điều khoản theo mẫu đã ký của từng HĐ — mockup chỉ dùng mẫu đầy đủ (CR-CUS-02); gia hạn xen kẽ mặc nhiên / phụ lục để demo chứng từ */
     var terms = termsOf('DAYDU', start), amend = i % 2 === 1;
     return {
@@ -282,25 +301,21 @@ TH.seed = function () {
       renewals: renewed ? [!amend
         ? { n: 1, mode: 'auto_if_applicable', from: addMonths(start, 12), to: end, at: addMonths(start, 11), by: managerOf(db, room.buildingId), evidence: 'Đã kiểm tra: không có thông báo chấm dứt trước ' + terms.noticeDays + ' ngày (Điều 3.4 HĐ ký ' + start + ')', file: null }
         : { n: 1, mode: 'amendment', from: addMonths(start, 12), to: end, at: addMonths(start, 11), by: managerOf(db, room.buildingId), evidence: 'Phụ lục gia hạn hai bên ký ' + addMonths(start, 11), file: 'phu_luc_gia_han_' + room.id + '_' + addMonths(start, 11).slice(0, 4) + '.pdf' }] : [],
-      previousContractId: room.id === 'CG-201' ? 'HĐ-CG201/24' : null, endKind: null,
+      previousContractId: room.id === '201T17' ? 'HĐ-201T17/24' : null, endKind: null,
       priceList: pl, note: '',
-      id: 'HĐ-' + room.id.replace('-', '') + '/' + start.slice(2, 4),
+      id: 'HĐ-' + room.id + '/' + start.slice(2, 4),
       roomId: room.id, buildingId: room.buildingId, customerId: db.customers[i].id,
       rent: room.rent, deposit: room.rent, start: start, end: end, signedAt: addDays(start, -3),
       people: people, billingDay: 1, status: 'active', scanFile: 'scan_' + room.id + '.pdf',
-      fees: [
-        { code: 'SVC', name: 'Phí dịch vụ', price: 150000, qty: 1, unit: 'tháng' },
-        { code: 'NET', name: 'Internet', price: 100000, qty: 1, unit: 'tháng' },
-        { code: 'PARK', name: 'Gửi xe điện', price: 120000, qty: people, unit: 'xe' },
-      ],
+      fees: seedFees(pl, people),
       versions: i % 5 === 2 ? [{ v: 1, at: start, note: 'Bản ký gốc' }, { v: 2, at: '2026-04-01', note: 'Phụ lục điều chỉnh giá thuê' }] : [{ v: 1, at: start, note: 'Bản ký gốc' }],
     };
   });
-  /* CR-BILL: TX-301 đóng 3 tháng tiền phòng/lần từ kỳ 09/2026 (sheet NHÀ S "đến kì tt 3th"); DV và điện nước vẫn lập theo tháng */
-  Object.assign(db.contracts.find(function (c) { return c.roomId === 'TX-301'; }), { payCycle: 3, cycleFrom: '2026-09', cycleScope: 'rent', cycleNote: 'Khách đề nghị đóng 3 tháng tiền phòng/lần từ 09/2026' });
+  /* CR-BILL: 301G1 đóng 3 tháng tiền phòng/lần từ kỳ 09/2026 (sheet NHÀ S "đến kì tt 3th"); DV và điện nước vẫn lập theo tháng */
+  Object.assign(db.contracts.find(function (c) { return c.roomId === '301G1'; }), { payCycle: 3, cycleFrom: '2026-09', cycleScope: 'rent', cycleNote: 'Khách đề nghị đóng 3 tháng tiền phòng/lần từ 09/2026' });
   db.followUps = [
-    { contractId: contractIdOf(db, 'CG-202'), at: '2026-10-15', by: 'NV-003', result: 'no_answer', moveOutAt: null, callbackAt: '2026-10-22', note: 'Khách hẹn trả lời sau khi trao đổi với gia đình.' },
-    { contractId: contractIdOf(db, 'DD-102'), at: '2026-10-12', by: 'NV-004', result: 'move_out', moveOutAt: '2026-11-15', callbackAt: null, note: 'Chuyển công tác, đã thông báo trước 30 ngày.' },
+    { contractId: contractIdOf(db, '202T17'), at: '2026-10-15', by: 'NV-003', result: 'no_answer', moveOutAt: null, callbackAt: '2026-10-22', note: 'Khách hẹn trả lời sau khi trao đổi với gia đình.' },
+    { contractId: contractIdOf(db, '102S9'), at: '2026-10-12', by: 'NV-004', result: 'move_out', moveOutAt: '2026-11-15', callbackAt: null, note: 'Chuyển công tác, đã thông báo trước 30 ngày.' },
   ];
 
   /* ---------- Chỉ số điện nước (chốt số ngày 01 của kỳ) ---------- */
@@ -308,30 +323,30 @@ TH.seed = function () {
   db.rooms.forEach(function (room, ri) {
     var e = 1200 + ri * 173, w = 300 + ri * 19;
     TH.PERIODS.forEach(function (p, pi) {
-      var occ = room.status === 'occupied' || (room.id === 'CG-401' && pi < 4) || (room.id === 'TX-202' && pi < 2) || (room.id === 'DD-302' && pi < 5);
+      var occ = room.status === 'occupied' || (room.id === '401T17' && pi < 4) || (room.id === '202G1' && pi < 2) || (room.id === '302S9' && pi < 5);
       var de = occ ? 85 + ((ri * 37 + pi * 23) % 95) : 3;
       var dw = occ ? 4 + ((ri * 5 + pi * 3) % 6) : 0;
-      if (room.id === 'DD-301' && p === '2026-10') de = 412;
+      if (room.id === '301S9' && p === '2026-10') de = 412;
       var rd = { roomId: room.id, period: p, elecPrev: e, elecCur: e + de, waterPrev: w, waterCur: w + dw, status: 'confirmed', enteredBy: managerOf(db, room.buildingId), enteredAt: p + '-01', approvedBy: null, note: '' };
-      if (room.id === 'DD-301' && p === '2026-10') { rd.approvedBy = 'NV-002'; rd.note = 'Tiêu thụ tăng ~3× trung bình — đã kiểm tra thực tế, khách dùng điều hòa liên tục.'; }
-      if (room.buildingId === 'TH-TX' && p === '2026-10') {
+      if (room.id === '301S9' && p === '2026-10') { rd.approvedBy = 'NV-002'; rd.note = 'Tiêu thụ tăng ~3× trung bình — đã kiểm tra thực tế, khách dùng điều hòa liên tục.'; }
+      if (room.buildingId === 'G1' && p === '2026-10') {
         rd.status = 'draft';
-        if (room.id === 'TX-201') { rd.elecCur = null; rd.waterCur = null; rd.status = 'missing'; }
-        if (room.id === 'TX-102') { rd.waterCur = w - 14; rd.note = 'Nghi nhập nhầm chữ số.'; }
+        if (room.id === '201G1') { rd.elecCur = null; rd.waterCur = null; rd.status = 'missing'; }
+        if (room.id === '102G1') { rd.waterCur = w - 14; rd.note = 'Nghi nhập nhầm chữ số.'; }
       }
       db.readings.push(rd);
       e += de; w += dw;
     });
   });
   db.meterChanges = [
-    { roomId: 'CG-102', type: 'elec', at: '2026-06-18', oldCode: 'Đ-CG102-cu', newCode: 'Đ-CG102', oldFinal: 3105, newStart: 0, note: 'Công tơ cũ hỏng, thay mới; số reset về 0 (dữ liệu minh họa).' },
+    { roomId: '102T17', type: 'elec', at: '2026-06-18', oldCode: 'Đ-102T17-cu', newCode: 'Đ-102T17', oldFinal: 3105, newStart: 0, note: 'Công tơ cũ hỏng, thay mới; số reset về 0 (dữ liệu minh họa).' },
   ];
 
   /* ---------- Phí phát sinh ---------- */
   db.extraFees = [
-    { id: 'PS-2610-01', roomId: 'CG-201', period: '2026-10', name: 'Sửa vòi sen', qty: 1, price: 150000, status: 'confirmed', source: 'Phiếu yêu cầu #YC-0912' },
-    { id: 'PS-2610-02', roomId: 'DD-201', period: '2026-10', name: 'Thay bóng đèn', qty: 2, price: 30000, status: 'confirmed', source: 'Phiếu yêu cầu #YC-0918' },
-    { id: 'PS-2610-03', roomId: 'TX-301', period: '2026-10', name: 'Vệ sinh điều hòa', qty: 1, price: 200000, status: 'draft', source: 'Phiếu yêu cầu #YC-0925' },
+    { id: 'PS-2610-01', roomId: '201T17', period: '2026-10', name: 'Sửa vòi sen', qty: 1, price: 150000, status: 'confirmed', source: 'Phiếu yêu cầu #YC-0912' },
+    { id: 'PS-2610-02', roomId: '201S9', period: '2026-10', name: 'Thay bóng đèn', qty: 2, price: 30000, status: 'confirmed', source: 'Phiếu yêu cầu #YC-0918' },
+    { id: 'PS-2610-03', roomId: '301G1', period: '2026-10', name: 'Vệ sinh điều hòa', qty: 1, price: 200000, status: 'draft', source: 'Phiếu yêu cầu #YC-0925' },
   ];
 
   /* ---------- Hóa đơn ---------- */
@@ -339,7 +354,7 @@ TH.seed = function () {
   TH.PERIODS.forEach(function (p) {
     db.contracts.forEach(function (ct) {
       if (ct.start > monthEnd(p)) return;
-      if (p === '2026-10' && ct.buildingId === 'TH-TX') return; // TX kỳ 10 chưa lập — dùng cho luồng INV-01
+      if (p === '2026-10' && ct.buildingId === 'G1') return; // G1 kỳ 10 chưa lập — dùng cho luồng INV-01
       db.invoices.push(buildInvoice(db, ct, p, 'confirmed'));
     });
   });
@@ -362,22 +377,22 @@ TH.seed = function () {
   var dayCycle = [3, 4, 6, 8, 2, 9, 12, 5, 14, 7, 11, 4, 16, 10, 13];
   db.invoices.forEach(function (inv, k) {
     if (inv.period === '2026-10') return;
-    if (inv.period === '2026-09' && inv.roomId === 'CG-302') { rc(inv, 3000000, 9, 'confirmed'); return; }
+    if (inv.period === '2026-09' && inv.roomId === '302T17') { rc(inv, 3000000, 9, 'confirmed'); return; }
     rc(inv, inv.total, dayCycle[k % dayCycle.length], 'confirmed');
   });
   var cur = function (room) { return db.invoices.find(function (i) { return i.roomId === room && i.period === '2026-10'; }); };
-  rc(cur('CG-101'), cur('CG-101').total, 3, 'confirmed');
-  rc(cur('CG-102'), cur('CG-102').total, 8, 'confirmed');
-  rc(cur('CG-201'), 2000000, 4, 'confirmed', { note: 'Thu lần 1' });
-  rc(cur('CG-201'), cur('CG-201').total - 2000000, 13, 'confirmed', { note: 'Thu lần 2 — đủ' });
-  rc(cur('CG-202'), cur('CG-202').total, 17, 'pending', { reportedAt: '2026-10-17', note: 'Khách chuyển khoản tối 17/10' });
-  rc(cur('CG-301'), cur('CG-301').total, 14, 'confirmed');
-  rc(cur('DD-101'), cur('DD-101').total, 2, 'confirmed');
-  rc(cur('DD-102'), cur('DD-102').total, 19, 'confirmed');
-  rc(cur('DD-201'), 3000000, 9, 'confirmed', { note: 'Thu lần 1' });
-  rc(cur('DD-202'), cur('DD-202').total, 5, 'confirmed');
-  rc(cur('DD-301'), cur('DD-301').total, 11, 'rejected', { method: 'Chuyển khoản', rejectReason: 'Ảnh chuyển khoản không khớp số tiền/người chuyển', confirmedBy: 'NV-002', confirmedAt: '2026-10-12' });
-  rc(cur('DD-301'), 2500000, 18, 'pending', { reportedAt: '2026-10-18', note: 'Báo lại sau khi đối chiếu, thu một phần' });
+  rc(cur('101T17'), cur('101T17').total, 3, 'confirmed');
+  rc(cur('102T17'), cur('102T17').total, 8, 'confirmed');
+  rc(cur('201T17'), 2000000, 4, 'confirmed', { note: 'Thu lần 1' });
+  rc(cur('201T17'), cur('201T17').total - 2000000, 13, 'confirmed', { note: 'Thu lần 2 — đủ' });
+  rc(cur('202T17'), cur('202T17').total, 17, 'pending', { reportedAt: '2026-10-17', note: 'Khách chuyển khoản tối 17/10' });
+  rc(cur('301T17'), cur('301T17').total, 14, 'confirmed');
+  rc(cur('101S9'), cur('101S9').total, 2, 'confirmed');
+  rc(cur('102S9'), cur('102S9').total, 19, 'confirmed');
+  rc(cur('201S9'), 3000000, 9, 'confirmed', { note: 'Thu lần 1' });
+  rc(cur('202S9'), cur('202S9').total, 5, 'confirmed');
+  rc(cur('301S9'), cur('301S9').total, 11, 'rejected', { method: 'Chuyển khoản', rejectReason: 'Ảnh chuyển khoản không khớp số tiền/người chuyển', confirmedBy: 'NV-002', confirmedAt: '2026-10-12' });
+  rc(cur('301S9'), 2500000, 18, 'pending', { reportedAt: '2026-10-18', note: 'Báo lại sau khi đối chiếu, thu một phần' });
 
   /* ---------- Chi phí ---------- */
   db.expenses = [];
@@ -385,7 +400,7 @@ TH.seed = function () {
   function addExp(b, p, cat, desc, amount, status, extra) {
     db.expenses.push(Object.assign({
       id: 'CP-' + p.slice(2, 4) + p.slice(5) + '-' + String(ex++).padStart(3, '0'), buildingId: b, period: p, category: cat, description: desc, amount: amount,
-      docNo: cat === 'owner_rent' ? 'HĐTT-' + b.slice(3) + '-' + p.slice(5) : 'HĐ' + (10200 + ex * 7), date: p + '-05', status: status,
+      docNo: cat === 'owner_rent' ? 'HĐTT-' + TH.bTag(b) + '-' + p.slice(5) : 'HĐ' + (10200 + ex * 7), date: p + '-05', status: status,
       createdBy: managerOf(db, b), approvedBy: status === 'approved' ? 'NV-002' : null, approvedAt: status === 'approved' ? p + '-07' : null, file: 'chungtu_' + ex + '.pdf', reason: '',
     }, extra || {}));
   }
@@ -401,55 +416,55 @@ TH.seed = function () {
       if (!isCur && (pi + bi) % 2 === 0) addExp(b.id, p, 'repair', ['Sửa khóa cửa', 'Thay bình nóng lạnh', 'Bảo trì máy bơm', 'Chống thấm sân thượng'][(pi + bi) % 4], 800000 + ((pi * 3 + bi) % 5) * 450000, 'approved', { date: p + '-18' });
     });
   });
-  addExp('TH-CG', '2026-10', 'repair', 'Sửa máy bơm tăng áp', 2400000, 'pending', { docNo: 'HĐ10388', date: '2026-10-14' });
-  addExp('TH-CG', '2026-10', 'cleaning', 'Vệ sinh khu chung', 1500000, 'draft', { date: '2026-10-16' });
-  addExp('TH-DD', '2026-10', 'repair', 'Sơn lại hành lang tầng 2', 3200000, 'pending', { docNo: 'HĐ10402', date: '2026-10-12' });
-  addExp('TH-DD', '2026-10', 'repair', 'Sơn hành lang tầng 2 (nhập lại)', 3200000, 'pending', { docNo: 'HĐ10402', date: '2026-10-13', createdBy: 'NV-006' });
-  addExp('TH-TX', '2026-10', 'supplies', 'Bóng đèn, ổ cắm dự phòng', 650000, 'rejected', { reason: 'Thiếu chứng từ mua hàng', approvedBy: 'NV-002', approvedAt: '2026-10-11' });
+  addExp('T17', '2026-10', 'repair', 'Sửa máy bơm tăng áp', 2400000, 'pending', { docNo: 'HĐ10388', date: '2026-10-14' });
+  addExp('T17', '2026-10', 'cleaning', 'Vệ sinh khu chung', 1500000, 'draft', { date: '2026-10-16' });
+  addExp('S9', '2026-10', 'repair', 'Sơn lại hành lang tầng 2', 3200000, 'pending', { docNo: 'HĐ10402', date: '2026-10-12' });
+  addExp('S9', '2026-10', 'repair', 'Sơn hành lang tầng 2 (nhập lại)', 3200000, 'pending', { docNo: 'HĐ10402', date: '2026-10-13', createdBy: 'NV-006' });
+  addExp('G1', '2026-10', 'supplies', 'Bóng đèn, ổ cắm dự phòng', 650000, 'rejected', { reason: 'Thiếu chứng từ mua hàng', approvedBy: 'NV-002', approvedAt: '2026-10-11' });
   /* Các khoản dùng cho báo cáo theo mẫu khách (RPT-04/05): mua sắm, bảo trì thang máy, hoa hồng phòng mới */
-  addExp('TH-CG', '2026-06', 'elevator', 'Bảo trì thang máy định kỳ quý 2', 800000, 'approved', { date: '2026-06-20' });
-  addExp('TH-CG', '2026-09', 'elevator', 'Bảo trì thang máy định kỳ quý 3', 800000, 'approved', { date: '2026-09-20' });
-  addExp('TH-TX', '2026-05', 'commission', 'Hoa hồng môi giới phòng TX-201', 2100000, 'approved', { date: '2026-05-03', roomId: 'TX-201' });
-  addExp('TH-TX', '2026-06', 'commission', 'Hoa hồng môi giới phòng TX-301', 2450000, 'approved', { date: '2026-06-03', roomId: 'TX-301' });
-  addExp('TH-TX', '2026-08', 'equipment', 'Điều hòa thay thế phòng TX-202', 6500000, 'approved', { date: '2026-08-12', roomId: 'TX-202' });
-  addExp('TH-CG', '2026-09', 'equipment', 'Tủ lạnh + rèm phòng CG-401', 3200000, 'approved', { date: '2026-09-08', roomId: 'CG-401' });
-  addExp('TH-DD', '2026-10', 'commission', 'Đăng tin cho thuê phòng DD-302', 300000, 'approved', { date: '2026-10-09', roomId: 'DD-302' });
+  addExp('T17', '2026-06', 'elevator', 'Bảo trì thang máy định kỳ quý 2', 800000, 'approved', { date: '2026-06-20' });
+  addExp('T17', '2026-09', 'elevator', 'Bảo trì thang máy định kỳ quý 3', 800000, 'approved', { date: '2026-09-20' });
+  addExp('G1', '2026-05', 'commission', 'Hoa hồng môi giới phòng 201G1', 2100000, 'approved', { date: '2026-05-03', roomId: '201G1' });
+  addExp('G1', '2026-06', 'commission', 'Hoa hồng môi giới phòng 301G1', 2450000, 'approved', { date: '2026-06-03', roomId: '301G1' });
+  addExp('G1', '2026-08', 'equipment', 'Điều hòa thay thế phòng 202G1', 6500000, 'approved', { date: '2026-08-12', roomId: '202G1' });
+  addExp('T17', '2026-09', 'equipment', 'Tủ lạnh + rèm phòng 401T17', 3200000, 'approved', { date: '2026-09-08', roomId: '401T17' });
+  addExp('S9', '2026-10', 'commission', 'Đăng tin cho thuê phòng 302S9', 300000, 'approved', { date: '2026-10-09', roomId: '302S9' });
 
   /* ---------- Cọc: nhận cọc phòng mới / khách bỏ cọc / hoàn cọc (dòng doanh thu đầu báo cáo mẫu) ---------- */
   db.deposits = [
-    { id: 'COC-2605-01', buildingId: 'TH-TX', roomId: 'TX-201', period: '2026-05', date: '2026-05-01', type: 'in', amount: 4200000, note: 'Cọc HĐ mới TX-201', status: 'confirmed' },
-    { id: 'COC-2606-01', buildingId: 'TH-TX', roomId: 'TX-301', period: '2026-06', date: '2026-06-01', type: 'in', amount: 4900000, note: 'Cọc HĐ mới TX-301', status: 'confirmed' },
-    { id: 'COC-2607-01', buildingId: 'TH-TX', roomId: 'TX-202', period: '2026-07', date: '2026-07-15', type: 'forfeit', amount: 4000000, breach: true, note: 'Khách phá HĐ trước hạn — giữ cọc theo HĐ', status: 'confirmed' },
-    { id: 'COC-2609-01', buildingId: 'TH-CG', roomId: 'CG-401', period: '2026-09', date: '2026-09-03', type: 'refund', amount: 6200000, note: 'Thanh lý đúng hạn 31/08 — hoàn cọc, trừ 300.000 hư hỏng', status: 'confirmed' },
-    { id: 'COC-2609-02', buildingId: 'TH-CG', roomId: 'CG-401', period: '2026-09', date: '2026-09-20', type: 'forfeit', amount: 2000000, note: 'Khách giữ chỗ 10/09 rồi không vào ở', status: 'confirmed' },
-    { id: 'COC-2610-01', buildingId: 'TH-TX', roomId: 'TX-202', period: '2026-10', date: '2026-10-12', type: 'in', amount: 4000000, note: 'Giữ chỗ, vào ở 01/11/2026', status: 'confirmed' },
+    { id: 'COC-2605-01', buildingId: 'G1', roomId: '201G1', period: '2026-05', date: '2026-05-01', type: 'in', amount: 4200000, note: 'Cọc HĐ mới 201G1', status: 'confirmed' },
+    { id: 'COC-2606-01', buildingId: 'G1', roomId: '301G1', period: '2026-06', date: '2026-06-01', type: 'in', amount: 4900000, note: 'Cọc HĐ mới 301G1', status: 'confirmed' },
+    { id: 'COC-2607-01', buildingId: 'G1', roomId: '202G1', period: '2026-07', date: '2026-07-15', type: 'forfeit', amount: 4000000, breach: true, note: 'Khách phá HĐ trước hạn — giữ cọc theo HĐ', status: 'confirmed' },
+    { id: 'COC-2609-01', buildingId: 'T17', roomId: '401T17', period: '2026-09', date: '2026-09-03', type: 'refund', amount: 6200000, note: 'Thanh lý đúng hạn 31/08 — hoàn cọc, trừ 300.000 hư hỏng', status: 'confirmed' },
+    { id: 'COC-2609-02', buildingId: 'T17', roomId: '401T17', period: '2026-09', date: '2026-09-20', type: 'forfeit', amount: 2000000, note: 'Khách giữ chỗ 10/09 rồi không vào ở', status: 'confirmed' },
+    { id: 'COC-2610-01', buildingId: 'G1', roomId: '202G1', period: '2026-10', date: '2026-10-12', type: 'in', amount: 4000000, note: 'Giữ chỗ, vào ở 01/11/2026', status: 'confirmed' },
   ];
 
   /* Tiền phòng phát sinh đã thu đủ (ngoài hóa đơn tháng) — thành phần C của hiệu suất (note.md §5.2), cũng là doanh thu tiền phòng */
   db.arisingRent = [
-    { id: 'PS-2608-01', buildingId: 'TH-TX', roomId: 'TX-202', period: '2026-08', date: '2026-08-26', amount: 1800000, paidFull: true, note: 'Khách ở ngắn hạn 15–26/08 sau khi thay điều hòa, thu đủ 26/08' },
-    { id: 'PS-2610-01', buildingId: 'TH-CG', roomId: 'CG-401', period: '2026-10', date: '2026-10-14', amount: 3000000, paidFull: true, note: 'Cho thuê ngắn ngày 01–14/10 khi chờ khách mới, thu đủ 14/10' },
+    { id: 'TPP-2608-01', buildingId: 'G1', roomId: '202G1', period: '2026-08', date: '2026-08-26', amount: 1800000, paidFull: true, note: 'Khách ở ngắn hạn 15–26/08 sau khi thay điều hòa, thu đủ 26/08' },
+    { id: 'TPP-2610-01', buildingId: 'T17', roomId: '401T17', period: '2026-10', date: '2026-10-14', amount: 3000000, paidFull: true, note: 'Cho thuê ngắn ngày 01–14/10 khi chờ khách mới, thu đủ 14/10' },
   ];
 
   /* ---------- Tài sản tại tòa: tài sản chủ nhà / tài sản đầu tư thêm (note.md §4) ---------- */
   var eqId = function (room) { var e = db.expenses.find(function (x) { return x.category === 'equipment' && x.roomId === room; }); return e ? e.id : null; };
   db.assets = [
-    { id: 'TS-CG-01', buildingId: 'TH-CG', group: 'owner', name: 'Điều hòa 12.000 BTU', qty: 7, unit: 'bộ', location: 'Phòng 101–401', condition: 'Tốt', note: 'Theo biên bản kiểm kê kèm HĐ thuê tòa', since: '2024-03-25' },
-    { id: 'TS-CG-02', buildingId: 'TH-CG', group: 'owner', name: 'Bình nóng lạnh 30L', qty: 7, unit: 'cái', location: 'WC từng phòng', condition: 'Tốt', note: '', since: '2024-03-25' },
-    { id: 'TS-CG-03', buildingId: 'TH-CG', group: 'owner', name: 'Thang máy 450 kg', qty: 1, unit: 'hệ', location: 'Trục thang', condition: 'Bình thường', note: 'Bảo trì định kỳ quý (chi phí bên thuê)', since: '2024-03-25' },
-    { id: 'TS-CG-04', buildingId: 'TH-CG', group: 'owner', name: 'Hệ thống báo cháy', qty: 1, unit: 'hệ', location: 'Toàn tòa', condition: 'Tốt', note: 'Chủ nhà trang bị theo Điều 6.1 HĐ', since: '2024-03-25' },
-    { id: 'TS-CG-05', buildingId: 'TH-CG', group: 'invest', name: 'Camera an ninh', qty: 4, unit: 'mắt', location: 'Cổng, hành lang', condition: 'Tốt', note: '', since: '2024-04-05', value: 6400000 },
-    { id: 'TS-CG-06', buildingId: 'TH-CG', group: 'invest', name: 'Máy giặt chung 9 kg', qty: 2, unit: 'cái', location: 'Tầng 1', condition: 'Bình thường', note: '', since: '2024-04-10', value: 11000000 },
-    { id: 'TS-CG-07', buildingId: 'TH-CG', group: 'invest', name: 'Tủ lạnh mini + rèm', qty: 1, unit: 'bộ', location: 'CG-401', condition: 'Mới', note: 'Mua sắm kỳ 09/2026', since: '2026-09-08', value: 3200000, expenseId: eqId('CG-401') },
-    { id: 'TS-DD-01', buildingId: 'TH-DD', group: 'owner', name: 'Điều hòa 9.000 BTU', qty: 6, unit: 'bộ', location: 'Phòng 101–302', condition: 'Bình thường', note: '', since: '2024-07-28' },
-    { id: 'TS-DD-02', buildingId: 'TH-DD', group: 'owner', name: 'Giường, tủ gỗ', qty: 6, unit: 'bộ', location: 'Phòng 101–302', condition: 'Cũ', note: 'Chủ cũ để lại, chủ mới xác nhận khi bàn giao 07/2025', since: '2025-07-01' },
-    { id: 'TS-DD-03', buildingId: 'TH-DD', group: 'owner', name: 'Máy bơm tăng áp', qty: 1, unit: 'cái', location: 'Sân thượng', condition: 'Cần thay', note: 'Đề xuất chủ nhà thay (Điều 7.2)', since: '2024-07-28' },
-    { id: 'TS-DD-04', buildingId: 'TH-DD', group: 'invest', name: 'Khóa vân tay', qty: 6, unit: 'cái', location: 'Cửa phòng', condition: 'Tốt', note: '', since: '2024-08-03', value: 9000000 },
-    { id: 'TS-DD-05', buildingId: 'TH-DD', group: 'invest', name: 'Wifi mesh', qty: 3, unit: 'cục', location: 'Mỗi tầng', condition: 'Tốt', note: '', since: '2024-08-03', value: 4500000 },
-    { id: 'TS-TX-01', buildingId: 'TH-TX', group: 'owner', name: 'Điều hòa 9.000 BTU', qty: 4, unit: 'bộ', location: 'TX-101, 102, 201, 301', condition: 'Bình thường', note: 'TX-202 hỏng, bên thuê thay mới', since: '2025-01-25' },
-    { id: 'TS-TX-02', buildingId: 'TH-TX', group: 'owner', name: 'Bình nóng lạnh 20L', qty: 5, unit: 'cái', location: 'WC từng phòng', condition: 'Cũ', note: '', since: '2025-01-25' },
-    { id: 'TS-TX-03', buildingId: 'TH-TX', group: 'invest', name: 'Điều hòa thay thế', qty: 1, unit: 'bộ', location: 'TX-202', condition: 'Mới', note: 'Mua sắm kỳ 08/2026', since: '2026-08-12', value: 6500000, expenseId: eqId('TX-202') },
-    { id: 'TS-TX-04', buildingId: 'TH-TX', group: 'invest', name: 'Kệ giày, tủ đồ chung', qty: 2, unit: 'cái', location: 'Sảnh tầng 1', condition: 'Tốt', note: '', since: '2025-02-03', value: 2400000 },
+    { id: 'TS-T17-01', buildingId: 'T17', group: 'owner', name: 'Điều hòa 12.000 BTU', qty: 7, unit: 'bộ', location: 'Phòng 101–401', condition: 'Tốt', note: 'Theo biên bản kiểm kê kèm HĐ thuê tòa', since: '2024-03-25' },
+    { id: 'TS-T17-02', buildingId: 'T17', group: 'owner', name: 'Bình nóng lạnh 30L', qty: 7, unit: 'cái', location: 'WC từng phòng', condition: 'Tốt', note: '', since: '2024-03-25' },
+    { id: 'TS-T17-03', buildingId: 'T17', group: 'owner', name: 'Thang máy 450 kg', qty: 1, unit: 'hệ', location: 'Trục thang', condition: 'Bình thường', note: 'Bảo trì định kỳ quý (chi phí bên thuê)', since: '2024-03-25' },
+    { id: 'TS-T17-04', buildingId: 'T17', group: 'owner', name: 'Hệ thống báo cháy', qty: 1, unit: 'hệ', location: 'Toàn tòa', condition: 'Tốt', note: 'Chủ nhà trang bị theo Điều 6.1 HĐ', since: '2024-03-25' },
+    { id: 'TS-T17-05', buildingId: 'T17', group: 'invest', name: 'Camera an ninh', qty: 4, unit: 'mắt', location: 'Cổng, hành lang', condition: 'Tốt', note: '', since: '2024-04-05', value: 6400000 },
+    { id: 'TS-T17-06', buildingId: 'T17', group: 'invest', name: 'Máy giặt chung 9 kg', qty: 2, unit: 'cái', location: 'Tầng 1', condition: 'Bình thường', note: '', since: '2024-04-10', value: 11000000 },
+    { id: 'TS-T17-07', buildingId: 'T17', group: 'invest', name: 'Tủ lạnh mini + rèm', qty: 1, unit: 'bộ', location: '401T17', condition: 'Mới', note: 'Mua sắm kỳ 09/2026', since: '2026-09-08', value: 3200000, expenseId: eqId('401T17') },
+    { id: 'TS-S9-01', buildingId: 'S9', group: 'owner', name: 'Điều hòa 9.000 BTU', qty: 6, unit: 'bộ', location: 'Phòng 101–302', condition: 'Bình thường', note: '', since: '2024-07-28' },
+    { id: 'TS-S9-02', buildingId: 'S9', group: 'owner', name: 'Giường, tủ gỗ', qty: 6, unit: 'bộ', location: 'Phòng 101–302', condition: 'Cũ', note: 'Chủ cũ để lại, chủ mới xác nhận khi bàn giao 07/2025', since: '2025-07-01' },
+    { id: 'TS-S9-03', buildingId: 'S9', group: 'owner', name: 'Máy bơm tăng áp', qty: 1, unit: 'cái', location: 'Sân thượng', condition: 'Cần thay', note: 'Đề xuất chủ nhà thay (Điều 7.2)', since: '2024-07-28' },
+    { id: 'TS-S9-04', buildingId: 'S9', group: 'invest', name: 'Khóa vân tay', qty: 6, unit: 'cái', location: 'Cửa phòng', condition: 'Tốt', note: '', since: '2024-08-03', value: 9000000 },
+    { id: 'TS-S9-05', buildingId: 'S9', group: 'invest', name: 'Wifi mesh', qty: 3, unit: 'cục', location: 'Mỗi tầng', condition: 'Tốt', note: '', since: '2024-08-03', value: 4500000 },
+    { id: 'TS-G1-01', buildingId: 'G1', group: 'owner', name: 'Điều hòa 9.000 BTU', qty: 4, unit: 'bộ', location: '101G1, 102, 201, 301', condition: 'Bình thường', note: '202G1 hỏng, bên thuê thay mới', since: '2025-01-25' },
+    { id: 'TS-G1-02', buildingId: 'G1', group: 'owner', name: 'Bình nóng lạnh 20L', qty: 5, unit: 'cái', location: 'WC từng phòng', condition: 'Cũ', note: '', since: '2025-01-25' },
+    { id: 'TS-G1-03', buildingId: 'G1', group: 'invest', name: 'Điều hòa thay thế', qty: 1, unit: 'bộ', location: '202G1', condition: 'Mới', note: 'Mua sắm kỳ 08/2026', since: '2026-08-12', value: 6500000, expenseId: eqId('202G1') },
+    { id: 'TS-G1-04', buildingId: 'G1', group: 'invest', name: 'Kệ giày, tủ đồ chung', qty: 2, unit: 'cái', location: 'Sảnh tầng 1', condition: 'Tốt', note: '', since: '2025-02-03', value: 2400000 },
   ];
 
   /* G-09 (đề xuất): trường tài sản đầy đủ — bên sở hữu/chịu chi, nguồn chứng từ, người cập nhật; tài sản đầu tư thêm có ngày mua, nguyên giá, thời hạn sử dụng */
@@ -473,50 +488,64 @@ TH.seed = function () {
     };
   });
   db.buildingGroups = [
-    { id: 'NHA-1', name: 'Nhóm nhà 1 · Cầu Giấy – Đống Đa', short: 'Nhóm nhà 1', buildings: ['TH-CG', 'TH-DD'], payAccount: 'VPBank •••1201 · CT TNHH TimeHouse (minh họa)' },
-    { id: 'NHA-2', name: 'Nhóm nhà 2 · Thanh Xuân', short: 'Nhóm nhà 2', buildings: ['TH-TX'], payAccount: 'Techcombank •••6018 · CT TNHH TimeHouse (minh họa)' },
+    /* rep = Bên A trên HĐ khách thuê (mẫu đầy đủ: "Đại diện chủ nhà (Ông/Bà)…") — đại diện bên cho thuê của nhóm nhà, dữ liệu giả đã mask */
+    { id: 'NHA-1', name: 'Nhóm nhà 1 · Cầu Giấy – Đống Đa', short: 'Nhóm nhà 1', buildings: ['T17', 'S9'], payAccount: 'VPBank •••1201 · CT TNHH TimeHouse (minh họa)',
+      rep: { staffId: 'NV-001', name: 'Phạm Minh Đức', title: 'Đại diện bên cho thuê', idNo: '0010••••3110', idPlace: 'Cục Cảnh sát QLHC về TTXH', permAddress: 'Số 12 ngõ 40 Phố Minh Họa, Cầu Giấy, Hà Nội', phone: '0903 ••• 110' } },
+    { id: 'NHA-2', name: 'Nhóm nhà 2 · Thanh Xuân', short: 'Nhóm nhà 2', buildings: ['G1'], payAccount: 'Techcombank •••6018 · CT TNHH TimeHouse (minh họa)',
+      rep: { staffId: 'NV-013', name: 'Trần Quốc Thắng', title: 'Đại diện bên cho thuê', idNo: '0010••••4946', idPlace: 'Cục Cảnh sát QLHC về TTXH', permAddress: 'Số 7 ngách 2 Phố Ví Dụ, Thanh Xuân, Hà Nội', phone: '0915 ••• 946' } },
   ];
 
   /* ---------- Nhân sự ---------- */
   db.teams = [
-    { id: 'T1', name: 'Đội 1 · Cầu Giấy – Đống Đa', leaderId: 'NV-003', parent: 'OPS' },
-    { id: 'T2', name: 'Đội 2 · Thanh Xuân', leaderId: 'NV-005', parent: 'OPS' },
-    { id: 'BO', name: 'Khối văn phòng', leaderId: 'NV-001', parent: null },
+    /* Theo sơ đồ tổ chức: QL tổng → phòng vận hành (TPVH, NVVH, kỹ thuật, vệ sinh), Tài chính kế toán, Phòng kinh doanh (TNKD → sale) */
+    { id: 'VP', name: 'Khối văn phòng · QL tổng, kế toán, nhân sự', kind: 'office', leaderId: 'NV-001', parent: null },
+    { id: 'VH1', name: 'Phòng vận hành 1 · T17 – S9', kind: 'ops', leaderId: 'NV-003', parent: 'VP' },
+    { id: 'VH2', name: 'Phòng vận hành 2 · G1', kind: 'ops', leaderId: 'NV-005', parent: 'VP' },
+    { id: 'KD', name: 'Phòng kinh doanh · sale & nguồn nhà', kind: 'sales', leaderId: 'NV-015', parent: 'VP' },
   ];
   db.staff = [
-    { id: 'NV-001', name: 'Phạm Minh Đức', title: 'Giám đốc vận hành', team: 'BO', role: 'admin', phone: '0903 ••• 110', status: 'active', joinedAt: '2023-09-01', base: 18000000, allowance: 2000000 },
-    { id: 'NV-002', name: 'Hoàng Thu Hà', title: 'Kế toán', team: 'BO', role: 'accountant', phone: '0904 ••• 225', status: 'active', joinedAt: '2024-01-08', base: 12000000, allowance: 1000000 },
-    { id: 'NV-003', name: 'Vũ Quang Huy', title: 'Trưởng nhóm / QL tòa', team: 'T1', role: 'manager', phone: '0905 ••• 336', status: 'active', joinedAt: '2024-03-15', base: 9000000, allowance: 1500000 },
-    { id: 'NV-004', name: 'Đỗ Thị Lan', title: 'Quản lý tòa', team: 'T1', role: 'manager', phone: '0906 ••• 447', status: 'active', joinedAt: '2024-07-20', base: 8000000, allowance: 1000000 },
-    { id: 'NV-005', name: 'Bùi Văn Nam', title: 'Trưởng nhóm / QL tòa', team: 'T2', role: 'manager', phone: '0907 ••• 558', status: 'active', joinedAt: '2025-01-05', base: 8500000, allowance: 1500000 },
-    { id: 'NV-006', name: 'Ngô Thị Mai', title: 'Nhân viên kinh doanh', team: 'T2', role: 'staff', phone: '0908 ••• 669', status: 'active', joinedAt: '2025-03-10', base: 7000000, allowance: 800000 },
-    { id: 'NV-007', name: 'Đặng Văn Tú', title: 'Kỹ thuật vận hành', team: 'T1', role: 'staff', phone: '0909 ••• 770', status: 'inactive', joinedAt: '2024-05-02', base: 7500000, allowance: 500000 },
-    { id: 'NV-008', name: 'Lý Thị Ngọc', title: 'Nhân sự – hành chính', team: 'BO', role: 'hr', phone: '0910 ••• 881', status: 'active', joinedAt: '2024-02-19', base: 10000000, allowance: 800000 },
-    { id: 'NV-009', name: 'Trịnh Văn Hào', title: 'Nhân viên vệ sinh', team: 'T1', role: 'staff', phone: '0911 ••• 902', status: 'active', joinedAt: '2024-04-01', base: 6000000, allowance: 500000 },
-    { id: 'NV-010', name: 'Phan Thị Hương', title: 'Nhân viên vệ sinh', team: 'T2', role: 'staff', phone: '0912 ••• 913', status: 'active', joinedAt: '2025-02-01', base: 6000000, allowance: 500000 },
-    { id: 'NV-011', name: 'Mạc Văn Tuấn', title: 'Nhân viên kỹ thuật', team: 'T1', role: 'staff', phone: '0913 ••• 924', status: 'active', joinedAt: '2024-05-15', base: 7500000, allowance: 800000 },
-    { id: 'NV-012', name: 'Lương Đức Mạnh', title: 'Nhân viên kỹ thuật', team: 'T2', role: 'staff', phone: '0914 ••• 935', status: 'active', joinedAt: '2026-03-01', base: 7000000, allowance: 600000 },
-    { id: 'NV-013', name: 'Trần Quốc Thắng', title: 'Trưởng phòng vận hành', team: 'BO', role: 'staff', phone: '0915 ••• 946', status: 'active', joinedAt: '2024-03-01', base: 12000000, allowance: 2000000 },
+    { id: 'NV-001', name: 'Phạm Minh Đức', title: 'Giám đốc vận hành', team: 'VP', role: 'admin', phone: '0903 ••• 110', status: 'active', joinedAt: '2023-09-01', base: 18000000, allowance: 2000000 },
+    { id: 'NV-002', name: 'Hoàng Thu Hà', title: 'Kế toán', team: 'VP', role: 'accountant', phone: '0904 ••• 225', status: 'active', joinedAt: '2024-01-08', base: 12000000, allowance: 1000000 },
+    { id: 'NV-003', name: 'Vũ Quang Huy', title: 'Trưởng nhóm / QL tòa', team: 'VH1', role: 'manager', phone: '0905 ••• 336', status: 'active', joinedAt: '2024-03-15', base: 9000000, allowance: 1500000 },
+    { id: 'NV-004', name: 'Đỗ Thị Lan', title: 'Quản lý tòa', team: 'VH1', role: 'manager', phone: '0906 ••• 447', status: 'active', joinedAt: '2024-07-20', base: 8000000, allowance: 1000000 },
+    { id: 'NV-005', name: 'Bùi Văn Nam', title: 'Trưởng nhóm / QL tòa', team: 'VH2', role: 'manager', phone: '0907 ••• 558', status: 'active', joinedAt: '2025-01-05', base: 8500000, allowance: 1500000 },
+    { id: 'NV-006', name: 'Ngô Thị Mai', title: 'Nhân viên kinh doanh', team: 'KD', role: 'staff', phone: '0908 ••• 669', status: 'active', joinedAt: '2025-03-10', base: 7000000, allowance: 1000000, lunch: 500000, fuel: 500000 },
+    { id: 'NV-007', name: 'Đặng Văn Tú', title: 'Kỹ thuật vận hành', team: 'VH1', role: 'staff', phone: '0909 ••• 770', status: 'inactive', joinedAt: '2024-05-02', base: 7500000, allowance: 500000 },
+    { id: 'NV-008', name: 'Lý Thị Ngọc', title: 'Nhân sự – hành chính', team: 'VP', role: 'hr', phone: '0910 ••• 881', status: 'active', joinedAt: '2024-02-19', base: 10000000, allowance: 800000 },
+    { id: 'NV-009', name: 'Trịnh Văn Hào', title: 'Nhân viên vệ sinh', team: 'VH1', role: 'staff', phone: '0911 ••• 902', status: 'active', joinedAt: '2024-04-01', base: 6000000, allowance: 500000 },
+    { id: 'NV-010', name: 'Phan Thị Hương', title: 'Nhân viên vệ sinh', team: 'VH2', role: 'staff', phone: '0912 ••• 913', status: 'active', joinedAt: '2025-02-01', base: 6000000, allowance: 500000 },
+    { id: 'NV-011', name: 'Mạc Văn Tuấn', title: 'Nhân viên kỹ thuật', team: 'VH1', role: 'staff', phone: '0913 ••• 924', status: 'active', joinedAt: '2024-05-15', base: 7500000, allowance: 800000 },
+    { id: 'NV-012', name: 'Lương Đức Mạnh', title: 'Nhân viên kỹ thuật', team: 'VH2', role: 'staff', phone: '0914 ••• 935', status: 'active', joinedAt: '2026-03-01', base: 7000000, allowance: 600000 },
+    { id: 'NV-013', name: 'Trần Quốc Thắng', title: 'Trưởng phòng vận hành 1', team: 'VP', role: 'staff', phone: '0915 ••• 946', status: 'active', joinedAt: '2024-03-01', base: 12000000, allowance: 2000000 },
+    { id: 'NV-014', name: 'Nguyễn Thị Thu Trang', title: 'Trưởng phòng vận hành 2', team: 'VP', role: 'staff', phone: '0916 ••• 957', status: 'active', joinedAt: '2026-10-01', base: 10000000, allowance: 1200000, lunch: 500000, fuel: 700000, note: 'Mới nhận việc 01/10/2026 — chưa phân công tòa (G1 vẫn “Chưa phân công” TPVH)' },
+    { id: 'NV-015', name: 'Đinh Quang Khải', title: 'Trưởng nhóm kinh doanh', team: 'KD', role: 'staff', phone: '0917 ••• 968', status: 'active', joinedAt: '2025-06-01', base: 8000000, allowance: 1200000, lunch: 500000, fuel: 700000 },
+    { id: 'NV-016', name: 'Hà Minh Thư', title: 'Sale', team: 'KD', role: 'staff', phone: '0918 ••• 979', status: 'active', joinedAt: '2026-02-15', base: 4000000, allowance: 500000, lunch: 500000, fuel: 0 },
+    { id: 'NV-017', name: 'Kiều Văn Lộc', title: 'Sale', team: 'KD', role: 'staff', phone: '0919 ••• 980', status: 'active', joinedAt: '2026-08-01', base: 2500000, allowance: 500000, lunch: 500000, fuel: 0, note: 'Lương cứng thử việc + hoa hồng theo bảng HOA HỒNG THÁNG' },
+    { id: 'NV-018', name: 'Tô Hải Nam', title: 'Nhân viên thị trường (nguồn nhà)', team: 'KD', role: 'staff', phone: '0920 ••• 991', status: 'active', joinedAt: '2025-11-01', base: 7000000, allowance: 1200000, lunch: 500000, fuel: 700000 },
   ];
+  /* Bảng lương tháng 8: tách phụ cấp ăn trưa (500k, kỹ thuật 700k) và xăng xe; tổng giữ nguyên allowance */
+  db.staff.forEach(function (s) {
+    if (s.lunch === undefined) { s.lunch = Math.min(s.allowance, /kỹ thuật/i.test(s.title) ? 700000 : 500000); s.fuel = s.allowance - s.lunch; }
+  });
   db.assignments = [
-    { id: 'PC-01', staffId: 'NV-003', buildingId: 'TH-CG', role: 'Nhân viên vận hành', main: true, from: '2024-04-01', to: null },
-    { id: 'PC-02', staffId: 'NV-004', buildingId: 'TH-DD', role: 'Nhân viên vận hành', main: true, from: '2024-08-01', to: null },
-    { id: 'PC-03', staffId: 'NV-006', buildingId: 'TH-TX', role: 'Nhân viên vận hành', main: true, from: '2025-02-01', to: '2026-06-30' },
-    { id: 'PC-04', staffId: 'NV-005', buildingId: 'TH-TX', role: 'Nhân viên vận hành', main: true, from: '2026-07-01', to: null },
-    { id: 'PC-05', staffId: 'NV-006', buildingId: 'TH-TX', role: 'Nhân viên vận hành', from: '2026-07-01', to: null, note: 'Hỗ trợ thu tiền' },
-    { id: 'PC-06', staffId: 'NV-003', buildingId: 'TH-DD', role: 'Trưởng nhóm', from: '2025-01-01', to: null },
-    { id: 'PC-07', staffId: 'NV-003', buildingId: 'TH-CG', role: 'Trưởng nhóm', from: '2025-01-01', to: null },
-    { id: 'PC-08', staffId: 'NV-005', buildingId: 'TH-TX', role: 'Trưởng nhóm', from: '2026-07-01', to: null },
-    { id: 'PC-09', staffId: 'NV-009', buildingId: 'TH-CG', role: 'Nhân viên vệ sinh', from: '2024-04-01', to: null },
-    { id: 'PC-10', staffId: 'NV-009', buildingId: 'TH-DD', role: 'Nhân viên vệ sinh', from: '2024-08-01', to: null },
-    { id: 'PC-11', staffId: 'NV-010', buildingId: 'TH-TX', role: 'Nhân viên vệ sinh', from: '2025-02-01', to: null },
-    { id: 'PC-12', staffId: 'NV-011', buildingId: 'TH-CG', role: 'Nhân viên kỹ thuật', from: '2024-05-15', to: null },
-    { id: 'PC-13', staffId: 'NV-011', buildingId: 'TH-DD', role: 'Nhân viên kỹ thuật', from: '2024-08-01', to: null },
-    { id: 'PC-14', staffId: 'NV-011', buildingId: 'TH-TX', role: 'Nhân viên kỹ thuật', from: '2025-02-01', to: null },
-    { id: 'PC-15', staffId: 'NV-012', buildingId: 'TH-TX', role: 'Nhân viên kỹ thuật', from: '2026-03-01', to: null },
+    { id: 'PC-01', staffId: 'NV-003', buildingId: 'T17', role: 'Nhân viên vận hành', main: true, from: '2024-04-01', to: null },
+    { id: 'PC-02', staffId: 'NV-004', buildingId: 'S9', role: 'Nhân viên vận hành', main: true, from: '2024-08-01', to: null },
+    { id: 'PC-03', staffId: 'NV-006', buildingId: 'G1', role: 'Nhân viên vận hành', main: true, from: '2025-02-01', to: '2026-06-30' },
+    { id: 'PC-04', staffId: 'NV-005', buildingId: 'G1', role: 'Nhân viên vận hành', main: true, from: '2026-07-01', to: null },
+    { id: 'PC-05', staffId: 'NV-006', buildingId: 'G1', role: 'Nhân viên vận hành', from: '2026-07-01', to: null, note: 'Hỗ trợ thu tiền' },
+    { id: 'PC-06', staffId: 'NV-003', buildingId: 'S9', role: 'Trưởng nhóm', from: '2025-01-01', to: null },
+    { id: 'PC-07', staffId: 'NV-003', buildingId: 'T17', role: 'Trưởng nhóm', from: '2025-01-01', to: null },
+    { id: 'PC-08', staffId: 'NV-005', buildingId: 'G1', role: 'Trưởng nhóm', from: '2026-07-01', to: null },
+    { id: 'PC-09', staffId: 'NV-009', buildingId: 'T17', role: 'Nhân viên vệ sinh', from: '2024-04-01', to: null },
+    { id: 'PC-10', staffId: 'NV-009', buildingId: 'S9', role: 'Nhân viên vệ sinh', from: '2024-08-01', to: null },
+    { id: 'PC-11', staffId: 'NV-010', buildingId: 'G1', role: 'Nhân viên vệ sinh', from: '2025-02-01', to: null },
+    { id: 'PC-12', staffId: 'NV-011', buildingId: 'T17', role: 'Nhân viên kỹ thuật', from: '2024-05-15', to: null },
+    { id: 'PC-13', staffId: 'NV-011', buildingId: 'S9', role: 'Nhân viên kỹ thuật', from: '2024-08-01', to: null },
+    { id: 'PC-14', staffId: 'NV-011', buildingId: 'G1', role: 'Nhân viên kỹ thuật', from: '2025-02-01', to: null },
+    { id: 'PC-15', staffId: 'NV-012', buildingId: 'G1', role: 'Nhân viên kỹ thuật', from: '2026-03-01', to: null },
     /* K-01: TPVH phụ trách khu vực (Cầu Giấy + Đống Đa); Thanh Xuân chưa phân công TPVH → danh sách khách hiện “Chưa phân công”, không lấy Trưởng nhóm thay thế */
-    { id: 'PC-16', staffId: 'NV-013', buildingId: 'TH-CG', role: 'Trưởng phòng vận hành', from: '2024-04-01', to: null, area: 'Khu vực 1' },
-    { id: 'PC-17', staffId: 'NV-013', buildingId: 'TH-DD', role: 'Trưởng phòng vận hành', from: '2024-08-01', to: null, area: 'Khu vực 1' },
+    { id: 'PC-16', staffId: 'NV-013', buildingId: 'T17', role: 'Trưởng phòng vận hành', from: '2024-04-01', to: null, area: 'Khu vực 1' },
+    { id: 'PC-17', staffId: 'NV-013', buildingId: 'S9', role: 'Trưởng phòng vận hành', from: '2024-08-01', to: null, area: 'Khu vực 1' },
   ];
   /* G-08 (đề xuất): mỗi phân công có Chính/Phụ + trạng thái; người đầu tiên của vai trò tại tòa là phụ trách chính */
   db.assignments.forEach(function (a) {
@@ -532,8 +561,8 @@ TH.seed = function () {
   /* Theo docs/"CÁCH TÍNH LƯƠNG PHÒNG VẬN HÀNH": đơn giá/phòng tại mốc HS 90% (ví dụ 110.000 cho thâm niên > 1 năm); bảng tham chiếu đầy đủ chờ khách cung cấp (D-06). */
   db.salaryPolicy = { ratePerRoom: { senior: 110000, junior: 90000 }, refHs: 90, leaderPerRoom: 10000, status: 'DRAFT', note: 'HS% = (A − A×B + C) ÷ tổng giá niêm yết, A = DT sau 3 mốc 5/10/15; mức lương/phòng = HS × đơn giá tham chiếu ÷ 90; lương HS = mức lương/phòng × số phòng; trưởng nhóm 10.000 đ/phòng. Bảng tham chiếu đầy đủ chờ ký (D-06).' };
   db.salaryAdjustments = [
-    { id: 'DC-2610-01', staffId: 'NV-004', period: '2026-10', type: 'bonus', amount: 500000, reason: 'Xử lý sự cố thấm trần DD-302 ngoài giờ', createdBy: 'NV-002', createdAt: '2026-10-16', status: 'draft' },
-    { id: 'DC-2610-02', staffId: 'NV-005', period: '2026-10', type: 'penalty', amount: -200000, reason: 'Nộp chỉ số kỳ 10 trễ hạn', createdBy: 'NV-002', createdAt: '2026-10-18', status: 'draft' },
+    { id: 'DCL-2610-01', staffId: 'NV-004', period: '2026-10', type: 'bonus', amount: 500000, reason: 'Xử lý sự cố thấm trần 302S9 ngoài giờ', createdBy: 'NV-002', createdAt: '2026-10-16', status: 'draft' },
+    { id: 'DCL-2610-02', staffId: 'NV-005', period: '2026-10', type: 'penalty', amount: -200000, reason: 'Nộp chỉ số kỳ 10 trễ hạn', createdBy: 'NV-002', createdAt: '2026-10-18', status: 'draft' },
   ];
   db.payrollStatus = { '2026-09': { status: 'confirmed', by: 'NV-002', at: '2026-10-03', note: 'Đã xác nhận bằng file Excel ngoài hệ thống' }, '2026-10': { status: 'draft' } };
 
@@ -546,25 +575,25 @@ TH.seed = function () {
     { id: 'CD-05', name: 'Hoàng Minh Châu', type: 'Cá nhân' },
   ];
   db.shares = [
-    { id: 'S-01', buildingId: 'TH-CG', shareholderId: 'CD-01', ratio: 40, capital: 400000000, from: '2024-04-01', to: null },
-    { id: 'S-02', buildingId: 'TH-CG', shareholderId: 'CD-02', ratio: 35, capital: 350000000, from: '2024-04-01', to: null },
-    { id: 'S-03', buildingId: 'TH-CG', shareholderId: 'CD-03', ratio: 25, capital: 250000000, from: '2024-04-01', to: null },
-    { id: 'S-04', buildingId: 'TH-DD', shareholderId: 'CD-01', ratio: 50, capital: 400000000, from: '2024-08-01', to: null },
-    { id: 'S-05', buildingId: 'TH-DD', shareholderId: 'CD-04', ratio: 30, capital: 240000000, from: '2024-08-01', to: null },
-    { id: 'S-06', buildingId: 'TH-DD', shareholderId: 'CD-05', ratio: 20, capital: 160000000, from: '2024-08-01', to: null },
-    { id: 'S-07', buildingId: 'TH-TX', shareholderId: 'CD-01', ratio: 45, capital: 270000000, from: '2025-02-01', to: null },
-    { id: 'S-08', buildingId: 'TH-TX', shareholderId: 'CD-02', ratio: 30, capital: 180000000, from: '2025-02-01', to: null },
-    { id: 'S-09', buildingId: 'TH-TX', shareholderId: 'CD-03', ratio: 25, capital: 150000000, from: '2025-02-01', to: '2026-06-30' },
-    { id: 'S-10', buildingId: 'TH-TX', shareholderId: 'CD-05', ratio: 25, capital: 150000000, from: '2026-07-01', to: null },
+    { id: 'S-01', buildingId: 'T17', shareholderId: 'CD-01', ratio: 40, capital: 400000000, from: '2024-04-01', to: null },
+    { id: 'S-02', buildingId: 'T17', shareholderId: 'CD-02', ratio: 35, capital: 350000000, from: '2024-04-01', to: null },
+    { id: 'S-03', buildingId: 'T17', shareholderId: 'CD-03', ratio: 25, capital: 250000000, from: '2024-04-01', to: null },
+    { id: 'S-04', buildingId: 'S9', shareholderId: 'CD-01', ratio: 50, capital: 400000000, from: '2024-08-01', to: null },
+    { id: 'S-05', buildingId: 'S9', shareholderId: 'CD-04', ratio: 30, capital: 240000000, from: '2024-08-01', to: null },
+    { id: 'S-06', buildingId: 'S9', shareholderId: 'CD-05', ratio: 20, capital: 160000000, from: '2024-08-01', to: null },
+    { id: 'S-07', buildingId: 'G1', shareholderId: 'CD-01', ratio: 45, capital: 270000000, from: '2025-02-01', to: null },
+    { id: 'S-08', buildingId: 'G1', shareholderId: 'CD-02', ratio: 30, capital: 180000000, from: '2025-02-01', to: null },
+    { id: 'S-09', buildingId: 'G1', shareholderId: 'CD-03', ratio: 25, capital: 150000000, from: '2025-02-01', to: '2026-06-30' },
+    { id: 'S-10', buildingId: 'G1', shareholderId: 'CD-05', ratio: 25, capital: 150000000, from: '2026-07-01', to: null },
   ];
   db.sharePayouts = [
-    { id: 'PCCD-2609-01', buildingId: 'TH-CG', shareholderId: 'CD-02', period: '2026-09', amount: 0, paidAt: '2026-10-10', docNo: 'PC-0910', note: 'Nhập tay — xem số trên báo cáo' },
+    { id: 'PCCD-2609-01', buildingId: 'T17', shareholderId: 'CD-02', period: '2026-09', amount: 0, paidAt: '2026-10-10', docNo: 'PC-0910', note: 'Nhập tay — xem số trên báo cáo' },
   ];
   db.periodLocks = { '2026-09': { locked: true, by: 'NV-002', at: '2026-10-06' } };
   db.periodApprovals = { '2026-09': { by: 'NV-002', at: '2026-10-05' } };
   db.snapshots = {}; // tạo khi duyệt kỳ (C); kỳ đã khóa được tạo lười khi mở báo cáo
   db.receiptEdits = [
-    { receiptRoom: 'CG-301', period: '2026-10', from: '2026-10-16', to: '2026-10-14', by: 'NV-002', at: '2026-10-16 15:20', reason: 'Khách chuyển khoản 14/10, ngân hàng ghi có 16/10 — đối chiếu sao kê.' },
+    { receiptRoom: '301T17', period: '2026-10', from: '2026-10-16', to: '2026-10-14', by: 'NV-002', at: '2026-10-16 15:20', reason: 'Khách chuyển khoản 14/10, ngân hàng ghi có 16/10 — đối chiếu sao kê.' },
   ];
   db.reportTemplates = [
     { id: 'MAU-01', name: 'Báo cáo tổng hợp công ty (mặc định)', version: 3, status: 'approved' },
@@ -587,7 +616,7 @@ TH.seed = function () {
     var ok = cus.oaLinked;
     db.messages.push({ id: 'ZL-' + String(mseq++).padStart(4, '0'), invoiceId: inv.id, customerId: cus.id, template: 'TPL-01', at: inv.period + '-02 09:0' + (mseq % 10), status: ok ? 'sent' : 'skipped', reason: ok ? '' : 'Người nhận chưa liên kết OA — không gửi', retries: 0 });
   });
-  ['CG-302', 'DD-201', 'DD-301', 'CG-202'].forEach(function (room, i) {
+  ['302T17', '201S9', '301S9', '202T17'].forEach(function (room, i) {
     var inv = cur(room);
     var cus = db.customers.find(function (c) { return c.id === inv.customerId; });
     db.messages.push({ id: 'ZL-' + String(mseq++).padStart(4, '0'), invoiceId: inv.id, customerId: cus.id, template: 'TPL-02', at: '2026-10-1' + (i % 2 ? 0 : 1) + ' 08:30', status: cus.oaLinked ? (i === 1 ? 'failed' : 'sent') : 'skipped', reason: !cus.oaLinked ? 'Người nhận chưa liên kết OA — không gửi' : i === 1 ? 'Provider timeout (mô phỏng)' : '', retries: i === 1 ? 1 : 0 });
@@ -602,7 +631,7 @@ TH.seed = function () {
 
   /* ---------- Import / batch / OCR ---------- */
   db.importBatches = [
-    { id: 'IMP-0007', kind: 'room', file: 'phong_TX_khoitao.xlsx', at: '2025-02-02 10:12', by: 'NV-001', rows: 5, ok: 5, errors: 0, status: 'done' },
+    { id: 'IMP-0007', kind: 'room', file: 'phong_G1_khoitao.xlsx', at: '2025-02-02 10:12', by: 'NV-001', rows: 5, ok: 5, errors: 0, status: 'done' },
     { id: 'IMP-0006', kind: 'building', file: 'toa_nha_2025.xlsx', at: '2025-01-28 16:40', by: 'NV-001', rows: 1, ok: 1, errors: 0, status: 'done' },
     { id: 'IMP-0005', kind: 'owner', file: 'chu_nha_dot2.xlsx', at: '2025-01-10 09:05', by: 'NV-001', rows: 3, ok: 2, errors: 1, status: 'done' },
   ];
@@ -612,14 +641,17 @@ TH.seed = function () {
   var PLATES = ['29B1', '30F5', '29X3', '88H1', '29E2', '30K2', '29D1'];
   var fullPlate = function (i, j) { return PLATES[(i + j) % PLATES.length] + '-' + String(100 + (i * 37 + j * 11) % 900) + '.' + String(10 + (i * 7 + j * 3) % 90); };
   /* K-08: xe lưu biển số THẬT (giả lập), có trạng thái đăng ký, ngày hiệu lực; xe đạp điện không biển → plate null */
+  /* Xe theo HĐ: xe đạp điện = số xe ghi ở dòng PARK_EBIKE (Điều 1.2/4.4), mỗi người còn lại 1 xe máy gửi miễn phí — Điều 1.2 ghi "Số xe: 0n xe máy" */
   function seedCustomerExtra(k, i, people, ct) {
     k.occupation = JOBS[i % JOBS.length];
-    k.permAddress = 'Phường/xã minh họa, ' + k.hometown;
+    k.permAddress = 'Số ' + (3 + (i * 7) % 60) + ' thôn Minh Họa, xã Ví Dụ, ' + k.hometown;
     k.note = k.note || '';
     k.vehicles = [];
     var from = ct ? ct.start : k.createdAt, to = ct && ct.status !== 'active' ? ct.endedAt : null, st = to ? 'ended' : 'active';
-    for (var j = 0; j < people; j++) k.vehicles.push({ id: 'XE-' + k.id.slice(3) + '-' + (j + 1), type: 'Xe đạp điện', plate: null, brand: ['VinFast Evo', 'Yadea', 'Pega', 'Dibao'][(i + j) % 4], color: ['Đen', 'Trắng', 'Xanh', 'Đỏ'][(i + j) % 4], status: st, from: from, to: to, feeCode: 'PARK_EBIKE', note: 'Không có biển số' });
-    if (i % 4 === 0) k.vehicles.push({ id: 'XE-' + k.id.slice(3) + '-' + (people + 1), type: 'Xe máy', plate: fullPlate(i, 0), brand: ['Honda Vision', 'Yamaha Janus', 'Honda Wave', 'SYM Attila'][i % 4], color: ['Đen', 'Xám', 'Đỏ', 'Trắng'][(i + 1) % 4], status: st, from: from, to: to, feeCode: 'PARK_MOTO', note: 'Gửi miễn phí theo HĐ' });
+    var eb = ct ? (ct.priceList.find(function (l) { return l.code === 'PARK_EBIKE'; }) || {}).qty || 0 : 0, motos = Math.max(0, people - eb);
+    for (var j = 0; j < eb; j++) k.vehicles.push({ id: 'XE-' + k.id.slice(3) + '-' + (j + 1), type: 'Xe đạp điện', plate: null, brand: ['VinFast Evo', 'Yadea', 'Pega', 'Dibao'][(i + j) % 4], color: ['Đen', 'Trắng', 'Xanh', 'Đỏ'][(i + j) % 4], status: st, from: from, to: to, feeCode: 'PARK_EBIKE', note: 'Không có biển số' });
+    for (j = 0; j < motos; j++) k.vehicles.push({ id: 'XE-' + k.id.slice(3) + '-' + (eb + j + 1), type: 'Xe máy', plate: fullPlate(i, j), brand: ['Honda Vision', 'Yamaha Janus', 'Honda Wave', 'SYM Attila'][(i + j) % 4], color: ['Đen', 'Xám', 'Đỏ', 'Trắng'][(i + j + 1) % 4], status: st, from: from, to: to, feeCode: 'PARK_MOTO', note: 'Gửi miễn phí theo HĐ' });
+    if (ct) ct.terms.vehiclesDeclared = motos;
   }
   db.customers.forEach(function (k, i) {
     var ct = db.contracts.find(function (c) { return c.customerId === k.id; });
@@ -630,11 +662,11 @@ TH.seed = function () {
   db.customers[0].vehicles.push({ id: 'XE-001-9', type: 'Xe điện (dịch vụ SM)', plate: '29E2-456.78', brand: 'VinFast Feliz S', color: 'Trắng', status: 'pending', from: '2026-10-18', to: null, feeCode: 'PARK_EV', note: 'Khai báo 18/10 — chờ xác nhận đăng ký, chưa tính phí' });
 
   var ENDED = [
-    { k: ['KH-016', 'Trần Hải Đăng', '1994-03-08', true], room: 'CG-401', start: '2024-09-01', end: '2026-08-31', status: 'ended', endedAt: '2026-08-31', people: 2, renew: true, template: 'DAYDU', endKind: 'expired', reason: 'Hết hạn, khách trả phòng đúng hạn 31/08' },
-    { k: ['KH-017', 'Lương Thị Mỹ Duyên', '1999-11-11', false], room: 'TX-202', start: '2025-08-01', end: '2026-07-31', status: 'terminated', endedAt: '2026-07-15', people: 1, template: 'DAYDU', endKind: 'tenant_request', reason: 'Khách đơn phương chấm dứt trước hạn 15/07; mức giữ cọc theo Điều 4.3 HĐ ký 29/07/2025, Admin duyệt 16/07' },
-    { k: ['KH-018', 'Đinh Công Sơn', '1991-05-30', true], room: 'DD-302', start: '2025-09-28', end: '2026-09-27', status: 'ended', endedAt: '2026-09-27', people: 1, template: 'DAYDU', endKind: 'expired', reason: 'Hết hạn, không gia hạn; bàn giao 28/09' },
-    /* K-09 (ký HĐ mới nối tiếp): HĐ cũ của KH-003 tại CG-201, HĐ mới HĐ-CG201/25 có mã mới và liên kết previousContractId; cọc chuyển qua phiếu chuyển cọc được duyệt */
-    { k: null, customerId: 'KH-003', room: 'CG-201', start: '2024-07-01', end: '2025-06-30', status: 'ended', endedAt: '2025-06-30', people: 1, template: 'DAYDU', endKind: 'expired', reason: 'Hết hạn — hai bên ký HĐ mới HĐ-CG201/25 từ 01/07/2025 (giá thuê mới)', nextId: 'HĐ-CG201/25' },
+    { k: ['KH-016', 'Trần Hải Đăng', '1994-03-08', true], room: '401T17', start: '2024-09-01', end: '2026-08-31', status: 'ended', endedAt: '2026-08-31', people: 2, renew: true, template: 'DAYDU', endKind: 'expired', reason: 'Hết hạn, khách trả phòng đúng hạn 31/08' },
+    { k: ['KH-017', 'Lương Thị Mỹ Duyên', '1999-11-11', false], room: '202G1', start: '2025-08-01', end: '2026-07-31', status: 'terminated', endedAt: '2026-07-15', people: 1, template: 'DAYDU', endKind: 'tenant_request', reason: 'Khách đơn phương chấm dứt trước hạn 15/07; mức giữ cọc theo Điều 4.3 HĐ ký 29/07/2025, Admin duyệt 16/07' },
+    { k: ['KH-018', 'Đinh Công Sơn', '1991-05-30', true], room: '302S9', start: '2025-09-28', end: '2026-09-27', status: 'ended', endedAt: '2026-09-27', people: 1, template: 'DAYDU', endKind: 'expired', reason: 'Hết hạn, không gia hạn; bàn giao 28/09' },
+    /* K-09 (ký HĐ mới nối tiếp): HĐ cũ của KH-003 tại 201T17, HĐ mới HĐ-201T17/25 có mã mới và liên kết previousContractId; cọc chuyển qua phiếu chuyển cọc được duyệt */
+    { k: null, customerId: 'KH-003', room: '201T17', start: '2024-07-01', end: '2025-06-30', status: 'ended', endedAt: '2025-06-30', people: 1, template: 'DAYDU', endKind: 'expired', reason: 'Hết hạn — hai bên ký HĐ mới HĐ-201T17/25 từ 01/07/2025 (giá thuê mới)', nextId: 'HĐ-201T17/25' },
   ];
   var endedIds = {};
   ENDED.forEach(function (e, n) {
@@ -644,15 +676,15 @@ TH.seed = function () {
       k = { id: e.k[0], name: e.k[1], dob: e.k[2], phone: '09' + (10 + i) + ' ••• ' + (100 + i * 37) % 1000, idNo: '0010' + (93 + i) + '•••••' + (512 + i * 41) % 1000, idType: 'CCCD', idPlace: 'Cục Cảnh sát QLHC về TTXH', hometown: ['Nam Định', 'Hưng Yên', 'Phú Thọ'][n], oaLinked: e.k[3], oaConsentAt: e.k[3] ? '2025-10-0' + (n + 1) : null, status: 'inactive', createdAt: addDays(e.start, -3) };
       db.customers.push(k);
     } else k = db.customers.find(function (x) { return x.id === e.customerId; });
-    var id = 'HĐ-' + room.id.replace('-', '') + '/' + e.start.slice(2, 4);
+    var id = 'HĐ-' + room.id + '/' + e.start.slice(2, 4);
     endedIds[e.room + (e.k ? '' : '#old')] = id;
     var terms = termsOf('DAYDU', e.start);
     var ct = { id: id, roomId: room.id, buildingId: room.buildingId, customerId: k.id, rent: e.k ? room.rent : room.rent - 400000, deposit: e.k ? room.rent : room.rent - 400000, start: e.start, end: e.end, signedAt: addDays(e.start, -3), people: e.people, billingDay: 1, status: e.status, endedAt: e.endedAt, endKind: e.endKind, endReason: e.reason, nextContractId: e.nextId || null, previousContractId: null, scanFile: 'scan_' + room.id + '_' + e.start.slice(0, 4) + '.pdf',
       terms: terms,
       renewals: e.renew ? [{ n: 1, mode: 'auto_if_applicable', from: addMonths(e.start, 12), to: e.end, at: addMonths(e.start, 11), by: managerOf(db, room.buildingId), evidence: 'Đã kiểm tra: không có thông báo chấm dứt trước 30 ngày (Điều 3.4)', file: null }] : [],
-      priceList: seedPriceList(b, e.start, e.people), note: '',
-      fees: [{ code: 'SVC', name: 'Phí dịch vụ', price: 150000, qty: 1, unit: 'tháng' }, { code: 'NET', name: 'Internet', price: 100000, qty: 1, unit: 'tháng' }, { code: 'PARK', name: 'Gửi xe điện', price: 120000, qty: e.people, unit: 'xe' }],
+      priceList: seedPriceList(b, e.start, 0), note: '',
       versions: [{ v: 1, at: e.start, note: 'Bản ký gốc' }] };
+    ct.fees = seedFees(ct.priceList, ct.people);
     db.contracts.push(ct);
     if (e.k) seedCustomerExtra(k, i, e.people, ct);
     db.documents.push({ id: 'TL-' + String(200 + n * 3).padStart(3, '0'), customerId: k.id, contractId: id, roomId: room.id, kind: 'Hợp đồng scan', file: ct.scanFile, version: 1, uploadedAt: ct.signedAt, views: 3 });
@@ -660,85 +692,89 @@ TH.seed = function () {
     if (e.status === 'ended') db.documents.push({ id: 'TL-' + String(202 + n * 3).padStart(3, '0'), customerId: k.id, contractId: id, roomId: room.id, kind: 'Biên bản bàn giao', file: 'bien_ban_ban_giao_' + room.id + '_' + e.endedAt.slice(0, 4) + '.pdf', version: 1, uploadedAt: addDays(e.endedAt, 1), views: 2 });
   });
   /* K-08 (không báo trùng tuyệt đối theo lịch sử): xe máy của KH-018 (đã ngừng 27/09) được KH-010 đăng ký lại từ 01/10 — hai khoảng đăng ký không chồng lấn */
-  db.customers.find(function (x) { return x.id === 'KH-018'; }).vehicles.push({ id: 'XE-018-9', type: 'Xe máy', plate: '30K2-321.09', brand: 'Honda Wave', color: 'Đỏ', status: 'ended', from: '2025-09-28', to: '2026-09-27', feeCode: 'PARK_MOTO', note: 'Bán lại cho khách DD-202' });
-  db.customers.find(function (x) { return x.id === 'KH-010'; }).vehicles.push({ id: 'XE-010-9', type: 'Xe máy', plate: '30K2-321.09', brand: 'Honda Wave', color: 'Đỏ', status: 'active', from: '2026-10-01', to: null, feeCode: 'PARK_MOTO', note: 'Mua lại xe của khách DD-302 cũ' });
+  /* Xe máy duy nhất của KH-018 (khai trong HĐ, Điều 1.2) — bán lại cho khách 202S9 */
+  Object.assign(db.customers.find(function (x) { return x.id === 'KH-018'; }).vehicles.find(function (v) { return v.type === 'Xe máy'; }), { plate: '30K2-321.09', brand: 'Honda Wave', color: 'Đỏ', note: 'Bán lại cho khách 202S9' });
+  db.customers.find(function (x) { return x.id === 'KH-010'; }).vehicles.push({ id: 'XE-010-9', type: 'Xe máy', plate: '30K2-321.09', brand: 'Honda Wave', color: 'Đỏ', status: 'active', from: '2026-10-01', to: null, feeCode: 'PARK_MOTO', note: 'Mua lại xe của khách 302S9 cũ' });
   /* CR-CUS-02: bàn giao theo Điều 2.2/4.2 (30 tài sản + chỉ số đầu kỳ của phòng) và tiền đã nộp khi ký (Điều 4.1) cho mọi HĐ — mô phỏng đã đọc từ bản scan mẫu đầy đủ */
   db.contracts.forEach(function (ct) {
     var p0 = ct.start.slice(0, 7) < TH.PERIODS[0] ? TH.PERIODS[0] : ct.start.slice(0, 7);
     var rd = db.readings.find(function (r) { return r.roomId === ct.roomId && r.period === p0; }) || db.readings.find(function (r) { return r.roomId === ct.roomId; });
-    var assets = TH.HANDOVER_ASSETS.map(function (a) { return { group: a.group, name: a.name, unit: a.unit, qty: a.qty, condition: a.condition }; });
-    if (ct.roomId === 'DD-302') { assets[13].condition = 'Sạch — thấm nhẹ góc trần'; assets[15].condition = 'Trầy vỏ, hoạt động bình thường'; }
-    if (ct.roomId === 'CG-102') assets[4].condition = 'Ố màu nhẹ';
-    if (ct.roomId === 'TX-202') assets[16].condition = 'Rò nước nhẹ';
+    var assets = handoverAssets(ct);
+    if (ct.roomId === '302S9') { assets[13].condition = 'Sạch — thấm nhẹ góc trần'; assets[15].condition = 'Trầy vỏ, hoạt động bình thường'; }
+    if (ct.roomId === '102T17') assets[4].condition = 'Ố màu nhẹ';
+    if (ct.roomId === '202G1') assets[16].condition = 'Rò nước nhẹ';
     ct.handover = { at: ct.start, billingFrom: ct.start, elecStart: rd ? rd.elecPrev : 0, waterStart: rd ? rd.waterPrev : 0, assets: assets, source: 'OCR HĐ ' + ct.id + ' · xác nhận ' + ct.signedAt, file: ct.scanFile };
-    if (ct.status === 'active') ct.prepaid = { beforeSign: 1000000, atSign: ct.deposit + ct.rent - 1000000, total: ct.deposit + ct.rent, allocation: 'Cọc ' + ct.deposit.toLocaleString('vi-VN') + ' ₫ + tiền phòng kỳ đầu ' + ct.rent.toLocaleString('vi-VN') + ' ₫' };
+    /* Điều 4.1: tiền đã nộp trước khi ký + đóng thêm khi ký = cọc 01 tháng (Điều 4.3) + tiền phòng kỳ đầu — khớp phiếu cọc COC-… và phiếu thu hóa đơn kỳ đầu */
+    ct.prepaid = { beforeSign: 1000000, atSign: ct.deposit + ct.rent - 1000000, total: ct.deposit + ct.rent, allocation: 'Cọc ' + fmtVnd(ct.deposit) + ' ₫ + tiền phòng kỳ đầu ' + fmtVnd(ct.rent) + ' ₫' };
+    contractParties(db, ct);
   });
   db.deposits.forEach(function (d) {
-    if (d.id === 'COC-2609-01') { d.contractId = endedIds['CG-401']; d.customerId = 'KH-016'; }
-    if (d.id === 'COC-2607-01') { d.contractId = endedIds['TX-202']; d.customerId = 'KH-017'; }
+    if (d.id === 'COC-2609-01') { d.contractId = endedIds['401T17']; d.customerId = 'KH-016'; }
+    if (d.id === 'COC-2607-01') { d.contractId = endedIds['202G1']; d.customerId = 'KH-017'; }
   });
-  var dd102 = db.contracts.find(function (c) { return c.roomId === 'DD-102' && c.status === 'active'; });
+  var dd102 = db.contracts.find(function (c) { return c.roomId === '102S9' && c.status === 'active'; });
   /* Hồ sơ cọc (K-03): người lập ≠ người duyệt; chỉ bước xác nhận THỰC CHI (có ngày/mã giao dịch) mới sinh dòng refund/forfeit trong db.deposits (P&L và dòng tiền chỉ đọc db.deposits đã xác nhận).
      Hạn hoàn chỉ tính khi HĐ có điều khoản (refundDays) và chỉ từ ngày bàn giao thực tế; trước bàn giao dueAt = null, không tự báo quá hạn. */
   db.depositCases = [
-    { id: 'HC-2609-01', contractId: endedIds['CG-401'], customerId: 'KH-016', amount: 6500000, state: 'refunded', handoverAt: '2026-08-31', dueAt: '2026-09-10', deductions: [{ item: 'Sửa chữa', name: 'Hư hỏng rèm, vệ sinh lại tường', amount: 300000, source: 'Biên bản bàn giao 31/08/2026 · Điều 6.2.5' }], forfeitAmount: 0, forfeitBasis: '', refundAmount: 6200000, proposedBy: 'NV-003', proposedAt: '2026-09-01', approvedBy: 'NV-001', approvedAt: '2026-09-02', paidBy: 'NV-002', paidAt: '2026-09-03', txnRef: 'CK-20260903-0417', depositId: 'COC-2609-01', note: 'Thanh lý đúng hạn, hoàn trong 3 ngày' },
-    { id: 'HC-2607-01', contractId: endedIds['TX-202'], customerId: 'KH-017', amount: 4000000, state: 'forfeited', handoverAt: '2026-07-15', dueAt: null, deductions: [], forfeitAmount: 4000000, forfeitBasis: 'Điều 4.3 & 7.1 HĐ ký 29/07/2025 (mẫu đầy đủ) — khách đơn phương chấm dứt', refundAmount: 0, proposedBy: 'NV-005', proposedAt: '2026-07-15', approvedBy: 'NV-001', approvedAt: '2026-07-16', paidBy: null, paidAt: null, txnRef: null, forfeitId: 'COC-2607-01', note: 'Giữ toàn bộ cọc theo quyết định đã duyệt; ghi nhận doanh thu bỏ cọc kỳ 07' },
-    { id: 'HC-2610-01', contractId: endedIds['DD-302'], customerId: 'KH-018', amount: 4800000, state: 'reconciling', handoverAt: '2026-09-28', dueAt: '2026-10-08', deductions: [{ item: 'Điện', name: 'Điện nước 01–27/09 (chưa lập hóa đơn)', amount: 310000, source: 'Chỉ số bàn giao 28/09' }, { item: 'Sửa chữa', name: 'Thấm trần — chờ xác định lỗi bên nào', amount: 0, source: 'Biên bản 28/09 · Điều 2.2 bàn giao: “Sạch — thấm nhẹ góc trần” · chưa chốt', pending: true }], forfeitAmount: 0, forfeitBasis: '', refundAmount: null, proposedBy: 'NV-004', proposedAt: null, approvedBy: null, approvedAt: null, paidBy: null, paidAt: null, txnRef: null, note: 'Phòng chuyển “Đang sửa” sau bàn giao; chưa chốt khấu trừ — hạn 10 ngày theo Điều 4.3 HĐ ký 25/09/2025' },
+    { id: 'HC-2609-01', contractId: endedIds['401T17'], customerId: 'KH-016', amount: 6500000, state: 'refunded', handoverAt: '2026-08-31', dueAt: '2026-09-10', deductions: [{ item: 'Sửa chữa', name: 'Hư hỏng rèm, vệ sinh lại tường', amount: 300000, source: 'Biên bản bàn giao 31/08/2026 · Điều 6.2.5' }], forfeitAmount: 0, forfeitBasis: '', refundAmount: 6200000, proposedBy: 'NV-003', proposedAt: '2026-09-01', approvedBy: 'NV-001', approvedAt: '2026-09-02', paidBy: 'NV-002', paidAt: '2026-09-03', txnRef: 'CK-20260903-0417', depositId: 'COC-2609-01', note: 'Thanh lý đúng hạn, hoàn trong 3 ngày' },
+    { id: 'HC-2607-01', contractId: endedIds['202G1'], customerId: 'KH-017', amount: 4000000, state: 'forfeited', handoverAt: '2026-07-15', dueAt: null, deductions: [], forfeitAmount: 4000000, forfeitBasis: 'Điều 4.3 & 7.1 HĐ ký 29/07/2025 (mẫu đầy đủ) — khách đơn phương chấm dứt', refundAmount: 0, proposedBy: 'NV-005', proposedAt: '2026-07-15', approvedBy: 'NV-001', approvedAt: '2026-07-16', paidBy: null, paidAt: null, txnRef: null, forfeitId: 'COC-2607-01', note: 'Giữ toàn bộ cọc theo quyết định đã duyệt; ghi nhận doanh thu bỏ cọc kỳ 07' },
+    { id: 'HC-2610-01', contractId: endedIds['302S9'], customerId: 'KH-018', amount: 4800000, state: 'reconciling', handoverAt: '2026-09-28', dueAt: '2026-10-08', deductions: [{ item: 'Điện', name: 'Điện nước 01–27/09 (chưa lập hóa đơn)', amount: 310000, source: 'Chỉ số bàn giao 28/09' }, { item: 'Sửa chữa', name: 'Thấm trần — chờ xác định lỗi bên nào', amount: 0, source: 'Biên bản 28/09 · Điều 2.2 bàn giao: “Sạch — thấm nhẹ góc trần” · chưa chốt', pending: true }], forfeitAmount: 0, forfeitBasis: '', refundAmount: null, proposedBy: 'NV-004', proposedAt: null, approvedBy: null, approvedAt: null, paidBy: null, paidAt: null, txnRef: null, note: 'Phòng chuyển “Đang sửa” sau bàn giao; chưa chốt khấu trừ — hạn 10 ngày theo Điều 4.3 HĐ ký 25/09/2025' },
     { id: 'HC-2611-01', contractId: dd102.id, customerId: dd102.customerId, amount: dd102.deposit, state: 'awaiting_handover', handoverAt: '2026-11-15', dueAt: null, deductions: [], forfeitAmount: 0, forfeitBasis: '', refundAmount: null, proposedBy: 'NV-004', proposedAt: '2026-10-12', approvedBy: null, approvedAt: null, paidBy: null, paidAt: null, txnRef: null, note: 'Khách báo chuyển đi 15/11 (khảo sát gia hạn 12/10). Hạn hoàn 10 ngày (Điều 4.3) chỉ tính từ ngày bàn giao thực tế → chưa xác định hạn', planned: true },
-    { id: 'HC-2507-01', contractId: endedIds['CG-201#old'], customerId: 'KH-003', amount: 4800000, state: 'transferred', handoverAt: null, dueAt: null, deductions: [], forfeitAmount: 0, forfeitBasis: '', refundAmount: 0, proposedBy: 'NV-003', proposedAt: '2025-06-28', approvedBy: 'NV-002', approvedAt: '2025-06-30', paidBy: null, paidAt: null, txnRef: 'PCC-2507-01', transferToContractId: 'HĐ-CG201/25', note: 'Chuyển cọc sang HĐ mới qua phiếu chuyển cọc PCC-2507-01 (bù thêm 400.000 theo giá mới) — không nhân đôi cọc' },
+    { id: 'HC-2507-01', contractId: endedIds['201T17#old'], customerId: 'KH-003', amount: 4800000, state: 'transferred', handoverAt: null, dueAt: null, deductions: [], forfeitAmount: 0, forfeitBasis: '', refundAmount: 0, proposedBy: 'NV-003', proposedAt: '2025-06-28', approvedBy: 'NV-002', approvedAt: '2025-06-30', paidBy: null, paidAt: null, txnRef: 'PCC-2507-01', transferToContractId: 'HĐ-201T17/25', note: 'Chuyển cọc sang HĐ mới qua phiếu chuyển cọc PCC-2507-01 (bù thêm 400.000 theo giá mới) — không nhân đôi cọc' },
   ];
   /* CR-PAY — phá HĐ theo sheet "DS phòng phá hđ": hóa đơn kỳ vẫn giữ (DT phá HĐ), truy thu tiền điện, phần điện nước không thu được vào sheet
-     "ĐIỆN NƯỚC PHÒNG TRỐNG/KHÔNG THU ĐƯỢC". DD-201: khách chuyển chỗ làm, bỏ đi 16/10 sau khi đã đóng 3.000.000 → hồ sơ cọc chờ duyệt giữ cọc (không tự ghi mất cọc, K-04). */
-  var dd201 = db.contracts.find(function (c) { return c.roomId === 'DD-201' && c.status === 'active'; });
+     "ĐIỆN NƯỚC PHÒNG TRỐNG/KHÔNG THU ĐƯỢC". 201S9: khách chuyển chỗ làm, bỏ đi 16/10 sau khi đã đóng 3.000.000 → hồ sơ cọc chờ duyệt giữ cọc (không tự ghi mất cọc, K-04). */
+  var dd201 = db.contracts.find(function (c) { return c.roomId === '201S9' && c.status === 'active'; });
   Object.assign(dd201, { status: 'terminated', endedAt: '2026-10-16', endKind: 'tenant_request', endReason: 'Khách chuyển chỗ làm, báo 15/10 và trả phòng 16/10 — phá HĐ trước hạn' });
-  db.rooms.find(function (r) { return r.id === 'DD-201'; }).status = 'vacant';
-  db.roomEvents.push({ roomId: 'DD-201', at: '2026-10-16', from: 'occupied', to: 'vacant', by: 'NV-004', note: 'Khách phá HĐ (chuyển chỗ làm)' });
+  db.rooms.find(function (r) { return r.id === '201S9'; }).status = 'vacant';
+  db.roomEvents.push({ roomId: '201S9', at: '2026-10-16', from: 'occupied', to: 'vacant', by: 'NV-004', note: 'Khách phá HĐ (chuyển chỗ làm)' });
   db.customers.find(function (k) { return k.id === dd201.customerId; }).vehicles.forEach(function (v) { if (v.status === 'active') { v.status = 'ended'; v.to = '2026-10-16'; } });
   db.depositCases.push({ id: 'HC-2610-02', contractId: dd201.id, customerId: dd201.customerId, amount: dd201.deposit, state: 'pending_approval', handoverAt: '2026-10-16', dueAt: '2026-10-26', deductions: [], forfeitAmount: dd201.deposit, forfeitBasis: 'Điều 4.3 & 7.1 HĐ — khách đơn phương chấm dứt trước hạn (đề xuất giữ toàn bộ cọc)', refundAmount: 0, proposedBy: 'NV-004', proposedAt: '2026-10-17', approvedBy: null, approvedAt: null, paidBy: null, paidAt: null, txnRef: null, note: 'Phá HĐ 16/10 — chờ duyệt mức giữ cọc' });
   db.breakCases = [
-    { id: 'PHD-2607-01', roomId: 'TX-202', contractId: endedIds['TX-202'], customerId: 'KH-017', buildingId: 'TH-TX', period: '2026-07', at: '2026-07-15', reason: 'hometown', note: 'Khách về quê, đơn phương chấm dứt (trước khi lập hóa đơn trên hệ thống)', reportedBy: 'NV-005', reportedAt: '2026-07-15' },
-    { id: 'PHD-2610-01', roomId: 'DD-201', contractId: dd201.id, customerId: dd201.customerId, buildingId: 'TH-DD', period: '2026-10', at: '2026-10-16', reason: 'job', note: 'Chuyển chỗ làm, báo trước 1 ngày; đã đóng 3.000.000 ngày 09/10', reportedBy: 'NV-004', reportedAt: '2026-10-16' },
+    { id: 'PHD-2607-01', roomId: '202G1', contractId: endedIds['202G1'], customerId: 'KH-017', buildingId: 'G1', period: '2026-07', at: '2026-07-15', reason: 'hometown', note: 'Khách về quê, đơn phương chấm dứt (trước khi lập hóa đơn trên hệ thống)', reportedBy: 'NV-005', reportedAt: '2026-07-15' },
+    { id: 'PHD-2610-01', roomId: '201S9', contractId: dd201.id, customerId: dd201.customerId, buildingId: 'S9', period: '2026-10', at: '2026-10-16', reason: 'job', note: 'Chuyển chỗ làm, báo trước 1 ngày; đã đóng 3.000.000 ngày 09/10', reportedBy: 'NV-004', reportedAt: '2026-10-16' },
   ];
 
   /* ---------- CR-BILL — quy tắc tính tiền đề xuất, phòng mới tháng, điện chung, giảm trừ/phụ thu ---------- */
   db.billRules = Object.assign({}, TH.BILL_RULES_DEFAULT, { status: 'proposed', updatedBy: 'NV-002', updatedAt: '2026-10-21', note: 'Đề xuất bám file Excel tháng 9/2026 — chờ khách duyệt (D-03/K-05)' });
-  /* Sheet PHÒNG MỚI: TX-202 — khách giữ chỗ 12/10 (cọc 4.000.000), vào ở 20/10, giá chốt thấp hơn niêm yết. Hóa đơn TX kỳ 10 chưa lập (luồng INV-01):
-     sinh nháp sẽ ra tiền phòng lẻ 12/30 ngày + DV đủ tháng + điện nước. CG-401 giữ trống cho luồng OCR hợp đồng mẫu. */
-  var r202 = db.rooms.find(function (r) { return r.id === 'TX-202'; }), bTX = db.buildings.find(function (b) { return b.id === 'TH-TX'; });
+  /* Sheet PHÒNG MỚI: 202G1 — khách giữ chỗ 12/10 (cọc 4.000.000), vào ở 20/10, giá chốt thấp hơn niêm yết. Hóa đơn G1 kỳ 10 chưa lập (luồng INV-01):
+     sinh nháp sẽ ra tiền phòng lẻ 12/30 ngày + DV đủ tháng + điện nước. 401T17 giữ trống cho luồng OCR hợp đồng mẫu. */
+  var r202 = db.rooms.find(function (r) { return r.id === '202G1'; }), bTX = db.buildings.find(function (b) { return b.id === 'G1'; });
   var k19 = { id: 'KH-019', name: 'Vương Thu Hà', dob: '2000-05-16', phone: '0936 ••• 512', idNo: '0012••••7512', idType: 'CCCD', idPlace: 'Cục Cảnh sát QLHC về TTXH', hometown: 'Phú Thọ', oaLinked: true, oaConsentAt: '2026-10-18', status: 'active', createdAt: '2026-10-12' };
   db.customers.push(k19);
-  var ct202 = { id: 'HĐ-TX202/26', roomId: 'TX-202', buildingId: 'TH-TX', customerId: k19.id, rent: 3800000, listRent: r202.rent, priceNote: 'Chốt giá 3,8tr (niêm yết 4tr) — khách do CTV giới thiệu; cọc giữ chỗ 12/10 chuyển thành cọc HĐ', deposit: 4000000,
+  var ct202 = { id: 'HĐ-202G1/26', roomId: '202G1', buildingId: 'G1', customerId: k19.id, rent: 3800000, listRent: r202.rent, priceNote: 'Chốt giá 3,8tr (niêm yết 4tr) — khách do CTV giới thiệu; cọc giữ chỗ 12/10 chuyển thành cọc HĐ', deposit: 4000000,
     start: '2026-10-20', end: '2027-10-19', signedAt: '2026-10-18', people: 1, billingDay: 20, status: 'active', endKind: null, renewals: [], previousContractId: null, scanFile: 'scan_TX-202_2026.pdf', note: '',
     terms: termsOf('DAYDU', '2026-10-20'), priceList: seedPriceList(bTX, '2026-10-20', 1),
-    fees: [{ code: 'SVC', name: 'Phí dịch vụ', price: 150000, qty: 1, unit: 'tháng' }, { code: 'NET', name: 'Internet', price: 100000, qty: 1, unit: 'tháng' }, { code: 'PARK', name: 'Gửi xe điện', price: 120000, qty: 1, unit: 'xe' }],
     versions: [{ v: 1, at: '2026-10-18', note: 'Bản ký gốc' }] };
-  var rd202 = db.readings.find(function (r) { return r.roomId === 'TX-202' && r.period === '2026-10'; });
-  ct202.handover = { at: '2026-10-20', billingFrom: '2026-10-20', elecStart: rd202.elecPrev, waterStart: rd202.waterPrev, assets: TH.HANDOVER_ASSETS.map(function (a) { return { group: a.group, name: a.name, unit: a.unit, qty: a.qty, condition: a.condition }; }), source: 'OCR HĐ ' + ct202.id + ' · xác nhận 2026-10-18', file: ct202.scanFile };
+  ct202.fees = seedFees(ct202.priceList, ct202.people);
+  var rd202 = db.readings.find(function (r) { return r.roomId === '202G1' && r.period === '2026-10'; });
+  ct202.handover = { at: '2026-10-20', billingFrom: '2026-10-20', elecStart: rd202.elecPrev, waterStart: rd202.waterPrev, assets: handoverAssets(ct202), source: 'OCR HĐ ' + ct202.id + ' · xác nhận 2026-10-18', file: ct202.scanFile };
   ct202.prepaid = { beforeSign: 4000000, atSign: 0, total: 4000000, allocation: 'Cọc giữ chỗ 4.000.000 ₫ (12/10) chuyển thành cọc HĐ — tiền phòng kỳ đầu thu theo hóa đơn lẻ ngày' };
   db.contracts.push(ct202);
+  contractParties(db, ct202);
   seedCustomerExtra(k19, db.customers.length - 1, 1, ct202);
   r202.status = 'occupied';
-  db.roomEvents.push({ roomId: 'TX-202', at: '2026-10-20', from: 'vacant', to: 'occupied', by: 'NV-005', note: 'Khách mới vào ở (' + ct202.id + ')' });
-  Object.assign(db.deposits.find(function (d) { return d.id === 'COC-2610-01'; }), { note: 'Giữ chỗ 12/10 → cọc HĐ mới TX-202 (vào ở 20/10)', contractId: ct202.id, customerId: k19.id });
-  db.documents.push({ id: 'TL-230', customerId: k19.id, contractId: ct202.id, roomId: 'TX-202', kind: 'Hợp đồng scan', file: ct202.scanFile, version: 1, uploadedAt: '2026-10-18', views: 1 });
-  db.documents.push({ id: 'TL-231', customerId: k19.id, contractId: ct202.id, roomId: 'TX-202', kind: 'CCCD (đã mask)', file: 'cccd_KH-019_mask.jpg', version: 1, uploadedAt: '2026-10-18', views: 1 });
+  db.roomEvents.push({ roomId: '202G1', at: '2026-10-20', from: 'vacant', to: 'occupied', by: 'NV-005', note: 'Khách mới vào ở (' + ct202.id + ')' });
+  Object.assign(db.deposits.find(function (d) { return d.id === 'COC-2610-01'; }), { note: 'Giữ chỗ 12/10 → cọc HĐ mới 202G1 (vào ở 20/10)', contractId: ct202.id, customerId: k19.id });
+  db.documents.push({ id: 'TL-230', customerId: k19.id, contractId: ct202.id, roomId: '202G1', kind: 'Hợp đồng scan', file: ct202.scanFile, version: 1, uploadedAt: '2026-10-18', views: 1 });
+  db.documents.push({ id: 'TL-231', customerId: k19.id, contractId: ct202.id, roomId: '202G1', kind: 'CCCD (đã mask)', file: 'cccd_KH-019_mask.jpg', version: 1, uploadedAt: '2026-10-18', views: 1 });
 
-  /* Sheet "Điện vệ sinh chung": công tơ chung (WC/hành lang) TX — (CS mới − CS cũ) × đơn giá ÷ số người sử dụng; áp dụng từ kỳ 10 */
+  /* Sheet "Điện vệ sinh chung": công tơ chung (WC/hành lang) G1 — (CS mới − CS cũ) × đơn giá ÷ số người sử dụng; áp dụng từ kỳ 10 */
   db.commonMeters = [
-    { id: 'CTC-TX-01', buildingId: 'TH-TX', name: 'WC chung + hành lang tầng 1–3', code: 'Đ-TX-CHUNG', rooms: ['TX-101', 'TX-102', 'TX-201', 'TX-202', 'TX-301'], method: 'per_person', price: 4000, from: '2026-10', note: 'Tòa có công tơ chung: Phí dịch vụ không gồm điện chung (đề xuất BILL-Q5)' },
+    { id: 'CTC-G1-01', buildingId: 'G1', name: 'WC chung + hành lang tầng 1–3', code: 'Đ-G1-CHUNG', rooms: ['101G1', '102G1', '201G1', '202G1', '301G1'], method: 'per_person', price: 4000, from: '2026-10', note: 'Tòa có công tơ chung: Phí dịch vụ không gồm điện chung (đề xuất BILL-Q5)' },
   ];
   db.commonReadings = [
-    { meterId: 'CTC-TX-01', period: '2026-09', prev: 2410, cur: 2520, status: 'confirmed', enteredBy: 'NV-005', enteredAt: '2026-09-01', note: 'Kỳ theo dõi đầu — chưa phân bổ' },
-    { meterId: 'CTC-TX-01', period: '2026-10', prev: 2520, cur: 2646, status: 'confirmed', enteredBy: 'NV-005', enteredAt: '2026-10-01', note: '' },
+    { meterId: 'CTC-G1-01', period: '2026-09', prev: 2410, cur: 2520, status: 'confirmed', enteredBy: 'NV-005', enteredAt: '2026-09-01', note: 'Kỳ theo dõi đầu — chưa phân bổ' },
+    { meterId: 'CTC-G1-01', period: '2026-10', prev: 2520, cur: 2646, status: 'confirmed', enteredBy: 'NV-005', enteredAt: '2026-10-01', note: '' },
   ];
   /* Số người ở thay đổi theo tháng (ghi chú "tháng 10 ở 2 ng" trong file) — dùng cho điện chung / nước theo người */
-  db.contracts.find(function (c) { return c.roomId === 'TX-102' && c.status === 'active'; }).peopleLog = [{ from: '2026-10', people: 3, note: 'Tháng 10 ở thêm 1 người (QL khai báo 05/10)', by: 'NV-005', at: '2026-10-05' }];
+  db.contracts.find(function (c) { return c.roomId === '102G1' && c.status === 'active'; }).peopleLog = [{ from: '2026-10', people: 3, note: 'Tháng 10 ở thêm 1 người (QL khai báo 05/10)', by: 'NV-005', at: '2026-10-05' }];
   /* Giảm trừ / phụ thu (cột "Thu khác"): QL tự duyệt dưới ngưỡng; từ ngưỡng trở lên chờ kế toán/admin duyệt */
   var ctOf = function (roomId) { return db.contracts.find(function (c) { return c.roomId === roomId && c.status === 'active'; }); };
   db.billAdjusts = [
-    { id: 'DC-2610-01', roomId: 'TX-101', contractId: ctOf('TX-101').id, buildingId: 'TH-TX', period: '2026-10', kind: 'discount', category: 'Hỗ trợ DV', amount: 120000, reason: 'Khách về quê 10 ngày đầu tháng — hỗ trợ DV chung', status: 'approved', createdBy: 'NV-005', createdAt: '2026-10-02', approvedBy: 'NV-005', approvedAt: '2026-10-02' },
-    { id: 'DC-2610-02', roomId: 'TX-102', contractId: ctOf('TX-102').id, buildingId: 'TH-TX', period: '2026-10', kind: 'surcharge', category: 'Thêm người', amount: 200000, reason: 'Thêm 1 người ở quá 5 ngày (Điều 1.2 HĐ)', status: 'approved', createdBy: 'NV-005', createdAt: '2026-10-05', approvedBy: 'NV-005', approvedAt: '2026-10-05' },
-    { id: 'DC-2610-03', roomId: 'TX-301', contractId: ctOf('TX-301').id, buildingId: 'TH-TX', period: '2026-10', kind: 'surcharge', category: 'Phạt vi phạm', amount: 600000, reason: 'Làm bẩn, hỏng tường hành lang — phạt theo nội quy', status: 'pending', createdBy: 'NV-005', createdAt: '2026-10-08', approvedBy: null, approvedAt: null },
+    { id: 'TK-2610-01', roomId: '101G1', contractId: ctOf('101G1').id, buildingId: 'G1', period: '2026-10', kind: 'discount', category: 'Hỗ trợ DV', amount: 120000, reason: 'Khách về quê 10 ngày đầu tháng — hỗ trợ DV chung', status: 'approved', createdBy: 'NV-005', createdAt: '2026-10-02', approvedBy: 'NV-005', approvedAt: '2026-10-02' },
+    { id: 'TK-2610-02', roomId: '102G1', contractId: ctOf('102G1').id, buildingId: 'G1', period: '2026-10', kind: 'surcharge', category: 'Thêm người', amount: 200000, reason: 'Thêm 1 người ở quá 5 ngày (Điều 1.2 HĐ)', status: 'approved', createdBy: 'NV-005', createdAt: '2026-10-05', approvedBy: 'NV-005', approvedAt: '2026-10-05' },
+    { id: 'TK-2610-03', roomId: '301G1', contractId: ctOf('301G1').id, buildingId: 'G1', period: '2026-10', kind: 'surcharge', category: 'Phạt vi phạm', amount: 600000, reason: 'Làm bẩn, hỏng tường hành lang — phạt theo nội quy', status: 'pending', createdBy: 'NV-005', createdAt: '2026-10-08', approvedBy: null, approvedAt: null },
   ];
 
   /* K-06: ngưỡng cảnh báo hết hạn là cấu hình doanh nghiệp (mặc định 35), khác với mốc khách phải báo trước theo HĐ */
@@ -754,11 +790,11 @@ TH.seed = function () {
 
   /* ---------- Người dùng hệ thống ---------- */
   db.users = [
-    { id: 'U-01', staffId: 'NV-001', username: 'duc.pm', role: 'admin', scope: ['TH-CG', 'TH-DD', 'TH-TX'], status: 'active', perms: null },
-    { id: 'U-02', staffId: 'NV-002', username: 'ha.ht', role: 'accountant', scope: ['TH-CG', 'TH-DD', 'TH-TX'], status: 'active', perms: null },
-    { id: 'U-03', staffId: 'NV-003', username: 'huy.vq', role: 'manager', scope: ['TH-CG'], status: 'active', perms: null },
-    { id: 'U-04', staffId: 'NV-004', username: 'lan.dt', role: 'manager', scope: ['TH-DD'], status: 'active', perms: null },
-    { id: 'U-05', staffId: 'NV-005', username: 'nam.bv', role: 'manager', scope: ['TH-TX'], status: 'active', perms: null },
+    { id: 'U-01', staffId: 'NV-001', username: 'duc.pm', role: 'admin', scope: ['T17', 'S9', 'G1'], status: 'active', perms: null },
+    { id: 'U-02', staffId: 'NV-002', username: 'ha.ht', role: 'accountant', scope: ['T17', 'S9', 'G1'], status: 'active', perms: null },
+    { id: 'U-03', staffId: 'NV-003', username: 'huy.vq', role: 'manager', scope: ['T17'], status: 'active', perms: null },
+    { id: 'U-04', staffId: 'NV-004', username: 'lan.dt', role: 'manager', scope: ['S9'], status: 'active', perms: null },
+    { id: 'U-05', staffId: 'NV-005', username: 'nam.bv', role: 'manager', scope: ['G1'], status: 'active', perms: null },
     { id: 'U-06', staffId: 'NV-008', username: 'ngoc.lt', role: 'hr', scope: [], status: 'active', perms: null },
   ];
   db.permVersions = [
@@ -769,16 +805,16 @@ TH.seed = function () {
 
   /* ---------- Audit ---------- */
   db.audit = [
-    { at: '2026-10-19 16:02', by: 'NV-002', action: 'Xác nhận phiếu thu', entity: 'PT (DD-102)', detail: 'Thực nhận 19/10/2026 — sau mốc 15, HS 0%', kind: 'receipt', buildingId: 'TH-DD' },
-    { at: '2026-10-14 10:21', by: 'NV-002', action: 'Xác nhận phiếu thu', entity: 'PT (CG-301)', detail: 'Thực nhận 14/10/2026', kind: 'receipt', buildingId: 'TH-CG' },
-    { at: '2026-10-12 09:40', by: 'NV-002', action: 'Từ chối báo thu', entity: 'PT (DD-301)', detail: 'Ảnh chuyển khoản không khớp', kind: 'receipt', buildingId: 'TH-DD' },
+    { at: '2026-10-19 16:02', by: 'NV-002', action: 'Xác nhận phiếu thu', entity: 'PT (102S9)', detail: 'Thực nhận 19/10/2026 — sau mốc 15, HS 0%', kind: 'receipt', buildingId: 'S9' },
+    { at: '2026-10-14 10:21', by: 'NV-002', action: 'Xác nhận phiếu thu', entity: 'PT (301T17)', detail: 'Thực nhận 14/10/2026', kind: 'receipt', buildingId: 'T17' },
+    { at: '2026-10-12 09:40', by: 'NV-002', action: 'Từ chối báo thu', entity: 'PT (301S9)', detail: 'Ảnh chuyển khoản không khớp', kind: 'receipt', buildingId: 'S9' },
     { at: '2026-10-09 08:15', by: 'NV-002', action: 'Duyệt chi phí', entity: 'Chi phí kỳ 10 (8 khoản)', detail: 'Điện nước tổng, internet, vệ sinh', kind: 'expense', buildingId: 'ALL' },
     { at: '2026-10-06 17:30', by: 'NV-002', action: 'Khóa kỳ', entity: 'Kỳ 09/2026', detail: 'Chốt số liệu báo cáo kỳ 09', kind: 'period', buildingId: 'ALL' },
     { at: '2026-10-01 14:05', by: 'NV-002', action: 'Xác nhận hóa đơn', entity: 'Batch kỳ 10 · Cầu Giấy, Đống Đa', detail: '11 hóa đơn', kind: 'invoice', buildingId: 'ALL' },
-    { at: '2026-09-28 11:00', by: 'NV-004', action: 'Đổi trạng thái phòng', entity: 'DD-302', detail: 'Đang thuê → Đang sửa', kind: 'room', buildingId: 'TH-DD' },
+    { at: '2026-09-28 11:00', by: 'NV-004', action: 'Đổi trạng thái phòng', entity: '302S9', detail: 'Đang thuê → Đang sửa', kind: 'room', buildingId: 'S9' },
   ];
   db.batches = [
-    { id: 'BATCH-2610-01', period: '2026-10', buildings: ['TH-CG', 'TH-DD'], at: '2026-10-01 10:30', by: 'NV-003', created: 11, skipped: 0, status: 'confirmed', run: 1 },
+    { id: 'BATCH-2610-01', period: '2026-10', buildings: ['T17', 'S9'], at: '2026-10-01 10:30', by: 'NV-003', created: 11, skipped: 0, status: 'confirmed', run: 1 },
   ];
   return db;
 };
@@ -807,6 +843,7 @@ function monthEnd(ym) { return ym + '-' + String(monthDays(ym)).padStart(2, '0')
 function dayDiff(a, b) { return Math.round((new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / 86400000); }
 function monthsBetween(a, b) { return (+b.slice(0, 4) - +a.slice(0, 4)) * 12 + (+b.slice(5, 7) - +a.slice(5, 7)); }
 TH.monthEnd = monthEnd;
+TH.dayDiff = dayDiff;
 function rulesOf(db) { return Object.assign({}, TH.BILL_RULES_DEFAULT, db.billRules || {}); }
 /* Ngày tính tiền của HĐ trong kỳ (F023.B): từ ngày bắt đầu tính tiền (bàn giao) đến ngày khách thực đi; tròn tháng → hệ số 1, lẻ → ngày ở ÷ 30 (hoặc ÷ số ngày của tháng) */
 function occupancy(db, ct, period) {
@@ -917,20 +954,57 @@ function buildInvoice(db, ct, period, status) {
   };
 }
 TH.buildInvoice = buildInvoice;
-/* Bảng giá dịch vụ theo HĐ (CR-CUS-01, K-05) — dữ liệu mẫu khớp bộ phí cũ (DV chung 150k/phòng, Internet 100k, gửi xe đạp điện 120k/xe) để hóa đơn/báo cáo đã kiểm không đổi */
+/* Biểu phí dịch vụ theo tòa — bám cột DV của sheet NHÀ T/S/G (Hoá đơn tháng 9/2026) và Điều 4.4 mẫu HĐ đầy đủ.
+   T17 dùng đúng biểu phí in trên mẫu HĐ (Internet 100k, DV chung 120k/người, nước 120k/người, xe đạp điện 150k, xe điện SM 400k);
+   S9: combo DV 120k/người, nước theo công tơ; G1: tách thang máy / vệ sinh / máy giặt theo người như sheet NHÀ G. Điện, nước lấy từ hồ sơ tòa. */
+TH.FEE_SCHEMES = {
+  T17: { NET: [100000, 'per_room'], SVC: [120000, 'per_person', 'Máy giặt, điện chung, thu rác, vệ sinh chung (Điều 4.4)'], ELEV: [0, 'na', 'Diễn giải trong Dịch vụ chung — không lập dòng thu riêng'], PARK_EBIKE: [150000, 'per_vehicle'], PARK_EV: [400000, 'per_vehicle', 'Xe điện dịch vụ xanh SM (Điều 4.4) — chỉ tính xe đã xác nhận đăng ký'] },
+  S9: { NET: [100000, 'per_room'], SVC: [120000, 'per_person', 'Combo DV: vệ sinh chung, máy giặt chung, thu rác'], ELEV: [0, 'na', 'Tòa không có thang máy'], PARK_EBIKE: [150000, 'per_vehicle'] },
+  G1: { NET: [100000, 'per_room'], ELEV: [50000, 'per_person', 'Thang máy theo người (sheet NHÀ G)'], CLEAN: [30000, 'per_person', 'Vệ sinh khu chung theo người'], WASH: [60000, 'per_person', 'Máy giặt chung tầng 1 theo người'], PARK_EBIKE: [150000, 'per_vehicle'] },
+};
+/* Bảng giá dịch vụ theo HĐ (CR-CUS-01, K-05): mọi mã phí trong TH.FEE_TYPES, dòng không có trong biểu phí tòa = không áp dụng */
 function seedPriceList(b, start, people) {
-  var from = start.slice(0, 7), basis = 'HĐ ký ' + addDays(start, -3);
-  return [
-    { code: 'ELEC', price: b.elecPrice, method: 'by_meter', active: true, from: from, basis: basis, note: '' },
-    { code: 'WATER', price: b.waterPrice, method: 'by_meter', active: true, from: from, basis: basis, note: '' },
-    { code: 'NET', price: 100000, method: 'per_room', active: true, from: from, basis: basis, note: '' },
-    { code: 'ELEV', price: 0, method: 'na', active: false, from: from, basis: basis, note: b.elevator ? 'Diễn giải trong Dịch vụ chung — không lập dòng thu riêng' : 'Tòa không có thang máy' },
-    { code: 'SVC', price: 150000, method: 'per_room', active: true, from: from, basis: basis, note: 'Máy giặt, điện chung, thu rác, vệ sinh chung' + (b.elevator ? ', thang máy' : '') },
-    { code: 'PARK_MOTO', price: 0, method: 'per_vehicle', qtySource: 'vehicles', active: true, from: from, basis: basis, note: 'Miễn phí — giữ dòng để lưu quyền sử dụng và số xe đã đăng ký' },
-    { code: 'PARK_EBIKE', price: 120000, method: 'per_vehicle', qtySource: 'manual', qty: people, active: true, from: from, basis: basis, note: 'Số xe ghi trong HĐ ký' },
-    { code: 'PARK_EV', price: 0, method: 'na', active: false, from: from, basis: basis, note: 'Chưa đăng ký' },
-    { code: 'EVCHG', price: 0, method: 'na', active: false, from: from, basis: basis, note: 'Chưa có công tơ phụ' },
+  var from = start.slice(0, 7), basis = 'HĐ ký ' + addDays(start, -3), sc = TH.FEE_SCHEMES[b.id] || TH.FEE_SCHEMES.T17;
+  var line = function (code, price, method, note, extra) { return Object.assign({ code: code, price: price, method: method, active: method !== 'na', from: from, basis: basis, note: note || '' }, extra || {}); };
+  var out = [
+    line('ELEC', b.elecPrice, 'by_meter'),
+    line('WATER', b.waterPrice, b.waterMethod === 'per_person' ? 'per_person' : b.waterMethod === 'per_room' ? 'per_room' : 'by_meter'),
   ];
+  ['NET', 'ELEV', 'SVC', 'CLEAN', 'WASH'].forEach(function (code) { var s = sc[code]; out.push(s ? line(code, s[0], s[1], s[2]) : line(code, 0, 'na', 'Không có trong biểu phí tòa')); });
+  out.push(line('PARK_MOTO', 0, 'per_vehicle', 'Miễn phí — giữ dòng để lưu quyền sử dụng và số xe đã đăng ký', { qtySource: 'vehicles' }));
+  out.push(line('PARK_EBIKE', sc.PARK_EBIKE[0], 'per_vehicle', 'Số xe ghi trong HĐ ký (Điều 1.2)', { qtySource: 'manual', qty: people }));
+  out.push(sc.PARK_EV ? line('PARK_EV', sc.PARK_EV[0], 'per_vehicle', sc.PARK_EV[2], { qtySource: 'vehicles' }) : line('PARK_EV', 0, 'na', 'Tòa chưa nhận xe điện dịch vụ'));
+  out.push(line('EVCHG', 0, 'na', 'Chưa có công tơ phụ'));
+  return out;
+}
+/* Bộ phí cố định dùng lập hóa đơn — như TH.syncFees nhưng không đọc TH.db (seed chưa gắn); xe theo đăng ký chưa có xe xác nhận → SL 0, không vào hóa đơn */
+function seedFees(pl, people) {
+  return pl.filter(function (l) { return l.active && l.code !== 'ELEC' && l.code !== 'WATER' && TH.FIXED_METHODS.indexOf(l.method) > -1; }).map(function (l) {
+    var qty = l.method === 'per_person' ? people : l.method === 'per_room' ? 1 : l.qtySource === 'manual' ? +l.qty || 0 : 0;
+    return { code: l.code, name: TH.feeType(l.code).name, price: l.price, qty: qty, unit: { per_person: 'người', per_room: 'tháng', per_vehicle: 'xe' }[l.method] };
+  }).filter(function (f) { return f.qty > 0; });
+}
+TH.seedFees = seedFees;
+function fmtVnd(n) { return String(Math.round(+n || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+TH.unaccent = function (t) { return String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D'); };
+/* Điều 2.2 theo trang bị thực của tòa: G1 dùng máy giặt chung (thu DV máy giặt theo người), S9 không trang bị máy hút mùi */
+function handoverAssets(ct) {
+  return TH.HANDOVER_ASSETS.map(function (a) {
+    var x = { group: a.group, name: a.name, unit: a.unit, qty: a.qty, condition: a.condition };
+    if (ct.buildingId === 'G1' && a.name === 'Máy giặt') { x.qty = 0; x.condition = 'Dùng chung tầng 1 (DV máy giặt)'; }
+    if (ct.buildingId === 'S9' && a.name === 'Máy hút mùi') { x.qty = 0; x.condition = 'Không trang bị'; }
+    return x;
+  });
+}
+TH.handoverAssets = handoverAssets;
+/* Bên A, tài khoản nhận và nội dung chuyển khoản theo mẫu HĐ đầy đủ (Điều 4.4.2–4.4.3: "P302 - TH01 - TRAN MINH AN" → "{phòng} - {tòa} - {TÊN}") */
+function contractParties(db, ct) {
+  var g = (db.buildingGroups || []).find(function (x) { return x.buildings.indexOf(ct.buildingId) > -1; }) || {};
+  var room = db.rooms.find(function (r) { return r.id === ct.roomId; }), k = db.customers.find(function (c) { return c.id === ct.customerId; });
+  ct.partyA = g.rep ? Object.assign({}, g.rep) : null;
+  if (g.payAccount) ct.terms.payAccount = g.payAccount;
+  ct.terms.peopleMax = Math.max(2, ct.people || 1);
+  ct.terms.transferNote = TH.roomNo(room) + ' - ' + TH.bTag(ct.buildingId) + ' - ' + TH.unaccent(k ? k.name : '').toUpperCase();
 }
 function termsOf(templateId, start) {
   var t = TH.CONTRACT_TERMS[templateId] || TH.CONTRACT_TERMS.DAYDU;
@@ -1206,7 +1280,7 @@ TH.calc = (function () {
         var rooms = sum(mine, function (p) { return roomsOf(p.buildingId).length; });
         var listed = sum(mine, function (p) { return sum(roomsOf(p.buildingId), function (r) { return r.rent; }); });
         var pp = api.perfPay(s, dtD, listed, rooms, period);
-        var team = db().teams.find(function (t) { return t.leaderId === s.id && t.id !== 'BO'; });
+        var team = db().teams.find(function (t) { return t.leaderId === s.id && TH.isOpsTeam(t); });
         var teamRooms = team ? sum(db().buildings.filter(function (b) { var m = api.staff(b.managerId); return m && m.team === team.id; }), function (b) { return roomsOf(b.id).length; }) : 0;
         var lead = teamRooms * pol.leaderPerRoom;
         var adj = sum(db().salaryAdjustments.filter(function (a) { return a.staffId === s.id && a.period === period; }), function (a) { return a.amount; });

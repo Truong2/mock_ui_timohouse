@@ -15,7 +15,7 @@ TH.PKG_KEYS = ['A', 'B', 'C', 'D'];
 TH.ROLES = {
   admin: { key: 'admin', label: 'Admin', staffId: 'NV-001', scope: 'ALL' },
   accountant: { key: 'accountant', label: 'Kế toán', staffId: 'NV-002', scope: 'ALL' },
-  manager: { key: 'manager', label: 'Quản lý tòa', staffId: 'NV-003', scope: ['TH-CG'] },
+  manager: { key: 'manager', label: 'Quản lý tòa', staffId: TH.DEMO.staff.manager, scope: TH.DEMO.managerScope },
   hr: { key: 'hr', label: 'Nhân sự', staffId: 'NV-008', scope: [] },
 };
 

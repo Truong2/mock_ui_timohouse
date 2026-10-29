@@ -61,10 +61,10 @@ async (page) => {
       observations.push({ id: 'owner-upsert-columns', nameUpdated: owner.name === 'Tên QA', phoneUpdated: owner.phone === '0900000001', addressUpdated: owner.address === 'Địa chỉ QA' });
       const buildings = configs['BLD-IMP'];
       buildings.commit(buildings.sample().filter(r => !r.errors.length && !r.dup), 'skip');
-      const b = TH.db.buildings.find(b => b.id === 'TH-HM');
+      const b = TH.db.buildings.find(b => b.id === 'G2');
       observations.push({ id: 'building-invented-defaults', area: b.area, managerId: b.managerId, floors: b.floors, sourceColumnCount: buildings.columns.length });
-      configs['ROOM-IMP'].commit([{ data: { b: 'TH-CG', code: '999', floor: 9, rent: 100, status: 'Đang thuê' } }], 'skip');
-      const room = TH.db.rooms.find(r => r.id === 'CG-999');
+      configs['ROOM-IMP'].commit([{ data: { b: 'T17', code: '999', floor: 9, rent: 100, status: 'Đang thuê' } }], 'skip');
+      const room = TH.db.rooms.find(r => r.id === '999T17');
       observations.push({ id: 'room-status', expected: 'occupied', actual: room.status, defaultAreaWithoutInput: room.area });
     } finally { TH.db = savedDB; }
     return {

@@ -10,7 +10,7 @@ async (page) => {
   await page.goto('http://127.0.0.1:8779/index.html?previewPackage=D&componentsQa=' + Date.now() + '#/demo/cus-02/KH-003');
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.evaluate(() => { TH.modal.stack.slice().forEach(m => { TH.modal.close(m.key, { silent: true, noFocus: true }); m.el.remove(); }); TH.db = TH.seed(); Object.assign(TH.store.state, { pkg: 'D', role: 'admin', building: 'ALL', period: '2026-10', ui: {}, drafts: {}, editing: null }); TH.app.guard = null; TH.app.render(); });
-  const totals = () => page.evaluate(() => ({ schema: TH.DATA_SCHEMA, kd09: TH.calc.pnl('2026-09', 'ALL', 'kd').lnr, total09: TH.calc.pnl('2026-09', 'ALL', 'tong').lnr, kd10: TH.calc.pnl('2026-10', 'ALL', 'kd').lnr, total10: TH.calc.pnl('2026-10', 'ALL', 'tong').lnr, invoice: TH.calc.invoice('INV-2610-CG202').total }));
+  const totals = () => page.evaluate(() => ({ schema: TH.DATA_SCHEMA, kd09: TH.calc.pnl('2026-09', 'ALL', 'kd').lnr, total09: TH.calc.pnl('2026-09', 'ALL', 'tong').lnr, kd10: TH.calc.pnl('2026-10', 'ALL', 'kd').lnr, total10: TH.calc.pnl('2026-10', 'ALL', 'tong').lnr, invoice: TH.calc.invoice('INV-2610-202T17').total }));
   const baseline = await totals();
   check('DOM-PAGE-ORDER', await page.evaluate(() => {
     const view = document.getElementById('view'), nodes = [...view.children];
@@ -84,9 +84,9 @@ async (page) => {
   await page.locator('#qa-component-fixture .form-error-summary a').first().click();
   check('FORM-ERROR-LINK', await page.locator('#f-qa-enterprise-name').evaluate(e => e === document.activeElement), 'Error summary focuses its field');
   await page.evaluate(() => {
-    const box = document.getElementById('qa-component-fixture'); box.innerHTML = '<div data-document><b>DRAFT · HĐ-CG101/25 · F012.B</b></div>'; TH.reviewFilter(box);
+    const box = document.getElementById('qa-component-fixture'); box.innerHTML = '<div data-document><b>DRAFT · HĐ-101T17/25 · F012.B</b></div>'; TH.reviewFilter(box);
   });
-  check('DOCUMENT-INTEGRITY', await page.locator('#qa-component-fixture [data-document]').innerText() === 'DRAFT · HĐ-CG101/25 · F012.B', 'The display filter never rewrites source documents');
+  check('DOCUMENT-INTEGRITY', await page.locator('#qa-component-fixture [data-document]').innerText() === 'DRAFT · HĐ-101T17/25 · F012.B', 'The display filter never rewrites source documents');
   await page.evaluate(() => { document.getElementById('qa-component-fixture').remove(); delete TH.act['_qa.open']; });
   const sweep = { variants: 0, dialogs: 0, failures: [] };
   for (const width of [375, 768, 1024, 1440]) {

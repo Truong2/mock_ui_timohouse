@@ -183,7 +183,7 @@
     } catch (e) { return fail(e.message); }
   };
   TH.act['rec.shareTable'] = function () {
-    var building = TH.store.ui('SHARE-01', 'b', TH.scope() !== 'ALL' ? TH.scope() : 'TH-CG'), period = TH.store.state.period, form = 'rec-share-table';
+    var building = TH.store.ui('SHARE-01', 'b', TH.scope() !== 'ALL' ? TH.scope() : 'T17'), period = TH.store.state.period, form = 'rec-share-table';
     TH.store.clearDraft(form);
     TH.modal.open({ key: form, size: 'lg', recordForm: form, render: function () {
       var rows = C.sharesFor(building, period), unused = TH.db.shareholders.filter(function (h) { return h.status !== 'inactive' && !rows.some(function (s) { return s.shareholderId === h.id; }); });
@@ -201,7 +201,7 @@
     TH.store.clearDraft(form); TH.modal.close(form, { silent: true }); done(result);
   };
   TH.act['shr.save'] = function () {
-    var b = TH.store.ui('SHARE-01', 'b', TH.scope() !== 'ALL' ? TH.scope() : 'TH-CG'), p = TH.store.state.period, form = 'shr-' + b + '-' + p;
+    var b = TH.store.ui('SHARE-01', 'b', TH.scope() !== 'ALL' ? TH.scope() : 'T17'), p = TH.store.state.period, form = 'shr-' + b + '-' + p;
     var rows = C.sharesFor(b, p).map(function (s) { return Object.assign({}, s, { ratio: +String(TH.store.draft(form, s.id, s.ratio)).replace(',', '.') }); });
     var result = R.saveShares(b, p, rows); if (result.ok) TH.store.clearDraft(form); done(result);
   };
@@ -232,7 +232,7 @@
   Object.keys(legacyPermissions).forEach(function (name) { var fn = TH.act[name]; if (!fn) return; TH.act[name] = function (el) {
     if (!TH.can(legacyPermissions[name])) return done(fail('Vai trò hiện tại không có quyền lưu dữ liệu này.'));
     var b;
-    if (name === 'own.link.save') b = TH.store.draft('own-link-' + el.dataset.id, 'b', 'TH-DD');
+    if (name === 'own.link.save') b = TH.store.draft('own-link-' + el.dataset.id, 'b', 'S9');
     if (name === 'bdoc.save') b = TH.store.draft('bdoc-up', 'b', TH.store.draft('bdoc-up', '_b', ''));
     if (name === 'bld.assignSave') b = el.dataset.id;
     if (b && (!TH.inScope(b) || !C.building(b) || C.building(b).status === 'inactive')) return done(fail('Tòa ngoài phạm vi hoặc đã ngừng hoạt động.'));
@@ -282,7 +282,7 @@
   TH.act['lpay.paySave'] = function (el) {
     if (!R.guardLegacy('lpay.paySave', el)) return done(fail('Không có quyền ghi nhận hoặc ngày trả thuộc kỳ khóa.'));
     var r = R.get('landlordPay', el.dataset.id), form = 'lpay-pay-' + r.id, before = clone(r);
-    var amount = +String(TH.store.draft(form, 'amount', r.amount - TH.landlordPaid(r))).replace(/[^\d.-]/g, ''), doc = TH.store.draft(form, 'doc', 'UNC-' + r.buildingId.slice(3) + '-' + TH.TODAY.slice(5).replace('-', ''));
+    var amount = +String(TH.store.draft(form, 'amount', r.amount - TH.landlordPaid(r))).replace(/[^\d.-]/g, ''), doc = TH.store.draft(form, 'doc', 'UNC-' + TH.bTag(r.buildingId) + '-' + TH.TODAY.slice(5).replace('-', ''));
     if (!(amount > 0 && amount <= r.amount - TH.landlordPaid(r))) return done(fail('Số tiền vượt phần còn phải trả.'));
     var matches = TH.db.expenses.filter(function (e) { return e.status === 'approved' && e.category === 'owner_rent' && e.buildingId === r.buildingId && (e.landlordPayId === r.id || e.docNo === doc); });
     if (matches.some(function (e) { return e.landlordPayId === r.id && e.paid; }) || (r.transactions || []).some(function (t) { return t.docNo === doc; })) return done(fail('Chứng từ đã ghi nhận thanh toán; không ghi hai lần.'));
@@ -357,7 +357,7 @@
   };
   function openImport(type) {
     if (!TH.has(importFeatures[type]) || !TH.can(R.definitions[type].permission)) return done(fail('Gói / vai trò không cho phép nhập.'));
-    var form = 'rec-import', period = TH.store.state.period, rows, fields, building = TH.scope() === 'ALL' ? 'TH-CG' : TH.scope(); TH.store.clearDraft(form);
+    var form = 'rec-import', period = TH.store.state.period, rows, fields, building = TH.scope() === 'ALL' ? 'T17' : TH.scope(); TH.store.clearDraft(form);
     if (type === 'staff') { rows = TH.db.staff.filter(function (r) { return r.status === 'active'; }).slice(0, 3).map(clone); fields = ['name', 'phone', 'title', 'team']; }
     if (type === 'expense') { rows = [1, 2].map(function (n) { return { id: R.id('CP'), buildingId: building, period: period, date: period + '-20', description: 'Chi phí nhập mẫu ' + n, amount: n * 100000, category: 'repair', docNo: R.id('CT'), status: 'draft', createdBy: TH.me().id }; }); fields = ['description', 'amount', 'docNo']; }
     if (type === 'salaryInput') { rows = C.payroll(period).slice(0, 3).map(function (r) { var old = R.list(type).find(function (x) { return x.staffId === r.staff.id && x.period === period; }); return Object.assign({}, old || { id: R.id('LG'), period: period, staffId: r.staff.id, status: 'draft' }, { base: r.base, allowance: r.allowance }); }); fields = ['base', 'allowance']; }

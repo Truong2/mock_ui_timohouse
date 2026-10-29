@@ -796,7 +796,7 @@ var TH = window.TH = window.TH || {};
      ========================================================= */
   TH.isReview = function () { return !!(TH.store && TH.store.state && TH.store.state.reviewMode); };
   /* Mã nội bộ: tính năng (F023.B), quyết định (D-03, K-05, G-03, R-01), câu hỏi (BILL-Q1…Q8, PAY-Q3), CR (CR-RPT-02);
-     mã màn (METER-01, INV-PREV) chỉ khi có trong TH.SCREENS. Không chạm mã dữ liệu (INV-2610-CG302, PT-2610-003, TH-CG). */
+     mã màn (METER-01, INV-PREV) chỉ khi có trong TH.SCREENS. Không chạm mã dữ liệu (INV-2610-302T17, PT-2610-003, T17). */
   var RE_CODE = /\b(?:F\d{3}(?:\.[A-D])?|[DKGR]-\d{2}|BILL-Q\d(?:[…-]Q\d)?|PAY-Q\d|CR-[A-Z]+-\d+|QA-[A-Z]+(?:-\d+)?)\b/g;
   var RE_SCREEN_PAREN = /\(\s*([A-Z]{2,6}-(?:\d{2}[a-z]?|[A-Z]{3,}))\s*\)/g;
   var RE_SCREEN = /\b([A-Z]{2,6}-(?:\d{2}[a-z]?|[A-Z]{3,}))\b/g;

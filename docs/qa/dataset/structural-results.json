@@ -1,13 +1,19 @@
 {
-  "passed": 3556,
+  "passed": 4323,
   "failed": 0,
-  "baselineUnchanged": true,
-  "datasetVersion": "excel-demo-v1",
+  "datasetVersion": "excel-demo-v2",
+  "schema": 13,
   "counts": {
+    "buildings": 3,
     "invoices": 97,
     "receipts": 98,
     "rooms": 18,
-    "scenarios": 15,
+    "contracts": 20,
+    "commissions": 19,
+    "repairJobs": 13,
+    "staff": 18,
+    "teams": 4,
+    "scenarios": 17,
     "reports": 2
   }
 }

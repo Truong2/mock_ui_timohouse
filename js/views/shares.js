@@ -5,7 +5,7 @@
 
   function curBuilding() {
     var s = TH.scope();
-    var b = TH.store.ui(S, 'b', s !== 'ALL' ? s : 'TH-CG');
+    var b = TH.store.ui(S, 'b', s !== 'ALL' ? s : 'T17');
     if (!TH.inScope(b)) b = TH.roleScope()[0];
     return b;
   }
@@ -53,7 +53,7 @@
         TH.kpi({ label: 'Lãi tạm tính đủ ĐK chia', value: F.short(base), neg: base < 0, accent: true, foot: TH.openBadge('D-07', 'DRAFT') }) + TH.kpi({ label: 'Số cổ đông hiệu lực', value: String(list.length), foot: esc(b.name) + ' · kỳ ' + F.period(p) }) + '</div>' +
         '<div class="grid-main-side"><div class="stack"><div class="card card-flush">' + bTabs + table + '</div>' + check + '</div><div class="stack">' + snap + '</div></div>';
     },
-    scan: function () { return [{ ui: { b: 'TH-CG' } }]; },
+    scan: function () { return [{ ui: { b: 'T17' } }]; },
   };
   TH.act['shr.discard'] = function () { TH.store.clearDraft('shr-' + curBuilding() + '-' + TH.store.state.period); TH.app.refresh(); };
   TH.act['shr.save'] = function () {
@@ -64,12 +64,12 @@
     TH.store.clearDraft('shr-' + bId + '-' + p); TH.app.refresh();
     TH.toast('Đã lưu tỷ lệ', 'Tổng 100%.', 'success');
   };
-  TH.act['shr.import'] = function () { TH.toast('Import bảng chia cổ phần (mô phỏng)', 'Tệp “bang_chia_CP_T10.xlsx”: 3 tòa, 9 dòng, khớp template.', 'info'); };
+  TH.act['shr.import'] = function () { TH.toast('Import bảng chia cổ phần (mô phỏng)', 'Tệp “bang_chia_CP_T10.xlsx”: 3 tòa T17/S9/G1, khớp template.', 'info'); };
 
   /* ---------------- SHARE-RESULT ---------------- */
   TH.views['SHARE-RESULT'] = {
     modal: { size: 'lg' },
-    scanParam: 'TH-CG',
+    scanParam: 'T17',
     render: function (r) {
       var p = TH.store.state.period, bId = r.param && C.building(r.param) ? r.param : curBuilding(), b = C.building(bId);
       var mode = TH.has('F043.B') ? TH.store.ui('SHARE-RESULT', 'mode', 'cash') : 'cash';

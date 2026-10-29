@@ -147,7 +147,7 @@
       return TH.pageHeader({ screen: 'RPT-04', status: TH.periodBadge(TH.store.state.period) + templateBadge('Mẫu G1 · T8/2026') + crBadge(), desc: 'Mẫu <b>“BÁO CÁO KINH DOANH G1 THÁNG 8/2026”</b>: tạo bản báo cáo theo tòa qua luồng xem trước → xác nhận; xem lại và tải Excel từ bản đã tạo.' }) +
         TH.reportLegacy('RPT-04', { b: sel.cur });
     },
-    dialogs: [function () { return drill4Render('TH-CG', TH.CURRENT_PERIOD, 'rent'); }, function () { return poolRender(TH.CURRENT_PERIOD); }],
+    dialogs: [function () { return drill4Render('T17', TH.CURRENT_PERIOD, 'rent'); }, function () { return poolRender(TH.CURRENT_PERIOD); }],
   };
 
   var KIND = { invoice: ['Hóa đơn', 'teal'], arising: ['Tiền phòng phát sinh', 'teal'], deposit: ['Cọc', 'info'], expense: ['Chi phí', 'warning'], pool: ['Phân bổ', 'neutral'], payroll: ['Lương', 'draft'], contract: ['Hợp đồng', 'teal'], room: ['Phòng', 'neutral'], break: ['Phá HĐ', 'danger'] };

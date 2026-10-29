@@ -44,14 +44,14 @@
     return '<div><div class="section-title">Hồ sơ chủ nhà & tòa trong gói <span class="badge badge-info review-only" data-tip="' + esc(TH.CR_BLD.title + ' · ' + TH.CR_BLD.id) + '">CR</span></div><div class="rpt-pack">' + TH.PKG_KEYS.map(function (k) {
       var on = lvl >= TH.PACKAGES[k].level, rp = TH.BLD_PACK[k];
       return '<div class="rpt-pack-row' + (on ? '' : ' is-off') + '">' + TH.tierPill(k, { plus: k !== 'A' }) + '<div><b class="small rpt-pack-hd">' + (on ? '' : I('lock', 'ic-sm')) + esc(rp.head) + '</b><ul>' + rp.items.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></div></div>';
-    }).join('') + '</div><div class="row u-mt-8 u-gap-8"><a class="btn btn-sm" href="' + TH.router.href('OWN-02', 'CN-001') + '" data-close>' + I('owner', 'ic-sm') + 'Hồ sơ chủ nhà</a><a class="btn btn-sm" href="' + TH.router.href('BLD-02', 'TH-CG') + '" data-close>' + I('building', 'ic-sm') + 'Hồ sơ tòa</a></div></div>';
+    }).join('') + '</div><div class="row u-mt-8 u-gap-8"><a class="btn btn-sm" href="' + TH.router.href('OWN-02', 'CN-001') + '" data-close>' + I('owner', 'ic-sm') + 'Hồ sơ chủ nhà</a><a class="btn btn-sm" href="' + TH.router.href('BLD-02', 'T17') + '" data-close>' + I('building', 'ic-sm') + 'Hồ sơ tòa</a></div></div>';
   }
   /* Hồ sơ khách thuê trong từng gói (CR-CUS-01) */
   function cusPack(lvl) {
     return '<div><div class="section-title">Hồ sơ khách thuê trong gói <span class="badge badge-info review-only" data-tip="' + esc(TH.CR_CUS.title + ' · ' + TH.CR_CUS.id) + '">CR</span></div><div class="rpt-pack">' + TH.PKG_KEYS.map(function (k) {
       var on = lvl >= TH.PACKAGES[k].level, rp = TH.CUS_PACK[k];
       return '<div class="rpt-pack-row' + (on ? '' : ' is-off') + '">' + TH.tierPill(k, { plus: k !== 'A' }) + '<div><b class="small rpt-pack-hd">' + (on ? '' : I('lock', 'ic-sm')) + esc(rp.head) + '</b><ul>' + rp.items.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></div></div>';
-    }).join('') + '</div><div class="row u-mt-8 u-gap-8"><a class="btn btn-sm" href="' + TH.router.href('CUS-01') + '" data-close>' + I('users', 'ic-sm') + 'Danh sách khách</a><a class="btn btn-sm" href="' + TH.router.href('CUS-02', 'KH-008') + '" data-close>' + I('user', 'ic-sm') + 'Hồ sơ DD-102</a></div></div>';
+    }).join('') + '</div><div class="row u-mt-8 u-gap-8"><a class="btn btn-sm" href="' + TH.router.href('CUS-01') + '" data-close>' + I('users', 'ic-sm') + 'Danh sách khách</a><a class="btn btn-sm" href="' + TH.router.href('CUS-02', 'KH-008') + '" data-close>' + I('user', 'ic-sm') + 'Hồ sơ 102S9</a></div></div>';
   }
   /* Báo cáo theo mẫu khách có trong từng gói (CR-RPT-01) */
   function reportPack(lvl) {

@@ -1,6 +1,6 @@
-# TIMEHOUSE — Nguồn tài liệu và công thức cho excel-demo-v1
+# TIMEHOUSE — Nguồn tài liệu và công thức cho excel-demo-v2
 
-Bản phân tích phục vụ dataset mô phỏng 3 tòa, 18 phòng, kỳ 05–10/2026. Không nhập hồ sơ thật từ Excel vào bộ demo.
+Bản phân tích phục vụ dataset mô phỏng 3 tòa T17, S9, G1 (mỗi loại nhà T/S/G một tòa), 18 phòng, kỳ 05–10/2026. Không nhập hồ sơ thật từ Excel vào bộ demo.
 
 ## 1. Phương pháp và giới hạn
 

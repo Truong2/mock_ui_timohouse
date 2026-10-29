@@ -108,7 +108,7 @@
     if (!ok.length) { TH.toast('Chưa có dòng để ghi', 'Chọn ít nhất một dòng hợp lệ.', 'warning'); return; }
     if (TH.recordActions) {
       var type = { 'OWN-IMP': 'owner', 'BLD-IMP': 'building', 'ROOM-IMP': 'room' }[S], denied = ok.find(function (row) {
-        var id = type === 'room' ? row.data.b.slice(3) + '-' + row.data.code : row.data.id, old = TH.recordActions.get(type, id);
+        var id = type === 'room' ? TH.roomIdOf(row.data.b, row.data.code) : row.data.id, old = TH.recordActions.get(type, id);
         if (old) return !TH.recordActions.inspect(type, id, 'edit').allowed;
         if (type === 'owner') return TH.store.state.role === 'manager';
         if (type === 'building') return TH.store.state.role === 'manager' || !TH.calc.owner(row.data.ownerId || row.data.owner);

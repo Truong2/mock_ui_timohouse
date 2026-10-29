@@ -314,7 +314,7 @@ var TH = window.TH = window.TH || {};
           body: '<div class="stack">' +
             '<div><div class="section-title">Vai trò giả lập</div><div class="radio-row">' + Object.keys(TH.ROLES).map(function (k) {
               return '<label class="radio-chip"><input type="radio" name="t-role" value="' + k + '"' + (k === s.role ? ' checked' : '') + ' data-act-change="role.pick"><span>' + esc(TH.ROLES[k].label) + '</span></label>';
-            }).join('') + '</div><div class="field-hint u-mt-8">Quản lý tòa chỉ thấy Cầu Giấy và xác nhận thu tại tòa mình; kế toán hậu kiểm. Nhân sự chỉ mở HR/Lương.</div></div>' +
+            }).join('') + '</div><div class="field-hint u-mt-8">Quản lý tòa chỉ thấy tòa ' + esc(TH.DEMO.managerScope.join(', ')) + ' và xác nhận thu tại tòa mình; kế toán hậu kiểm. Nhân sự chỉ mở HR/Lương.</div></div>' +
             (screen ? '<div><div class="section-title">Trạng thái dữ liệu · ' + esc(screen) + '</div><div class="seg" role="group">' + [['normal', 'Dữ liệu mẫu'], ['loading', 'Đang tải'], ['empty', 'Không có dữ liệu'], ['error', 'Lỗi API']].map(function (o) {
               return '<button type="button" aria-pressed="' + (ds === o[0]) + '" data-act="state.set" data-screen="' + screen + '" data-val="' + o[0] + '">' + o[1] + '</button>';
             }).join('') + '</div><div class="field-hint u-mt-8">Forbidden (403) xem bằng cách đổi vai trò. Draft / Chờ xác nhận / Đã xác nhận / Success có trong luồng nghiệp vụ.</div></div>' : '') +

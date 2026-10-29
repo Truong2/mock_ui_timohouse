@@ -129,7 +129,7 @@
         '<div class="overview-snapshot">' + snapCard + '</div>' +
         net;
     },
-    dialogs: [function () { return drillRender('TH-CG'); }],
+    dialogs: [function () { return drillRender('T17'); }],
   };
   function drillRender(bId) {
     var p = TH.store.state.period, b = C.building(bId);
@@ -236,7 +236,7 @@
         cmpBody = TH.table({ compact: true, cols: [{ key: 'p', label: 'Kỳ', render: function (x) { return 'Kỳ ' + F.period(x); } }, { key: 'b', label: 'Doanh thu', num: true, render: function (x) { return F.money(C.summary(x, scope).billed); } }, { key: 'c', label: 'Thu thực', num: true, render: function (x) { return F.money(C.summary(x, scope).collected); } }, { key: 'o', label: 'Lấp đầy', num: true, render: function (x) { return F.pct(C.summary(x, scope).occupancy, 0); } }], rows: trendPs.slice(-3) });
       } else if (cmp === 'team') {
         cmpBody = TH.table({ compact: true, cols: [{ key: 'n', label: 'Nhóm', render: function (t) { return esc(t.name); } }, { key: 'b', label: 'Tòa', render: function (t) { return t.bs.map(function (b) { return b.short; }).join(', ') || '—'; } }, { key: 'v', label: 'Doanh thu', num: true, render: function (t) { return F.money(C.sum(t.bs, function (b) { return C.summary(p, b.id).billed; })); } }, { key: 'w', label: 'D · quy đổi HS', num: true, render: function (t) { return F.money(Math.round(C.sum(t.bs, function (b) { return TH.perfTier(C.perfBuilding(p, b.id)).D; }))); } }],
-          rows: TH.db.teams.filter(function (t) { return t.id !== 'BO'; }).map(function (t) { return { name: t.name, bs: TH.db.buildings.filter(function (b) { var m = C.staff(b.managerId); return m && m.team === t.id; }) }; }) });
+          rows: TH.db.teams.filter(TH.isOpsTeam).map(function (t) { return { name: t.name, bs: TH.db.buildings.filter(function (b) { var m = C.staff(b.managerId); return m && m.team === t.id; }) }; }) });
       } else {
         cmpBody = TH.table({ compact: true, cols: [{ key: 'n', label: 'Tòa', render: function (b) { return esc(b.short); } }, { key: 'o', label: 'Lấp đầy', num: true, render: function (b) { return F.pct(C.summary(p, b.id).occupancy, 0); } }, { key: 'v', label: 'Doanh thu', num: true, render: function (b) { return F.money(C.summary(p, b.id).billed); } }, { key: 'r', label: 'Tỷ lệ thu', num: true, render: function (b) { var s = C.summary(p, b.id); return s.billed ? F.pct(s.collectedForPeriod / s.billed, 0) : '—'; } }], rows: TH.db.buildings.filter(function (b) { return TH.inScope(b.id); }) });
       }

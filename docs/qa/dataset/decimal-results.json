@@ -1,5 +1,5 @@
 {
-  "passed": 3718,
+  "passed": 3778,
   "failed": 0,
   "method": "Python Decimal; direct input ledger aggregation, no JS calculation calls",
   "toleranceVND": 1e-06,

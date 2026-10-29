@@ -83,7 +83,7 @@ async (page) => {
   check('UI-STD-04 font≥12', !smallBad.length, smallBad.slice(0, 8));
   check('UI-STD-05 icon-label', !ariaBad.length, ariaBad.slice(0, 8));
   check('UI-STD-06 header≤3', !headerBad.length, headerBad);
-  await go({ id: 'INV-03', param: 'INV-2610-CG302' });
+  await go({ id: 'INV-03', param: 'INV-2610-302T17' });
   const menu = await read(() => ({ items: document.querySelectorAll('.page-actions .action-pop .menu-item').length, btn: !!document.querySelector('.page-actions [data-act="amenu.toggle"][aria-haspopup="menu"]') }));
   await page.click('.page-actions [data-act="amenu.toggle"]'); await page.waitForTimeout(100);
   const opened = await read(() => ({ open: !document.querySelector('.page-actions .action-pop').hidden, focus: document.activeElement.classList.contains('menu-item') }));
@@ -123,11 +123,11 @@ async (page) => {
     if (r.missing || !r.invalid || !r.err || r.toast) formBad.push({ open, ...r });
   }
   // Form phụ: kỳ trả chủ nhà (số tiền 0), từ chối báo thu không lý do → lỗi tại field, phiếu vẫn chờ
-  await reset('D', false); await go({ id: 'BLD-02', param: 'TH-CG' });
+  await reset('D', false); await go({ id: 'BLD-02', param: 'T17' });
   const extra = await read(() => {
     document.querySelectorAll('.toast').forEach(t => t.remove());
     const inv = () => [...document.querySelectorAll('[role=dialog] [aria-invalid="true"]')].map(e => e.id);
-    TH.act['lpay.add']({ dataset: { b: 'TH-CG' } }); TH.store.setDraft('lpay-TH-CG', 'amount', '0');
+    TH.act['lpay.add']({ dataset: { b: 'T17' } }); TH.store.setDraft('lpay-T17', 'amount', '0');
     document.querySelector('[role=dialog] [data-act="lpay.save"]').click();
     const lpay = inv(); TH.modal.stack.slice().forEach(m => TH.modal.close(m.key, { silent: true }));
     const rc = TH.db.receipts.find(x => x.status === 'pending'); location.hash = TH.router.href('PAY-APP', rc.id);
@@ -135,7 +135,7 @@ async (page) => {
   });
   await page.waitForTimeout(200);
   const rej = await read(id => { document.querySelector('[role=dialog] [data-act="app.reject"]').click(); return { inv: [...document.querySelectorAll('[role=dialog] [aria-invalid="true"]')].map(e => e.id), status: TH.db.receipts.find(x => x.id === id).status, toast: document.querySelectorAll('.toast-danger').length }; }, extra.rc);
-  if (!extra.lpay.includes('f-lpay-TH-CG-amount') || extra.toast) formBad.push({ form: 'lpay', ...extra });
+  if (!extra.lpay.includes('f-lpay-T17-amount') || extra.toast) formBad.push({ form: 'lpay', ...extra });
   if (!rej.inv.length || rej.status !== 'pending' || rej.toast) formBad.push({ form: 'app.reject', ...rej });
   check('UI-STD-09 field-errors', !formBad.length, formBad);
 
@@ -156,7 +156,7 @@ async (page) => {
   await reset('D', false);
   const st = await read(() => ({ unpaid: TH.status('unpaid'), bill: TH.statusOf('bill', 'unpaid'), rej: TH.statusOf('adjust', 'rejected') }));
   const facts = [];
-  for (const s of [{ id: 'CUS-02', param: 'HĐ-CG101/25' }, { id: 'CON-02', param: 'HĐ-CG101/25' }, { id: 'ROOM-02', param: 'CG-201' }, { id: 'BLD-02', param: 'TH-CG' }, { id: 'OWN-02', param: 'CN-001' }]) {
+  for (const s of [{ id: 'CUS-02', param: 'HĐ-101T17/25' }, { id: 'CON-02', param: 'HĐ-101T17/25' }, { id: 'ROOM-02', param: '201T17' }, { id: 'BLD-02', param: 'T17' }, { id: 'OWN-02', param: 'CN-001' }]) {
     await go(s); facts.push(await read(() => ({ facts: document.querySelectorAll('#view .detail-facts > div').length, tabCard: !!document.querySelector('#view .tab-card .tabs'), crumbs: document.querySelectorAll('#view .crumbs > a, #view .crumbs > span').length })));
   }
   check('UI-STD-10 status+detail', /badge-warning/.test(st.unpaid) && /badge-warning/.test(st.bill) && /badge-danger/.test(st.rej) && facts.every(f => f.facts >= 4 && f.tabCard && f.crumbs <= 2), { st, facts });

@@ -103,7 +103,11 @@ var TH = window.TH = window.TH || {};
     if (l.type === 'common') return 'elec'; // CR-BILL: điện chung phân bổ = doanh thu điện
     if (l.type === 'adjust') return l.amount < 0 ? 'rent' : 'lift'; // giảm trừ trừ vào tiền phòng; phụ thu như DV khác
     if (l.code === 'NET') return 'net';
-    if (l.code === 'PARK') return 'ev';
+    /* Cột DV của sheet NHÀ T/S/G: vệ sinh, thang máy, máy giặt, xe điện tách dòng; DV chung/combo chia đều 3 dòng */
+    if (l.code === 'CLEAN') return 'clean';
+    if (l.code === 'ELEV') return 'lift';
+    if (l.code === 'WASH') return 'wash';
+    if (/^PARK|^EVCHG/.test(l.code || '')) return 'ev';
     return 'svcSplit';
   }
   C.pnlLineKey = lineKey;
@@ -197,7 +201,7 @@ var TH = window.TH = window.TH || {};
       var hs = C.perfBuilding(period, bId);
       var pp = C.perfPay(mgr, hs.D, hs.listed, rooms.length, period);
       add(v, 'mgr', pp.pay, { kind: 'payroll', id: mgr.id, amount: pp.pay, text: mgr.name + ' · HS ' + TH.fmt.pct(pp.hs / 100, 1) + ' × ' + rooms.length + ' phòng' });
-      var team = db().teams.find(function (t) { return t.id === mgr.team && t.id !== 'BO'; });
+      var team = db().teams.find(function (t) { return t.id === mgr.team && TH.isOpsTeam(t); });
       if (team) {
         var lead = rooms.length * pol.leaderPerRoom, leader = C.staff(team.leaderId);
         add(v, 'lead', lead, { kind: 'payroll', id: team.leaderId, amount: lead, text: (leader ? leader.name : '') + ' · ' + rooms.length + ' phòng × ' + TH.fmt.money(pol.leaderPerRoom) });

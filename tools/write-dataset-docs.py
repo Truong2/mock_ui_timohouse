@@ -10,8 +10,8 @@ audit = read('source-inventory.json'); rules = read('formula-rules.json'); db = 
 families = read('formula-families.json'); structural = read('structural-results.json'); numeric = read('decimal-results.json')
 domains = {'master': 'Hồ sơ', 'supplier': 'Dịch vụ đầu vào', 'billing': 'Hóa đơn/phòng mới', 'deposit': 'Cọc/phá HĐ', 'commission': 'Hoa hồng', 'building_report': 'Báo cáo tòa', 'shares': 'Cổ phần', 'utilities': 'Điện nước', 'repair': 'Sửa chữa', 'payroll': 'Lương', 'forecast': 'Dự kiến', 'portfolio_report': 'Báo cáo tổng', 'report_requirements': 'Yêu cầu báo cáo', 'investment': 'Đầu tư', 'reference': 'Tham khảo'}
 def text(x): return str(x).replace('|', '\\|').replace('\n', ' ')
-rows = ['# TIMEHOUSE — Nguồn tài liệu và công thức cho excel-demo-v1', '',
-        'Bản phân tích phục vụ dataset mô phỏng 3 tòa, 18 phòng, kỳ 05–10/2026. Không nhập hồ sơ thật từ Excel vào bộ demo.', '',
+rows = ['# TIMEHOUSE — Nguồn tài liệu và công thức cho excel-demo-v2', '',
+        'Bản phân tích phục vụ dataset mô phỏng 3 tòa T17, S9, G1 (mỗi loại nhà T/S/G một tòa), 18 phòng, kỳ 05–10/2026. Không nhập hồ sơ thật từ Excel vào bộ demo.', '',
         '## 1. Phương pháp và giới hạn', '',
         '- Đọc sparse OOXML của toàn bộ 13 workbook, mọi sheet kể cả sheet ẩn. Có 248 sheet, 108.090 ô công thức; 75.804 công thức dùng chung đã mở rộng theo ô đích.',
         '- 7.540 nhóm công thức được chuẩn hóa theo tham chiếu tương đối, giữ công thức gốc, ô nguồn và kết quả cache trong hồ sơ nén. Không chạy Excel để tính lại.',
@@ -64,21 +64,35 @@ field_rows = [
  ('Tài sản', 'Bàn giao, đầu tư ban đầu, thiết bị mua thêm', 'DAYDU Điều 2; G1 / ĐẦU TƯ BAN ĐẦU', 'assets, handover.assets, equipment expenses', 'Số lượng và nguyên giá; không tự khấu hao'),
  ('Hiệu suất', 'M5/M10/M15; DV; thu thêm; giá niêm yết', 'DOCX Bước 1–5; bảng lương / THÁNG 8!J:U', 'calc.perfBuilding, payroll', 'Trọng số 100/90/70/0; TH1, tiền dư chưa có quy tắc duyệt riêng'),
  ('Lương', 'Cứng, phụ cấp, trưởng nhóm, mức/phòng, thực nhận', 'Bảng lương / THÁNG 8!D:H,V:X', 'staff, salaryPolicy, salaryAdjustments, calc.payroll', 'Lương nháp /90; DOCX /100 mâu thuẫn, không coi đã duyệt'),
- ('Phân bổ', 'Chi phí chung và mẫu số phòng', 'G1 / BÁO CÁO THÁNG 8!C36:C46', 'costPools', 'Tạo mới theo 18 phòng; không dùng 1382/1343 của nguồn thực'),
+ ('Phân bổ', 'Chi phí chung và mẫu số phòng', 'G1 / BÁO CÁO THÁNG 8!C36:C46', 'costPools', 'Tạo mới theo 18 phòng của T17/S9/G1; không dùng 1382/1343 của nguồn thực'),
  ('Báo cáo', 'DT, GV, CPBH, TCP, LNG, LNR, tỷ lệ', 'BCKD / BÁO CÁO KINH DOANH THÁNG 8', 'calc.pnl, reportRuns.snapshot', 'Tổng/KD riêng; tỷ lệ tổng tính lại tử/mẫu; mẫu số 0 để không áp dụng'),
  ('Cổ phần', 'Tỷ lệ; vốn mẫu; LN; tổng nhận', 'G1 / BÁO CÁO THÁNG 8!G:M; Bảng chia cp', 'shares, shareholders, calc.shareSplit', 'Tỷ lệ tổng 100%; vốn mẫu khác vốn góp, không tự chi trả'),
  ('Dự kiến', 'Doanh thu/chi phí cơ sở và điều chỉnh', 'Dự kiến LN / Tháng 9.2026!E3:J7', 'forecastPlans, dataset.forecast', 'Nháp, tính từ P&L kỳ cơ sở + giả định; không ghi vào chứng từ thực tế'),
 ]
-mapping = ['# TIMEHOUSE — Ma trận dữ liệu mô phỏng', '', 'Bộ dữ liệu `excel-demo-v1`; 3 tòa, 18 phòng; 6 kỳ 05–10/2026. Mọi giá trị mới là dữ liệu mô phỏng, căn cứ nguồn mô tả cấu trúc và cách tính.', '',
+mapping = ['# TIMEHOUSE — Ma trận dữ liệu mô phỏng', '', 'Bộ dữ liệu `excel-demo-v2` (schema 13); 3 tòa T17 · S9 · G1 theo mã file Excel, 18 phòng (7/6/5); 6 kỳ 05–10/2026. Mọi giá trị là dữ liệu mô phỏng, căn cứ nguồn mô tả cấu trúc và cách tính.', '',
            '| Nhóm | Trường / ý nghĩa nguồn | Tài liệu | Dữ liệu ứng dụng | Kiểu và quy tắc |', '|---|---|---|---|---|']
 mapping += ['| ' + ' | '.join(text(c) for c in row) + ' |' for row in field_rows]
 mapping += ['', '## Tình huống và liên kết', '', '| Mã | Tình huống | Kỳ | Quy tắc |', '|---|---|---|---|']
 mapping += ['| ' + s['id'] + ' | ' + s['title'] + ' | ' + s['period'] + ' | ' + s['ruleId'] + ' |' for s in db['dataset']['scenarios']]
 mapping += ['', 'Các bản ghi liên quan nằm trong `dataset.scenarios[].refs`; trường `sourceBasis` trên chứng từ gắn phiên bản dataset, quy tắc và tình huống. Đây là căn cứ cấu trúc, không phải chứng minh giao dịch thật của khách hàng.', '',
             '## Tương thích và sử dụng', '',
-            '- Giữ schema 12 và API `TH.seed()`, `TH.buildInvoice`, `TH.calc`, `TH.reports`. Bổ sung `TH.dataset.version/rules/rule/forecast`; metadata và các sổ phụ chỉ tham chiếu chứng từ, không cộng thêm vào sổ chính.',
-            '- Trình duyệt mới nạp dataset mới; schema-12 đã lưu được giữ nguyên cả nháp. Trong **Công cụ demo → Nguồn và tình huống dữ liệu**, Admin/Kế toán tra được căn cứ và mở màn nghiệp vụ.',
+            '- Schema 13: đổi toàn bộ mã sang kiểu Excel nên bản lưu schema 12 trên trình duyệt được nạp lại (mất nháp cũ). Giữ API `TH.seed()`, `TH.buildInvoice`, `TH.calc`, `TH.reports`, `TH.dataset`; thêm `TH.DEMO` (bản ghi neo), `TH.bTag`, `TH.roomIdOf`, `TH.FEE_SCHEMES`, `TH.contractDoc`.',
+            '- Trong **Công cụ demo → Nguồn và tình huống dữ liệu**, Admin/Kế toán tra được căn cứ và mở màn nghiệp vụ.',
             '- **Công cụ demo → Khôi phục** nạp lại bộ mới sau khi giải quyết phần đang sửa và xác nhận xóa phiên demo. Hai bản báo cáo mô phỏng cố định được nạp lại cùng seed.',
-            '- Dữ liệu QA đầy đủ: `docs/qa/dataset/dataset.json`; mốc cũ: `baseline-schema12.json`; thay đổi tiền: `dataset-diff.json`; kết quả bộ tính: `engine-results.json`.', '']
+            '- Dữ liệu QA đầy đủ: `docs/qa/dataset/dataset.json`; mốc tài chính: `baseline-schema13.json` (chụp lại bằng `node tools/dataset-runtime.cjs` khi đổi dữ liệu có chủ đích); kết quả bộ tính: `engine-results.json`.', '',
+            '## Bảng ánh xạ mã cũ → mới (schema 12 → 13)', '',
+            '| Cũ | Mới |', '|---|---|',
+            '| Tòa TH-CG / TH-DD / TH-TX | T17 (nhà T · Cầu Giấy) / S9 (nhà S · Đống Đa) / G1 (nhà G · Thanh Xuân) |',
+            '| Phòng CG-201 / DD-302 / TX-102 | 201T17 / 302S9 / 102G1 (số phòng + mã tòa) |',
+            '| Công tơ Đ-CG101, N-CG101 | Đ-101T17, N-101T17 |',
+            '| HĐ khách HĐ-CG201/25; hóa đơn INV-2610-CG201 | HĐ-201T17/25; INV-2610-201T17 |',
+            '| HĐT-CG-2024, LT-CG-2610, TS-CG-01, CTC-TX-01 | HĐT-T17-2024, LT-T17-2610, TS-T17-01, CTC-G1-01 |',
+            '| Đội T1 / T2 / BO | VH1 / VH2 / VP, thêm KD (trường `kind`: ops / office / sales) |',
+            '| arisingRent PS-, billAdjusts DC-, salaryAdjustments DC- | TPP-, TK-, DCL- (hết trùng mã giữa các bảng) |',
+            '| Hoa hồng HH-DEMO-n | HH-{yymm}-{nn}: mỗi HĐ ký mới một dòng, kênh môi giới / CTV / sale |',
+            '| Sửa chữa SC-DEMO-nnn | SC-{yymm}-{nnn} (công ty chi), SC-{yymm}-Knn (khách chi qua phí phát sinh) |',
+            '',
+            '## Hợp đồng khách thuê theo mẫu đầy đủ', '',
+            'Mọi HĐ khách thuê theo `docs/tenplate/Hop_dong_thue_phong_demo_day_du.pdf` và khớp chứng từ: Bên A = đại diện nhóm nhà; Bên B = hồ sơ khách; Điều 1.2 số người/xe = dòng phí theo người và xe đã đăng ký; Điều 2.2 = 30 tài sản bàn giao theo trang bị tòa; Điều 4.1 giá thuê = dòng tiền phòng trên hóa đơn, tiền nộp khi ký = cọc + tiền phòng kỳ đầu; Điều 4.2 chỉ số = chỉ số đầu kỳ đầu; Điều 4.3 cọc = phiếu COC; Điều 4.4 biểu phí = đơn giá dòng hóa đơn, nội dung chuyển khoản `{phòng} - {tòa} - {TÊN}` = phiếu thu. `tools/qa-dataset.cjs` kiểm chéo toàn bộ. Xem bản HĐ: CUS-02 › Hợp đồng › **Xem bản hợp đồng theo mẫu**.', '']
 (ROOT / 'docs/md/TIMEHOUSE_DATASET_MATRIX.md').write_text('\n'.join(mapping), encoding='utf-8')
 print('Wrote source inventory for 248 sheets and field/scenario matrix.')

@@ -7,12 +7,12 @@ async (page) => {
   const count = await page.evaluate(() => {
     TH.db = TH.seed(); TH.db.reportRuns = []; TH.db.reportDrafts = [];
     Object.assign(TH.store.state, { pkg: 'D', role: 'admin', building: 'ALL', drafts: {}, ui: {}, editing: null });
-    const plans = [{ type: 'RPT-04', period: '2026-09', buildingIds: ['TH-CG'] }, { type: 'RPT-05', period: '2026-08', buildingIds: ['TH-CG', 'TH-DD', 'TH-TX'] }];
+    const plans = [{ type: 'RPT-04', period: '2026-09', buildingIds: ['T17'] }, { type: 'RPT-05', period: '2026-08', buildingIds: ['T17', 'S9', 'G1'] }];
     const runs = plans.map(req => {
       const d = TH.reports.preview(req, { transient: true }).draft;
       if (!d || d.errors.length) throw new Error('Snapshot validation: ' + JSON.stringify(d && d.errors));
       const item = d.items[0];
-      return { id: 'BC' + req.type.slice(4) + '-' + req.period.replace('-', '') + '-' + req.buildingIds.map(x => x.slice(3)).join('.') + '-v1',
+      return { id: 'BC' + req.type.slice(4) + '-' + req.period.replace('-', '') + '-' + req.buildingIds.map(x => x.replace(/^TH-/, '')).join('.') + '-v1',
         type: req.type, period: req.period, buildingIds: req.buildingIds, groupKey: req.type + '|' + req.period + '|' + req.buildingIds.slice().sort().join('+'),
         version: 1, prevId: null, fromRunId: null, createdBy: 'NV-002', createdAt: '2026-10-06 09:00', template: item.template, engine: item.engine, schema: TH.DATA_SCHEMA,
         fp: d.fp, warnings: d.warnings, acknowledged: true, snapshot: item, storage: 'seed', synthetic: true, datasetVersion: TH.dataset.version };
@@ -26,7 +26,7 @@ async (page) => {
     const a = document.createElement('a'), url = URL.createObjectURL(new Blob([data], { type: 'text/javascript' }));
     a.href = url; a.download = 'dataset-reports.js'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
   });
-  const dl = await pending; await dl.saveAs('D:/mock_ui_timohouse/js/dataset-reports.js');
+  const dl = await pending; await dl.saveAs('C:/Users/truon/Downloads/mockup/js/dataset-reports.js');
   await cdp.detach();
   return { reports: count, file: 'js/dataset-reports.js' };
 }

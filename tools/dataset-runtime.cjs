@@ -30,9 +30,9 @@ function metrics(TH) {
 }
 module.exports = { runtime, metrics, root };
 if (require.main === module) {
-  const { TH } = runtime(false);
+  const { TH } = runtime(true);
   const dir = path.join(root, 'docs/qa/dataset');
   fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(path.join(dir, 'baseline-schema12.json'), JSON.stringify({ schema: TH.DATA_SCHEMA, db: TH.db, metrics: metrics(TH) }, null, 2) + '\n');
+  fs.writeFileSync(path.join(dir, 'baseline-schema13.json'), JSON.stringify({ schema: TH.DATA_SCHEMA, db: TH.db, metrics: metrics(TH) }, null, 2) + '\n');
   console.log('Captured schema', TH.DATA_SCHEMA, 'with', TH.db.rooms.length, 'rooms.');
 }

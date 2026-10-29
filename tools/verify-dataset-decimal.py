@@ -18,7 +18,7 @@ def eq(actual, expected, label, tol=Decimal('0.000001')):
     assert abs(D(actual) - D(expected)) <= tol, f'{label}: actual={actual} expected={expected}'
 idx = {name: {r['id']: r for r in rows if 'id' in r} for name, rows in db.items() if isinstance(rows, list)}
 
-meter = idx['commonMeters']['CTC-TX-01']
+meter = idx['commonMeters']['CTC-G1-01']
 reading = next(r for r in db['commonReadings'] if r['meterId'] == meter['id'] and r['period'] == '2026-10')
 common_units = {}
 for room in meter['rooms']:
@@ -114,7 +114,10 @@ def pnl(period, bid, mode):
             elif typ == 'extra': v['lift'] += a
             elif typ == 'adjust': v['rent' if a < 0 else 'lift'] += a
             elif code == 'NET': v['net'] += a
-            elif code == 'PARK': v['ev'] += a
+            elif code == 'CLEAN': v['clean'] += a
+            elif code == 'ELEV': v['lift'] += a
+            elif code == 'WASH': v['wash'] += a
+            elif code and (code.startswith('PARK') or code == 'EVCHG'): v['ev'] += a
             else:
                 third = rnd(a / 3); v['clean'] += third; v['lift'] += third; v['wash'] += a - 2 * third
     for a in db['arisingRent']:
@@ -130,7 +133,7 @@ def pnl(period, bid, mode):
     for source, target in pool_keys.items(): v[target] += rnd(D(pool['lines'].get(source, 0)) * rooms / pool['portfolioRooms'])
     manager = idx['staff'][idx['buildings'][bid]['managerId']]; h = performance(period, bid)
     v['mgr'] = pay(period, manager, h['D'], h['listed'], rooms)[1]
-    if any(t['id'] == manager['team'] and t['id'] != 'BO' for t in db['teams']): v['lead'] += rooms * db['salaryPolicy']['leaderPerRoom']
+    if any(t['id'] == manager['team'] and t.get('kind') == 'ops' for t in db['teams']): v['lead'] += rooms * db['salaryPolicy']['leaderPerRoom']
     if mode == 'kd':
         v['depIn'] = v['depRefund'] = v['equip'] = D(0)
         if v['cRent'] == 0:
@@ -160,7 +163,7 @@ for pr in engine['payroll']:
         rooms = sum(1 for r in db['rooms'] if r['buildingId'] in ids)
         per_room, perf_pay = pay(period, s, sum(h['D'] for h in hs), sum(h['listed'] for h in hs), rooms)
         eq(row['perRoom'], per_room, 'salary/perRoom/' + s['id']); eq(row['perf'], perf_pay, 'salary/perf/' + s['id'])
-        team = next((t for t in db['teams'] if t['leaderId'] == s['id'] and t['id'] != 'BO'), None)
+        team = next((t for t in db['teams'] if t['leaderId'] == s['id'] and t.get('kind') == 'ops'), None)
         team_b = {b['id'] for b in db['buildings'] if team and idx['staff'][b['managerId']]['team'] == team['id']}
         lead = sum(1 for r in db['rooms'] if r['buildingId'] in team_b) * db['salaryPolicy']['leaderPerRoom']
         adj = sum(a['amount'] for a in db['salaryAdjustments'] if a['staffId'] == s['id'] and a['period'] == period)

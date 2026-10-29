@@ -104,6 +104,8 @@
   function deep(o) { return o === undefined ? undefined : JSON.parse(JSON.stringify(o)); }
   function hash(str) { var h = 5381; for (var i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0; return (h >>> 0).toString(16); }
   function keyOf(ids) { return 'S:' + ids.slice().sort().join('+'); }
+  /* Thứ tự hiển thị tòa theo danh mục tòa (T17, S9, G1), không theo bảng chữ cái; khóa/nhóm phiên bản vẫn dùng thứ tự sắp xếp */
+  function ordered(ids) { var order = TH.db.buildings.map(function (b) { return b.id; }); return ids.slice().sort(function (a, b) { return order.indexOf(a) - order.indexOf(b) || (a < b ? -1 : a > b ? 1 : 0); }); }
   function mm(p) { return String(+p.slice(5)) + '/' + p.slice(0, 4); }
   function groupOf(bId) { return (TH.db.buildingGroups || []).find(function (g) { return g.buildings.indexOf(bId) > -1; }) || null; }
   function now() { var d = new Date(); return TH.TODAY + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
@@ -186,7 +188,7 @@
     return out;
   }
   function buildItem(type, p, ids, tplId) {
-    ids = ids.slice().sort();
+    ids = ordered(ids);
     var tpl = TH.db.reportTemplates.find(function (t) { return t.id === tplId && t.report === 'RPT-05'; });
     var snap = { type: type, period: p, buildingIds: ids, engine: ENGINE, schema: TH.DATA_SCHEMA, template: type === 'RPT-04' ? TYPES[type].tpl : (tpl ? tpl.id + ' · v' + tpl.version : 'MAU-BCKD · v1'), compact: !!(tpl && tpl.compact),
       labels: {}, groups: {}, cols: {}, vals: {}, meta: {}, src: {}, notes: {}, sheets: [], share: null, pool: null, rules: deep(TH.billRules()), locked: TH.periodLocked(p) };
@@ -376,7 +378,7 @@
     return null;
   }
   function buildDraftItems(req) {
-    var ids = req.buildingIds.slice().sort(), t = TYPES[req.type], eff = effFormulas(req.type, req.formulas);
+    var ids = ordered(req.buildingIds), t = TYPES[req.type], eff = effFormulas(req.type, req.formulas);
     var items = req.type === 'RPT-04' ? ids.map(function (b) { return buildItem('RPT-04', req.period, [b]); }) : req.type === 'RPT-05' ? [buildItem('RPT-05', req.period, ids, req.tpl)] : [t.build(req.period, ids)];
     items.forEach(function (it) {
       it.formulas = eff; it.group = t.group;
@@ -405,7 +407,7 @@
     register: function (id, def) { TYPES[id] = def; },
     preview: function (request, opts) {
       opts = opts || {};
-      var req = { type: request.type, period: request.period, buildingIds: (request.buildingIds || []).slice().sort(), tpl: request.tpl || 'MAU-BCKD', previousRunId: request.previousRunId || null, editOf: request.editOf || null, formulas: deep(request.formulas) || {} };
+      var req = { type: request.type, period: request.period, buildingIds: ordered(request.buildingIds || []), tpl: request.tpl || 'MAU-BCKD', previousRunId: request.previousRunId || null, editOf: request.editOf || null, formulas: deep(request.formulas) || {} };
       var err = validate(req);
       if (err) return { ok: false, error: err };
       var items = buildDraftItems(req), a = assess(req, items);
@@ -516,7 +518,7 @@
       d.items.forEach(function (it) {
         var gk = groupKey(it.type, it.period, it.buildingIds), same = runs.filter(function (r) { return r.groupKey === gk; });
         var ver = same.reduce(function (m, r) { return Math.max(m, r.version); }, 0) + 1, prev = same.sort(function (a, b) { return b.version - a.version; })[0];
-        var rid = 'BC' + it.type.slice(4) + '-' + it.period.replace('-', '') + '-' + it.buildingIds.map(function (b) { return b.slice(3); }).join('.') + '-v' + ver;
+        var rid = 'BC' + it.type.slice(4) + '-' + it.period.replace('-', '') + '-' + it.buildingIds.map(function (b) { return TH.bTag(b); }).join('.') + '-v' + ver;
         runs.push({ id: rid, type: it.type, period: it.period, buildingIds: it.buildingIds.slice(), groupKey: gk, version: ver, prevId: prev ? prev.id : null, fromRunId: d.request.previousRunId || null,
           createdBy: me, createdAt: at, template: it.template, engine: it.engine || ENGINE, schema: TH.DATA_SCHEMA, fp: d.fp, warnings: deep(d.warnings), acknowledged: d.warnings.length > 0, snapshot: deep(it), storage: 'pending',
           group: TYPES[it.type].group, formulas: deep(d.request.formulas) || {}, review: review, edits: [] });
@@ -569,7 +571,7 @@
     xlsxSheets: function (snap, run) { return toXlsx(snap, run); },
     export: function (runId) {
       var r = runOf(runId); if (!r || !canSee(r)) return null;
-      var scope = r.type === 'RPT-04' ? r.buildingIds[0] : (r.buildingIds.length === TH.db.buildings.length ? 'ALL' : r.buildingIds.map(function (b) { return b.slice(3); }).join('-'));
+      var scope = r.type === 'RPT-04' ? r.buildingIds[0] : (r.buildingIds.length === TH.db.buildings.length ? 'ALL' : r.buildingIds.map(function (b) { return TH.bTag(b); }).join('-'));
       var fname = 'TIMEHOUSE_' + r.type + '_' + scope + '_ky_' + r.period + '_v' + r.version;
       var sheets = toXlsx(r.snapshot, r);
       TH._lastExport = { filename: fname + '.xlsx', sheets: sheets, runId: r.id };
@@ -1073,7 +1075,7 @@
 
   TH.views[S] = {
     scan: function () {
-      var all = ['TH-CG', 'TH-DD', 'TH-TX'];
+      var all = TH.db.buildings.map(function (b) { return b.id; });
       return [{ param: null }, { param: null, ui: { grp: 'fin' } }, { param: null, ui: { grp: 'ops' } }, { param: null, ui: { grp: 'cus' } }, { param: null, ui: { st: 'deleted' } }, { param: null, ui: { st: 'edited' } }, { param: null, ui: { st: 'legacy' } },
         { param: 'new' }, { param: 'new', ui: { req: { type: 'RPT-05', period: '2026-09', buildingIds: all } } },
         { param: 'new', ui: { ngrp: 'ops', req: { type: 'RPT-AMD', period: '2026-09', buildingIds: all } } }, { param: 'new', ui: { ngrp: 'cus', req: { type: 'RPT-SEG', period: '2026-09', buildingIds: all } } }];

@@ -25,7 +25,7 @@ async (page) => {
   await read(() => { location.hash = '#/demo/reports/new'; });
   await page.waitForSelector('[data-act="rptf.preview"]');
   await page.click('[data-act="rptf.pickType"][data-type="RPT-04"]'); await page.waitForTimeout(100);
-  await page.locator('[data-act-change="rptf.b"][data-b="TH-DD"]').uncheck();
+  await page.locator('[data-act-change="rptf.b"][data-b="S9"]').uncheck();
   await page.click('[data-act="rptf.preview"]');
   await page.waitForSelector('[data-act="rptf.confirm"]');
   const btn4 = await page.locator('[data-act="rptf.confirm"]').innerText();
@@ -43,16 +43,16 @@ async (page) => {
   await page.waitForTimeout(250);
   const q1a = await read(() => ({ runs: TH.db.reportRuns.map(r => r.id), hash: location.hash }));
   const q1b = await read(() => {
-    const R = TH.reports, d = R.preview({ type: 'RPT-05', period: '2026-10', buildingIds: ['TH-CG', 'TH-TX'] }).draft;
+    const R = TH.reports, d = R.preview({ type: 'RPT-05', period: '2026-10', buildingIds: ['T17', 'G1'] }).draft;
     d.ack = true; const c = R.confirm(__rv(d.id), { acknowledgeWarnings: true }), r = R.run(c.runIds[0]);
     return { n: c.runIds.length, sheets: r.snapshot.sheets.map(s => s.name), g1cols: r.snapshot.sheets.find(s => s.id === 'g:NHA-1').cols.map(c => c.label), ids: r.buildingIds };
   });
-  check('QA-RPT-01', btn4.includes('2 báo cáo') && items4 === 2 && afterCancel === 0 && disabledBeforeAck && q1a.runs.length === 2 && q1a.runs.every(id => /^BC04-202610-(CG|TX)-v1$/.test(id)) &&
-    q1b.n === 1 && q1b.sheets.join() === 'BAO CAO KINH DOANH T10,BAO CAO TONG T10,BC DT T10 NHÓM NHÀ 1,BC DT T10 NHÓM NHÀ 2,NGUON SO LIEU,CONG THUC' && q1b.g1cols.join() === 'TỔNG,Cầu Giấy' && q1b.ids.join() === 'TH-CG,TH-TX', { btn4, items4, afterCancel, disabledBeforeAck, q1a, q1b });
+  check('QA-RPT-01', btn4.includes('2 báo cáo') && items4 === 2 && afterCancel === 0 && disabledBeforeAck && q1a.runs.length === 2 && q1a.runs.every(id => /^BC04-202610-(T17|G1)-v1$/.test(id)) &&
+    q1b.n === 1 && q1b.sheets.join() === 'BAO CAO KINH DOANH T10,BAO CAO TONG T10,BC DT T10 NHÓM NHÀ 1,BC DT T10 NHÓM NHÀ 2,NGUON SO LIEU,CONG THUC' && q1b.g1cols.join() === 'TỔNG,T17' && q1b.ids.join() === 'T17,G1', { btn4, items4, afterCancel, disabledBeforeAck, q1a, q1b });
 
   // QA-RPT-02 — preview = bản lưu = Excel; mọi ô số truy được, nguồn/thành phần đối chiếu khớp
   const q2 = await read(() => {
-    const R = TH.reports, d = R.preview({ type: 'RPT-05', period: '2026-09', buildingIds: ['TH-CG', 'TH-DD', 'TH-TX'] }).draft, it = d.items[0];
+    const R = TH.reports, d = R.preview({ type: 'RPT-05', period: '2026-09', buildingIds: ['T17', 'S9', 'G1'] }).draft, it = d.items[0];
     d.ack = true; const c = R.confirm(__rv(d.id), { acknowledgeWarnings: true }), run = R.run(c.runIds[0]);
     const same = JSON.stringify(it.vals) === JSON.stringify(run.snapshot.vals);
     R.export(run.id); const xl = window.__xl[window.__xl.length - 1];
@@ -79,39 +79,39 @@ async (page) => {
   const uiCells = await read(() => ({ expect: (() => { const sh = TH.db.reportRuns[TH.db.reportRuns.length - 1].snapshot.sheets[0]; return sh.lines.filter(l => l.t === 'm' || l.t === 'r').length * sh.cols.length; })(), btns: document.querySelectorAll('.rptf-cell').length, named: Array.from(document.querySelectorAll('.rptf-cell')).every(b => /^Nguồn và cách tính: /.test(b.getAttribute('aria-label'))) }));
   check('QA-RPT-02', q2.same && q2.cells > 400 && !q2.bad.length && !q2.xlMismatch && q2.size > 2000 && /^TIMEHOUSE_RPT-05_ALL_ky_2026-09_v1\.?/.test(q2.file) && q2.errors === 0 && uiCells.btns === uiCells.expect && uiCells.btns >= 200 && uiCells.named, { q2, uiCells });
 
-  // QA-RPT-03 — trả trước TX-301: hóa đơn kỳ 09 14.700.000 cho 09–11; tiền phòng kỳ 09 và 10 mỗi kỳ 4.900.000; nguồn kỳ 10 mở hóa đơn kỳ 09
+  // QA-RPT-03 — trả trước 301G1: hóa đơn kỳ 09 14.700.000 cho 09–11; tiền phòng kỳ 09 và 10 mỗi kỳ 4.900.000; nguồn kỳ 10 mở hóa đơn kỳ 09
   const q3 = await read(() => {
-    const R = TH.reports, k = R.keyOf(['TH-TX']);
-    const d9 = R.preview({ type: 'RPT-04', period: '2026-09', buildingIds: ['TH-TX'] }).draft, d10 = R.preview({ type: 'RPT-04', period: '2026-10', buildingIds: ['TH-TX'] }).draft;
+    const R = TH.reports, k = R.keyOf(['G1']);
+    const d9 = R.preview({ type: 'RPT-04', period: '2026-09', buildingIds: ['G1'] }).draft, d10 = R.preview({ type: 'RPT-04', period: '2026-10', buildingIds: ['G1'] }).draft;
     const t9 = R.trace({ where: 'draft', id: d9.id, item: 0, mode: 'tong', col: k, metric: 'rent' }), t10 = R.trace({ where: 'draft', id: d10.id, item: 0, mode: 'tong', col: k, metric: 'rent' });
-    const s9 = t9.sources.find(s => s.id === 'INV-2609-TX301'), l9 = s9.lines.find(l => l.type === 'rent'), p10 = t10.sources.find(s => s.kind === 'prepaid');
+    const s9 = t9.sources.find(s => s.id === 'INV-2609-301G1'), l9 = s9.lines.find(l => l.type === 'rent'), p10 = t10.sources.find(s => s.kind === 'prepaid');
     return { line: l9.amount, cover: l9.cover.join(), c9: l9.contrib, p10: p10 && [p10.id, p10.amount, p10.invPeriod, p10.lineTotal, p10.first, p10.later] };
   });
   await page.evaluate(() => { const d = TH.db.reportDrafts[TH.db.reportDrafts.length - 1]; location.hash = '#/demo/reports/preview/' + d.id; });
   await page.waitForSelector('.rptf-cell');
-  await read(() => { const col = TH.reports.keyOf(['TH-TX']); document.querySelector('.rptf-cell[data-m="rent"][data-col="' + col + '"]').click(); });
+  await read(() => { const col = TH.reports.keyOf(['G1']); document.querySelector('.rptf-cell[data-m="rent"][data-col="' + col + '"]').click(); });
   await page.waitForSelector('[data-act="rptf.open"][data-kind="prepaid"]');
   await page.click('[data-act="rptf.open"][data-kind="prepaid"]'); await page.waitForTimeout(300);
   const q3nav = await read(() => ({ hash: decodeURIComponent(location.hash), banner: !!document.querySelector('.rptf-return'), period: TH.store.state.period }));
   await page.click('[data-act="rptf.return"]'); await page.waitForTimeout(250);
   const q3back = await read(() => location.hash.indexOf('#/demo/reports/preview/') === 0);
-  check('QA-RPT-03', q3.line === 14700000 && q3.cover === '2026-09,2026-10,2026-11' && q3.c9 === 4900000 && q3.p10.join() === 'INV-2609-TX301,4900000,2026-09,14700000,4900000,4900000' && q3nav.hash === '#/demo/inv-03/INV-2609-TX301' && q3nav.banner && q3nav.period === '2026-10' && q3back, { q3, q3nav, q3back });
+  check('QA-RPT-03', q3.line === 14700000 && q3.cover === '2026-09,2026-10,2026-11' && q3.c9 === 4900000 && q3.p10.join() === 'INV-2609-301G1,4900000,2026-09,14700000,4900000,4900000' && q3nav.hash === '#/demo/inv-03/INV-2609-301G1' && q3nav.banner && q3nav.period === '2026-10' && q3back, { q3, q3nav, q3back });
 
-  // QA-RPT-04 — lẻ ngày TX-202: nháp bị loại + cảnh báo; sau xác nhận 1.520.000 (÷30) có căn cứ; đổi quy tắc chỉ đổi nháp (1.471.000), hóa đơn đã xác nhận giữ nguyên, preview bị phát hiện cũ
+  // QA-RPT-04 — lẻ ngày 202G1: nháp bị loại + cảnh báo; sau xác nhận 1.520.000 (÷30) có căn cứ; đổi quy tắc chỉ đổi nháp (1.471.000), hóa đơn đã xác nhận giữ nguyên, preview bị phát hiện cũ
   const q4 = await read(() => {
-    const R = TH.reports, k = R.keyOf(['TH-TX']);
-    TH.store.setUi('INV-01', 'b', 'TH-TX'); TH.act['inv.gen']({ dataset: {} });
-    const d = R.preview({ type: 'RPT-04', period: '2026-10', buildingIds: ['TH-TX'] }).draft;
-    const warn = d.warnings.some(w => w.code === 'DRAFT_INV' && /TX-202/.test(w.text)), rentDraft = R.trace({ where: 'draft', id: d.id, item: 0, mode: 'tong', col: k, metric: 'rent' }).value;
-    ['TX-202', 'TX-101'].forEach(id => { const rd = TH.calc.reading(id, '2026-10'); rd.status = 'confirmed'; });
-    TH.refreshDrafts('TH-TX', '2026-10');
-    ['TX-202', 'TX-101'].forEach(id => { const i = TH.db.invoices.find(x => x.roomId === id && x.period === '2026-10'); Object.assign(i, { status: 'confirmed', confirmedBy: 'NV-002', confirmedAt: TH.TODAY }); });
+    const R = TH.reports, k = R.keyOf(['G1']);
+    TH.store.setUi('INV-01', 'b', 'G1'); TH.act['inv.gen']({ dataset: {} });
+    const d = R.preview({ type: 'RPT-04', period: '2026-10', buildingIds: ['G1'] }).draft;
+    const warn = d.warnings.some(w => w.code === 'DRAFT_INV' && /202G1/.test(w.text)), rentDraft = R.trace({ where: 'draft', id: d.id, item: 0, mode: 'tong', col: k, metric: 'rent' }).value;
+    ['202G1', '101G1'].forEach(id => { const rd = TH.calc.reading(id, '2026-10'); rd.status = 'confirmed'; });
+    TH.refreshDrafts('G1', '2026-10');
+    ['202G1', '101G1'].forEach(id => { const i = TH.db.invoices.find(x => x.roomId === id && x.period === '2026-10'); Object.assign(i, { status: 'confirmed', confirmedBy: 'NV-002', confirmedAt: TH.TODAY }); });
     const stale = R.isStale(d), blocked = R.confirm(__rv(d.id), { acknowledgeWarnings: true }).reason;
     R.recalc(d.id);
-    const t = R.trace({ where: 'draft', id: d.id, item: 0, mode: 'tong', col: k, metric: 'rent' }), s202 = t.sources.find(s => s.id === 'INV-2610-TX202'), l = s202.lines.find(x => x.type === 'rent');
+    const t = R.trace({ where: 'draft', id: d.id, item: 0, mode: 'tong', col: k, metric: 'rent' }), s202 = t.sources.find(s => s.id === 'INV-2610-202G1'), l = s202.lines.find(x => x.type === 'rent');
     TH.onChange['bill.rule']({ dataset: { key: 'prorateBase' }, value: 'actual' });
-    const conf = TH.db.invoices.find(x => x.roomId === 'TX-202' && x.period === '2026-10').lines.find(x => x.type === 'rent').amount;
-    const draftAlt = TH.buildInvoice(TH.db, TH.calc.contractOfRoom('TX-202'), '2026-10', 'draft').lines.find(x => x.type === 'rent').amount;
+    const conf = TH.db.invoices.find(x => x.roomId === '202G1' && x.period === '2026-10').lines.find(x => x.type === 'rent').amount;
+    const draftAlt = TH.buildInvoice(TH.db, TH.calc.contractOfRoom('202G1'), '2026-10', 'draft').lines.find(x => x.type === 'rent').amount;
     const stale2 = R.isStale(d);
     TH.onChange['bill.rule']({ dataset: { key: 'prorateBase' }, value: 'd30' });
     return { warn, rentDraft, stale, blocked, diff: d.diff.length, contrib: l.contrib, raw: Math.round(l.raw), days: l.days + '/' + l.base, from: l.from, roundTo: l.roundTo, conf, draftAlt, stale2 };
@@ -120,29 +120,29 @@ async (page) => {
 
   // QA-RPT-05 — điện chung: 126 kWh × 4.000 = 504.000; Σ phân bổ + thất thoát = tiền công tơ; chỉ hóa đơn đã xác nhận vào doanh thu (seed chưa lập HĐ TX không cộng 504.000)
   const q5 = await read(() => {
-    const R = TH.reports, k = R.keyOf(['TH-TX']);
-    const d = R.preview({ type: 'RPT-04', period: '2026-10', buildingIds: ['TH-TX'] }).draft;
+    const R = TH.reports, k = R.keyOf(['G1']);
+    const d = R.preview({ type: 'RPT-04', period: '2026-10', buildingIds: ['G1'] }).draft;
     const t = R.trace({ where: 'draft', id: d.id, item: 0, mode: 'tong', col: k, metric: 'elec' });
     const lines = [].concat(...t.sources.map(s => s.lines || [])).filter(l => l.type === 'common'), b = lines[0] && lines[0].basis;
     const sum = b ? b.rows.reduce((a, r) => a + r.amount, 0) + b.loss : null;
     TH.db = TH.seed(); TH.db.reportRuns = []; TH.db.reportDrafts = [];
-    const d0 = R.preview({ type: 'RPT-04', period: '2026-10', buildingIds: ['TH-TX'] }).draft;
+    const d0 = R.preview({ type: 'RPT-04', period: '2026-10', buildingIds: ['G1'] }).draft;
     const e0 = R.trace({ where: 'draft', id: d0.id, item: 0, mode: 'tong', col: k, metric: 'elec' });
     return { n: lines.length, room: t.sources.filter(s => (s.lines || []).some(l => l.type === 'common')).map(s => s.room), kwh: b && b.kwh, meter: b && b.meterAmount, sum, base: b && b.base, units: b && b.units, e0: e0.value, common0: e0.sources.length };
   });
   check('QA-RPT-05', q5.n === 2 && q5.kwh === 126 && q5.meter === 504000 && q5.sum === 504000 && q5.base === 9 && q5.e0 === 0 && q5.common0 === 0, q5);
 
-  // QA-RPT-06 — điều chỉnh: giảm trừ TX-101 −120.000 vào tiền phòng 1 lần, có lý do/duyệt; khoản chờ duyệt TX-301 không lọt vào số ghi nhận
+  // QA-RPT-06 — điều chỉnh: giảm trừ 101G1 −120.000 vào tiền phòng 1 lần, có lý do/duyệt; khoản chờ duyệt 301G1 không lọt vào số ghi nhận
   const q6 = await read(() => {
-    const R = TH.reports, k = R.keyOf(['TH-TX']);
-    TH.store.setUi('INV-01', 'b', 'TH-TX'); TH.act['inv.gen']({ dataset: {} });
-    ['TX-101', 'TX-301'].forEach(id => { TH.calc.reading(id, '2026-10').status = 'confirmed'; });
-    TH.refreshDrafts('TH-TX', '2026-10');
-    const i101 = TH.db.invoices.find(x => x.roomId === 'TX-101' && x.period === '2026-10'); Object.assign(i101, { status: 'confirmed' });
-    const d = R.preview({ type: 'RPT-04', period: '2026-10', buildingIds: ['TH-TX'] }).draft;
+    const R = TH.reports, k = R.keyOf(['G1']);
+    TH.store.setUi('INV-01', 'b', 'G1'); TH.act['inv.gen']({ dataset: {} });
+    ['101G1', '301G1'].forEach(id => { TH.calc.reading(id, '2026-10').status = 'confirmed'; });
+    TH.refreshDrafts('G1', '2026-10');
+    const i101 = TH.db.invoices.find(x => x.roomId === '101G1' && x.period === '2026-10'); Object.assign(i101, { status: 'confirmed' });
+    const d = R.preview({ type: 'RPT-04', period: '2026-10', buildingIds: ['G1'] }).draft;
     const rent = R.trace({ where: 'draft', id: d.id, item: 0, mode: 'tong', col: k, metric: 'rent' }), lift = R.trace({ where: 'draft', id: d.id, item: 0, mode: 'tong', col: k, metric: 'lift' });
     const adj = [].concat(...rent.sources.map(s => (s.lines || []).filter(l => l.type === 'adjust')));
-    const pend = [].concat(...lift.sources.map(s => (s.lines || []).filter(l => l.refId === 'DC-2610-03')));
+    const pend = [].concat(...lift.sources.map(s => (s.lines || []).filter(l => l.refId === 'TK-2610-03')));
     return { adj: adj.map(l => [l.contrib, l.basis.reason, l.basis.status, l.basis.approvedBy, l.basis.period]), count: adj.length, pend: pend.length, rent: rent.value, check: rent.check, warn: d.warnings.some(w => w.code === 'PENDING_ADJ') };
   });
   check('QA-RPT-06', q6.count === 1 && q6.adj[0][0] === -120000 && q6.adj[0][2] === 'approved' && q6.adj[0][4] === '2026-10' && q6.adj[0][1] && q6.pend === 0 && q6.rent === q6.check && q6.rent === 4900000 + 3500000 - 120000 && q6.warn, q6);
@@ -152,19 +152,19 @@ async (page) => {
     const C = TH.calc, ev = TH.db.roomEvents, room = { id: 'QA-ROOM', status: 'occupied' };
     const at = (d, p) => { TH.db.roomEvents = ev.concat([{ roomId: 'QA-ROOM', at: d, from: 'vacant', to: 'occupied' }]); const s = C.roomStateAt(room, p); TH.db.roomEvents = ev; return s; };
     return { d31: at('2026-10-31', '2026-10'), d28: at('2026-10-28', '2026-10'), d30: at('2026-09-30', '2026-09'), nov1: at('2026-11-01', '2026-10'), sep: at('2026-10-31', '2026-09'), leap: at('2028-02-29', '2028-02'), feb: at('2027-02-28', '2027-02'), mar1: at('2027-03-01', '2027-02'),
-      dd302sep: C.roomStateAt(C.room('DD-302'), '2026-09'), cg401aug: C.roomStateAt(C.room('CG-401'), '2026-08'), cg401jul: C.roomStateAt(C.room('CG-401'), '2026-07') };
+      dd302sep: C.roomStateAt(C.room('302S9'), '2026-09'), cg401aug: C.roomStateAt(C.room('401T17'), '2026-08'), cg401jul: C.roomStateAt(C.room('401T17'), '2026-07') };
   });
   check('QA-RPT-07', q7.d31 === 'occupied' && q7.d28 === 'occupied' && q7.d30 === 'occupied' && q7.nov1 === 'vacant' && q7.sep === 'vacant' && q7.leap === 'occupied' && q7.feb === 'occupied' && q7.mar1 === 'vacant' && q7.dd302sep === 'maintenance' && q7.cg401aug === 'vacant' && q7.cg401jul === 'occupied', q7);
 
   // QA-RPT-08 — phiên bản: sửa nguồn → preview cũ bị phát hiện; v2 số mới, v1 & Excel v1 giữ nguyên; nguồn bị xóa vẫn đọc được căn cứ đã lưu
   await reset('admin');
   const q8 = await read(() => {
-    const R = TH.reports, k = R.keyOf(['TH-CG']);
-    const d1 = R.preview({ type: 'RPT-04', period: '2026-09', buildingIds: ['TH-CG'] }).draft; d1.ack = true;
+    const R = TH.reports, k = R.keyOf(['T17']);
+    const d1 = R.preview({ type: 'RPT-04', period: '2026-09', buildingIds: ['T17'] }).draft; d1.ack = true;
     const v1 = R.run(R.confirm(__rv(d1.id), { acknowledgeWarnings: true }).runIds[0]);
     R.export(v1.id); const x1 = JSON.stringify(window.__xl[window.__xl.length - 1].s);
-    const d2 = R.preview({ type: 'RPT-04', period: '2026-09', buildingIds: ['TH-CG'], previousRunId: v1.id }).draft;
-    const exp = TH.db.expenses.find(e => e.buildingId === 'TH-CG' && e.period === '2026-09' && e.category === 'repair' && e.status === 'approved');
+    const d2 = R.preview({ type: 'RPT-04', period: '2026-09', buildingIds: ['T17'], previousRunId: v1.id }).draft;
+    const exp = TH.db.expenses.find(e => e.buildingId === 'T17' && e.period === '2026-09' && e.category === 'repair' && e.status === 'approved');
     exp.amount += 1000000;
     const stale = R.isStale(d2), blocked = R.confirm(__rv(d2.id), { acknowledgeWarnings: true }).reason;
     R.recalc(d2.id); d2.ack = true;
@@ -180,13 +180,13 @@ async (page) => {
 
   // QA-RPT-09 — quyền & lưu trữ: gói A có luồng; QL không thấy RPT-05/tòa khác, lương bị che; Nhân sự 403; refresh giữ bản lưu; lỗi quota không báo lưu bền vững
   await reset('admin', 'A');
-  const q9a = await read(() => { const d = TH.reports.preview({ type: 'RPT-05', period: '2026-10', buildingIds: ['TH-CG', 'TH-DD'] }).draft; d.ack = true; const c = TH.reports.confirm(__rv(d.id), { acknowledgeWarnings: true }); return { ok: c.ok, pkg: TH.store.state.pkg, durable: c.durable }; });
+  const q9a = await read(() => { const d = TH.reports.preview({ type: 'RPT-05', period: '2026-10', buildingIds: ['T17', 'S9'] }).draft; d.ack = true; const c = TH.reports.confirm(__rv(d.id), { acknowledgeWarnings: true }); return { ok: c.ok, pkg: TH.store.state.pkg, durable: c.durable }; });
   await read(() => { TH.store.state.role = 'manager'; location.hash = '#/demo/reports'; TH.app.refresh(); });
   await page.waitForTimeout(200);
   const q9b = await read(() => {
-    const R = TH.reports, d = R.preview({ type: 'RPT-04', period: '2026-10', buildingIds: ['TH-CG'] }).draft;
-    const html = TH.reportTraceRender({ where: 'draft', id: d.id, item: 0, mode: 'tong', col: R.keyOf(['TH-CG']), metric: 'mgr' }).body;
-    return { r5: R.canType('RPT-05'), seeRun5: TH.db.reportRuns.some(R.canSee), dd: R.preview({ type: 'RPT-04', period: '2026-10', buildingIds: ['TH-DD'] }).error, salaryHidden: /bị hạn chế/.test(html), listRows: document.querySelectorAll('table[aria-label="Danh sách báo cáo đã tạo"] tbody tr').length };
+    const R = TH.reports, d = R.preview({ type: 'RPT-04', period: '2026-10', buildingIds: ['T17'] }).draft;
+    const html = TH.reportTraceRender({ where: 'draft', id: d.id, item: 0, mode: 'tong', col: R.keyOf(['T17']), metric: 'mgr' }).body;
+    return { r5: R.canType('RPT-05'), seeRun5: TH.db.reportRuns.some(R.canSee), dd: R.preview({ type: 'RPT-04', period: '2026-10', buildingIds: ['S9'] }).error, salaryHidden: /bị hạn chế/.test(html), listRows: document.querySelectorAll('table[aria-label="Danh sách báo cáo đã tạo"] tbody tr').length };
   });
   await read(() => { TH.store.state.role = 'hr'; location.hash = '#/demo/reports'; TH.app.refresh(); });
   await page.waitForTimeout(150);
@@ -197,7 +197,7 @@ async (page) => {
   const q9d = await read(() => ({ runs: TH.db.reportRuns.length, storage: TH.db.reportRuns.map(r => r.storage) }));
   const q9e = await read(() => {
     const orig = Storage.prototype.setItem; Storage.prototype.setItem = function () { throw new Error('QuotaExceededError'); };
-    const d = TH.reports.preview({ type: 'RPT-04', period: '2026-10', buildingIds: ['TH-TX'] }).draft; d.ack = true;
+    const d = TH.reports.preview({ type: 'RPT-04', period: '2026-10', buildingIds: ['G1'] }).draft; d.ack = true;
     const c = TH.reports.confirm(__rv(d.id), { acknowledgeWarnings: true });
     Storage.prototype.setItem = orig;
     return { ok: c.ok, durable: c.durable, storage: TH.reports.run(c.runIds[0]).storage };
@@ -206,7 +206,7 @@ async (page) => {
 
   // QA-RPT-10 — route cũ & UI: RPT-04 link mở form điền sẵn tòa (không tạo bản lưu); 375px không tràn ngang ở danh sách / xem trước / bản lưu; không lỗi JS
   await reset('admin');
-  await read(() => { TH.store.setUi('RPT-04', 'b', 'TH-DD'); location.hash = '#/demo/rpt-04'; });
+  await read(() => { TH.store.setUi('RPT-04', 'b', 'S9'); location.hash = '#/demo/rpt-04'; });
   await page.waitForSelector('[data-act="rptf.preview"]');
   const q10a = await read(() => ({ type: (document.querySelector('[data-act="rptf.pickType"][aria-pressed="true"]') || {}).dataset ? document.querySelector('[data-act="rptf.pickType"][aria-pressed="true"]').dataset.type : null, checked: Array.from(document.querySelectorAll('[data-act-change="rptf.b"]:checked')).map(x => x.dataset.b), runs: TH.db.reportRuns.length }));
   await page.click('[data-act="rptf.preview"]'); await page.waitForSelector('.rptf-cell');
@@ -219,11 +219,11 @@ async (page) => {
   await read(() => { location.hash = '#/demo/reports'; }); await page.waitForTimeout(250);
   over.list = await read(() => document.documentElement.scrollWidth - window.innerWidth);
   await page.setViewportSize({ width: 1440, height: 900 });
-  check('QA-RPT-10', q10a.type === 'RPT-04' && q10a.checked.join() === 'TH-DD' && q10a.runs === 0 && over.preview <= 0 && over.view <= 0 && over.list <= 0 && !errors.length, { q10a, over, errors });
+  check('QA-RPT-10', q10a.type === 'RPT-04' && q10a.checked.join() === 'S9' && q10a.runs === 0 && over.preview <= 0 && over.view <= 0 && over.list <= 0 && !errors.length, { q10a, over, errors });
 
   // QA-RPT-11 — bàn làm việc xem trước: chưa mở nhóm thì không tích được (UI + API); mở nhóm tô ô liên quan; 1440px truy nguồn trong panel, 375px mở modal; hộp sửa công thức hiện kết quả trước khi lưu
   await reset('admin');
-  await read(() => { const r = TH.reports.preview({ type: 'RPT-AMD', period: '2026-09', buildingIds: ['TH-CG', 'TH-DD', 'TH-TX'] }); TH.store.setUi('REPORTS', 'pane', 'check'); location.hash = '#/demo/reports/preview/' + r.draft.id; });
+  await read(() => { const r = TH.reports.preview({ type: 'RPT-AMD', period: '2026-09', buildingIds: ['T17', 'S9', 'G1'] }); TH.store.setUi('REPORTS', 'pane', 'check'); location.hash = '#/demo/reports/preview/' + r.draft.id; });
   await page.waitForSelector('.rptf-pane [data-act="rptf.group"]');
   const q11a = await read(() => {
     const id = decodeURIComponent(location.hash).split('/').pop(), R = TH.reports, g = R.reviewState(R.draft(id)).groups[0];

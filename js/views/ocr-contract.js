@@ -18,7 +18,7 @@
     { key: 'idNo', group: 'b', label: 'Số CCCD (mask)', ocr: '0010•••••001', conf: 0.9 },
     { key: 'idPlace', group: 'b', label: 'Nơi cấp', ocr: 'Cục Cảnh sát QLHC về TTXH', conf: 0.84 },
     { key: 'permAddress', group: 'b', label: 'Hộ khẩu thường trú', ocr: '123 Minh Khai, phường Vĩnh Tuy, Hà Nội', conf: 0.79 },
-    { key: 'room', group: 'd1', label: '1.1 Phòng số', ocr: 'CG-401', conf: 0.95 },
+    { key: 'room', group: 'd1', label: '1.1 Phòng số', ocr: '401T17', conf: 0.95 },
     { key: 'people', group: 'd1', label: '1.2 Số người ở', ocr: '2', conf: 0.96, num: true },
     { key: 'peopleMax', group: 'd1', label: '1.2 Số người tối đa', ocr: '2', conf: 0.9, num: true },
     { key: 'vehicles', group: 'd1', label: '1.2 Số xe máy', ocr: '1', conf: 0.94, num: true },
@@ -71,14 +71,30 @@
   function monthsBetween(a, b) { return Math.max(0, Math.round((new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / 86400000 / 30.44)); }
 
   /* Khi đọc lại cho HĐ đã có: trường định danh/thời hạn lấy từ hồ sơ hiện tại (để thấy "Khác" nếu sửa), biểu phí & điều khoản lấy từ mẫu */
+  /* Bản scan mẫu cho HĐ mới: phòng trống neo (TH.DEMO.room.ocrVacant), giá/cọc/chỉ số/biểu phí/tài khoản lấy từ dữ liệu tòa — khớp dữ liệu, không gõ số rời */
+  function sampleFields() {
+    var room = C().room(TH.DEMO.room.ocrVacant);
+    if (!room) return FIELDS;
+    var pl = TH.seedPriceList(C().building(room.buildingId), '2026-11-01', 1), price = function (code) { var l = pl.find(function (x) { return x.code === code; }); return l && l.active ? fmtNum(l.price) : '0'; };
+    var rd = TH.db.readings.filter(function (r) { return r.roomId === room.id && r.elecCur !== null; }).slice(-1)[0];
+    var o = { code: 'HĐ-' + room.id + '/26', room: room.id, rent: fmtNum(room.rent), deposit: fmtNum(room.rent), prepaidAtSign: fmtNum(room.rent * 2 - 1000000),
+      elecStart: rd ? fmtNum(rd.elecCur) : undefined, waterStart: rd ? String(rd.waterCur) : undefined, bank: C().payAccount(room.buildingId).split(' · ')[0],
+      feeNet: price('NET'), feeElec: price('ELEC'), feeWater: price('WATER'), feeEbike: price('PARK_EBIKE'), feeSvc: price('SVC'), feeEv: price('PARK_EV') };
+    return FIELDS.map(function (f) { return o[f.key] !== undefined ? Object.assign({}, f, { ocr: String(o[f.key]) }) : f; });
+  }
   function fieldsFor(ct) {
-    if (!ct) return FIELDS;
+    if (!ct) return sampleFields();
     var k = C().customer(ct.customerId) || {}, T = ct.terms || {}, H = ct.handover || {}, P = ct.prepaid || {};
+    /* Điều 3.3 in thời hạn của bản ký; phần gia hạn (mặc nhiên/phụ lục) theo Điều 3.4, không ghi đè thời hạn gốc */
+    var signedEnd = ct.renewals && ct.renewals.length ? TH.addDays(ct.renewals[0].from, -1) : ct.end;
     var moto = (k.vehicles || []).filter(function (v) { return v.type === 'Xe máy' && v.status !== 'ended'; }).length;
     var o = { code: ct.id, signedAt: ct.signedAt, customer: k.name, dob: k.dob, phone: k.phone, idNo: k.idNo, idPlace: k.idPlace, permAddress: k.permAddress, room: ct.roomId, people: String(ct.people), peopleMax: String(T.peopleMax || ct.people), vehicles: String(T.vehiclesDeclared !== undefined && T.vehiclesDeclared !== null ? T.vehiclesDeclared : moto),
-      handoverAt: H.at || ct.start, billingFrom: H.billingFrom || ct.start, termMonths: String(monthsBetween(ct.start, TH.addDays(ct.end, 1))), start: ct.start, end: ct.end,
+      handoverAt: H.at || ct.start, billingFrom: H.billingFrom || ct.start, termMonths: String(monthsBetween(ct.start, TH.addDays(signedEnd, 1))), start: ct.start, end: signedEnd,
       rent: fmtNum(ct.rent), deposit: fmtNum(ct.deposit), prepaidBefore: P.beforeSign !== undefined ? fmtNum(P.beforeSign) : undefined, prepaidAtSign: P.atSign !== undefined ? fmtNum(P.atSign) : undefined,
-      elecStart: H.elecStart !== undefined ? fmtNum(H.elecStart) : undefined, waterStart: H.waterStart !== undefined ? String(H.waterStart) : undefined };
+      elecStart: H.elecStart !== undefined ? fmtNum(H.elecStart) : undefined, waterStart: H.waterStart !== undefined ? String(H.waterStart) : undefined,
+      bank: T.payAccount ? String(T.payAccount).split(' · ')[0] : undefined };
+    /* Điều 4.4: biểu phí in trên HĐ = bảng giá theo HĐ (dòng không áp dụng → 0) */
+    (ct.priceList || []).forEach(function (l) { var k = { NET: 'feeNet', ELEC: 'feeElec', WATER: 'feeWater', PARK_EBIKE: 'feeEbike', SVC: 'feeSvc', PARK_EV: 'feeEv' }[l.code]; if (k && !(k === 'feeWater' && l.method !== 'per_person')) o[k] = fmtNum(l.active ? l.price : 0); });
     return FIELDS.map(function (f) { return o[f.key] !== undefined && o[f.key] !== null && o[f.key] !== '' ? Object.assign({}, f, { ocr: String(o[f.key]) }) : f; });
   }
 
@@ -147,12 +163,16 @@
 
   /* Bản scan minh họa theo bố cục mẫu đầy đủ (Điều 1–4 có ô OCR; Điều 5–7 rút gọn ở các khoản được lưu) */
   function docHtml(box, v, o) {
-    var room = C().room(v('room')), b = room ? C().building(room.buildingId) : null, me = C().staff('NV-001');
+    var room = C().room(v('room')), b = room ? C().building(room.buildingId) : null;
+    /* Bản xem HĐ đã có: nước theo công tơ / theo phòng in đúng cách tính của HĐ (OCR mẫu chỉ có ô theo người) */
+    var wl = o && o.mode === 'view' ? (o.ct.priceList || []).find(function (l) { return l.code === 'WATER'; }) : null;
+    var grp = b ? (TH.db.buildingGroups || []).find(function (g) { return g.buildings.indexOf(b.id) > -1; }) : null;
+    var pa = (o && o.ct && o.ct.partyA) || (grp && grp.rep) || { name: C().staffName('NV-001'), idNo: '0010••••3110', idPlace: 'Cục Cảnh sát QLHC về TTXH', phone: '0903 ••• 110' };
     var tbl = function (from, to) { return ASSETS.slice(from, to).map(function (a, j) { var i = from + j; return '<tr><td>' + esc(a.name) + '</td><td class="doc-c">' + box('tbl_assets_' + i + '_qty', a.qty + (a.unit && a.unit !== '—' && a.unit !== 'cái' ? ' ' + a.unit : '')) + '</td><td>' + box('tbl_assets_' + i + '_condition', a.condition) + '</td></tr>'; }).join(''); };
     return '<span class="sim-mark">' + TH.simBadge('Bản scan minh họa theo mẫu đầy đủ') + '</span><div class="doc-c" style="font-size:12px">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM<br><b>Độc lập – Tự do – Hạnh phúc</b><br>***</div>' +
       '<h4>HỢP ĐỒNG CHO THUÊ PHÒNG</h4><div class="doc-c">HĐ số: ' + box('code', v('code')) + '</div>' +
       '<p>Hôm nay, ngày ' + box('signedAt', F.date(v('signedAt'))) + '. Tại địa chỉ: ' + esc(b ? b.name + ', ' + b.address : 'Tòa TimeHouse') + '. Chúng tôi gồm:</p>' +
-      '<p><b>BÊN CHO THUÊ PHÒNG (BÊN A):</b> Đại diện: ' + esc(me ? me.name : 'Phạm Minh Đức') + ' — Số CCCD: 0010••••••110 — Nơi cấp: Cục Cảnh sát — SĐT: 0903 ••• 110.</p>' +
+      '<p><b>BÊN CHO THUÊ PHÒNG (BÊN A):</b> Đại diện (Ông/Bà): ' + esc(pa.name) + ' — Số CCCD: ' + esc(pa.idNo) + ' — Nơi cấp: ' + esc(pa.idPlace) + (pa.permAddress ? ' — Hộ khẩu thường trú: ' + esc(pa.permAddress) : '') + ' — SĐT: ' + esc(pa.phone) + '.</p>' +
       '<p><b>BÊN THUÊ PHÒNG (BÊN B):</b> Họ tên đầy đủ: ' + box('customer', v('customer')) + ' — Ngày sinh: ' + box('dob', F.date(v('dob'))) + ' — Các số điện thoại đang dùng: ' + box('phone', v('phone')) + ' — Số CCCD: ' + box('idNo', v('idNo')) + ' — Nơi cấp: ' + box('idPlace', v('idPlace')) + ' — Hộ khẩu thường trú: ' + box('permAddress', v('permAddress')) + '.</p>' +
       '<p><b>ĐIỀU 1: ĐỐI TƯỢNG CHO THUÊ VÀ MỤC ĐÍCH SỬ DỤNG.</b> 1.1. Bên A đồng ý cho bên B thuê phòng số: ' + box('room', v('room')) + (b ? ' – ' + esc(b.name) : '') + '. 1.2. Bên B sử dụng phòng trên với mục đích để ở. Số lượng: ' + box('people', String(v('people')).padStart(2, '0') + ' người') + '. Số người tối đa là ' + box('peopleMax', String(v('peopleMax')).padStart(2, '0') + ' người') + '; nếu thêm người phải thông báo trước và được bên A đồng ý; người mới đến ở quá 5 ngày thì tính thêm người. Số xe: ' + box('vehicles', String(v('vehicles')).padStart(2, '0') + ' xe máy') + '.</p>' +
       '<p><b>ĐIỀU 2: BÀN GIAO TÀI SẢN.</b> 2.1. Tài sản chung (thang bộ, thang máy, sân phơi, máy bơm, máy giặt chung, chiếu sáng, bể nước, camera…) sử dụng bình thường; hỏng hóc do lỗi bên B thì bên B sửa chữa/bồi thường. 2.2. Tài sản trong phòng đã bàn giao, hoạt động bình thường:</p>' +
@@ -161,8 +181,12 @@
       '<p><b>ĐIỀU 3: THỜI ĐIỂM GIAO NHẬN PHÒNG VÀ THỜI HẠN CHO THUÊ.</b> 3.1. Thời điểm giao nhận phòng ở là ngày ' + box('handoverAt', F.date(v('handoverAt'))) + '. 3.2. Thời điểm tính tiền phòng ở là ngày ' + box('billingFrom', F.date(v('billingFrom'))) + '. 3.3. Thời hạn hợp đồng là: ' + box('termMonths', v('termMonths') + ' tháng') + ' tính từ ngày ' + box('start', F.date(v('start'))) + ' đến ngày ' + box('end', F.date(v('end'))) + '. 3.4. Trước 30 ngày hết hạn, nếu hai bên không có ý kiến gì thì hợp đồng ' + box('autoRenew', 'mặc nhiên kéo dài thêm mỗi lần 12 tháng') + ' và tự gia hạn mỗi lần kết thúc thời hạn.</p>' +
       '<p><b>ĐIỀU 4: GIÁ CẢ VÀ PHƯƠNG THỨC THANH TOÁN.</b> 4.1. Giá cho thuê phòng là: ' + box('rent', v('rent') + 'đ/tháng') + '. Số tiền đã thanh toán trước khi ký hợp đồng: ' + box('prepaidBefore', v('prepaidBefore') + 'đ') + '. Số tiền đóng thêm vào thời điểm ký hợp đồng: ' + box('prepaidAtSign', v('prepaidAtSign') + 'đ') + '. 4.2. Các khoản phí dịch vụ — Số điện: ' + box('elecStart', v('elecStart') + ' kWh') + '; Số nước: ' + box('waterStart', v('waterStart') + ' m³') + '. 4.3. Tiền đặt cọc duy trì hợp đồng là 01 tháng tiền nhà: ' + box('deposit', v('deposit') + 'đ') + '. Tiền đặt cọc được bên A trả lại hoàn toàn khi bên B chuyển ra đúng thời hạn và không có phát sinh; bên A thanh toán trong vòng ' + box('refundDays', v('refundDays') + ' ngày') + ' kể từ ngày bên B bàn giao phòng và chìa khóa. Nếu bên B vi phạm hợp đồng hoặc đơn phương chấm dứt trước thời hạn thì phải thanh toán đầy đủ tiền dịch vụ đã sử dụng và mất toàn bộ tiền đặt cọc. Nhượng lại hợp đồng chịu phí nhượng phòng ' + box('transferFee', v('transferFee') + 'đ') + '.</p>' +
       '<p>4.4. Phương thức thanh toán: ngày 25 hàng tháng bên A gửi thông báo tiền phòng kỳ tiếp theo và tiền dịch vụ đã dùng. 4.4.1 Thời hạn thanh toán: ' + box('payWindow', v('payWindow')) + '. 4.4.2 Chuyển khoản đến tài khoản ghi trên thông báo tiền phòng — ' + box('bank', v('bank')) + '.</p>' +
-      '<table class="doc-table"><tbody><tr><td>Internet</td><td>' + box('feeNet', v('feeNet') + 'đ /tháng') + '</td><td>Xe đạp điện</td><td>' + box('feeEbike', v('feeEbike') + 'đ /xe') + '</td></tr><tr><td>Điện</td><td>' + box('feeElec', v('feeElec') + 'đ /số') + '</td><td>Dịch vụ chung (máy giặt, điện chung, thu rác, vệ sinh chung)</td><td>' + box('feeSvc', v('feeSvc') + 'đ /người') + '</td></tr><tr><td>Nước</td><td>' + box('feeWater', v('feeWater') + 'đ /người') + '</td><td>Xe điện dịch vụ xanh SM</td><td>' + box('feeEv', v('feeEv') + '/xe') + '</td></tr></tbody></table>' +
-      '<p>4.4.3 Nội dung chuyển khoản: ' + esc(String(v('room')) + ' - ' + String(v('customer')).toUpperCase()) + '. 4.4.4 Chậm trả tiền thì bên B chịu phạt ' + box('lateFee', v('lateFee') + ' đồng') + ' cho một ngày nộp muộn, tính từ ngày mùng 1 tháng sau đó; thời hạn chậm trả không quá ' + box('lateGrace', String(v('lateGrace')).padStart(2, '0') + ' ngày') + '; hết hạn coi như bên B vi phạm hợp đồng.</p>' +
+      '<table class="doc-table"><tbody><tr><td>Internet</td><td>' + box('feeNet', v('feeNet') + 'đ /tháng') + '</td><td>Xe đạp điện</td><td>' + box('feeEbike', v('feeEbike') + 'đ /xe') + '</td></tr><tr><td>Điện</td><td>' + box('feeElec', v('feeElec') + 'đ /số') + '</td><td>Dịch vụ chung (máy giặt, điện chung, thu rác, vệ sinh chung)</td><td>' + box('feeSvc', v('feeSvc') + 'đ /người') + '</td></tr><tr><td>Nước</td><td>' + (wl && wl.method !== 'per_person' ? '<b>' + fmtNum(wl.price) + 'đ /' + (wl.method === 'by_meter' ? 'm³' : 'phòng') + '</b>' : box('feeWater', v('feeWater') + 'đ /người')) + '</td><td>Xe điện dịch vụ xanh SM</td><td>' + box('feeEv', v('feeEv') + '/xe') + '</td></tr></tbody></table>' +
+      (wl ? (function () {
+        var extra = (o.ct.priceList || []).filter(function (l) { return l.active && ['ELEV', 'CLEAN', 'WASH'].indexOf(l.code) > -1; });
+        return extra.length ? '<p>Phí khác theo biểu phí tòa: ' + extra.map(function (l) { return esc(TH.feeType(l.code).name) + ' <b>' + fmtNum(l.price) + 'đ</b> ' + esc(TH.feeUnit(l.code, l.method).replace('đ/', '/')); }).join('; ') + '.</p>' : '';
+      })() : '') +
+      '<p>4.4.3 Nội dung chuyển khoản: ' + esc((room ? TH.roomNo(room) + ' - ' + TH.bTag(room.buildingId) : String(v('room'))) + ' - ' + TH.unaccent(v('customer')).toUpperCase()) + '. 4.4.4 Chậm trả tiền thì bên B chịu phạt ' + box('lateFee', v('lateFee') + ' đồng') + ' cho một ngày nộp muộn, tính từ ngày mùng 1 tháng sau đó; thời hạn chậm trả không quá ' + box('lateGrace', String(v('lateGrace')).padStart(2, '0') + ' ngày') + '; hết hạn coi như bên B vi phạm hợp đồng.</p>' +
       '<p><b>ĐIỀU 5–7 (rút gọn).</b> 5.2.4 Bên A bảo hành đồ đạc và trang thiết bị trong vòng ' + box('warrantyDays', v('warrantyDays') + ' ngày') + ' kể từ ngày bàn giao. 6.2.11 Khi chấm dứt hợp đồng, bên B báo trước ít nhất ' + box('noticeDays', v('noticeDays') + ' ngày') + ' và bàn giao lại phòng như Điều 2. 7.1 Vi phạm hợp đồng, nội quy hoặc đơn phương chấm dứt trước thời hạn thì mất toàn bộ tiền đặt cọc. 7.2 Hợp đồng lập thành 02 bản, có giá trị từ ngày ký.</p>' +
       '<div class="doc-sig"><div>ĐẠI DIỆN BÊN A<br>(Ký và ghi rõ họ tên)<br><br><i style="color:var(--text-3)">(đã ký)</i></div><div>ĐẠI DIỆN BÊN B<br>(Ký và ghi rõ họ tên)<br><br><i style="color:var(--text-3)">(đã ký)</i></div></div>';
   }
@@ -243,5 +267,27 @@
     TH.toast('Đã áp kết quả OCR vào hồ sơ ' + esc(ct.id), 'Dòng phí hiệu lực từ kỳ ' + F.period(r.from) + '; hóa đơn đã lập không đổi' + (r.added ? '; ' + r.added + ' xe máy chờ xác nhận đăng ký' : '') + '.');
   };
 
-  TH.CONTRACT_OCR = { fields: FIELDS, groups: GROUPS, assets: ASSETS, templates: templates, reader: reader, vals: vals, assetsOf: assetsOf, corrections: corrections, tableCfg: tableCfg, fieldsFor: fieldsFor, checks: checks, buildTerms: buildTerms, buildPriceList: buildPriceList, handoverOf: handoverOf, prepaidOf: prepaidOf, docHtml: docHtml, workspace: workspace, applyToContract: applyToContract, fmtNum: fmtNum };
+  /* Bản hợp đồng theo mẫu đầy đủ, điền từ chính bản ghi HĐ (chỉ đọc) — CUS-02 › Hợp đồng › "Xem bản hợp đồng theo mẫu" */
+  TH.contractDoc = function (ct) {
+    var fields = fieldsFor(ct), v = function (k) { var f = fieldByKey(fields, k); return f ? f.ocr : ''; };
+    var H = ct.handover || {}, list = H.assets || ASSETS;
+    var box = function (k, t) {
+      var m = /^tbl_assets_(\d+)_(qty|condition)$/.exec(k);
+      if (m) { var a = list[+m[1]] || {}; return esc(m[2] === 'qty' ? a.qty + (a.unit && a.unit !== '—' && a.unit !== 'cái' ? ' ' + a.unit : '') : a.condition); }
+      return '<b>' + esc(t) + '</b>';
+    };
+    return '<div class="doc-page">' + docHtml(box, v, { ct: ct, mode: 'view' }) + '</div>';
+  };
+  TH.act['cus.ctDoc'] = function (el) {
+    var id = el.dataset.ct;
+    TH.modal.open({ key: 'ctdoc', size: 'lg', render: function () {
+      var ct = C().contract(id);
+      return { title: 'Hợp đồng ' + esc(ct.id) + ' · theo mẫu đầy đủ', sub: 'Điền từ hồ sơ thuê: Bên B, Điều 1–4 (người/xe, bàn giao, thời hạn, giá, cọc, chỉ số, biểu phí) — khớp hóa đơn, phiếu cọc và chỉ số công tơ',
+        body: TH.contractDoc(ct), foot: '<button type="button" class="btn" data-close>Đóng</button>' };
+    } });
+  };
+
+  TH.CONTRACT_OCR = { groups: GROUPS, assets: ASSETS, templates: templates, reader: reader, vals: vals, assetsOf: assetsOf, corrections: corrections, tableCfg: tableCfg, fieldsFor: fieldsFor, checks: checks, buildTerms: buildTerms, buildPriceList: buildPriceList, handoverOf: handoverOf, prepaidOf: prepaidOf, docHtml: docHtml, workspace: workspace, applyToContract: applyToContract, fmtNum: fmtNum };
+  /* Trường OCR mẫu cho HĐ mới đọc theo dữ liệu hiện tại (phòng trống, giá, chỉ số, biểu phí của tòa) */
+  Object.defineProperty(TH.CONTRACT_OCR, 'fields', { get: sampleFields, enumerable: true });
 })();

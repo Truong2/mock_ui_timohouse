@@ -53,7 +53,7 @@
   TH.act['room.save'] = function (el) {
     var id = el.dataset.id, form = 'room-' + id, g = function (k, d) { return TH.store.draft(form, k, d); };
     if (id === 'new') {
-      var b = g('b', TH.buildingOptions(false)[0].id), code = (g('code', '') || '').trim(), rid = b.slice(3) + '-' + code;
+      var b = g('b', TH.buildingOptions(false)[0].id), code = (g('code', '') || '').trim(), rid = TH.roomIdOf(b, code);
       if (!TH.formErrors(form, !code ? { code: 'Nhập số phòng.' } : C.room(rid) ? { code: 'Phòng ' + rid + ' đã tồn tại trong tòa.' } : {})) { TH.modal.rerenderAll(); return; }
       TH.db.rooms.push({ id: rid, code: rid, buildingId: b, floor: +g('floor', 1), area: +g('area', 20), rent: +String(g('rent', 0)).replace(/\D/g, ''), status: g('status', 'vacant'), meters: [{ type: 'elec', code: 'Đ-' + rid.replace('-', '') }, { type: 'water', code: 'N-' + rid.replace('-', '') }] });
       TH.log('Thêm phòng', rid, '', 'room', b); TH.toast('Đã thêm phòng', esc(rid));
@@ -69,10 +69,10 @@
 
   /* ---------------- ROOM-02 ---------------- */
   TH.views['ROOM-02'] = {
-    scanParam: 'CG-201',
-    scan: function () { return ['overview', 'tenant', 'contract', 'meter', 'timeline', 'periods'].map(function (t) { return { ui: { tab: t }, param: 'CG-201' }; }); },
+    scanParam: '201T17',
+    scan: function () { return ['overview', 'tenant', 'contract', 'meter', 'timeline', 'periods'].map(function (t) { return { ui: { tab: t }, param: '201T17' }; }); },
     render: function (rt) {
-      var r = C.room(rt.param || 'CG-201');
+      var r = C.room(rt.param || '201T17');
       if (!r) return TH.pageHeader({ screen: 'ROOM-02' }) + '<div class="card">' + TH.state('empty', { title: 'Không tìm thấy phòng' }) + '</div>';
       if (!TH.inScope(r.buildingId)) return TH.pageHeader({ screen: 'ROOM-02', title: 'Phòng ' + r.id }) + '<div class="card">' + TH.state('forbidden', { text: 'Phòng thuộc tòa ngoài phạm vi vai trò hiện tại.' }) + '</div>';
       var S = 'ROOM-02', c = C.contractOfRoom(r.id), k = c && C.customer(c.customerId), b = C.building(r.buildingId);
@@ -119,17 +119,17 @@
     inc: { preview: 'F008.B', upsert: 'F008.C', history: 'F008.D' },
     sample: function () {
       return [
-        { line: 2, data: { b: 'TH-CG', code: '402', floor: 4, rent: 6200000, status: 'Trống' }, errors: [] },
-        { line: 3, data: { b: 'TH-TX', code: '302', floor: 3, rent: 4700000, status: 'Trống' }, errors: [] },
-        { line: 4, data: { b: 'TH-CG', code: '201', floor: 2, rent: 5400000, status: 'Đang thuê' }, errors: [], dup: true },
+        { line: 2, data: { b: 'T17', code: '402', floor: 4, rent: 6200000, status: 'Trống' }, errors: [] },
+        { line: 3, data: { b: 'G1', code: '302', floor: 3, rent: 4700000, status: 'Trống' }, errors: [] },
+        { line: 4, data: { b: 'T17', code: '201', floor: 2, rent: 5400000, status: 'Đang thuê' }, errors: [], dup: true },
         { line: 5, data: { b: 'TH-XX', code: '101', floor: 1, rent: 3000000, status: 'Trống' }, errors: ['Mã tòa không tồn tại'] },
-        { line: 6, data: { b: 'TH-DD', code: '303', floor: 3, rent: '', status: 'Trống' }, errors: ['Thiếu giá'] },
+        { line: 6, data: { b: 'S9', code: '303', floor: 3, rent: '', status: 'Trống' }, errors: ['Thiếu giá'] },
       ];
     },
     commit: function (rows, policy) {
       var n = 0;
       rows.forEach(function (r) {
-        var id = r.data.b.slice(3) + '-' + r.data.code, ex = C.room(id);
+        var id = TH.roomIdOf(r.data.b, r.data.code), ex = C.room(id);
         if (ex) { if (policy === 'update') { TH.db.priceHistory.push({ roomId: id, from: TH.TODAY, rent: r.data.rent }); ex.rent = r.data.rent; n++; } return; }
         TH.db.rooms.push({ id: id, code: id, buildingId: r.data.b, floor: r.data.floor, area: 25, rent: r.data.rent, status: 'vacant', meters: [{ type: 'elec', code: 'Đ-' + id.replace('-', '') }, { type: 'water', code: 'N-' + id.replace('-', '') }] });
         n++;
@@ -140,7 +140,7 @@
   TH.registerImport(impCfg);
   TH.views['ROOM-IMP'] = { modal: { size: 'xl' }, scan: function () { return [{ ui: { step: 'upload' } }, { ui: { step: 'check' } }, { ui: { step: 'done' } }]; }, render: function () {
     var out = TH.importFlow(impCfg);
-    out.body += TH.gate('F008.D', '<div class="alert alert-neutral u-mt-12">' + I('layers', 'ic-sm') + '<div class="alert-body">' + TH.tierPill('D') + ' Nhập nhiều tòa trong một tệp có thống kê batch: TH-CG 2 dòng · TH-TX 1 · TH-DD 1 · không xác định 1.</div></div>', { mode: 'mini', label: 'Nhập nhiều tòa có thống kê theo lô' });
+    out.body += TH.gate('F008.D', '<div class="alert alert-neutral u-mt-12">' + I('layers', 'ic-sm') + '<div class="alert-body">' + TH.tierPill('D') + ' Nhập nhiều tòa trong một tệp có thống kê batch: T17 2 dòng · G1 1 · S9 1 · không xác định 1.</div></div>', { mode: 'mini', label: 'Nhập nhiều tòa có thống kê theo lô' });
     return out;
   } };
 })();

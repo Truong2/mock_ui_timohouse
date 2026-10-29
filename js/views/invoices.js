@@ -85,7 +85,7 @@
     var period = p, moved = TH.db.invoices.some(function (i) { return i.roomId === ct.roomId && i.period === p && i.status === 'confirmed'; });
     if (moved) period = TH.addMonthsYm(p, 1);
     var auto = amount < R.adjustApproveFrom;
-    var a = { id: TH.recordActions.id('DC'), roomId: ct.roomId, contractId: ct.id, buildingId: ct.buildingId, period: period, kind: g('kind', 'discount'), category: g('category', TH.ADJUST_CATEGORIES[0]), amount: amount,
+    var a = { id: TH.recordActions.id('TK'), roomId: ct.roomId, contractId: ct.id, buildingId: ct.buildingId, period: period, kind: g('kind', 'discount'), category: g('category', TH.ADJUST_CATEGORIES[0]), amount: amount,
       reason: reason + (moved ? ' (chuyển từ kỳ ' + F.period(p) + ' — hóa đơn đã xác nhận)' : ''), status: auto ? 'approved' : 'pending', createdBy: TH.me().id, createdAt: TH.TODAY, approvedBy: auto ? TH.me().id : null, approvedAt: auto ? TH.TODAY : null };
     TH.db.billAdjusts = (TH.db.billAdjusts || []).concat([a]);
     refreshDrafts(ct.buildingId, period);
@@ -119,7 +119,7 @@
   function targetBuildings() {
     var multi = TH.has('F022.B') && TH.store.ui('INV-01', 'multi', false);
     var s = TH.scope();
-    var b = TH.store.ui('INV-01', 'b', s !== 'ALL' ? s : 'TH-TX');
+    var b = TH.store.ui('INV-01', 'b', s !== 'ALL' ? s : 'G1');
     if (!TH.inScope(b)) b = TH.roleScope()[0];
     return multi ? TH.db.buildings.filter(function (x) { return TH.inScope(x.id); }).map(function (x) { return x.id; }) : [b];
   }
@@ -130,7 +130,7 @@
 
   /* ---------------- INV-01 ---------------- */
   TH.views['INV-01'] = {
-    scan: function () { return [{ ui: { multi: false } }, { ui: { multi: true } }, { ui: { multi: false, b: 'TH-CG' } }]; },
+    scan: function () { return [{ ui: { multi: false } }, { ui: { multi: true } }, { ui: { multi: false, b: 'T17' } }]; },
     dialogs: [function () { return adjForm(); }],
     render: function () {
       var p = TH.store.state.period, bs = targetBuildings();
@@ -395,10 +395,10 @@
   TH.act['doc.print'] = function () { if (TH._docHtml) TH.printDoc(TH._docHtml); };
   TH.invoiceDoc = invoiceDoc;
   TH.views['INV-03'] = {
-    scanParam: 'INV-2610-CG201',
-    dialogs: [function () { return invoiceDoc(C.invoice('INV-2610-CG302')); }],
+    scanParam: 'INV-2610-201T17',
+    dialogs: [function () { return invoiceDoc(C.invoice('INV-2610-302T17')); }],
     render: function (r) {
-      var inv = C.invoice(r.param || 'INV-2610-CG201');
+      var inv = C.invoice(r.param || 'INV-2610-201T17');
       if (!inv) return TH.pageHeader({ screen: 'INV-03' }) + '<div class="card">' + TH.state('empty', { title: 'Không tìm thấy hóa đơn' }) + '</div>';
       if (inv.status === 'draft') refreshDrafts(inv.buildingId, inv.period);
       inv = C.invoice(inv.id);

@@ -136,7 +136,7 @@
   };
 
   TH.views[S] = {
-    scan: function () { return [{ ui: { b: null } }, { ui: { b: null, f: 'todo' } }, { ui: { b: 'TH-CG' } }, { ui: { b: 'TH-TX', vacant: true } }]; },
+    scan: function () { return [{ ui: { b: null } }, { ui: { b: null, f: 'todo' } }, { ui: { b: 'T17' } }, { ui: { b: 'G1', vacant: true } }]; },
     render: function () {
       var p = TH.store.state.period, bId = pickB(), showVac = !!TH.store.ui(S, 'vacant', false);
       var rows = bId ? rowsFor(p, bId, showVac) : [];
@@ -216,7 +216,7 @@
           '<div class="grid-3">' + meterCard + recon + snap + '</div>'
         : buildingList(p));
     },
-    dialogs: [function () { return editForm('TX-102'); }, function () { return feeForm(); }],
+    dialogs: [function () { return editForm('102G1'); }, function () { return feeForm(); }],
   };
 
   /* Dialog nhập chỉ số 1 phòng (A) */

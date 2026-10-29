@@ -146,7 +146,7 @@
     var amt = +String(g('amount', '')).replace(/\D/g, ''), reason = (g('reason', '') || '').trim(), type = g('type', 'bonus');
     var errs = {}; if (!amt) errs.amount = 'Nhập số tiền lớn hơn 0.'; if (!reason) errs.reason = 'Nhập lý do điều chỉnh.';
     if (!TH.formErrors('saladj', errs)) { TH.modal.rerenderAll(); return; }
-    var rec = { id: TH.recordActions.id('DC'), staffId: g('staff', 'NV-003'), period: TH.store.state.period, type: type, amount: type === 'penalty' ? -amt : amt, reason: reason, createdBy: TH.me().id, createdAt: TH.TODAY, status: 'draft' };
+    var rec = { id: TH.recordActions.id('DCL'), staffId: g('staff', 'NV-003'), period: TH.store.state.period, type: type, amount: type === 'penalty' ? -amt : amt, reason: reason, createdBy: TH.me().id, createdAt: TH.TODAY, status: 'draft' };
     TH.db.salaryAdjustments.push(rec);
     TH.log('Thêm điều chỉnh lương', rec.staffId, F.money(rec.amount) + ' · ' + reason, 'salary');
     TH.store.clearDraft('saladj'); TH.app.refresh();

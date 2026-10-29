@@ -19,11 +19,11 @@ async (host) => {
       assert('trash preserves data', R.trash('owner', 'CN-CRUD').record.name === 'Tên đã sửa');
       assert('restore owner', R.execute('owner', 'CN-CRUD', 'restore').ok && C.owner('CN-CRUD').name === 'Tên đã sửa');
       assert('linked owner blocked', !R.execute('owner', 'CN-001', 'delete', { reason: 'Sai' }).ok);
-      assert('linked building blocked', !R.execute('building', 'TH-CG', 'delete', { reason: 'Sai' }).ok);
+      assert('linked building blocked', !R.execute('building', 'T17', 'delete', { reason: 'Sai' }).ok);
       assert('self admin lock blocked', !R.execute('user', 'U-01', 'archive', { reason: 'Sai' }).ok);
       assert('self admin demotion blocked', !R.execute('user', 'U-01', 'edit', { values: { role: 'manager' } }).ok);
       TH.store.state.role = 'manager';
-      assert('scope blocks direct handler', !R.execute('room', 'DD-101', 'edit', { values: { floor: 5 } }).ok);
+      assert('scope blocks direct handler', !R.execute('room', '101S9', 'edit', { values: { floor: 5 } }).ok);
       TH.store.state.role = 'hr';
       assert('role blocks direct financial edit', !R.execute('expense', TH.db.expenses[0].id, 'edit', { values: { amount: 1 } }).ok);
       for (const pkg of ['A', 'B', 'C', 'D']) {

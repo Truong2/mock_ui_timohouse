@@ -52,8 +52,8 @@
   /* ---------------- CON-02 ---------------- */
   var NEW = 'con-new';
   TH.views['CON-02'] = {
-    scanParam: 'HĐ-CG201/25',
-    scan: function () { return [{ param: 'HĐ-CG201/25', ui: { tab: 'info' } }, { param: 'HĐ-CG201/25', ui: { tab: 'fees' } }, { param: 'HĐ-CG201/25', ui: { tab: 'hist' } }, { param: 'new' }]; },
+    scanParam: 'HĐ-201T17/25',
+    scan: function () { return [{ param: 'HĐ-201T17/25', ui: { tab: 'info' } }, { param: 'HĐ-201T17/25', ui: { tab: 'fees' } }, { param: 'HĐ-201T17/25', ui: { tab: 'hist' } }, { param: 'new' }]; },
     render: function (r) {
       if (!r.param || r.param === 'new') return newForm();
       var c = C.contract(r.param);
@@ -94,7 +94,7 @@
         actions: '<a class="btn" href="' + TH.router.href('CUS-02', c.customerId) + '">' + I('user', 'ic-sm') + 'Hồ sơ khách</a>' + (c.status === 'active' ? '<a class="btn btn-primary" href="' + TH.router.href('CON-FOLLOW', c.id) + '">' + I('phone', 'ic-sm') + 'Ghi kết quả hỏi gia hạn</a>' : '') }) +
         '<div class="card tab-card u-mb-16">' + TH.tabs(S, tabs, tab) + '</div>' + TH.tabPanel(S, tab, body);
     },
-    dialogs: [function () { return addendumForm('HĐ-CG201/25'); }],
+    dialogs: [function () { return addendumForm('HĐ-201T17/25'); }],
   };
 
   function ocrDone() { return TH.db.ocrJobs.find(function (j) { return j.kind === 'contract' && j.status === 'confirmed' && !j.used; }); }
@@ -247,7 +247,7 @@
   /* ---------------- CON-FOLLOW ---------------- */
   TH.views['CON-FOLLOW'] = {
     modal: { size: 'md' },
-    scanParam: 'HĐ-CG202/25',
+    scanParam: 'HĐ-202T17/25',
     render: function (r) {
       var c = C.contract(r.param) || C.expiring(TH.expiryDays(), 'ALL')[0];
       var form = 'fu-' + c.id, res = TH.store.draft(form, 'result', 'no_answer');
@@ -299,7 +299,7 @@
   TH.act['ocrcon.confirm'] = function () {
     var O = TH.CONTRACT_OCR, vals = O.vals(OCR_FORM, O.fields), assets = O.assetsOf(OCR_FORM), corrections = O.corrections(OCR_FORM, O.fields);
     TH.db.ocrJobs.unshift({ id: TH.recordActions.id('OCR'), kind: 'contract', target: 'new', file: 'hop_dong_CG401_scan.pdf', status: 'confirmed', fields: vals, assets: assets, by: TH.me().id, at: TH.TODAY, corrections: corrections });
-    TH.log('Xác nhận kết quả OCR HĐ', vals.code, corrections + ' mục đã sửa · ' + assets.length + ' tài sản bàn giao', 'contract', 'TH-CG');
+    TH.log('Xác nhận kết quả OCR HĐ', vals.code, corrections + ' mục đã sửa · ' + assets.length + ' tài sản bàn giao', 'contract', 'T17');
     TH.store.clearDraft(OCR_FORM);
     TH.app.guard = null;
     TH.modal.close(TH.modal.top().key, { silent: true });

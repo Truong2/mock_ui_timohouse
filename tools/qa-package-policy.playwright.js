@@ -12,7 +12,7 @@ async (host) => {
   try {
     await page.goto('http://127.0.0.1:8779/index.html?previewPackage=A&policyQa='+Date.now()+'#/');
     await page.waitForFunction(() => window.TH && TH.packagePolicy && TH.packagePolicy.installed);
-    check('POLICY', await page.evaluate(() => TH.FEATURES.length === 52 && TH.DATA_SCHEMA === 12 && TH.PKG_KEYS.map(k=>TH.PACKAGES[k].price).join('|') === '50–60 triệu|70–80 triệu|80–90 triệu|90–100 triệu'), 'Registry, schema and prices retained');
+    check('POLICY', await page.evaluate(() => TH.FEATURES.length === 52 && TH.DATA_SCHEMA === 13 && TH.PKG_KEYS.map(k=>TH.PACKAGES[k].price).join('|') === '50–60 triệu|70–80 triệu|80–90 triệu|90–100 triệu'), 'Registry, schema and prices retained');
     let reference;
     for (const pkg of ['A','B','C','D']) {
       await reset(pkg);
@@ -51,19 +51,19 @@ async (host) => {
     const profiles=await page.evaluate(()=>{
       const set=(form,data)=>Object.entries(data).forEach(([k,v])=>TH.store.setDraft(form,k,v));
       set('own-new',{id:'CN-QA',name:'Chủ nhà mô phỏng QA',phone:'0900000000'});TH.act['own.save']({dataset:{}});
-      set('bld-new',{id:'TH-QA',name:'Tòa mô phỏng QA',owner:'CN-QA',manager:'NV-003'});TH.act['bld.save']();
-      set('room-new',{b:'TH-QA',code:'101',rent:'3000000'});TH.act['room.save']({dataset:{id:'new'}});
+      set('bld-new',{id:'T99',name:'Tòa mô phỏng QA',owner:'CN-QA',manager:'NV-003'});TH.act['bld.save']();
+      set('room-new',{b:'T99',code:'101',rent:'3000000'});TH.act['room.save']({dataset:{id:'new'}});
       set('cus-new',{name:'Khách mô phỏng QA',phone:'0900000001'});TH.act['cus.save']();const customer=TH.db.customers[TH.db.customers.length-1];
-      set('con-new',{customer:customer.id,room:'QA-101',rent:'3000000',deposit:'3000000',start:'2026-10-01',end:'2027-09-30'});TH.act['con.approve']();
-      const c=TH.calc.contractOfRoom('QA-101');
-      return {owner:!!TH.db.owners.find(o=>o.id==='CN-QA'),building:!!TH.calc.building('TH-QA'),room:!!TH.calc.room('QA-101'),contract:!!c&&c.customerId===customer.id};
+      set('con-new',{customer:customer.id,room:'101T99',rent:'3000000',deposit:'3000000',start:'2026-10-01',end:'2027-09-30'});TH.act['con.approve']();
+      const c=TH.calc.contractOfRoom('101T99');
+      return {owner:!!TH.db.owners.find(o=>o.id==='CN-QA'),building:!!TH.calc.building('T99'),room:!!TH.calc.room('101T99'),contract:!!c&&c.customerId===customer.id};
     });
     check('A-PROFILE-CONTRACT-FLOW',Object.values(profiles).every(Boolean),profiles);
     await reset('A'); await page.evaluate(()=>TH.go('INV-01'));await page.waitForSelector('#inv1-room');
     const gen = await page.evaluate(()=>{
-      TH.store.setUi('INV-01','b','TH-TX'); TH.store.setUi('INV-01','multi',true);
-      const cs=TH.db.contracts.filter(c=>c.status==='active'&&c.buildingId==='TH-TX');
-      TH.db.invoices=TH.db.invoices.filter(i=>i.period!=='2026-10'||i.buildingId!=='TH-TX');
+      TH.store.setUi('INV-01','b','G1'); TH.store.setUi('INV-01','multi',true);
+      const cs=TH.db.contracts.filter(c=>c.status==='active'&&c.buildingId==='G1');
+      TH.db.invoices=TH.db.invoices.filter(i=>i.period!=='2026-10'||i.buildingId!=='G1');
       TH.store.setUi('INV-01','room',cs[0].roomId);
       const n=TH.db.invoices.length;TH.act['inv.gen']({dataset:{}});
       const added=TH.db.invoices.slice(n); TH.act['inv.gen']({dataset:{}});
@@ -72,10 +72,10 @@ async (host) => {
     check('A-INVOICE-SINGLE-IDEMPOTENT',gen.added.length===1&&gen.added[0]===gen.room&&gen.unique,gen);
     // Seed ready drafts for two rooms to distinguish single confirmation from batch confirmation.
     await page.evaluate(()=>{
-      const cs=TH.db.contracts.filter(c=>c.status==='active'&&c.buildingId==='TH-CG').slice(0,2);
+      const cs=TH.db.contracts.filter(c=>c.status==='active'&&c.buildingId==='T17').slice(0,2);
       TH.db.invoices=TH.db.invoices.filter(i=>i.period!=='2026-10'||!cs.some(c=>c.roomId===i.roomId));
       cs.forEach(c=>{const i=TH.buildInvoice(TH.db,c,'2026-10','draft');i.readingOk=true;i.lines.forEach(l=>l.draft=false);TH.db.invoices.push(i);});
-      TH.store.setUi('INV-01','b','TH-CG');TH.store.setUi('INV-01','room',cs[0].roomId);
+      TH.store.setUi('INV-01','b','T17');TH.store.setUi('INV-01','room',cs[0].roomId);
       window.__confirmIds=cs.map(c=>TH.db.invoices.find(i=>i.period==='2026-10'&&i.roomId===c.roomId).id);
       // Avoid rendering synthetic ready drafts, which would legitimately rebuild their sources.
       window.__refresh=TH.app.refresh;TH.app.refresh=()=>{};
@@ -86,7 +86,7 @@ async (host) => {
     check('A-CONFIRM-SINGLE',confirmed[0]==='confirmed'&&confirmed[1]==='draft',confirmed);
     await reset('B');
     await page.evaluate(()=>{
-      TH.store.setUi('INV-01','b','TH-TX');TH.db.invoices=TH.db.invoices.filter(i=>i.period!=='2026-10'||i.buildingId!=='TH-TX');
+      TH.store.setUi('INV-01','b','G1');TH.db.invoices=TH.db.invoices.filter(i=>i.period!=='2026-10'||i.buildingId!=='G1');
       const n=TH.db.invoices.length;TH.act['inv.gen']({dataset:{}});window.__batchAdded=TH.db.invoices.length-n;
     });
     check('B-INVOICE-BATCH',await page.evaluate(()=>__batchAdded>1),'One operation creates multiple room invoices');
@@ -97,7 +97,7 @@ async (host) => {
     check('DOWNGRADE-CONFIRM-GUARD',await page.evaluate(()=>!TH.db.periodLocks['2026-10']),'D confirmation cannot lock a period after downgrade');
     await reset('A');
     for(const pkg of ['A','B','C','D']){
-      const r=await page.evaluate(k=>{TH.store.state.pkg=k;TH.store.state.period='2026-10';const shares=TH.calc.sharesFor('TH-CG','2026-10');TH.store.setUi('SHARE-01','b','TH-CG');TH.store.setDraft('shr-TH-CG-2026-10',shares[0].id,'0');const before=JSON.stringify(TH.db.shares);TH.act['shr.save']();return before===JSON.stringify(TH.db.shares);},pkg);
+      const r=await page.evaluate(k=>{TH.store.state.pkg=k;TH.store.state.period='2026-10';const shares=TH.calc.sharesFor('T17','2026-10');TH.store.setUi('SHARE-01','b','T17');TH.store.setDraft('shr-T17-2026-10',shares[0].id,'0');const before=JSON.stringify(TH.db.shares);TH.act['shr.save']();return before===JSON.stringify(TH.db.shares);},pkg);
       check('SHARE-100-'+pkg,r,'Invalid allocation is rejected at every tier');
     }
     for(const pkg of ['A','B','C','D']){
@@ -118,13 +118,13 @@ async (host) => {
     check('A-OA-STALE-MULTI',stale,'Saved multi-selection cannot send from A');
     const single=await page.evaluate(()=>{const i=TH.db.invoices.find(i=>i.status==='confirmed'&&TH.calc.customer(i.customerId).oaLinked);TH.db.messages=[];TH.store.setUi('OA-01','sel',[i.id]);TH.store.setUi('OA-01','tpl','TPL-01');TH.act['oa.send']();return TH.db.messages.length===1;});
     check('A-OA-SINGLE',single,'A retains functional OCR/OA baseline');
-    const badVersion=await page.evaluate(()=>TH.reports.preview({type:'RPT-05',period:'2026-09',buildingIds:['TH-CG'],previousRunId:'existing'}));
+    const badVersion=await page.evaluate(()=>TH.reports.preview({type:'RPT-05',period:'2026-09',buildingIds:['T17'],previousRunId:'existing'}));
     check('REPORT-VERSION-DIRECT-GUARD',!badVersion.ok,'Direct report API cannot create an advanced version from A');
     // Real save/export parity of both original report types for each tier.
     for(const pkg of ['A','B','C','D']){
       await reset(pkg);
       const reports=await page.evaluate(()=>['RPT-04','RPT-05'].map(type=>{
-        const p=TH.reports.preview({type,period:'2026-09',buildingIds:['TH-CG'],tpl:'MAU-BCKD'});
+        const p=TH.reports.preview({type,period:'2026-09',buildingIds:['T17'],tpl:'MAU-BCKD'});
         if(!p.ok)return {type,error:p.error};
         TH.reports.reviewState(p.draft).groups.forEach(g=>{TH.reports.markSeen(p.draft.id,g.id);TH.reports.setReview(p.draft.id,g.id,true);});
         const s=TH.reports.confirm(p.draft.id,{acknowledgeWarnings:true});
@@ -135,12 +135,12 @@ async (host) => {
     }
     await reset('A');
     const manualMeter=await page.evaluate(()=>{
-      TH.db.readings=TH.db.readings.filter(r=>!(r.roomId==='TX-102'&&r.period==='2026-10'));
-      TH.store.setDraft('mtr1-TX-102','ep','100');TH.store.setDraft('mtr1-TX-102','wp','10');TH.store.setDraft('mtr1-TX-102','e','150');TH.store.setDraft('mtr1-TX-102','w','15');
-      TH.act['mtr.save1']({dataset:{id:'TX-102'}});const r=TH.calc.reading('TX-102','2026-10');return r&&r.elecCur===150&&r.elecPrev===100&&r.waterCur===15;
+      TH.db.readings=TH.db.readings.filter(r=>!(r.roomId==='102G1'&&r.period==='2026-10'));
+      TH.store.setDraft('mtr1-102G1','ep','100');TH.store.setDraft('mtr1-102G1','wp','10');TH.store.setDraft('mtr1-102G1','e','150');TH.store.setDraft('mtr1-102G1','w','15');
+      TH.act['mtr.save1']({dataset:{id:'102G1'}});const r=TH.calc.reading('102G1','2026-10');return r&&r.elecCur===150&&r.elecPrev===100&&r.waterCur===15;
     });
     check('A-FIRST-READING',manualMeter,'First-month entry is available without a seeded reading');
-    const negativeMeter=await page.evaluate(()=>{const before=JSON.stringify(TH.db.readings);TH.store.setDraft('mtr1-TX-102','e','1');TH.store.setDraft('mtr1-TX-102','w','15');TH.act['mtr.save1']({dataset:{id:'TX-102'}});return before===JSON.stringify(TH.db.readings);});
+    const negativeMeter=await page.evaluate(()=>{const before=JSON.stringify(TH.db.readings);TH.store.setDraft('mtr1-102G1','e','1');TH.store.setDraft('mtr1-102G1','w','15');TH.act['mtr.save1']({dataset:{id:'102G1'}});return before===JSON.stringify(TH.db.readings);});
     check('A-METER-VALIDATION',negativeMeter,'Invalid readings do not require an advanced package to be rejected');
     await reset('A');
     await page.evaluate(()=>TH.go('CON-02','new'));await page.waitForSelector('[data-act="con.approve"]');
@@ -177,7 +177,7 @@ async (host) => {
       await page.evaluate(()=>TH.router.go('#/'));await page.waitForSelector('.landing-pricing');
       await page.locator('.plan[data-pkg="'+pkg+'"] button').click();
       check('LAYOUT-'+width+'-'+pkg,await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Pricing page fits viewport and selected package');
-      if(width===375||width===1440)await page.screenshot({path:'D:/mock_ui_timohouse/docs/qa/package-policy/'+pkg+'-'+width+'.png'});
+      if(width===375||width===1440)await page.screenshot({path:'C:/Users/truon/Downloads/mockup/docs/qa/package-policy/'+pkg+'-'+width+'.png'});
     }
     check('CONSOLE',!errors.length,errors);
     return {date:'2026-10-24',passed:results.length,results};

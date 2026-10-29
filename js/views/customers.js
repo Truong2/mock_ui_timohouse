@@ -151,7 +151,7 @@
     },
   };
 
-  /* Dòng phí theo từng HĐ (K-05): danh mục 9 dòng, mỗi HĐ chọn dòng áp dụng + cách tính + hiệu lực + căn cứ; dòng cố định đồng bộ sang bộ phí lập hóa đơn (F015) */
+  /* Dòng phí theo từng HĐ (K-05): danh mục theo TH.FEE_TYPES, mỗi HĐ chọn dòng áp dụng + cách tính + hiệu lực + căn cứ; dòng cố định đồng bộ sang bộ phí lập hóa đơn (F015) */
   function priceRows(ct) { return TH.FEE_TYPES.map(function (t) { return Object.assign({ t: t }, ct.priceList.find(function (l) { return l.code === t.code; }) || { code: t.code, price: 0, method: 'na', active: false, note: '' }); }); }
   function estOf(ct, l) { var q = TH.priceQty(ct, l); return l.active && q !== null ? (+l.price || 0) * q : null; }
   function qtyLabel(ct, l) {
@@ -357,7 +357,7 @@
     var summary = '<div class="card"><div class="card-hd"><div class="card-title">Hợp đồng ' + esc(ct.id) + '</div>' + TH.status(ct.status === 'active' && C.daysTo(ct.end) <= TH.expiryDays() ? 'expiring' : ct.status) + '</div><div class="card-bd">' +
       TH.kv([['Phòng — tòa', '<b class="mono">' + esc(roomCode(ct)) + '</b>'], ['Giá thuê', '<b class="tnum">' + F.money(ct.rent) + '</b>/tháng' + (ct.listRent && ct.listRent !== ct.rent ? ' <span class="small muted">(niêm yết ' + F.money(ct.listRent) + ')</span>' : '') + (ct.priceNote ? '<div class="cell-sub">' + esc(ct.priceNote) + '</div>' : '') + (ct.payCycle > 1 ? '<div class="cell-sub">Đóng ' + esc(TH.PAY_CYCLES[ct.payCycle]) + '</div>' : '')], ['Tiền cọc', F.money(ct.deposit)], ['Đã nộp khi ký', ct.prepaid ? F.money(ct.prepaid.total) + '<div class="small muted">' + esc(ct.prepaid.allocation) + '</div>' : '<span class="muted">Chưa đọc từ HĐ</span>'], ['Hiệu lực', F.date(ct.start) + ' → ' + F.date(ct.end)], ['Số người / xe (Điều 1)', ct.people + ' người · ' + ((ct.terms || {}).vehiclesDeclared !== undefined && (ct.terms || {}).vehiclesDeclared !== null ? ct.terms.vehiclesDeclared + ' xe máy khai báo' : 'chưa đọc số xe') + ' · ' + TH.vehiclesOf(ct, null, 'active').length + ' xe đã xác nhận'], ['Lần ký', signLabel(ct)], ['Mẫu HĐ', esc((ct.terms || {}).templateName || '—')]]) +
       '<a class="btn btn-sm u-mt-12" href="' + TH.router.href('CON-02', ct.id) + '">Mở CON-02</a></div></div>';
-    var fileCard = '<div class="card card-flush">' + TH.cardHd(I('paperclip', 'ic-sm') + 'File hợp đồng', 'Gắn với khách, phòng và tòa tương ứng', ct.status === 'active' ? TH.permBtn('contract.edit', '<button type="button" class="btn btn-sm" data-act="cus.ctUpload" data-ct="' + esc(ct.id) + '">' + I('upload', 'ic-sm') + 'Tải lên</button>', 'Tải lên · 403') : '') +
+    var fileCard = '<div class="card card-flush">' + TH.cardHd(I('paperclip', 'ic-sm') + 'File hợp đồng', 'Gắn với khách, phòng và tòa tương ứng', '<div class="row u-gap-6"><button type="button" class="btn btn-sm" data-act="cus.ctDoc" data-ct="' + esc(ct.id) + '">' + I('eye', 'ic-sm') + 'Xem bản hợp đồng theo mẫu</button>' + (ct.status === 'active' ? TH.permBtn('contract.edit', '<button type="button" class="btn btn-sm" data-act="cus.ctUpload" data-ct="' + esc(ct.id) + '">' + I('upload', 'ic-sm') + 'Tải lên</button>', 'Tải lên · 403') : '') + '</div>') +
       '<div class="card-bd stack-sm">' + (files.map(function (d) { return '<div class="row" style="justify-content:space-between;flex-wrap:nowrap">' + TH.fileOf(d.file) + '<span class="small muted u-ta-r">' + esc(d.kind) + '<br>' + F.date(d.uploadedAt) + ' · v' + d.version + '</span></div>'; }).join('') || '<span class="muted small">Chưa có file hợp đồng.</span>') + '</div></div>';
     var ocrCard = ct.status === 'active' ? '<div class="card"><div class="card-hd"><div class="card-title">' + I('scan', 'ic-sm') + 'Đọc hợp đồng (OCR mẫu đầy đủ)</div></div><div class="card-bd stack-sm">' +
       '<p class="small muted u-m-0">Đọc bản scan theo mẫu <b>Hợp đồng cho thuê phòng — bản đầy đủ</b>: Bên B, Điều 1 (người/xe), Điều 2.2 (tài sản bàn giao), Điều 3 (giao nhận, thời hạn), Điều 4 (giá, tiền đã nộp, chỉ số, cọc, biểu phí). OCR chỉ điền <b>nháp để xác nhận</b>; không tự ghi dữ liệu, không tự lập hóa đơn.</p>' +
@@ -603,7 +603,7 @@
 
   TH.views['CUS-02'] = {
     scanParam: 'KH-003',
-    scan: function () { return ['stay', 'contract', 'fin', 'docs', 'history', 'versions'].map(function (t) { return { ui: { tab: t }, param: 'KH-003' }; }).concat([{ ui: { tab: 'fin' }, param: 'HĐ-DD302/25' }, { ui: { tab: 'contract' }, param: 'HĐ-CG401/24' }, { ui: { tab: 'stay' }, param: 'HĐ-TX202/25' }, { ui: { tab: 'fin' }, param: 'HĐ-CG201/24' }]); },
+    scan: function () { return ['stay', 'contract', 'fin', 'docs', 'history', 'versions'].map(function (t) { return { ui: { tab: t }, param: 'KH-003' }; }).concat([{ ui: { tab: 'fin' }, param: 'HĐ-302S9/25' }, { ui: { tab: 'contract' }, param: 'HĐ-401T17/24' }, { ui: { tab: 'stay' }, param: 'HĐ-202G1/25' }, { ui: { tab: 'fin' }, param: 'HĐ-201T17/24' }]); },
     render: function (r) {
       var param = r.param || 'KH-003', k, ctParam = null;
       if (/^HĐ/.test(param)) { ctParam = C.contract(param); k = ctParam && C.customer(ctParam.customerId); } else k = C.customer(param);
@@ -643,7 +643,7 @@
           actions: [{ label: 'Tải lên', icon: 'upload', act: 'cus.upload', dataset: { id: k.id } }, { label: 'OCR & rà soát', icon: 'scan', href: TH.router.href('OCR-CUS', k.id), primary: true }] }) +
         '<div class="card tab-card u-mb-16">' + TH.tabs(S, tabs, tab) + '</div>' + TH.tabPanel(S, tab, body);
     },
-    dialogs: [function () { return vehForm('KH-003'); }, function () { return vehForm('KH-003', 'XE-003-1'); }, function () { var c0 = C.contract('HĐ-CG201/25'); return TH.CONTRACT_OCR.workspace({ form: 'ocr-con-scan', fields: TH.CONTRACT_OCR.fieldsFor(c0), mode: 'update', ct: c0, confirmAct: 'ctocr.confirm', confirmLabel: 'Xác nhận', docTitle: c0.scanFile }); }, function () { return depReviewForm('HC-2610-01'); }, function () { return depPayForm('HC-2609-01'); }],
+    dialogs: [function () { return vehForm('KH-003'); }, function () { return vehForm('KH-003', 'XE-003-1'); }, function () { var c0 = C.contract('HĐ-201T17/25'); return TH.CONTRACT_OCR.workspace({ form: 'ocr-con-scan', fields: TH.CONTRACT_OCR.fieldsFor(c0), mode: 'update', ct: c0, confirmAct: 'ctocr.confirm', confirmLabel: 'Xác nhận', docTitle: c0.scanFile }); }, function () { return depReviewForm('HC-2610-01'); }, function () { return depPayForm('HC-2609-01'); }],
   };
   TH.act['cus.upload'] = function (el) {
     var k = C.customer(el.dataset.id), c = contractOf(k);

@@ -1,6 +1,6 @@
 # TIMEHOUSE — Bản demo HTML/CSS/JS
 
-Dataset hiện tại: **excel-demo-v1** — 3 tòa, 18 phòng, 05–10/2026; dữ liệu mô phỏng theo 13 workbook khách cung cấp. [Phân tích nguồn/công thức](docs/md/TIMEHOUSE_DATASET_SOURCES.md), [ma trận dữ liệu](docs/md/TIMEHOUSE_DATASET_MATRIX.md), [kết quả QA](docs/md/TIMEHOUSE_DATASET_QA.md). Dữ liệu schema 12 đã lưu được giữ nguyên; chọn **Công cụ demo → Khôi phục** để nạp bộ mới. Admin/Kế toán mở **Nguồn và tình huống dữ liệu** trong Công cụ demo để đối chiếu.
+Dataset hiện tại: **excel-demo-v2** (schema 13) — 3 tòa T17 · S9 · G1 (mã kiểu Excel, mỗi loại nhà T/S/G một tòa), 18 phòng, 05–10/2026; hợp đồng khách thuê theo mẫu đầy đủ khớp hóa đơn/cọc/chỉ số; dữ liệu mô phỏng theo 13 workbook khách cung cấp. [Phân tích nguồn/công thức](docs/md/TIMEHOUSE_DATASET_SOURCES.md), [ma trận dữ liệu](docs/md/TIMEHOUSE_DATASET_MATRIX.md), [kết quả QA](docs/md/TIMEHOUSE_DATASET_QA.md). Dữ liệu schema 12 đã lưu được giữ nguyên; chọn **Công cụ demo → Khôi phục** để nạp bộ mới. Admin/Kế toán mở **Nguồn và tình huống dữ liệu** trong Công cụ demo để đối chiếu.
 
 Chuẩn UI hiện tại: [Component và pattern enterprise — CR-UI-COMP](docs/md/TIMEHOUSE_UI_COMPONENT_STANDARD.md) (23/10/2026). Toàn bộ màn dùng nhóm hành động từ lúc render, tab/panel có bàn phím, lỗi form liên kết tới từng trường và menu không bị vùng bảng cắt. Schema **12** được giữ nguyên. [Bằng chứng QA và ảnh trước/sau](docs/qa/ui-enterprise/).
 
@@ -34,7 +34,7 @@ Chọn **Sao chép liên kết** ở cuối trang để gửi đúng gói đang 
 index.html?previewPackage=A#/demo/rpt-01      # mở báo cáo ở gói A
 index.html?previewPackage=C#/demo/pay-02      # công nợ & mốc 5/10/15 ở gói C
 index.html?previewPackage=D#/demo/ocr-con     # OCR hợp đồng theo mẫu đầy đủ (dialog trên CON-01)
-index.html#/demo/inv-03/INV-2610-CG201        # chi tiết một hóa đơn
+index.html#/demo/inv-03/INV-2610-201T17        # chi tiết một hóa đơn
 ```
 
 Thứ tự lấy gói: `previewPackage` hợp lệ → lựa chọn đã lưu → **D**. Query sai (ví dụ `=Z`) có thông báo và fallback. Sau khi đổi gói, URL và storage cùng cập nhật nên refresh/Back/Forward giữ đúng gói.
@@ -53,7 +53,7 @@ js/
   views/ocr-contract.js CR-CUS-02: định nghĩa OCR hợp đồng theo mẫu đầy đủ (38 field, bảng tài sản Điều 2.2, bản scan minh họa, áp vào hồ sơ thuê)
   features.js           F001–F052 — SINH TỰ ĐỘNG từ SRS §5/§5A
   screens.js            39 Screen ID — SINH TỰ ĐỘNG từ SRS §4
-  store.js              gói, vai trò giả lập, scope, bộ lọc, nháp, lưu local (schema 12; giữ dữ liệu schema 12 đã lưu)
+  store.js              gói, vai trò giả lập, scope, bộ lọc, nháp, lưu local (schema 13; bản lưu schema cũ được nạp lại)
   router.js · app.js    hash router, app shell, event delegation, công cụ demo
   components.js         bảng, badge, gate gói, dialog/drawer, toast, tooltip, chart SVG
   xlsx.js               xuất .xlsx/.csv không phụ thuộc thư viện
@@ -125,7 +125,7 @@ Kỳ 10/2026 đang mở (Thanh Xuân chưa lập hóa đơn, tiền thuê nhà c
 
 ## Công cụ demo (nút trượt trên topbar)
 
-- Vai trò giả lập: Admin · Kế toán · Quản lý tòa (chỉ Cầu Giấy, không tự duyệt thu) · Nhân sự (chỉ HR/Lương).
+- Vai trò giả lập: Admin · Kế toán · Quản lý tòa (chỉ T17 · Cầu Giấy, không tự duyệt thu) · Nhân sự (chỉ HR/Lương).
 - Trạng thái dữ liệu cho màn đang xem: Đang tải · Không có dữ liệu · Lỗi API. 403 xem bằng cách đổi vai trò.
 - **Khôi phục dữ liệu demo** (có xác nhận): về dataset gốc, xóa nháp và bộ lọc, giữ gói đang xem.
 
@@ -135,13 +135,13 @@ Kỳ 10/2026 đang mở (Thanh Xuân chưa lập hóa đơn, tiền thuê nhà c
 2. Topbar *Đang xem: Gói D* → chọn **A**: các card B/C/D chuyển ghost, phần lõi vẫn dùng được.
 3. Chủ nhà `OWN-01` → *Import Excel* ở A (báo lỗi dòng) → chọn **B** → preview toàn bộ + tải file lỗi.
 4. Hợp đồng → *OCR hợp đồng* (`OCR-CON`, mẫu đầy đủ): 38 field theo 7 nhóm + bảng 30 tài sản bàn giao; *Đánh dấu tất cả* → *Xác nhận* → `CON-02` *Chuyển vào form* → *Duyệt*: HĐ mới có dòng phí, điều khoản, bàn giao, tiền đã nộp, xe máy chờ xác nhận. B có độ tin cậy, C có so khớp (người/xe/chỉ số/giá), D có log sửa tay.
-5. `METER-01` chọn **Thanh Xuân** trong danh sách tòa (bảng chỉ gồm phòng đang ở; TX-202 khách mới từ 20/10; thẻ *Công tơ điện chung* chia theo số người, sửa được số người kỳ này) → nhập chỉ số (TX-201 thiếu, TX-102 số lùi; DD-301 đột biến ở Đống Đa) → `INV-01` chọn Thanh Xuân → *Sinh nháp* → *Xem trước & xác nhận*.
-6. `PAY-02` *Tiến độ thu tiền* (theo file hóa đơn tháng 9 của khách): tab *Theo quản lý* / *Theo tòa* (lũy kế M5/M10/M15, DT mốc 1/2/3, DT phá HĐ) → bấm Đống Đa → *Check theo phòng* (DD-201 Thiếu · Phá HĐ, CG-302 Chưa TT có nợ cũ, TX-202 Đóng cọc) → tab *Phòng phá HĐ* (phải thu = tiền điện) và *Điện nước không thu được*. Đổi vai trò *Quản lý tòa*: *Thu* CG-302 vượt nợ → xác nhận ngay, phân bổ kỳ cũ trước, hiện *Thừa*; nút ⓧ *Ghi nhận phá HĐ*. Đổi *Kế toán*: không xác nhận, `PAY-01` lọc *Chưa hậu kiểm* → *Đã đối soát*. `INV-03` → *Mẫu hóa đơn* (12 khoản, Mã KH, nội dung CK). Tab *Chi tiết hóa đơn & hiệu suất* giữ bảng mốc theo hóa đơn và HS A/B/C/D; chọn **C** xem chống trùng/backdate.
-6b. `BLD-02/TH-CG` kỳ 09: tab *Vận hành & kết quả* (các bước A→D, HS 72,3%) → tab *Chủ nhà & hợp đồng* bấm *Chỉnh sửa* giá thuê, đổi tab giữa chừng để thấy hộp thoại lưu/bỏ → tab *Lịch thanh toán* (Đống Đa, Thanh Xuân quá hạn); chuyển **A → B → C** để thấy vai trò nhân sự, sinh lịch từ HĐ, đã trả/còn lại mở dần.
-6c. `CUS-01` lọc *Hồ sơ cọc* → mở `DD-302 — TH-DD`, tab *Tài chính*: Admin *Lập đối chiếu → gửi duyệt*, nhập khấu trừ thấm trần 500.000đ → số hoàn 3.990.000đ. Admin không tự duyệt; đổi *Kế toán* → *Duyệt hoàn* (chưa ghi sổ) → *Xác nhận đã chi / tất toán* với ngày và mã giao dịch. RPT-05 Tổng kỳ 10 giảm 3.990.000đ, Kinh doanh giữ 11.430.000đ trên dataset `excel-demo-v1` vừa khôi phục. Mở `DD-102`: Đang thuê + Sắp hết HĐ + Chờ bàn giao. Tab *Hợp đồng*: *Đọc hợp đồng* (OCR mẫu đầy đủ) → *Đánh dấu tất cả* → *Xác nhận & áp vào hồ sơ thuê*; nước 2 × 120.000đ, hiệu lực kỳ 11. Mở KH-003 xem hai HĐ nối tiếp và phiếu chuyển cọc. `SYS-01 › Sao lưu & vận hành`: đổi cảnh báo 35 → 45 ngày (2 → 3 HĐ), rồi đặt lại 35.
-6d. `INV-01` Thanh Xuân → *Sinh nháp*: TX-202 khách mới tiền phòng 12/30 ngày, TX-301 *Đã trả trước đến 11/2026* (đóng 3 tháng), dòng điện chung, TX-301 bị giữ nháp vì phạt 600.000 chờ duyệt (đổi *Kế toán* → *Duyệt*). Thẻ *Quy tắc tính tiền* đổi ÷30 ↔ ngày thực để khách so. `PAY-02` tab *Phòng mới* (giá chốt / niêm yết, cọc, cần đóng).
+5. `METER-01` chọn **Thanh Xuân** trong danh sách tòa (bảng chỉ gồm phòng đang ở; 202G1 khách mới từ 20/10; thẻ *Công tơ điện chung* chia theo số người, sửa được số người kỳ này) → nhập chỉ số (201G1 thiếu, 102G1 số lùi; 301S9 đột biến ở Đống Đa) → `INV-01` chọn Thanh Xuân → *Sinh nháp* → *Xem trước & xác nhận*.
+6. `PAY-02` *Tiến độ thu tiền* (theo file hóa đơn tháng 9 của khách): tab *Theo quản lý* / *Theo tòa* (lũy kế M5/M10/M15, DT mốc 1/2/3, DT phá HĐ) → bấm Đống Đa → *Check theo phòng* (201S9 Thiếu · Phá HĐ, 302T17 Chưa TT có nợ cũ, 202G1 Đóng cọc) → tab *Phòng phá HĐ* (phải thu = tiền điện) và *Điện nước không thu được*. Đổi vai trò *Quản lý tòa*: *Thu* 302T17 vượt nợ → xác nhận ngay, phân bổ kỳ cũ trước, hiện *Thừa*; nút ⓧ *Ghi nhận phá HĐ*. Đổi *Kế toán*: không xác nhận, `PAY-01` lọc *Chưa hậu kiểm* → *Đã đối soát*. `INV-03` → *Mẫu hóa đơn* (12 khoản, Mã KH, nội dung CK). Tab *Chi tiết hóa đơn & hiệu suất* giữ bảng mốc theo hóa đơn và HS A/B/C/D; chọn **C** xem chống trùng/backdate.
+6b. `BLD-02/T17` kỳ 09: tab *Vận hành & kết quả* (các bước A→D, HS 72,3%) → tab *Chủ nhà & hợp đồng* bấm *Chỉnh sửa* giá thuê, đổi tab giữa chừng để thấy hộp thoại lưu/bỏ → tab *Lịch thanh toán* (Đống Đa, Thanh Xuân quá hạn); chuyển **A → B → C** để thấy vai trò nhân sự, sinh lịch từ HĐ, đã trả/còn lại mở dần.
+6c. `CUS-01` lọc *Hồ sơ cọc* → mở `302S9 — S9`, tab *Tài chính*: Admin *Lập đối chiếu → gửi duyệt*, nhập khấu trừ thấm trần 500.000đ → số hoàn 3.990.000đ. Admin không tự duyệt; đổi *Kế toán* → *Duyệt hoàn* (chưa ghi sổ) → *Xác nhận đã chi / tất toán* với ngày và mã giao dịch. RPT-05 Tổng kỳ 10 giảm 3.990.000đ, Kinh doanh giữ 11.430.000đ trên dataset `excel-demo-v1` vừa khôi phục. Mở `102S9`: Đang thuê + Sắp hết HĐ + Chờ bàn giao. Tab *Hợp đồng*: *Đọc hợp đồng* (OCR mẫu đầy đủ) → *Đánh dấu tất cả* → *Xác nhận & áp vào hồ sơ thuê*; nước 2 × 120.000đ, hiệu lực kỳ 11. Mở KH-003 xem hai HĐ nối tiếp và phiếu chuyển cọc. `SYS-01 › Sao lưu & vận hành`: đổi cảnh báo 35 → 45 ngày (2 → 3 HĐ), rồi đặt lại 35.
+6d. `INV-01` Thanh Xuân → *Sinh nháp*: 202G1 khách mới tiền phòng 12/30 ngày, 301G1 *Đã trả trước đến 11/2026* (đóng 3 tháng), dòng điện chung, 301G1 bị giữ nháp vì phạt 600.000 chờ duyệt (đổi *Kế toán* → *Duyệt*). Thẻ *Quy tắc tính tiền* đổi ÷30 ↔ ngày thực để khách so. `PAY-02` tab *Phòng mới* (giá chốt / niêm yết, cọc, cần đóng).
 7. Chọn **D** → `SAL-01`, `SHARE-01` với nhãn DRAFT (D-06, D-07) và truy vết.
-8. Menu *Báo cáo theo mẫu Excel* → **Tạo báo cáo** → RPT-04, kỳ 09/2026, chọn Cầu Giấy + Thanh Xuân → **Xem trước** (mỗi tòa một bản, tab sheet mẫu / chia cổ phần / nguồn / công thức). Bấm một con số để mở *Nguồn và cách tính*: công thức → thành phần → chứng từ (TX-301 kỳ 10: nguồn *Trả trước* mở hóa đơn kỳ 09). Tích đã đọc cảnh báo → **Xác nhận tạo 2 báo cáo** → bản lưu chỉ đọc, **Tải Excel**.
+8. Menu *Báo cáo theo mẫu Excel* → **Tạo báo cáo** → RPT-04, kỳ 09/2026, chọn Cầu Giấy + Thanh Xuân → **Xem trước** (mỗi tòa một bản, tab sheet mẫu / chia cổ phần / nguồn / công thức). Bấm một con số để mở *Nguồn và cách tính*: công thức → thành phần → chứng từ (301G1 kỳ 10: nguồn *Trả trước* mở hóa đơn kỳ 09). Tích đã đọc cảnh báo → **Xác nhận tạo 2 báo cáo** → bản lưu chỉ đọc, **Tải Excel**.
 9. Tạo RPT-05 các tòa → sheet Kinh doanh / Tổng / từng nhóm nhà. Sửa một chi phí rồi quay về: preview báo *nguồn đã thay đổi* → **Tính lại preview** (liệt kê chỉ tiêu đổi) → xác nhận ra **v2**, v1 giữ nguyên. Đổi vai trò *Quản lý tòa*: chỉ RPT-04 tòa mình.
 10. Về `RPT-01`, F5 — gói được giữ; mở *So sánh 52 chức năng* (ô có nhãn **CR** là phần cập nhật theo mẫu báo cáo).
 

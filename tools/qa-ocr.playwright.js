@@ -24,20 +24,20 @@ async (page) => {
   await click('ocrcon.confirm'); await page.waitForTimeout(400);
   await click('con.prefill'); await page.waitForTimeout(300);
   await click('con.approve'); await page.waitForTimeout(600);
-  const q2 = await read(() => { const ct = TH.db.contracts.find(c => c.roomId === 'CG-401' && c.status === 'active'); if (!ct) return null; const k = TH.calc.customer(ct.customerId); return { lines: ct.priceList.filter(l => l.active).map(l => l.code).join(','), water: ct.priceList.find(l => l.code === 'WATER').method, refund: ct.terms.refundDays, auto: ct.terms.autoRenew, late: ct.terms.lateFeePerDay, assets: ct.handover.assets.length, e: ct.handover.elecStart, w: ct.handover.waterStart, prepaid: ct.prepaid.total, veh: k.vehicles.map(v => v.type + ':' + v.status).join(), idPlace: k.idPlace }; });
-  check('QA-OCR-02', q2 && q2.lines === 'ELEC,WATER,NET,SVC,PARK_MOTO,PARK_EBIKE,PARK_EV' && q2.water === 'per_person' && q2.refund === 10 && q2.auto && q2.late === 200000 && q2.assets === 30 && q2.e === 1250 && q2.w === 85 && q2.prepaid === 9000000 && q2.veh === 'Xe máy:pending' && !!q2.idPlace, q2);
+  const q2 = await read(() => { const ct = TH.db.contracts.find(c => c.roomId === '401T17' && c.status === 'active'); if (!ct) return null; const k = TH.calc.customer(ct.customerId); const room = TH.calc.room('401T17'), rd = TH.db.readings.filter(r => r.roomId === room.id && r.elecCur !== null).slice(-1)[0]; return { expE: rd.elecCur, expW: rd.waterCur, expPrepaid: room.rent * 2, lines: ct.priceList.filter(l => l.active).map(l => l.code).join(','), water: ct.priceList.find(l => l.code === 'WATER').method, refund: ct.terms.refundDays, auto: ct.terms.autoRenew, late: ct.terms.lateFeePerDay, assets: ct.handover.assets.length, e: ct.handover.elecStart, w: ct.handover.waterStart, prepaid: ct.prepaid.total, veh: k.vehicles.map(v => v.type + ':' + v.status).join(), idPlace: k.idPlace }; });
+  check('QA-OCR-02', q2 && q2.lines === 'ELEC,WATER,NET,SVC,PARK_MOTO,PARK_EBIKE,PARK_EV' && q2.water === 'per_person' && q2.refund === 10 && q2.auto && q2.late === 200000 && q2.assets === 30 && q2.e === q2.expE && q2.w === q2.expW && q2.prepaid === q2.expPrepaid && q2.veh === 'Xe máy:pending' && !!q2.idPlace, q2);
 
   // QA-OCR-03 — đọc lại cho HĐ đã có: dòng phí hiệu lực kỳ sau, hóa đơn cũ không đổi, SĐT vào lịch sử liên hệ
-  await go('#/demo/cus-02/HĐ-DD102/25', 'contract');
-  const before = await read(() => ({ inv: TH.calc.invoice('INV-2610-DD102').total, hist: TH.db.customerHistory.filter(h => h.customerId === 'KH-008').length }));
+  await go('#/demo/cus-02/HĐ-102S9/25', 'contract');
+  const before = await read(() => ({ inv: TH.calc.invoice('INV-2610-102S9').total, hist: TH.db.customerHistory.filter(h => h.customerId === 'KH-008').length }));
   await click('cus.ctOcr'); await page.waitForTimeout(400);
   await page.locator('#ocr-OCR-CON-phone').fill('0977 ••• 808'); await page.locator('#ocr-OCR-CON-phone').dispatchEvent('change');
   await click('ocr.all'); await click('ctocr.confirm'); await page.waitForTimeout(400);
-  const q3 = await read(() => { const ct = TH.calc.contract('HĐ-DD102/25'); const inv = TH.buildInvoice(TH.db, ct, '2026-11', 'draft'); return { from: ct.priceList[0].from, water: inv.lines.filter(l => l.type === 'water').map(l => l.qty + 'x' + l.price).join(), inv: TH.calc.invoice('INV-2610-DD102').total, hist: TH.db.customerHistory.filter(h => h.customerId === 'KH-008').length, job: TH.db.ocrJobs[0].kind + '/' + TH.db.ocrJobs[0].target }; });
+  const q3 = await read(() => { const ct = TH.calc.contract('HĐ-102S9/25'); const inv = TH.buildInvoice(TH.db, ct, '2026-11', 'draft'); return { from: ct.priceList[0].from, water: inv.lines.filter(l => l.type === 'water').map(l => l.qty + 'x' + l.price).join(), inv: TH.calc.invoice('INV-2610-102S9').total, hist: TH.db.customerHistory.filter(h => h.customerId === 'KH-008').length, job: TH.db.ocrJobs[0].kind + '/' + TH.db.ocrJobs[0].target }; });
   check('QA-OCR-03', q3.from === '2026-11' && q3.water === '2x120000' && q3.inv === before.inv && q3.hist === before.hist + 1 && q3.job === 'contract/update', { before, q3 });
 
   // QA-OCR-04 — so khớp (gói C): người > tối đa chặn xác nhận tới khi tích "đã kiểm tra"
-  await go('#/demo/cus-02/HĐ-CG301/25', 'contract');
+  await go('#/demo/cus-02/HĐ-301T17/25', 'contract');
   await click('cus.ctOcr'); await page.waitForTimeout(400);
   await page.locator('#ocr-OCR-CON-people').fill('3'); await page.locator('#ocr-OCR-CON-people').dispatchEvent('change');
   await click('ocr.all');
@@ -45,23 +45,23 @@ async (page) => {
   await page.locator('[role=dialog] input[data-draft$=".ackMatch"]').click(); await page.waitForTimeout(350);
   const q4b = await read(() => document.querySelector('[data-act="ctocr.confirm"]').disabled);
   check('QA-OCR-04', q4.danger > 0 && q4.disabled && !q4b, { q4, q4b });
-  await page.evaluate(() => { TH.store.clearDraft('ocr-con-HĐ-CG301/25'); TH.app.guard = null; TH.modal.close('ctocr', { silent: true }); });
+  await page.evaluate(() => { TH.store.clearDraft('ocr-con-HĐ-301T17/25'); TH.app.guard = null; TH.modal.close('ctocr', { silent: true }); });
 
   // QA-OCR-05 — tài sản bàn giao: sửa tình trạng; khấu trừ theo biên bản ở đối chiếu cọc
-  await go('#/demo/cus-02/HĐ-CG101/25', 'contract');
-  await page.evaluate(() => TH.act['sec.edit']({ dataset: { key: 'cusHandover', id: 'HĐ-CG101/25' } }));
-  await page.evaluate(() => TH.store.setDraft('sec-cusHandover-HĐ-CG101/25', 'c_0', 'Trầy xước thành giường'));
+  await go('#/demo/cus-02/HĐ-101T17/25', 'contract');
+  await page.evaluate(() => TH.act['sec.edit']({ dataset: { key: 'cusHandover', id: 'HĐ-101T17/25' } }));
+  await page.evaluate(() => TH.store.setDraft('sec-cusHandover-HĐ-101T17/25', 'c_0', 'Trầy xước thành giường'));
   await click('sec.save'); await page.waitForTimeout(300);
-  await go('#/demo/cus-02/HĐ-DD302/25', 'fin');
+  await go('#/demo/cus-02/HĐ-302S9/25', 'fin');
   await click('dep.review'); await page.waitForTimeout(300);
   await page.evaluate(() => { const f = 'dep-HC-2610-01'; TH.store.setDraft(f, 'a1', '0'); TH.store.setDraft(f, 'asset', '13'); TH.store.setDraft(f, 'assetAmt', '300000'); TH.modal.rerenderAll(); });
   await click('dep.submit'); await page.waitForTimeout(300);
-  const q5 = await read(() => ({ cond: TH.calc.contract('HĐ-CG101/25').handover.assets[0].condition, ded: TH.db.depositCases.find(x => x.id === 'HC-2610-01').deductions.map(d => d.name + '|' + d.source.slice(0, 9)).join(';') }));
+  const q5 = await read(() => ({ cond: TH.calc.contract('HĐ-101T17/25').handover.assets[0].condition, ded: TH.db.depositCases.find(x => x.id === 'HC-2610-01').deductions.map(d => d.name + '|' + d.source.slice(0, 9)).join(';') }));
   check('QA-OCR-05', q5.cond === 'Trầy xước thành giường' && /Hư hỏng: Tường\|Điều 2\.2/.test(q5.ded), q5);
 
   // QA-OCR-06 — điều khoản phạt/phí chỉ hiển thị, công nợ không đổi
-  await go('#/demo/cus-02/HĐ-CG101/25', 'stay');
-  const q6 = await read(() => { const t = document.body.textContent; return { transfer: /Phí nhượng phòng/.test(t) && /Điều 4\.3 — chỉ hiển thị/.test(t), late: /Chỉ hiển thị — không tính vào công nợ/.test(t), debt: TH.calc.contractDebt('HĐ-CG101/25').debt }; });
+  await go('#/demo/cus-02/HĐ-101T17/25', 'stay');
+  const q6 = await read(() => { const t = document.body.textContent; return { transfer: /Phí nhượng phòng/.test(t) && /Điều 4\.3 — chỉ hiển thị/.test(t), late: /Chỉ hiển thị — không tính vào công nợ/.test(t), debt: TH.calc.contractDebt('HĐ-101T17/25').debt }; });
   check('QA-OCR-06', q6.transfer && q6.late && q6.debt === 0, q6);
 
   // QA-OCR-07 — gói A: không có độ tin cậy/so khớp/log nhưng vẫn xác nhận và tạo HĐ được
