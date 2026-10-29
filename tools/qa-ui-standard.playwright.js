@@ -38,7 +38,7 @@ async (page) => {
   const reviewOn = await read(([code]) => ({ codes: (document.getElementById('view').innerText.match(new RegExp(code, 'g')) || []).length, tier: Array.from(document.querySelectorAll('#view .up-tag')).filter(e => e.offsetParent).length }), [CODE]);
   check('UI-STD-01', !leaks.length && reviewOn.codes > 0 && reviewOn.tier > 0, { leaks: leaks.slice(0, 6), reviewOn });
 
-  // UI-STD-02 — một màu chính: nút primary, tab đang chọn, link cùng --primary (teal)
+  // UI-STD-02 — một màu chính: nút primary, tab đang chọn, link cùng --primary (blue, CR-UI-THEME)
   await reset('D', false);
   await go({ id: 'CUS-01' });
   const color = await read(() => {
@@ -47,7 +47,7 @@ async (page) => {
     const btn = document.querySelector('.page-actions .btn-primary'), link = document.querySelector('#view .table a:not(.btn), #view .card a:not(.btn)'), tab = document.querySelector('.workspace-tabs a[aria-current="page"], .tab[aria-selected="true"]');
     return { primary, btn: btn && getComputedStyle(btn).backgroundColor, link: link && getComputedStyle(link).color, tab: tab && getComputedStyle(tab).borderBottomColor };
   });
-  check('UI-STD-02', color.btn === color.primary && color.link === color.primary && color.tab === color.primary && /rgb\(15, 118, 110\)/.test(color.primary), color);
+  check('UI-STD-02', color.btn === color.primary && color.link === color.primary && color.tab === color.primary && /rgb\(37, 99, 235\)/.test(color.primary), color);
 
   // UI-STD-03/04/05/06 — mọi màn: tương phản chữ ≥ 4.5:1 (≥ 3:1 chữ lớn), cỡ chữ ≥ 12px, nút icon có tên, header ≤ 3 nút + "Thêm"
   const contrastBad = [], smallBad = [], ariaBad = [], headerBad = [];
@@ -170,7 +170,7 @@ async (page) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   check('UI-STD-11 no-hscroll', !over.length, over.slice(0, 10));
 
-  // ---------- CR-UI-ENT: Ant Design Pro mix layout ----------
+  // ---------- CR-UI-ENT + CR-UI-THEME: topbar trắng, cột thương hiệu + sidebar navy ----------
   const hex2rgb = h => { const v = h.trim().replace('#', ''); return 'rgb(' + [0, 2, 4].map(i => parseInt(v.substr(i, 2), 16)).join(', ') + ')'; };
   await page.setViewportSize({ width: 1440, height: 900 }); await reset('D', false); await go({ id: 'INV-02' });
   const ent = await read(() => {
@@ -183,7 +183,16 @@ async (page) => {
     return {
       header: { pos: cs(tb, 'position'), left: r.left, width: r.width, top: r.top, bg: cs(tb, 'backgroundColor'), brand: !!document.querySelector('.topbar-brand') && document.querySelector('.topbar-brand').offsetWidth > 0,
         contrastFg: ratio(cs(tb, 'color'), cs(tb, 'backgroundColor')), sbBrandHidden: cs(document.querySelector('#sidebar .brand'), 'display') === 'none' },
-      headerBgToken: root.getPropertyValue('--teal-800'), layoutToken: root.getPropertyValue('--bg-layout'),
+      headerBgToken: root.getPropertyValue('--header-bg'), layoutToken: root.getPropertyValue('--bg-layout'),
+      /* sidebar navy: chữ mục thường/đang chọn/đếm và cột thương hiệu đạt ≥ 4.5:1 (chữ bán trong suốt được trộn với nền) */
+      sider: (() => {
+        const sb = document.getElementById('sidebar'), bg = cs(sb, 'backgroundColor');
+        const mix = (fg, base) => { const f = fg.match(/[\d.]+/g).map(Number), b = base.match(/[\d.]+/g).map(Number), a = f.length > 3 ? f[3] : 1; return 'rgb(' + [0, 1, 2].map(i => Math.round(f[i] * a + b[i] * (1 - a))).join(', ') + ')'; };
+        const pair = el => { if (!el) return null; let b = cs(el, 'backgroundColor'); if (/rgba\(.*, 0\)$/.test(b) || b === 'transparent') b = bg; else b = mix(b, bg); return Math.round(ratio(mix(cs(el, 'color'), b), b) * 100) / 100; };
+        const brand = document.querySelector('.topbar-brand');
+        return { bg, token: root.getPropertyValue('--sider-bg'), item: pair(sb.querySelector('.nav-item:not([aria-current])')), active: pair(sb.querySelector('.nav-item[aria-current="page"]')),
+          count: pair(sb.querySelector('.nav-count')), brandBg: cs(brand, 'backgroundColor'), brand: pair(brand) };
+      })(),
       content: { radius: cs(document.getElementById('view'), 'borderTopLeftRadius'), shellBg: cs(document.getElementById('shell'), 'backgroundColor') },
       card: cs(document.querySelector('#view .card'), 'borderTopLeftRadius'),
       sizes: { btn: document.querySelector('#view .page-actions .btn')?.getBoundingClientRect().height, input: document.querySelector('#view .toolbar .input')?.getBoundingClientRect().height,
@@ -193,6 +202,7 @@ async (page) => {
     };
   });
   check('UI-ENT-01 header', ent.header.pos === 'fixed' && ent.header.left === 0 && ent.header.top === 0 && ent.header.width >= 1400 && ent.header.bg === hex2rgb(ent.headerBgToken) && ent.header.brand && ent.header.sbBrandHidden && ent.header.contrastFg >= 7, ent.header);
+  check('UI-THEME-01 sider-navy', ent.sider.bg === hex2rgb(ent.sider.token) && ent.sider.brandBg === ent.sider.bg && [ent.sider.item, ent.sider.active, ent.sider.brand].every(v => v >= 4.5) && (ent.sider.count === null || ent.sider.count >= 4.5), ent.sider);
   check('UI-ENT-02 layout+card', ent.content.radius === '0px' && ent.content.shellBg === hex2rgb(ent.layoutToken) && ent.card === '8px', { ...ent.content, card: ent.card });
   check('UI-ENT-03 sizes', Math.round(ent.sizes.btn) === 32 && Math.round(ent.sizes.input) === 32 && ent.sizes.title === '20px' && ent.sizes.kpi === '24px' && ent.sizes.headRow <= 41 && ent.sizes.tdPad === '6px', ent.sizes);
   await go({ id: 'CUS-01' }); await page.waitForTimeout(50);

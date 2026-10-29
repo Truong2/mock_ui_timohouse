@@ -43,7 +43,7 @@ Thứ tự lấy gói: `previewPackage` hợp lệ → lựa chọn đã lưu �
 
 ```
 index.html              trang giới thiệu + mount ứng dụng
-css/                    tokens · components · layouts (responsive, print) · navigation (shell enterprise kiểu Ant Design Pro: header teal + sidebar trắng, CR-UI-ENT)
+css/                    tokens · components · layouts (responsive, print) · navigation (shell enterprise: topbar trắng + sidebar navy, primary blue, CR-UI-ENT/CR-UI-THEME)
 js/
   data.js               dataset mẫu (3 tòa, 18 phòng, 19 HĐ: 15 đang thuê + 4 đã kết thúc, 18 khách, 6 kỳ, dòng phí theo HĐ, hồ sơ cọc, sổ cọc, chi phí chung, HĐ thuê tòa, lịch trả chủ nhà, tài sản) + TH.calc (gồm perfBuilding: hiệu suất A/B/C/D)
   pnl.js                P&L tòa/kỳ theo mẫu báo cáo khách (TH.calc.pnl, chia cổ phần)

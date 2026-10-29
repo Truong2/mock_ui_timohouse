@@ -20,7 +20,7 @@
 
 ## Thiết kế
 
-Desktop 1440, sidebar 264, topbar 64, Inter, teal #0F766E, nền #F8FAFC, card trắng #FFFFFF, viền #E2E8F0, grid 8px; 1 screen = 1 tác vụ chính, không nhồi tất cả tab. Mockup chỉ dùng dữ liệu minh họa.
+Desktop 1440, sidebar 264, topbar 64, Inter, primary blue #2563EB, sidebar navy #0F2A5F, topbar trắng, nền #F5F7FA, card trắng #FFFFFF, viền #E6EAF0 (CR-UI-THEME), grid 8px; 1 screen = 1 tác vụ chính, không nhồi tất cả tab. Mockup chỉ dùng dữ liệu minh họa.
 
 ## Hình ảnh không thay được logic
 

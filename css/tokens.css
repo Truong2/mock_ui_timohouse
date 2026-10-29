@@ -3,18 +3,19 @@
 /* @font-face Inter: xem css/fonts.css (data URI để chạy ở file://). */
 
 :root {
-  /* Brand */
-  --teal-25: #f5fdfb;
-  --teal-50: #f0fdfa;
-  --teal-100: #ccfbf1;
-  --teal-200: #99f6e4;
-  --teal-300: #5eead4;
-  --teal-500: #14b8a6;
-  --teal-600: #0d9488;
-  --teal-700: #0f766e;
-  --teal-800: #115e59;
-  --teal-900: #134e4a;
-  --teal-950: #042f2e;
+  /* Brand — blue/navy (CR-UI-THEME, template B “Enterprise Navy”, tone TimoHouse) */
+  --primary-25: #f5f8ff;
+  --primary-50: #eff6ff;
+  --primary-100: #dbeafe;
+  --primary-200: #bfdbfe;
+  --primary-300: #93c5fd;
+  --primary-500: #3b82f6;
+  --primary-600: #2563eb;
+  --primary-700: #1d4ed8;
+  --primary-800: #1e40af;
+  --primary-900: #1e3a8a;
+  --primary-950: #0f2a5f;
+  --navy: var(--primary-950);
 
   /* Neutral (slate) */
   --n-0: #ffffff;
@@ -31,22 +32,43 @@
   --n-900: #0f172a;
 
   /* Semantic */
-  --primary: var(--teal-700);
-  --primary-hover: var(--teal-800);
-  --primary-soft: var(--teal-50);
-  --primary-ring: rgba(15, 118, 110, 0.28);
+  --primary: var(--primary-600);
+  --primary-hover: var(--primary-700);
+  --primary-soft: var(--primary-50);
+  --primary-ring: rgba(37, 99, 235, 0.28);
+  /* Lớp phủ trong suốt theo primary (vùng OCR, hero, hiệu ứng) */
+  --primary-a10: rgba(37, 99, 235, 0.10);
+  --primary-a16: rgba(37, 99, 235, 0.16);
+  --primary-a30: rgba(37, 99, 235, 0.30);
+  --primary-a50: rgba(37, 99, 235, 0.50);
+  --primary-a0: rgba(37, 99, 235, 0);
+  --primary-glow: rgba(147, 197, 253, 0.25);
+  --title: var(--navy);
 
   /* CR-UI-ENT — nền layout xám nhạt, card/page header trắng (Ant Design Pro) */
-  --bg-layout: #f5f7f8;
-  --border-split: #eceff2;
+  --bg-layout: #f5f7fa;
+  --border-split: #e6eaf0;
   --table-head: #fafbfc;
-  --header-bg: var(--teal-800);
-  --header-fg: #ffffff;
-  --header-fg-2: rgba(255, 255, 255, 0.82);
-  --header-ctl-bg: rgba(255, 255, 255, 0.12);
-  --header-ctl-hover: rgba(255, 255, 255, 0.2);
-  --header-ctl-line: rgba(255, 255, 255, 0.28);
-  --header-shadow: 0 1px 4px rgba(0, 21, 41, 0.12);
+  /* Topbar trắng; cột thương hiệu bên trái cùng màu sidebar navy */
+  --header-bg: #ffffff;
+  --header-fg: var(--navy);
+  --header-fg-2: var(--n-500);
+  --header-ctl-bg: #f3f6fb;
+  --header-ctl-hover: #e8eef8;
+  --header-ctl-line: #d5deeb;
+  --header-shadow: 0 1px 0 var(--border-split);
+  --header-focus: var(--primary);
+  /* Sidebar navy phẳng */
+  --sider-bg: var(--navy);
+  --sider-fg: #e6eeff;
+  --sider-fg-2: rgba(230, 238, 255, 0.78);
+  --sider-fg-3: rgba(230, 238, 255, 0.62);
+  --sider-hover: rgba(255, 255, 255, 0.08);
+  --sider-active-bg: var(--primary);
+  --sider-active-fg: #ffffff;
+  --sider-line: rgba(255, 255, 255, 0.12);
+  --sider-chip: rgba(255, 255, 255, 0.14);
+  --sider-focus: #ffffff;
 
   --bg: var(--bg-layout);
   --surface: var(--n-0);
@@ -68,9 +90,10 @@
   --danger: #b91c1c;
   --danger-soft: #fef2f2;
   --danger-line: #fecaca;
-  --info: #1d4ed8;
-  --info-soft: #eff6ff;
-  --info-line: #bfdbfe;
+  /* info = sky, tách khỏi primary blue */
+  --info: #0369a1;
+  --info-soft: #e0f2fe;
+  --info-line: #bae6fd;
   --draft: #7c2d12;
   --draft-soft: #fff7ed;
   --draft-line: #fed7aa;
@@ -78,7 +101,7 @@
   --success-fg: #14532d;
   --warning-fg: #78350f;
   --danger-fg: #7f1d1d;
-  --info-fg: #1e3a8a;
+  --info-fg: #0c4a6e;
   --warning-line-strong: #f59e0b;
   --danger-line-strong: #fca5a5;
   --danger-hover: #991b1b;
@@ -96,21 +119,22 @@
   --sheet-edge: var(--border-split);
   --panel-edge: var(--border-split);
   --surface-tint: var(--table-head);
-  --surface-tint-teal: var(--teal-25);
-  --nav-active-bg: var(--teal-50);
-  --room-occupied-bg: #e4f3ed;
-  --room-occupied-line: #bfd8ce;
+  --surface-tint-teal: var(--primary-25);
+  --nav-active-bg: var(--primary-50);
+  --room-occupied-bg: #e8f0fe;
+  --room-occupied-line: #bfd3f5;
   --split-bg: #e9eef3;
   /* Bản in / tài liệu */
   --doc-ink: #1f2937;
+  --doc-accent: var(--navy);
   --doc-rule: var(--n-400);
   --stamp: #c2410c;
 
   /* Package tiers */
-  --tier-a: #0f766e;
-  --tier-a-soft: #f0fdfa;
-  --tier-b: #0369a1;
-  --tier-b-soft: #f0f9ff;
+  --tier-a: #1d4ed8;
+  --tier-a-soft: #eff6ff;
+  --tier-b: #6d28d9;
+  --tier-b-soft: #f5f3ff;
   --tier-c: #475569;
   --tier-c-soft: #f1f5f9;
   --tier-d: #b45309;
@@ -118,14 +142,14 @@
 
   /* Chart */
   /* Một hue cho dữ liệu thu; các chuỗi so sánh dùng sắc trung tính. */
-  --chart-1: #0f766e;
-  --chart-2: #94a3a6;
-  --chart-3: #34494b;
-  --chart-4: #c6d0d0;
+  --chart-1: #2563eb;
+  --chart-2: #94a3b8;
+  --chart-3: #1e3a8a;
+  --chart-4: #cbd5e1;
   /* Mốc 5/10/15 (thứ bậc, một hue): */
-  --seq-1: #115e59;
-  --seq-2: #0d9488;
-  --seq-3: #5eead4;
+  --seq-1: #1e40af;
+  --seq-2: #3b82f6;
+  --seq-3: #93c5fd;
   --seq-4: #cbd5e1;
 
   /* Type */

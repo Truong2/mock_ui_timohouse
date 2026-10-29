@@ -26,9 +26,9 @@ Trang giới thiệu là đề xuất trình bày bổ sung ngoài 39 màn nghi�
 | Thành phần | Hướng thực hiện |
 |---|---|
 | Khung desktop | Chuẩn tham chiếu 1440px; sidebar 264px; topbar 64px |
-| Màu | Teal `#0F766E`; nền `#F8FAFC`; card `#FFFFFF`; viền `#E2E8F0` |
+| Màu | Primary blue `#2563EB`; sidebar/cột thương hiệu navy `#0F2A5F`; topbar trắng; nền `#F5F7FA`; card `#FFFFFF`; viền `#E6EAF0` (CR-UI-THEME) |
 | Typography | Inter có dấu tiếng Việt, lưu font local khi có asset; font hệ thống dự phòng |
-| Khoảng cách | Grid 8px, radius 12px; bóng nhẹ, phân cấp bằng khoảng cách và chữ |
+| Khoảng cách | Grid 8px, radius card/dialog 8px (control 6px); không bóng, phân cấp bằng khoảng cách và chữ |
 | Nội dung | Tiếng Việt nhất quán; tiền định dạng VND; số liệu căn phải và dùng chữ số cùng độ rộng |
 | Bảng dữ liệu | Header rõ, bộ lọc gọn, sticky header, phân trang, hover và selection có chủ đích |
 | Tương tác | Hover/focus 120–180ms; drawer/modal 180–240ms; chuyển nội dung nhẹ |

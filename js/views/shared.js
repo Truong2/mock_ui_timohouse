@@ -38,7 +38,7 @@
       body = steps + '<div class="grid-2">' +
         '<div class="stack"><div class="card"><div class="card-bd stack-sm"><div class="row u-gap-12">' + TH.fileOf(cfg.template) + '</div><div class="small muted">' + TH.tierPill('A') + ' Mẫu cố định duy nhất. Cột: ' + cfg.columns.map(function (c) { return esc(c.label); }).join(', ') + '.</div>' +
         '<div><button type="button" class="btn btn-sm" data-act="imp.template" data-screen="' + S + '">' + I('download', 'ic-sm') + 'Tải file mẫu (.xlsx)</button></div></div></div>' +
-        '<div class="dropzone"><div class="state-ic state-empty" style="background:var(--teal-50);color:var(--teal-700)">' + I('upload') + '</div><b>Chọn tệp Excel theo mẫu</b><span class="small">Bản demo dùng tệp mẫu có sẵn (mô phỏng), không tải tệp thật lên máy chủ.</span>' +
+        '<div class="dropzone"><div class="state-ic state-empty" style="background:var(--primary-soft);color:var(--primary)">' + I('upload') + '</div><b>Chọn tệp Excel theo mẫu</b><span class="small">Bản demo dùng tệp mẫu có sẵn (mô phỏng), không tải tệp thật lên máy chủ.</span>' +
         '<button type="button" class="btn btn-primary btn-sm" data-act="imp.pick" data-screen="' + S + '">' + I('paperclip', 'ic-sm') + 'Dùng tệp mẫu “' + esc(cfg.sampleFile) + '”</button>' + TH.simBadge('Tệp mô phỏng') + '</div></div>' +
         '<div class="stack">' + TH.gate(cfg.inc.history, historyCard(cfg), { label: TH.inc(cfg.inc.history).text, lines: 4 }) + '</div></div>';
       foot = '<button type="button" class="btn" data-close>Đóng</button>';

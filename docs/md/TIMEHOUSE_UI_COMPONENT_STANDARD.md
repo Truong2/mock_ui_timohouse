@@ -4,14 +4,16 @@
 
 Tài liệu này bổ sung CR-UI-ENT, thay mô tả “Framed sheet” và cách gom hành động sau render trong các ghi chép cũ. Áp dụng cho 39 màn SRS + 3 màn CR, các dialog/drawer và luồng báo cáo. Giữ HTML/CSS/JS thuần, Inter local, teal và các quy tắc nghiệp vụ hiện tại.
 
+**CR-UI-THEME (29/10/2026):** áp template **B “Enterprise Navy”** theo tone TimoHouse, chọn sau khi xem 4 phương án (A Timo Classic, B Enterprise Navy, C Navy Header, D Light Calm). Giữ nguyên bố cục, mật độ, bo góc 8px và quy tắc nghiệp vụ; chỉ đổi token màu và shell. KPI trắng có vạch trái 3px theo `--kpi-accent` (mặc định primary, đỏ khi giá trị âm/quá hạn); tiêu đề trang và số KPI màu `--title` navy. Mọi màu chỉ khai báo trong `css/tokens.css`; dark mode sau này thêm bằng `:root[data-theme]` trên cùng bộ token. Bản in hóa đơn/hợp đồng dùng `--doc-accent` cố định. Ảnh: `docs/qa/ui-theme/`. Kiểm: UI-STD-02 (primary blue), UI-ENT-01/06 (topbar theo `--header-bg`), UI-THEME-01 (sidebar navy, tương phản ≥ 4.5:1).
+
 **CR-PKG-OPS (24/10/2026):** phân tầng theo [ma trận hiệu lực](TIMEHOUSE_PACKAGE_FUNCTION_MATRIX.md). A thao tác từng hồ sơ/chứng từ; B nhập Excel và hàng loạt; C kiểm soát nâng cao; D quản trị kỳ. Khóa gói hiển thị lý do và kiểm tra lại ở handler/dialog; không thay quyền vai trò. Các ô tiền báo cáo A vẫn hiển thị đầy đủ, chỉ phần mở nguồn cần B. Quy tắc tính tiền và kiểm dữ liệu bắt buộc không bị khóa theo gói. Nhãn khóa được xuống dòng trong vùng chứa; menu bàn phím giữ focus, không tự đóng vì sự kiện cuộn đã chờ trước lúc mở.
 
 ## 1. Nền tảng và mẫu trang
 
 | Thành phần | Chuẩn | Nguồn triển khai |
 | --- | --- | --- |
-| Token | Primary teal; semantic tone; spacing 4/8px; control desktop 32px; hàng một dòng 40px; vùng bấm mobile ≥44px; card/dialog bo 8px | `css/tokens.css` |
-| Shell | Header thương hiệu + sidebar sáng; sidebar 232/72px; breakpoint mobile 1080px. Base, responsive, print shell và biến thể enterprise cùng một stylesheet | `css/navigation.css` |
+| Token | Primary blue `#2563EB` (thang `--primary-25…950`, navy `#0F2A5F`); info tách sang sky `#0369A1`; semantic tone; spacing 4/8px; control desktop 32px; hàng một dòng 40px; vùng bấm mobile ≥44px; card/dialog bo 8px | `css/tokens.css` |
+| Shell | Topbar trắng toàn ngang; cột thương hiệu + sidebar navy phẳng (token `--sider-*`), mục đang chọn nền primary chữ trắng; sidebar 232/72px; breakpoint mobile 1080px. Base, responsive, print shell và biến thể enterprise cùng một stylesheet | `css/navigation.css` |
 | Danh sách | Breadcrumb/tiêu đề/thao tác → điều hướng phân hệ → tổng quan → lọc → bảng/hồ sơ mobile → phân trang | `TH.pageHeader`, `TH.table`, `TH.pager` |
 | Hồ sơ | Điều hướng phân hệ → breadcrumb/tiêu đề/facts → tab đối tượng → panel. DOM có cùng thứ tự với hình ảnh, không dùng CSS order để đảo các khối trang | `TH.detailFacts`, `TH.tabs`, `TH.tabPanel` |
 | Luồng nhiều bước | OCR/import giữ workspace rà soát; báo cáo phân biệt tạo mới, xem trước và bản lưu; bước tiếp theo theo đúng trạng thái/quyền hiện có | Workspace hiện có + component chung |
